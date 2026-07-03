@@ -1,0 +1,1605 @@
+[
+  {
+    "id": "m1",
+    "title": "Month 1 — Linux",
+    "tag": "Foundation",
+    "why": "Everything else stands on this. Servers, Docker, and cloud all run on Linux. Learn to talk to a computer with text, not clicks.",
+    "topics": [
+      {
+        "id": "m1t1",
+        "title": "Your first shell (and WSL)",
+        "concept": "A shell is a program that takes commands you type and runs them — a text way to control the computer instead of pointing and clicking. On Windows you already have PowerShell. But real servers, Docker, and almost all industry tooling run on Linux, so you install WSL — a full Ubuntu Linux that lives inside Windows.",
+        "analogy": "The shell is texting your computer instructions instead of pointing and clicking. Same machine, far more precise — and you can save the instructions to repeat them.",
+        "examples": [
+          {
+            "code": "echo hello\nwhoami",
+            "note": "echo prints text back to you. whoami prints your username. If you see 'hello' and your name, your shell works. This is your first command ever."
+          },
+          {
+            "code": "wsl --install   # run in PowerShell as Administrator, then restart",
+            "note": "Installs Ubuntu Linux inside Windows. After restart, open 'Ubuntu' from the Start menu to get a real Linux shell. It will ask you to make a username + password — that's your Linux login; pick something you'll remember."
+          }
+        ],
+        "mistakes": [
+          "Typing commands into a file, a browser, or this webpage instead of the terminal window.",
+          "Forgetting to press Enter — nothing runs until you do.",
+          "Thinking the WSL password prompt is broken because you can't see the characters — Linux hides password typing on purpose. Just type and press Enter."
+        ],
+        "handsOn": "1) Open PowerShell (Windows key → type powershell → Enter). Run echo hello and whoami. 2) Install WSL with the command above, restart, open Ubuntu, and run echo hello again inside Linux.",
+        "doneWhen": "You have a working Linux shell (Ubuntu) open and can say, in one sentence, what a shell is.",
+        "checks": [
+          {
+            "q": "What is a shell, in one sentence?",
+            "a": "A program that takes typed commands and runs them."
+          },
+          {
+            "q": "Why bother with WSL instead of just PowerShell?",
+            "a": "Servers, Docker, and most industry tooling run on Linux. WSL gives you a genuine Ubuntu shell, so everything you learn transfers directly to a real job."
+          }
+        ]
+      },
+      {
+        "id": "m1t2",
+        "title": "Moving around the file system",
+        "concept": "Linux stores everything as one big upside-down tree that starts at / (the 'root'). You are always standing inside one folder — your 'current directory'. Three commands are your legs and eyes: pwd (where am I), ls (what's here), cd (move).",
+        "analogy": "The file system is a tree of folders and you're a person standing on one branch. cd is walking to another branch; pwd is looking down at your feet to read where you're standing.",
+        "examples": [
+          {
+            "code": "pwd            # print working directory — where am I\nls             # list what's in this folder\nls -l          # list with details (size, date, permissions)\ncd projects    # walk into the 'projects' folder\ncd ..          # go up one level to the parent\ncd ~           # jump straight home",
+            "note": "~ always means your home folder. .. always means 'the folder above this one'. A single dot . means 'right here'."
+          }
+        ],
+        "mistakes": [
+          "Confusing absolute vs relative paths: /home/you/notes starts from the root and works from anywhere; notes starts from wherever you currently stand.",
+          "Forgetting that cd with no name (or cd ~) takes you home.",
+          "Names with spaces break unless you quote them: cd \"My Folder\"."
+        ],
+        "handsOn": "Run: mkdir -p projects/month1/notes. Then cd into the deepest folder, run pwd, and walk all the way back to home using only cd. Check pwd at each step so you can see yourself move.",
+        "doneWhen": "You can get to any folder without guessing, and pwd never surprises you.",
+        "checks": [
+          {
+            "q": "What does pwd tell you?",
+            "a": "The full path of the folder you are currently standing in."
+          },
+          {
+            "q": "Difference between an absolute path and a relative path?",
+            "a": "Absolute starts from / (root) and works from anywhere; relative starts from your current folder and depends on where you are."
+          }
+        ]
+      },
+      {
+        "id": "m1t3",
+        "title": "Creating, reading, moving, deleting files",
+        "concept": "Most of Linux is manipulating files: make them, look inside, copy, rename, delete. The core verbs are touch/mkdir (create), cat/less (read), cp (copy), mv (move or rename), rm (remove).",
+        "analogy": "These are the same actions you already do by right-clicking in File Explorer — new, open, copy, rename, delete — just typed instead of clicked, so you can do them faster and script them.",
+        "examples": [
+          {
+            "code": "touch todo.txt         # create an empty file\ncat todo.txt          # print the whole file to the screen\ncp todo.txt todo.bak  # copy (source first, destination second)\nmv todo.txt tasks.txt # rename (also how you 'move' files)\nrm todo.bak           # delete a file — permanently",
+            "note": "mv does double duty: same folder = rename, different folder = move. cp always takes source then destination."
+          }
+        ],
+        "warn": "rm deletes permanently — there is NO recycle bin. NEVER run rm -rf / or rm -rf ~ . Read the line twice before pressing Enter. If unsure, list first with ls, delete second.",
+        "mistakes": [
+          "Running rm with a wildcard you didn't check, e.g. rm * in the wrong folder.",
+          "Forgetting cp needs BOTH a source and a destination.",
+          "Assuming deleted files can be recovered — on Linux they usually can't."
+        ],
+        "handsOn": "In projects/month1, create a file with touch, put a line in it (echo \"hi\" > note.txt), read it with cat, copy it, rename the copy, then delete the copy. Verify with ls at each step.",
+        "doneWhen": "You can create, read, rename and delete files by typing, and you respect rm.",
+        "checks": [
+          {
+            "q": "Why is rm more dangerous than deleting in File Explorer?",
+            "a": "There is no recycle bin — rm removes files permanently and immediately."
+          },
+          {
+            "q": "What are the two jobs of mv?",
+            "a": "Renaming a file, and moving it to a different folder."
+          }
+        ]
+      },
+      {
+        "id": "m1t9",
+        "title": "Getting help & installing software (man, sudo, apt)",
+        "concept": "Two survival skills. First: every command documents itself — add --help for a quick reference, or man <command> for the full manual (press q to quit). Second: on Ubuntu you install software with apt, the system's app store. Many apt commands need admin power, which you borrow temporarily with sudo (it asks for YOUR password).",
+        "analogy": "man pages are the instruction manual that came in the box — always there, no googling needed. sudo is borrowing the building's master key for one job: powerful, so you only use it when you understand the job.",
+        "examples": [
+          {
+            "code": "ls --help | head        # quick reference for ls (first lines)\nman ls                  # the full manual — q to quit\nsudo apt update         # refresh the list of available software\nsudo apt install tree   # install a program called 'tree'\ntree                    # run it: draws your folder structure",
+            "note": "apt update refreshes the catalogue; apt install fetches the program. sudo will ask for the Linux password you created when installing WSL."
+          }
+        ],
+        "warn": "sudo runs a command with FULL system power. Never paste a sudo command from the internet that you don't understand — it can do anything to your system, including destroy it.",
+        "mistakes": [
+          "Googling what a flag does when --help or man would answer instantly.",
+          "Running apt install without apt update first on a fresh system — the catalogue may be stale.",
+          "Getting trapped in man and not knowing q quits (arrow keys scroll)."
+        ],
+        "handsOn": "Run sudo apt update, install tree with apt, run tree in your projects folder, then read man tree and find one flag you didn't know. Try that flag.",
+        "doneWhen": "You can discover what a command does without googling, and install a new tool yourself.",
+        "checks": [
+          {
+            "q": "What does sudo actually do?",
+            "a": "Runs one command with administrator (root) power, after confirming your password — temporary borrowed authority."
+          },
+          {
+            "q": "What's the difference between apt update and apt install?",
+            "a": "update refreshes the catalogue of available software; install actually downloads and installs a program."
+          }
+        ]
+      },
+      {
+        "id": "m1t4",
+        "title": "Permissions: who can do what",
+        "concept": "Every file records who may read (r), write (w), and execute (x) it, split across three groups: the owner, the group, and everyone else. ls -l shows this as a string like -rwxr-xr--. chmod changes it. This is why a script won't run until you make it executable.",
+        "analogy": "Permissions are like a building's door badges: the owner has a master key, the team has a shared badge, and the public gets limited access. chmod is reprogramming the badges.",
+        "examples": [
+          {
+            "code": "ls -l script.sh          # -rw-r--r--  means owner can read+write, others read only\nchmod +x script.sh       # add execute so you can RUN it\n./script.sh              # run a script in the current folder",
+            "note": "The leading - or d says file or directory. Then three r/w/x triples: owner, group, others. +x adds the execute bit."
+          }
+        ],
+        "warn": "Do not 'fix' permission problems with chmod 777 (everyone can do everything). It's a security hole and a habit interviewers notice. Give the least access that makes it work.",
+        "mistakes": [
+          "Trying to run a script before adding +x and being confused by 'Permission denied'.",
+          "Reaching for chmod 777 instead of understanding which bit is missing.",
+          "Forgetting the ./ in front of a local script — Linux won't look in the current folder by default."
+        ],
+        "handsOn": "Write a one-line script (echo 'echo hi' > hi.sh), try to run it with ./hi.sh (it fails), run ls -l to see why, add +x with chmod, and run it again successfully.",
+        "doneWhen": "You can read an ls -l permission string out loud and fix 'Permission denied' the right way.",
+        "checks": [
+          {
+            "q": "What do the three letters rwx stand for?",
+            "a": "Read, write, execute."
+          },
+          {
+            "q": "Why is chmod 777 a bad habit?",
+            "a": "It gives every user full read/write/execute — a security hole; you should grant the least access that works."
+          }
+        ]
+      },
+      {
+        "id": "m1t5",
+        "title": "Pipes and filters: combining small tools",
+        "concept": "The Unix philosophy: many tiny programs that each do ONE thing, joined together. The pipe | takes the output of the command on its left and feeds it as input to the command on the right. grep filters lines, wc counts, sort orders, head/tail show the ends.",
+        "analogy": "A pipe is a factory conveyor belt. Each machine (command) does one small job to whatever comes down the belt, then passes it to the next. You build a big result from small stations.",
+        "examples": [
+          {
+            "code": "ls -l | grep \".txt\"          # list files, keep only lines containing .txt\ncat log.txt | wc -l          # count how many lines are in the file\nhistory | grep git | head    # find your recent git commands, show the first few",
+            "note": "grep keeps matching lines; wc -l counts lines; head shows the top. Chain as many as you like with more | pipes."
+          }
+        ],
+        "mistakes": [
+          "Thinking you need one giant command — the power is combining small ones.",
+          "Forgetting grep is case-sensitive by default (use grep -i to ignore case).",
+          "Piping into a command that expects a filename instead of input from the pipe."
+        ],
+        "handsOn": "Make a file with several lines, then build a pipeline that filters it with grep and counts the result with wc -l. Then pipe your own command history through grep to find a command you ran earlier.",
+        "doneWhen": "You can chain 2–3 commands with pipes to answer a question about a file.",
+        "checks": [
+          {
+            "q": "What does the pipe | actually do?",
+            "a": "Sends the output of the left command in as the input of the right command."
+          },
+          {
+            "q": "Which tool filters lines by a pattern, and which counts them?",
+            "a": "grep filters (keeps matching lines); wc -l counts lines."
+          }
+        ]
+      },
+      {
+        "id": "m1t6",
+        "title": "Processes: what's running",
+        "concept": "A process is a running program. Linux runs many at once. You can list them (ps, top), and stop a stuck one by its ID (kill). Understanding this demystifies 'the server is already running on that port' errors you'll hit constantly.",
+        "analogy": "Processes are like appliances plugged in and running. ps is walking the room to see what's on; kill is unplugging one that's stuck.",
+        "examples": [
+          {
+            "code": "ps aux | grep python     # find running python processes\ntop                      # live view of what's using CPU (press q to quit)\nkill 12345               # ask process 12345 to stop (id comes from ps)",
+            "note": "Each process has a PID (process id). You get the PID from ps, then use it with kill. kill -9 forces it, but try a normal kill first."
+          }
+        ],
+        "mistakes": [
+          "Force-killing (kill -9) everything instead of trying a graceful stop first.",
+          "Killing the wrong PID because you didn't read the ps output carefully.",
+          "Panicking at 'port already in use' — it just means a process is still running; find and stop it."
+        ],
+        "handsOn": "Run a long command (e.g. sleep 300) — but first add & to run it in the background: sleep 300 &. Find it with ps, then stop it with kill and its PID.",
+        "doneWhen": "You can find a running process and stop it on purpose.",
+        "checks": [
+          {
+            "q": "What is a process?",
+            "a": "A running program. Linux runs many at once, each with its own PID."
+          },
+          {
+            "q": "How do you stop a stuck program from the shell?",
+            "a": "Find its PID with ps, then run kill <PID> (kill -9 to force if needed)."
+          }
+        ]
+      },
+      {
+        "id": "m1t7",
+        "title": "PROJECT: your first bash script",
+        "concept": "A bash script is just a text file full of the same commands you type, run top-to-bottom automatically. This is the moment the shell stops being a toy and becomes automation. A script starts with #!/bin/bash (the 'shebang' that says which program runs it) and is made executable with chmod +x.",
+        "analogy": "If typing commands is cooking a dish once, a script is writing the recipe down so you (or a computer) can repeat it perfectly every time.",
+        "examples": [
+          {
+            "code": "#!/bin/bash\n# backup.sh — copy today's notes into a dated folder\nDATE=$(date +%Y-%m-%d)\nmkdir -p backups/$DATE\ncp notes/*.txt backups/$DATE/\necho \"Backed up notes into backups/$DATE\"",
+            "note": "$(date ...) runs a command and drops its output in. $DATE reuses the value. Save this as backup.sh, chmod +x backup.sh, then run ./backup.sh."
+          }
+        ],
+        "mistakes": [
+          "Forgetting the shebang line or the chmod +x, so the script won't run.",
+          "Not testing on a throwaway folder first — a script repeats mistakes at full speed.",
+          "Spaces around = in variables: write DATE=... not DATE = ..."
+        ],
+        "handsOn": "Write a real script that does something useful to you — e.g. makes a dated backup folder and copies files into it, printing a summary line. Make it executable and run it twice.",
+        "doneWhen": "You have a working .sh script committed to your month1 project folder, and you can explain what each line does.",
+        "checks": [
+          {
+            "q": "What is the shebang (#!/bin/bash) for?",
+            "a": "It tells the system which program should run the script's commands — bash."
+          },
+          {
+            "q": "What does $(...) do inside a script?",
+            "a": "Runs the command inside it and substitutes its output into the line."
+          }
+        ]
+      },
+      {
+        "id": "m1t8",
+        "title": "OverTheWire Bandit 0–15 (practice)",
+        "concept": "Bandit is a free online game that teaches Linux by making you find hidden passwords using real commands. It forces the skills above into your fingers. You connect to their server with SSH (a secure remote shell) and solve one level at a time.",
+        "analogy": "Bandit is the driving range for Linux — safe, repeatable reps where a mistake costs nothing, before you drive on a real road (a real server).",
+        "examples": [
+          {
+            "code": "ssh bandit0@bandit.labs.overthewire.org -p 2220\n# password for level 0 is: bandit0\n# each level's password unlocks the next; find it with ls, cat, find, grep...",
+            "note": "You'll reuse cat, ls, file, find, grep, and pipes constantly. When stuck, the level's own hints tell you which command family to explore."
+          }
+        ],
+        "mistakes": [
+          "Reading full walkthroughs instead of struggling first — the struggle is the learning.",
+          "Not writing down which command solved each level (great notes material).",
+          "Giving up at a level instead of using the 'I'm stuck' button for a hint."
+        ],
+        "handsOn": "Play Bandit levels 0 through 15. For each level, write one line in your notes: which command cracked it and why.",
+        "doneWhen": "You've cleared levels 0–15 and your notes list the command that solved each.",
+        "checks": [
+          {
+            "q": "What is SSH?",
+            "a": "A secure way to open a shell on a remote computer over the network."
+          },
+          {
+            "q": "Why practice on Bandit instead of just reading?",
+            "a": "Skills stick when your fingers do them under mild pressure; Bandit gives safe, repeatable reps."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m2",
+    "title": "Month 2 — Python & Git",
+    "tag": "Core skills",
+    "why": "Python is the glue language of AI, data, and automation. Git is how every company tracks code. Together they turn you from 'runs commands' into 'builds and ships things'.",
+    "topics": [
+      {
+        "id": "m2t1",
+        "title": "Python refresher: variables, types, control flow",
+        "concept": "A program stores data in variables, each with a type (int, float, str, bool). It makes decisions with if/elif/else and repeats work with for and while loops. That's the skeleton of every program you'll ever write.",
+        "analogy": "Variables are labelled boxes; the type is what shape fits in the box. if is a fork in the road; a loop is walking the same corridor until a condition says stop.",
+        "examples": [
+          {
+            "code": "name = \"Iniyan\"        # str\nscore = 87              # int\nif score >= 60:\n    print(name, \"passed\")\nelse:\n    print(name, \"retry\")\n\nfor i in range(3):     # 0, 1, 2\n    print(\"attempt\", i)",
+            "note": "Indentation (4 spaces) is how Python groups code — it's not decoration, it's the syntax. range(3) gives 0,1,2."
+          }
+        ],
+        "mistakes": [
+          "Mixing tabs and spaces for indentation — pick spaces and stick to it.",
+          "Comparing with = (assignment) instead of == (equality).",
+          "Off-by-one in range: range(3) is 0,1,2 — it stops before the number."
+        ],
+        "handsOn": "Write a small script that stores a few numbers, loops over them, and prints whether each is even or odd (hint: n % 2).",
+        "doneWhen": "You can write a loop with an if inside it and predict its output before running.",
+        "checks": [
+          {
+            "q": "Why does indentation matter in Python?",
+            "a": "It defines which lines belong to a block (inside an if, loop, or function) — it's part of the syntax, not style."
+          },
+          {
+            "q": "What's the difference between = and ==?",
+            "a": "= assigns a value to a variable; == checks whether two values are equal."
+          }
+        ]
+      },
+      {
+        "id": "m2t2",
+        "title": "Data structures: list, dict, set, tuple",
+        "concept": "Python gives you four everyday containers. A list is an ordered, changeable sequence. A dict maps keys to values (a lookup table). A set is unique items with no order. A tuple is a fixed, unchangeable list. Choosing the right one is half of writing clean code.",
+        "analogy": "A list is a numbered row of lockers; a dict is a coat-check where a ticket (key) gets your item; a set is a guest list that ignores duplicates; a tuple is a locked list you promise not to change.",
+        "examples": [
+          {
+            "code": "nums = [3, 1, 2]           # list: ordered, changeable\nnums.append(4)             # [3,1,2,4]\nages = {\"ani\": 22}         # dict: key -> value\nages[\"ani\"]               # 22  (instant lookup)\nseen = {1, 2, 2, 3}        # set: becomes {1,2,3}",
+            "note": "Reach for a dict whenever you find yourself asking 'what is the value FOR this key' — it's the most useful structure in real code."
+          }
+        ],
+        "mistakes": [
+          "Using a list and scanning it when a dict lookup would be instant.",
+          "Expecting a set to keep order (it doesn't).",
+          "Trying to change a tuple — it's immutable on purpose."
+        ],
+        "handsOn": "Take a list of words and build a dict that counts how many times each word appears. This exact pattern shows up in interviews.",
+        "doneWhen": "You can pick the right container for a task and explain why in one sentence.",
+        "checks": [
+          {
+            "q": "When should you reach for a dict?",
+            "a": "When you need to look up a value BY a key quickly — a mapping from key to value."
+          },
+          {
+            "q": "How is a tuple different from a list?",
+            "a": "A tuple can't be changed after creation (immutable); a list can."
+          }
+        ]
+      },
+      {
+        "id": "m2t3",
+        "title": "Functions, files, and errors",
+        "concept": "A function is a named, reusable block of code that takes inputs and returns an output — it stops you repeating yourself. Reading/writing files lets your program remember things. try/except catches errors so a program bends instead of crashing.",
+        "analogy": "A function is a coffee machine: put beans and water in (arguments), get coffee out (return value) — you don't rebuild the machine each cup. try/except is a safety net under a tightrope walker.",
+        "examples": [
+          {
+            "code": "def greet(name):\n    return \"Hi \" + name\n\nwith open(\"log.txt\", \"a\") as f:   # 'a' = append\n    f.write(greet(\"ani\") + \"\\n\")\n\ntry:\n    x = int(\"oops\")               # this fails\nexcept ValueError:\n    print(\"that wasn't a number\")",
+            "note": "with open(...) safely closes the file for you. Catch the SPECIFIC error (ValueError) — not a bare except that hides real bugs."
+          }
+        ],
+        "mistakes": [
+          "Copy-pasting code instead of writing a function once and calling it.",
+          "Catching every error with a bare 'except:' — it hides bugs you needed to see.",
+          "Forgetting a function needs return to hand a value back."
+        ],
+        "handsOn": "Write a function that reads a file of numbers (one per line) and returns their average, using try/except to skip lines that aren't numbers.",
+        "doneWhen": "You can write a function with arguments and a return, and handle a bad input without crashing.",
+        "checks": [
+          {
+            "q": "Why use functions?",
+            "a": "To name and reuse a block of logic instead of repeating it — less code, fewer bugs, easier to change."
+          },
+          {
+            "q": "Why catch a specific error instead of a bare except?",
+            "a": "A bare except also swallows bugs you needed to see; catching the specific one handles the case you expect and lets real problems surface."
+          }
+        ]
+      },
+      {
+        "id": "m2t8",
+        "title": "Classes & objects — just enough OOP",
+        "concept": "A class is a blueprint that bundles data (attributes) and behaviour (methods) together; an object is one concrete thing made from that blueprint. __init__ runs when a new object is created and sets up its data; self means 'this particular object'. Interviews also love the four pillars of OOP: encapsulation (bundle data + methods, hide internals), inheritance (a class extends another), polymorphism (same method name, different behaviour per class), abstraction (expose what, hide how).",
+        "analogy": "A class is a cookie cutter; objects are the cookies. One shape, many cookies — each with its own sprinkles (attribute values). self is the cookie currently in your hand.",
+        "examples": [
+          {
+            "code": "class Student:\n    def __init__(self, name, score):\n        self.name = name        # this object's own data\n        self.score = score\n    def passed(self):\n        return self.score >= 60\n\na = Student(\"ani\", 85)     # one object\nb = Student(\"bala\", 40)    # another, own data\nprint(a.passed(), b.passed())   # True False",
+            "note": "Same blueprint, two independent objects. self.name means 'THIS student's name'. You already use objects daily — a list or a DataFrame is an object with methods."
+          }
+        ],
+        "mistakes": [
+          "Forgetting self as the first parameter of every method — the classic error.",
+          "Confusing the class (blueprint) with an object (one instance of it).",
+          "Memorising the four pillars as definitions with no example — interviewers always ask for one."
+        ],
+        "handsOn": "Write the Student class from scratch, create two objects, add a method of your own. Then write one line per OOP pillar in your notes, each with an example from your own code.",
+        "doneWhen": "You can write a small class, explain self, and give a one-line example for each of the four pillars.",
+        "checks": [
+          {
+            "q": "Class vs object, in one line?",
+            "a": "A class is the blueprint; an object is one concrete instance built from it, with its own data."
+          },
+          {
+            "q": "What is self?",
+            "a": "The particular object a method is being called on — 'this one'."
+          }
+        ]
+      },
+      {
+        "id": "m2t4",
+        "title": "Virtual environments & pip",
+        "concept": "Different projects need different library versions. A virtual environment (venv) is an isolated Python just for one project, so installing something for project A never breaks project B. pip installs libraries into it. requirements.txt records exactly what's installed so others can reproduce it.",
+        "analogy": "A venv is a clean, separate kitchen per project. Docker later takes this idea to the limit — a container is a venv for the WHOLE machine, not just Python.",
+        "examples": [
+          {
+            "code": "python -m venv .venv          # create an isolated env in .venv/\nsource .venv/bin/activate     # turn it on (Linux/WSL)\npip install requests          # installs into THIS env only\npip freeze > requirements.txt # record exact versions",
+            "note": "On Windows PowerShell the activate command is .venv\\Scripts\\Activate.ps1 instead. Anyone can recreate your env with pip install -r requirements.txt."
+          }
+        ],
+        "mistakes": [
+          "Installing everything globally, then wondering why two projects conflict.",
+          "Forgetting to activate the venv before pip install.",
+          "Committing the .venv folder to git — you commit requirements.txt instead."
+        ],
+        "handsOn": "Create a venv, activate it, install one library, and generate a requirements.txt. Then deactivate and confirm the library is gone from the base Python.",
+        "doneWhen": "You can set up an isolated environment and reproduce it from requirements.txt.",
+        "checks": [
+          {
+            "q": "What problem does a virtual environment solve?",
+            "a": "It isolates each project's libraries so different projects' versions don't clash."
+          },
+          {
+            "q": "What goes in requirements.txt and why?",
+            "a": "The exact libraries and versions your project needs, so anyone (or any server) can recreate the same environment."
+          }
+        ]
+      },
+      {
+        "id": "m2t5",
+        "title": "Git: tracking your work",
+        "concept": "Git is a time machine for your code. It saves snapshots ('commits') you can return to. The daily loop is: change files → git add (stage what to save) → git commit (save a snapshot with a message) → repeat. git status and git log show you where you are.",
+        "analogy": "Git is save-points in a video game. Commit often, and a mistake just means loading the last good save instead of restarting the level.",
+        "examples": [
+          {
+            "code": "git init                     # start tracking this folder (once)\ngit status                   # what's changed?\ngit add .                    # stage all changes for the next snapshot\ngit commit -m \"add average function\"   # save the snapshot\ngit log --oneline            # see your history",
+            "note": "add then commit is two steps on purpose: add chooses WHAT to save, commit saves it with a message. Write messages that say WHY."
+          }
+        ],
+        "mistakes": [
+          "Committing once a week with a message like 'stuff' — commit small and often with clear messages.",
+          "Committing secrets or huge data files (use a .gitignore).",
+          "Confusing add (stage) with commit (save) — you need both."
+        ],
+        "handsOn": "Turn your month2 project into a git repo. Make three separate commits as you build a small feature, each with a meaningful message. Read them back with git log --oneline.",
+        "doneWhen": "You commit naturally as you work and can read your own history.",
+        "checks": [
+          {
+            "q": "What's the difference between git add and git commit?",
+            "a": "add stages which changes to include; commit saves them as a snapshot with a message."
+          },
+          {
+            "q": "Why commit small and often?",
+            "a": "Small commits are easy to understand and undo; you can return to a recent good state instead of losing lots of work."
+          }
+        ]
+      },
+      {
+        "id": "m2t7",
+        "title": "Branches & pull requests — how teams work",
+        "concept": "A branch is a parallel line of commits — you experiment freely without touching the main line (main). When the work is good, you merge it back. On GitHub, teams do that merge through a pull request (PR): a proposal that says 'here are my changes', where teammates review and comment BEFORE it joins main. Every software company on earth works this way, so knowing the flow marks you as job-ready.",
+        "analogy": "main is the published book. A branch is writing your edits on a photocopy; a pull request is handing that photocopy to the editor, who reviews it before it's printed into the real book.",
+        "examples": [
+          {
+            "code": "git checkout -b add-search    # create + switch to a new branch\n# ...edit files, commit as usual...\ngit checkout main             # switch back to main\ngit merge add-search          # bring the branch's commits in\n\n# On GitHub: push the branch, click 'Compare & pull request',\n# describe the change, review the diff, then Merge.",
+            "note": "git branch lists your branches; the one with * is where you are. A merge conflict just means two branches edited the same lines — git marks the spot with <<<<<<< and you pick which version stays."
+          }
+        ],
+        "mistakes": [
+          "Doing all work directly on main — fine solo, a firing offence in a team; build the branch habit now.",
+          "Panicking at a merge conflict instead of reading the conflict markers calmly.",
+          "Giant PRs that change everything — small, focused branches get reviewed and merged fast."
+        ],
+        "handsOn": "In your CLI-tool repo: create a branch, make a small improvement, push it to GitHub, open a pull request on yourself, read your own diff, and merge it. Yes, a solo PR — the ritual is the point.",
+        "doneWhen": "You can branch, merge, and walk someone through what a pull request is for.",
+        "checks": [
+          {
+            "q": "What is a branch for?",
+            "a": "Working on changes in parallel without touching main until the work is ready to merge."
+          },
+          {
+            "q": "What does a pull request add beyond a merge?",
+            "a": "Review — teammates see, discuss, and approve the changes before they join main."
+          }
+        ]
+      },
+      {
+        "id": "m2t6",
+        "title": "PROJECT: a CLI tool on GitHub",
+        "concept": "Time to ship. Build a small command-line tool in Python (a todo tracker, a file organizer, a unit converter), version it with Git, and push it to GitHub — a website that hosts git repos and is your public proof of work. A clean repo with a README is what recruiters actually click on.",
+        "analogy": "GitHub is your workshop with the door open to the street. The project inside is the thing that says 'I can build', louder than any certificate.",
+        "examples": [
+          {
+            "code": "git remote add origin https://github.com/you/mytool.git\ngit branch -M main\ngit push -u origin main    # upload your commits to GitHub",
+            "note": "Create the empty repo on github.com first, then connect it with remote add and push. Add a README.md that says what the tool does and how to run it."
+          }
+        ],
+        "mistakes": [
+          "A repo with no README — reviewers can't tell what it is.",
+          "Pushing a venv or secrets — add a .gitignore first.",
+          "One giant commit at the end instead of a visible history of progress."
+        ],
+        "handsOn": "Build a genuinely useful little CLI tool, use a venv + requirements.txt, commit as you go, and push it to GitHub with a clear README explaining what it does and how to run it.",
+        "doneWhen": "There's a live GitHub repo with your tool, a README, and a real commit history you can walk someone through.",
+        "checks": [
+          {
+            "q": "What is GitHub, versus git?",
+            "a": "Git is the tool that tracks snapshots locally; GitHub is a website that hosts git repositories online so you can share and back them up."
+          },
+          {
+            "q": "Why does a README matter for getting hired?",
+            "a": "It's the first thing a reviewer reads; it shows you can communicate what you built and how to use it."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m3",
+    "title": "Month 3 — SQL & Data",
+    "tag": "Data literacy",
+    "why": "Data lives in databases, and SQL is how you ask it questions. Every analyst, data scientist, and most engineers use it daily. This is also the most interview-tested practical skill you'll learn.",
+    "topics": [
+      {
+        "id": "m3t1",
+        "title": "SELECT, WHERE, ORDER BY",
+        "concept": "A relational database is tables (rows and columns), like linked spreadsheets. SQL is the language to query them. SELECT chooses columns, FROM names the table, WHERE filters rows, ORDER BY sorts. That one sentence answers a huge share of real questions.",
+        "analogy": "A table is a spreadsheet; SQL is a very precise way of saying 'show me these columns, only these rows, sorted this way' — without scrolling by hand.",
+        "examples": [
+          {
+            "code": "SELECT name, score\nFROM students\nWHERE score >= 60\nORDER BY score DESC;    # highest first",
+            "note": "Read it as: pick name and score, from students, keep rows where score is at least 60, sort by score high-to-low. DESC = descending, ASC = ascending."
+          }
+        ],
+        "mistakes": [
+          "Forgetting the semicolon at the end of a statement.",
+          "Using = for text without quotes: WHERE name = 'ani', not = ani.",
+          "Assuming rows come back sorted — they don't unless you ORDER BY."
+        ],
+        "handsOn": "Install SQLite (comes with Python: sqlite3), make a small students table, insert a few rows, and write queries that filter and sort them.",
+        "doneWhen": "You can write a SELECT with WHERE and ORDER BY and predict the rows it returns.",
+        "checks": [
+          {
+            "q": "What does WHERE do?",
+            "a": "Filters which rows come back, keeping only those that match the condition."
+          },
+          {
+            "q": "If you don't write ORDER BY, what order do rows come in?",
+            "a": "No guaranteed order — you must ORDER BY to control it."
+          }
+        ]
+      },
+      {
+        "id": "m3t2",
+        "title": "JOINs: combining tables",
+        "concept": "Real data is split across tables to avoid repetition — students in one, courses in another, enrolments linking them. A JOIN stitches them back together on a shared column (a key). INNER JOIN keeps only matches; LEFT JOIN keeps all rows from the left table even when there's no match.",
+        "analogy": "A JOIN is matching two decks of cards by a shared number. INNER JOIN keeps only pairs that match; LEFT JOIN keeps every card from the left deck, pairing where it can and leaving blanks otherwise.",
+        "examples": [
+          {
+            "code": "SELECT s.name, c.title\nFROM students s\nJOIN enrolments e ON e.student_id = s.id\nJOIN courses c    ON c.id = e.course_id;",
+            "note": "The ON clause says which columns must match. The s and c are short aliases so you don't retype table names. This is the single most tested SQL concept in interviews."
+          }
+        ],
+        "mistakes": [
+          "Forgetting the ON condition and accidentally pairing every row with every row (a huge 'cross join').",
+          "Using INNER JOIN when you needed LEFT JOIN, silently dropping rows with no match.",
+          "Ambiguous column names when two tables share one — qualify them with the table alias."
+        ],
+        "handsOn": "Create students, courses, and an enrolments link table. Write an INNER JOIN to list who takes what, then switch to LEFT JOIN and see which students appear with no course.",
+        "doneWhen": "You can join two or three tables and explain the difference between INNER and LEFT.",
+        "checks": [
+          {
+            "q": "What is the ON clause in a JOIN for?",
+            "a": "It states which columns must match to link a row in one table to a row in another."
+          },
+          {
+            "q": "INNER JOIN vs LEFT JOIN — the key difference?",
+            "a": "INNER keeps only matching rows; LEFT keeps all rows from the left table, filling blanks where there's no match."
+          }
+        ]
+      },
+      {
+        "id": "m3t3",
+        "title": "GROUP BY and aggregates",
+        "concept": "Aggregates squash many rows into one summary number: COUNT, SUM, AVG, MIN, MAX. GROUP BY does it per category — 'average score per course', 'orders per customer'. HAVING filters those grouped results (WHERE filters rows before grouping; HAVING filters groups after).",
+        "analogy": "GROUP BY is sorting a pile of receipts into stacks by category, then totalling each stack. HAVING is then throwing away the stacks whose total is too small.",
+        "examples": [
+          {
+            "code": "SELECT course_id, AVG(score) AS avg_score\nFROM results\nGROUP BY course_id\nHAVING AVG(score) > 50\nORDER BY avg_score DESC;",
+            "note": "AVG(score) collapses each course's rows into one average. HAVING filters AFTER grouping; use WHERE to filter rows BEFORE grouping."
+          }
+        ],
+        "mistakes": [
+          "Selecting a column that isn't in GROUP BY and isn't aggregated — that's an error or nonsense.",
+          "Using WHERE to filter an aggregate (use HAVING for that).",
+          "Forgetting AS to name the computed column."
+        ],
+        "handsOn": "On your results table, compute the average and count per course with GROUP BY, then use HAVING to keep only courses with more than N students.",
+        "doneWhen": "You can produce a per-category summary and filter it with HAVING.",
+        "checks": [
+          {
+            "q": "What does GROUP BY do?",
+            "a": "Collapses rows into one summary row per category, so aggregates like AVG/COUNT are computed per group."
+          },
+          {
+            "q": "WHERE vs HAVING?",
+            "a": "WHERE filters individual rows before grouping; HAVING filters the grouped results after aggregation."
+          }
+        ]
+      },
+      {
+        "id": "m3t4",
+        "title": "Subqueries and CTEs",
+        "concept": "Sometimes an answer needs a query inside a query. A subquery is a SELECT nested in another. A CTE (WITH ... AS) is the same idea but named and readable, letting you build a complex answer in clear steps instead of one tangled statement.",
+        "analogy": "A CTE is defining a helper variable before the main calculation — 'let high_scorers be (…), now use it'. It turns one unreadable sentence into a short paragraph.",
+        "examples": [
+          {
+            "code": "WITH high AS (\n    SELECT student_id\n    FROM results\n    WHERE score > 80\n)\nSELECT s.name\nFROM students s\nJOIN high ON high.student_id = s.id;",
+            "note": "The WITH block computes a named temporary result (high), then the main query uses it like a table. Much easier to read and debug than nesting."
+          }
+        ],
+        "mistakes": [
+          "Deeply nesting subqueries until nobody can read them — a CTE is usually clearer.",
+          "A correlated subquery that reruns per row and is slow — know when it happens.",
+          "Forgetting the CTE only exists for that one query."
+        ],
+        "handsOn": "Rewrite a nested subquery as a CTE. Use it to answer a two-step question like 'names of students who scored above the class average'.",
+        "doneWhen": "You can break a hard query into readable steps with a CTE.",
+        "checks": [
+          {
+            "q": "What is a CTE?",
+            "a": "A named temporary result defined with WITH ... AS, used to build a complex query in readable steps."
+          },
+          {
+            "q": "Why prefer a CTE over deeply nested subqueries?",
+            "a": "It's easier to read, debug, and reuse within the query."
+          }
+        ]
+      },
+      {
+        "id": "m3t5",
+        "title": "pandas: SQL in Python",
+        "concept": "pandas is a Python library for tables (DataFrames). It does what SQL does but inside Python, where you can then plot, model, or automate. Filtering, grouping, and joining all have pandas equivalents, so your SQL thinking transfers directly.",
+        "analogy": "If SQL is asking the librarian for books, pandas is having the whole shelf on your desk to flip through, rearrange, and scribble on freely.",
+        "examples": [
+          {
+            "code": "import pandas as pd\ndf = pd.read_csv(\"results.csv\")\ndf[df[\"score\"] >= 60]                 # WHERE score >= 60\ndf.groupby(\"course\")[\"score\"].mean()  # GROUP BY course, AVG(score)",
+            "note": "read_csv loads a spreadsheet-like file. Boolean indexing df[df[...]] is the pandas WHERE. groupby(...).mean() is GROUP BY + AVG."
+          }
+        ],
+        "mistakes": [
+          "Looping row-by-row instead of using vectorised operations (slow and un-pandas).",
+          "Forgetting a filter returns a NEW DataFrame — assign it or you lose it.",
+          "Confusing a Series (one column) with a DataFrame (a table)."
+        ],
+        "handsOn": "Load a CSV with pandas, filter rows, group by a column and compute a mean — mapping each step back to its SQL equivalent in your notes.",
+        "doneWhen": "You can do filter + groupby + mean in pandas and name the SQL each step mirrors.",
+        "checks": [
+          {
+            "q": "What is a DataFrame?",
+            "a": "A pandas table of rows and columns you can filter, group, and transform in Python."
+          },
+          {
+            "q": "What's the pandas equivalent of SQL's WHERE?",
+            "a": "Boolean indexing, e.g. df[df['score'] >= 60]."
+          }
+        ]
+      },
+      {
+        "id": "m3t6",
+        "title": "PROJECT: a data write-up",
+        "concept": "The real differentiator isn't running queries — it's explaining what the numbers MEAN to someone non-technical. Take a real dataset, ask a question, answer it with SQL/pandas, and write up the finding in plain English with one clear chart. That write-up is portfolio gold.",
+        "analogy": "Anyone can read a thermometer; you get paid to say 'it's a fever, here's what to do'. The interpretation, not the number, is the job.",
+        "examples": [
+          {
+            "code": "# The shape of a good write-up:\n1. Question:  What drives late deliveries?\n2. Data:      12k orders, Jan-Jun\n3. Finding:   Late rate triples when distance > 40km\n4. Chart:     one clear bar chart\n5. So what:   prioritise nearer warehouses",
+            "note": "Notice it ends in a recommendation, not a number. That 'so what' is what separates an analyst from a query-runner."
+          }
+        ],
+        "mistakes": [
+          "Showing ten charts and no conclusion — pick the one that tells the story.",
+          "Jargon a manager won't understand — write for a smart non-expert.",
+          "Stating a number without saying why it matters."
+        ],
+        "handsOn": "Grab a public dataset (Kaggle, data.gov), ask one real question, answer it with SQL or pandas, make ONE clear chart, and write a half-page plain-English finding ending in a recommendation.",
+        "doneWhen": "You have a short write-up + chart in your repo that a non-technical person could understand and act on.",
+        "checks": [
+          {
+            "q": "What's the real differentiator in data work?",
+            "a": "Explaining what the numbers mean and what to do about them — the interpretation, not just the query."
+          },
+          {
+            "q": "Why end a write-up with a 'so what'?",
+            "a": "A finding is only useful if it leads to a decision or action; the 'so what' turns analysis into value."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m4",
+    "title": "Month 4 — DSA (Understanding)",
+    "tag": "Interview core",
+    "why": "Data structures & algorithms are how you reason about efficiency — and they're the backbone of technical interviews. Goal this month: UNDERSTAND them by building from scratch, not grind puzzles yet.",
+    "topics": [
+      {
+        "id": "m4t1",
+        "title": "Big-O: how work grows",
+        "concept": "Big-O describes how an algorithm's work grows as the data grows — not its exact speed, but its shape. O(n) means work grows in step with the data; O(n²) means it explodes; O(log n) means it barely grows; O(1) is constant. This is the language interviewers use to compare solutions.",
+        "analogy": "The phone book. Searching name-by-name from the front is O(n) — double the book, double the work. But because the book is SORTED, you can open the middle and halve it each time — that's O(log n), the whole point of binary search. The sorted property is what unlocks it.",
+        "examples": [
+          {
+            "code": "# O(n): look at every item once\nfor x in items:\n    print(x)\n\n# O(n^2): for every item, look at every item\nfor a in items:\n    for b in items:\n        compare(a, b)",
+            "note": "Count the nested loops over the data: one loop ~ O(n), a loop inside a loop ~ O(n²). Halving each step ~ O(log n)."
+          }
+        ],
+        "mistakes": [
+          "Memorising the labels without feeling WHY nested loops are quadratic.",
+          "Ignoring constants is fine — Big-O is about growth shape, not exact counts.",
+          "Assuming faster hardware fixes a bad Big-O — it doesn't; the curve wins at scale."
+        ],
+        "handsOn": "For three small functions you write, count the loops and label each O(1)/O(n)/O(n²). Explain each label out loud using the phone-book idea.",
+        "doneWhen": "You can look at a loop and name its Big-O, and explain why in plain words.",
+        "checks": [
+          {
+            "q": "What does Big-O actually measure?",
+            "a": "How the amount of work grows as the input size grows — the shape of the growth, not exact time."
+          },
+          {
+            "q": "Why is binary search O(log n) and not O(n)?",
+            "a": "Because the data is sorted, each step throws away half the remaining items, so the work barely grows as data grows."
+          }
+        ]
+      },
+      {
+        "id": "m4t2",
+        "title": "Arrays & strings",
+        "concept": "An array (Python list) is items in a row, each reachable instantly by index — O(1) to read position i. Strings are arrays of characters. Most 'easy' interview problems live here: reverse it, find a duplicate, check a condition in one pass.",
+        "analogy": "An array is a row of numbered lockers. If you know the number, you open it instantly — you don't walk past the others.",
+        "examples": [
+          {
+            "code": "a = [10, 20, 30]\na[0]            # 10, instant by index\na[-1]           # 30, last item\ns = \"level\"\ns == s[::-1]    # True: it's a palindrome (reads same reversed)",
+            "note": "a[::-1] reverses. Indexing is O(1); scanning the whole array is O(n)."
+          }
+        ],
+        "mistakes": [
+          "Off-by-one at the last index (len is one past the last valid index).",
+          "Building a new string in a loop repeatedly — it's costly; collect then join.",
+          "Forgetting negative indices count from the end."
+        ],
+        "handsOn": "Implement, from scratch, a function that checks if a string is a palindrome without using the [::-1] trick — walk from both ends toward the middle.",
+        "doneWhen": "You can index, slice, and scan arrays confidently and reason about the cost.",
+        "checks": [
+          {
+            "q": "Why is reading array[i] O(1)?",
+            "a": "The position is computed directly from the index, so it takes the same time regardless of array size."
+          },
+          {
+            "q": "What's a palindrome, and one way to check it in one pass?",
+            "a": "A string that reads the same backwards; compare characters from both ends moving inward until they meet."
+          }
+        ]
+      },
+      {
+        "id": "m4t3",
+        "title": "Hash maps: the workhorse",
+        "concept": "A hash map (Python dict) stores key→value with near-instant O(1) lookup, insert, and delete. It's the single most useful structure for interviews: 'have I seen this before?', 'how many of each?', 'is its complement here?' all become one dict away.",
+        "analogy": "A hash map is a coat-check. You don't search every coat; you hand over a ticket (key) and get yours back immediately.",
+        "examples": [
+          {
+            "code": "# Two-Sum idea: find two numbers that add to target\nseen = {}\nfor i, n in enumerate(nums):\n    if target - n in seen:      # is the complement already seen?\n        return [seen[target-n], i]\n    seen[n] = i",
+            "note": "Instead of checking every pair (O(n²)), one pass with a dict makes it O(n). This exact trick appears in dozens of problems."
+          }
+        ],
+        "mistakes": [
+          "Scanning a list to check membership when a set/dict lookup is instant.",
+          "Using a list of pairs where a dict is the natural fit.",
+          "Forgetting a dict key must be unique — a second write overwrites."
+        ],
+        "handsOn": "Solve Two-Sum with a hash map in one pass, from scratch. Then write a word-frequency counter using a dict.",
+        "doneWhen": "You instinctively reach for a dict/set for 'seen it?' and 'count it' problems.",
+        "checks": [
+          {
+            "q": "What makes a hash map so useful in interviews?",
+            "a": "Near-instant O(1) lookup/insert, which turns many O(n²) scan problems into single-pass O(n) ones."
+          },
+          {
+            "q": "How does a hash map turn Two-Sum from O(n²) into O(n)?",
+            "a": "For each number you check in O(1) whether its complement was already seen, instead of comparing every pair."
+          }
+        ]
+      },
+      {
+        "id": "m4t4",
+        "title": "Two pointers & sliding window",
+        "concept": "Two techniques that avoid nested loops. Two pointers walk from both ends (or at two speeds) toward each other. A sliding window keeps a moving range over an array to answer 'best/longest/sum of any run of length k' in one pass.",
+        "analogy": "Two pointers are two fingers closing in on a word from both ends of a page. A sliding window is a magnifying glass sliding along a line, always showing a fixed stretch.",
+        "examples": [
+          {
+            "code": "# Max sum of any window of size k — one pass\nwindow = sum(nums[:k])\nbest = window\nfor i in range(k, len(nums)):\n    window += nums[i] - nums[i-k]   # add new, drop old\n    best = max(best, window)",
+            "note": "Instead of re-summing each window (O(n·k)), you slide it: add the entering item, subtract the leaving one. That's O(n)."
+          }
+        ],
+        "mistakes": [
+          "Recomputing the whole window each step instead of sliding it.",
+          "Mismanaging the window's edges (off-by-one on entering/leaving items).",
+          "Reaching for these before recognising the 'contiguous run' signal."
+        ],
+        "handsOn": "Implement the max-sum-window-of-size-k from scratch. Then use two pointers to check if a sorted array has a pair summing to a target.",
+        "doneWhen": "You recognise when a problem says 'contiguous' or 'sorted pair' and can apply the right technique.",
+        "checks": [
+          {
+            "q": "What signal in a problem suggests a sliding window?",
+            "a": "Asking about a contiguous run/subarray of some length or condition — you can slide a range instead of re-scanning."
+          },
+          {
+            "q": "Why is sliding the window faster than re-summing it?",
+            "a": "You update the sum by adding the entering element and removing the leaving one — O(1) per step instead of O(k)."
+          }
+        ]
+      },
+      {
+        "id": "m4t5",
+        "title": "Recursion",
+        "concept": "Recursion is a function that calls itself on a smaller piece of the problem until it hits a simple base case that stops it. It's the natural way to express 'solve this by solving smaller versions' — trees, factorials, divide-and-conquer.",
+        "analogy": "Russian nesting dolls: to open the biggest, you open the next, and the next, until the tiniest that opens no further (the base case). Then you're done.",
+        "examples": [
+          {
+            "code": "def factorial(n):\n    if n <= 1:        # base case: stop here\n        return 1\n    return n * factorial(n - 1)   # smaller subproblem",
+            "note": "Every recursion needs a base case (or it runs forever) and a step that moves TOWARD it. factorial(3) = 3*2*1 = 6."
+          }
+        ],
+        "mistakes": [
+          "Forgetting the base case → infinite recursion → crash (stack overflow).",
+          "A recursive step that doesn't actually get smaller.",
+          "Using recursion where a simple loop is clearer — pick the readable one."
+        ],
+        "handsOn": "Write factorial and a function that sums a nested list recursively, from scratch. Trace factorial(4) on paper before running it.",
+        "doneWhen": "You can write a correct recursive function and identify its base case and shrinking step.",
+        "checks": [
+          {
+            "q": "What two parts must every recursion have?",
+            "a": "A base case that stops it, and a step that moves toward that base case on a smaller subproblem."
+          },
+          {
+            "q": "What happens if you forget the base case?",
+            "a": "It recurses forever and crashes with a stack overflow."
+          }
+        ]
+      },
+      {
+        "id": "m4t6",
+        "title": "Binary search & sorting",
+        "concept": "Binary search finds an item in a SORTED array in O(log n) by repeatedly halving the search range. Sorting arranges data so techniques like binary search and two-pointers become possible. You should be able to write binary search from memory — it's a rite of passage.",
+        "analogy": "Back to the phone book: open the middle, decide left or right, repeat. Sorting first is what earns you that power — an unsorted book forces you back to page-by-page.",
+        "examples": [
+          {
+            "code": "def bsearch(a, target):\n    lo, hi = 0, len(a) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if a[mid] == target: return mid\n        if a[mid] < target:  lo = mid + 1\n        else:                hi = mid - 1\n    return -1",
+            "note": "Each loop throws away half the array. The array MUST be sorted first. The // is integer division for the middle index."
+          }
+        ],
+        "mistakes": [
+          "Running binary search on unsorted data (it silently gives wrong answers).",
+          "Off-by-one on lo/hi bounds — the classic bug; test with tiny arrays.",
+          "Infinite loop from not moving lo or hi correctly."
+        ],
+        "handsOn": "Write binary search from scratch and test it on edge cases: target at the ends, target missing, empty array. Then use Python's built-in sorted() and note the contrast.",
+        "doneWhen": "You can write binary search from memory and explain why it needs sorted input.",
+        "checks": [
+          {
+            "q": "Why must binary search's input be sorted?",
+            "a": "It decides which half to keep by comparing to the middle; that only works if order is guaranteed."
+          },
+          {
+            "q": "What is binary search's Big-O and why?",
+            "a": "O(log n), because each step discards half the remaining elements."
+          }
+        ]
+      },
+      {
+        "id": "m4t7",
+        "title": "Stacks, queues & a peek at trees",
+        "concept": "A stack is last-in-first-out (LIFO) — like undo. A queue is first-in-first-out (FIFO) — like a line at a counter. A tree is data that branches (folders, family trees, decision paths). You don't need to master trees yet — just recognise them and how you'd walk one.",
+        "analogy": "A stack is a pile of plates: you take the top one you put down last. A queue is a ticket line: first to arrive is first served. A tree is your file system — folders inside folders.",
+        "examples": [
+          {
+            "code": "stack = []\nstack.append(1); stack.append(2)\nstack.pop()      # 2 — last in, first out\n\nfrom collections import deque\nq = deque(); q.append(1); q.append(2)\nq.popleft()      # 1 — first in, first out",
+            "note": "A Python list is a ready-made stack (append/pop). Use deque for an efficient queue (popleft). Trees you'll usually walk with recursion or a stack/queue."
+          }
+        ],
+        "mistakes": [
+          "Using a list's pop(0) as a queue — it's slow; use deque.",
+          "Mixing up LIFO and FIFO — say the full names to yourself.",
+          "Trying to memorise every tree algorithm now instead of just recognising the shape."
+        ],
+        "handsOn": "Use a stack to check if brackets in a string are balanced ( ()[]{} ) — a classic. Then describe, in words, how you'd visit every node of a folder tree.",
+        "doneWhen": "You can pick stack vs queue for a task and explain LIFO vs FIFO with an everyday example.",
+        "checks": [
+          {
+            "q": "Stack vs queue in one line?",
+            "a": "Stack is last-in-first-out (like undo); queue is first-in-first-out (like a line)."
+          },
+          {
+            "q": "Why use a stack to check balanced brackets?",
+            "a": "Each opening bracket is pushed; each closing bracket must match the most recent unmatched opening — exactly LIFO behaviour."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m5",
+    "title": "Month 5 — Ship It",
+    "tag": "Deploy & decide",
+    "why": "Turn your work into something running on the internet. Docker packages it, the cloud hosts it. This month you also start light LeetCode reps and finally choose your track.",
+    "topics": [
+      {
+        "id": "m5t1",
+        "title": "Containers & Docker: the idea",
+        "concept": "A container packages your app WITH everything it needs to run — code, libraries, system bits — so it runs the same on your laptop and on a server. Docker is the tool that builds and runs containers. This kills 'but it works on my machine'.",
+        "analogy": "Containers are venvs taken to the limit. A venv isolates Python libraries; a container isolates the whole environment — a sealed lunchbox that runs identically anywhere.",
+        "examples": [
+          {
+            "code": "docker --version            # check Docker is installed\ndocker run hello-world      # pulls and runs a tiny test container\ndocker ps                   # list running containers (like ps for processes)",
+            "note": "An 'image' is the recipe/blueprint; a 'container' is a running instance of it. You build an image once and run many containers from it."
+          }
+        ],
+        "mistakes": [
+          "Confusing an image (the blueprint) with a container (a running instance).",
+          "Thinking a container is a full virtual machine — it's lighter, sharing the host's kernel.",
+          "Installing Docker Desktop on Windows but forgetting it uses your WSL under the hood."
+        ],
+        "handsOn": "Install Docker Desktop (it integrates with WSL), then run hello-world and inspect docker ps. Write one line in your notes: image vs container.",
+        "doneWhen": "You can run a container and explain the venv-to-the-limit analogy.",
+        "checks": [
+          {
+            "q": "What problem do containers solve?",
+            "a": "They package an app with all its dependencies so it runs identically everywhere — no 'works on my machine'."
+          },
+          {
+            "q": "Image vs container?",
+            "a": "An image is the blueprint/recipe; a container is a running instance created from that image."
+          }
+        ]
+      },
+      {
+        "id": "m5t2",
+        "title": "Writing a Dockerfile",
+        "concept": "A Dockerfile is a text recipe that builds your image step by step: start from a base, copy your code in, install dependencies, say how to run it. docker build turns it into an image; docker run starts it.",
+        "analogy": "A Dockerfile is the recipe card; docker build is cooking the dish into a sealed meal (the image); docker run is reheating and serving it anywhere.",
+        "examples": [
+          {
+            "code": "FROM python:3.11-slim        # base image with Python\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install -r requirements.txt\nCOPY . .\nCMD [\"python\", \"app.py\"]      # how to start the app",
+            "note": "Order matters: copy requirements and install BEFORE copying the rest, so Docker can cache the install step and rebuild faster."
+          }
+        ],
+        "mistakes": [
+          "Copying everything before installing deps, so every code change reinstalls all libraries.",
+          "Forgetting a CMD, so the container starts and immediately exits.",
+          "Baking secrets/passwords into the image — pass them at run time instead."
+        ],
+        "handsOn": "Write a Dockerfile for your month2 Python tool (or a tiny web app), build it with docker build -t mytool ., and run it with docker run mytool.",
+        "doneWhen": "You can containerise one of your own apps and run it from the image.",
+        "checks": [
+          {
+            "q": "What does docker build do?",
+            "a": "Reads the Dockerfile recipe and produces an image — a packaged, runnable blueprint of your app."
+          },
+          {
+            "q": "Why copy requirements and install before copying the rest of the code?",
+            "a": "So Docker caches the dependency install and only re-runs it when requirements change, making rebuilds fast."
+          }
+        ]
+      },
+      {
+        "id": "m5t8",
+        "title": "How the web talks: HTTP, APIs, JSON & ports",
+        "concept": "When a browser opens a page, it sends an HTTP request (a method like GET or POST, plus a URL) and the server sends back a response (a status code plus a body). An API is simply a URL that returns DATA instead of a page — usually as JSON, a text format of nested keys and values. Ports are numbered doors on a machine: a server program listens on one door (80 for web, 443 for HTTPS, 8000 commonly in development). This is the plumbing your deployed app will use.",
+        "analogy": "HTTP is a restaurant: you (the browser) give an order (request) to the waiter, the kitchen (server) prepares it, and the waiter brings back a dish (response). The status code is the waiter's report: 200 'here you go', 404 'we don't have that', 500 'the kitchen caught fire'. The port is which door of the building you knock on.",
+        "examples": [
+          {
+            "code": "curl https://api.github.com/users/octocat\n# returns JSON data about a user, e.g.:\n# { \"login\": \"octocat\", \"public_repos\": 8, ... }\n\ncurl -i https://example.com   # -i shows the status line + headers too\n# HTTP/1.1 200 OK  ...",
+            "note": "curl is a browser without the pictures — it makes HTTP requests from the shell. Status codes: 2xx = success, 4xx = your request's fault (404 not found), 5xx = the server's fault."
+          }
+        ],
+        "mistakes": [
+          "Confusing 404 (the thing doesn't exist — client-side mistake) with 500 (the server itself crashed).",
+          "Not knowing which port your own app listens on — that's what docker's -p maps.",
+          "Thinking JSON is code — it's just structured data, like a nested dict written as text."
+        ],
+        "handsOn": "Use curl (in WSL) to hit a public API like api.github.com/users/YOUR-GITHUB-NAME. Identify in the output: the status code, and two values in the JSON. Then run curl -i and read the headers.",
+        "doneWhen": "You can explain request→response, name what 200/404/500 mean, and say what a port is in one line.",
+        "checks": [
+          {
+            "q": "What is an API, versus a web page?",
+            "a": "A URL that returns structured data (usually JSON) for programs to use, instead of HTML for humans to look at."
+          },
+          {
+            "q": "404 vs 500?",
+            "a": "404: the requested thing doesn't exist (client-side problem). 500: the server itself failed while handling the request."
+          }
+        ]
+      },
+      {
+        "id": "m5t3",
+        "title": "The cloud & a virtual machine",
+        "concept": "The 'cloud' is renting someone else's computers over the internet. A virtual machine (VM) is one rented computer you get a shell on — exactly the Linux skills from Month 1, now on a remote box. Providers group your rented things into a project or 'resource group' (a folder for cloud resources).",
+        "analogy": "The cloud is renting instead of owning a car. A VM is the specific rented car; a resource group is the labelled parking bay holding everything for one trip.",
+        "examples": [
+          {
+            "code": "ssh user@your-server-ip     # same SSH from Bandit — now a real rented box\n# once in, it's just Linux: apt install, git clone, docker run...",
+            "note": "AWS calls a VM an EC2 instance; Azure and GCP have their own names. Under the hood it's a Linux machine you SSH into and use exactly as you learned."
+          }
+        ],
+        "warn": "Cloud costs real money. ALWAYS use the free tier, set a billing alert, and STOP or delete the VM when you're done for the day. A forgotten running machine can quietly run up a bill.",
+        "mistakes": [
+          "Leaving a VM running overnight and getting charged.",
+          "Opening every port to the world instead of just what you need.",
+          "Storing the SSH key carelessly — it's the key to the box."
+        ],
+        "handsOn": "Create ONE free-tier VM (AWS/Azure/GCP), set a billing alert first, SSH in, run a few Linux commands, then STOP it. Note the resource-group idea.",
+        "doneWhen": "You've SSHed into a cloud VM and safely stopped it, with a billing alert set.",
+        "checks": [
+          {
+            "q": "What is a VM in the cloud, in terms you already know?",
+            "a": "A rented Linux computer you SSH into — the same shell skills from Month 1, on a remote machine."
+          },
+          {
+            "q": "What's the one habit that prevents surprise cloud bills?",
+            "a": "Use the free tier, set a billing alert, and stop/delete resources when you're done."
+          }
+        ]
+      },
+      {
+        "id": "m5t4",
+        "title": "PROJECT: deploy something live",
+        "concept": "Put it all together: take a containerised app, run it on your cloud VM, and make it reachable at a public address. This single achievement — 'here's a link to something I built and deployed' — outweighs a stack of certificates.",
+        "analogy": "Everything so far was rehearsal in the garage. This is driving the car out onto the public road with your name on the plate.",
+        "examples": [
+          {
+            "code": "# on the VM:\ngit clone https://github.com/you/mytool.git\ncd mytool\ndocker build -t mytool .\ndocker run -d -p 80:8000 mytool   # -d = background, -p = open a port",
+            "note": "-p 80:8000 maps the server's public port 80 to your app's port. Then your app answers at http://your-server-ip. That link is your proof."
+          }
+        ],
+        "mistakes": [
+          "Forgetting to open the port in the cloud firewall/security group.",
+          "Running in the foreground so it dies when you disconnect — use -d.",
+          "No README explaining how it was deployed — reviewers want the story."
+        ],
+        "handsOn": "Deploy one of your apps to your VM in a container, open the port, and confirm it loads in a browser at the public IP. Then STOP the VM if you're pausing, and document the steps.",
+        "doneWhen": "There's a live URL to something you built, and you can explain every step from code to running site.",
+        "checks": [
+          {
+            "q": "Why is a deployed link worth more than a certificate?",
+            "a": "It's concrete proof you can build AND ship something real, end to end — exactly what product companies hire for."
+          },
+          {
+            "q": "What does -p 80:8000 do in docker run?",
+            "a": "Maps the host's port 80 to the container's port 8000, so the app is reachable from outside."
+          }
+        ]
+      },
+      {
+        "id": "m5t5",
+        "title": "Portfolio & GitHub polish",
+        "concept": "Now make your work legible to a stranger in 60 seconds. Each project repo gets a clear README (what, why, how to run, a screenshot or link). Your GitHub profile becomes the hub. This is the surface recruiters actually judge.",
+        "analogy": "You've cooked several dishes; now you plate them. Same food, but presentation decides whether anyone tastes it.",
+        "examples": [
+          {
+            "code": "# A README that gets read:\n# Project name — one-line what it does\n## Demo    (link or screenshot/gif)\n## Run it  (the exact commands)\n## How it works  (2-3 sentences)\n## What I learned",
+            "note": "Pin your 3–4 best repos on your GitHub profile. A short demo gif beats paragraphs — reviewers skim."
+          }
+        ],
+        "mistakes": [
+          "Leaving default/empty READMEs on your best work.",
+          "Twenty half-finished repos instead of four polished ones — pin the best.",
+          "No live link or screenshot, so reviewers can't see it working."
+        ],
+        "handsOn": "Write or upgrade READMEs for your four portfolio projects (bash tool, CLI tool, data write-up, deployed app). Pin them on your GitHub profile.",
+        "doneWhen": "A stranger can understand and run each of your four projects from its README alone.",
+        "checks": [
+          {
+            "q": "What should a project README let a stranger do in 60 seconds?",
+            "a": "Understand what it does, see it working (link/screenshot), and know how to run it."
+          },
+          {
+            "q": "Four polished repos or twenty half-finished ones — which, and why?",
+            "a": "Four polished ones; reviewers judge your best visible work, not your quantity."
+          }
+        ]
+      },
+      {
+        "id": "m5t6",
+        "title": "LeetCode reps (start now, not before)",
+        "concept": "Now that you understand the DSA pieces, start light interview rehearsal: 3–4 EASY problems a week, focusing on explaining your approach out loud, not just passing. Quality of reasoning beats quantity of problems.",
+        "analogy": "LeetCode is interview rehearsal, not a starting point. Grinding it before learning the pieces is like watching chess games before you know how the pieces move — now that you know the moves, rehearsing makes sense.",
+        "examples": [
+          {
+            "code": "# A rep is not 'did it pass'. It's:\n1. Restate the problem in your own words\n2. Say your approach BEFORE coding\n3. Note the Big-O\n4. Code it\n5. If stuck 25 min, read the solution, then redo it tomorrow from memory",
+            "note": "Start with arrays, strings, and hash-map problems — the patterns you built in Month 4. Easy first; hard problems come much later."
+          }
+        ],
+        "mistakes": [
+          "Jumping to Hard problems and feeling crushed — Easy first, always.",
+          "Reading solutions immediately instead of a real 25-minute attempt.",
+          "Counting problems solved instead of patterns understood."
+        ],
+        "handsOn": "Do 3–4 Easy problems this week using the 5-step rep above. Re-solve any you needed help on, from memory, a day later.",
+        "doneWhen": "You have a steady weekly rhythm of Easy problems and can talk through your approach aloud.",
+        "checks": [
+          {
+            "q": "Why start LeetCode now and not in Month 1?",
+            "a": "It's rehearsal of patterns; it only makes sense after you understand the underlying pieces (Month 4)."
+          },
+          {
+            "q": "What matters more than the number of problems solved?",
+            "a": "Understanding the patterns and being able to explain your approach out loud."
+          }
+        ]
+      },
+      {
+        "id": "m5t7",
+        "title": "Choose your track (the decision point)",
+        "concept": "You've now shipped across the whole stack. Time to pick a primary direction to go deep: ML Engineer / MLOps (fuses your AI&DS degree with deployment), or Software Engineering (more fresher openings, shared foundation). You lose nothing by aiming high — the base is the same.",
+        "analogy": "The 'two Fridays' test: which felt better — Friday A, the buzz of SHIPPING something that runs? Or Friday B, the buzz of UNDERSTANDING, cracking the data or the math? Your honest answer points the way.",
+        "examples": [
+          {
+            "code": "# Decide with evidence you already collected:\nWhich month's project energised you most?\nDid deploying (M5) or the data write-up (M3) feel best?\nDo you like making things RUN, or making things MAKE SENSE?",
+            "note": "Standing recommendation: ML Engineer / MLOps as the primary target, Software Engineering as the fallback. But your evidence beats any recommendation — you now have real projects to judge from."
+          }
+        ],
+        "mistakes": [
+          "Choosing by salary rumours instead of what genuinely energises you.",
+          "Thinking the choice is permanent — it's a starting direction, not a life sentence.",
+          "Refusing to choose and staying shallow everywhere."
+        ],
+        "handsOn": "Write half a page: which projects energised you, your honest 'two Fridays' answer, and your chosen primary track + fallback. Keep it in your repo.",
+        "doneWhen": "You've named a primary track and a fallback, backed by which projects actually energised you.",
+        "checks": [
+          {
+            "q": "What is the 'two Fridays' test?",
+            "a": "Which satisfies you more — shipping something that runs (Friday A), or understanding/cracking a problem (Friday B) — as a signal for engineering vs data/ML."
+          },
+          {
+            "q": "Why is aiming for ML Engineer 'safe' even if you fall back to SWE?",
+            "a": "They share the same foundation, so preparing for the deeper role loses you nothing if you pivot to software engineering."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "career",
+    "title": "Career & Interview Track",
+    "tag": "How you get selected",
+    "tagClass": "",
+    "why": "Runs in PARALLEL from Month 4 onward — this is HOW the skills turn into an offer, especially at product-based companies. Skills get you in the room; this track gets you the yes.",
+    "topics": [
+      {
+        "id": "c1",
+        "title": "The landscape: product vs service, and role map",
+        "concept": "Product companies build their own product (you go deep, higher bar, stronger fundamentals expected). Service companies build for clients (more openings, broader/shallower). Your target is product-based. Roles map to your work: SWE, ML Engineer/MLOps, Data Analyst/Scientist. Know which you're aiming at and what each screens for.",
+        "analogy": "Service companies are a restaurant cooking whatever each customer orders; a product company perfects its own signature dish. Product interviews probe how deeply you understand your ingredients.",
+        "examples": [
+          {
+            "code": "# What product interviews weight more heavily:\n- Can you EXPLAIN your code and choices? (not just produce output)\n- DSA + problem solving under discussion\n- Real projects you can defend end to end\n- Fundamentals: OS, networks, DBMS basics",
+            "note": "This is exactly why the whole plan is fundamentals-first: product companies test understanding, not just tool usage."
+          }
+        ],
+        "mistakes": [
+          "Applying everywhere with one generic resume instead of targeting product roles.",
+          "Not knowing which role you're interviewing for, so you prep the wrong things.",
+          "Assuming 'orchestrating AI tools' impresses — they'll probe what's underneath."
+        ],
+        "handsOn": "Make a shortlist of 10 product-based companies that hire freshers in your target role. For each, note what their interview reportedly tests (Glassdoor, LeetCode discuss).",
+        "doneWhen": "You can name your target role, 10 target companies, and what each screens for.",
+        "checks": [
+          {
+            "q": "Core difference between product and service companies for you as a candidate?",
+            "a": "Product companies expect deeper fundamentals and understanding; service companies have more openings but test more broadly and shallowly."
+          },
+          {
+            "q": "Why does 'explain your code' matter so much at product companies?",
+            "a": "They hire for understanding and ownership, not just output — you'll defend your choices in interviews and on the job."
+          }
+        ]
+      },
+      {
+        "id": "c2",
+        "title": "Resume: projects-first, one page, metrics",
+        "concept": "A fresher resume is won on projects, not a wall of skills. One page. Lead with 3–4 real projects, each as 2–3 bullets: what you built, the tech, and a concrete result or metric. No paragraphs, no rated skill bars, no lies.",
+        "analogy": "Your resume is a movie trailer, not the film. It shows the best scenes (projects) to earn a ticket (the interview) — it doesn't tell the whole story.",
+        "examples": [
+          {
+            "code": "# A strong project bullet:\nDeployed a containerised Flask API on an AWS EC2\nfree-tier VM (Docker); reachable publicly, ~120ms\nresponse. Wrote the Dockerfile and CI notes.\n\n# Weak version:\nMade a website using Python and cloud.",
+            "note": "Strong = specific tech + what you did + a number. Every bullet starts with an action verb and can survive 'tell me more about this'."
+          }
+        ],
+        "mistakes": [
+          "Listing 30 skills you can't defend — interviewers pick the weakest and probe it.",
+          "Vague bullets with no tech and no result.",
+          "Two pages as a fresher — cut to one."
+        ],
+        "handsOn": "Draft a one-page resume in your projects/career folder: 3–4 projects with metric-bearing bullets. Then run the /resume command (or the 'stuck' button) for a hiring-manager critique.",
+        "doneWhen": "You have a one-page, projects-first resume where you can defend every single line.",
+        "checks": [
+          {
+            "q": "What should lead a fresher's resume, and why?",
+            "a": "Real projects — they're concrete proof of ability, which freshers can't show through experience."
+          },
+          {
+            "q": "Why avoid listing skills you can't defend?",
+            "a": "Interviewers often probe the weakest-looking claim; an indefensible line costs you credibility."
+          }
+        ]
+      },
+      {
+        "id": "c3",
+        "title": "GitHub & portfolio as proof",
+        "concept": "Your GitHub is the evidence behind the resume. Pinned, polished repos with clear READMEs and, ideally, one live link. A recruiter clicks; in a minute they should see that you build real things and communicate clearly.",
+        "analogy": "The resume is the claim; GitHub is the receipt. Product companies check the receipt.",
+        "examples": [
+          {
+            "code": "# Portfolio checklist:\n[ ] 4 pinned repos, each with a real README\n[ ] at least 1 live deployed link\n[ ] a profile README introducing you\n[ ] clean commit history (no 'stuff' messages)",
+            "note": "Link your best-deployed project prominently. A live URL in a resume bullet gets clicked."
+          }
+        ],
+        "mistakes": [
+          "Sending a resume with a GitHub that's empty or full of tutorials.",
+          "No pinned repos, so reviewers see random noise first.",
+          "Messy commit history that contradicts a 'clean coder' claim."
+        ],
+        "handsOn": "Polish and pin your four best repos, write a profile README, and make sure one live link is visible. Ask for a critique via the stuck button.",
+        "doneWhen": "Your GitHub, opened cold, makes a reviewer think 'this person builds real things' within a minute.",
+        "checks": [
+          {
+            "q": "What's the relationship between your resume and your GitHub?",
+            "a": "Resume makes the claim; GitHub is the evidence reviewers check."
+          },
+          {
+            "q": "What single asset most strengthens a fresher portfolio?",
+            "a": "One genuinely deployed, live project with a clear README."
+          }
+        ]
+      },
+      {
+        "id": "c4",
+        "title": "DSA interview routine",
+        "concept": "Interview DSA is a habit, not a cram. A sustainable routine: a steady set of problems per week in a sensible order (patterns, not random), always explaining aloud, and spaced review of ones you missed. Consistency over months beats bursts.",
+        "analogy": "Same as gym: three sessions a week for months builds real strength; one twelve-hour session before the interview just injures you.",
+        "examples": [
+          {
+            "code": "# Weekly routine:\n- 3-4 problems, by PATTERN (arrays -> hashing -> two-pointer\n  -> sliding window -> stack -> tree -> ...)\n- explain approach + Big-O out loud BEFORE coding\n- redo any you needed help on, from memory, days later",
+            "note": "Follow a structured order (e.g. NeetCode's pattern grouping) rather than random problems, so patterns compound."
+          }
+        ],
+        "mistakes": [
+          "Random problem-hopping instead of following patterns.",
+          "Silent solving — you must practise talking, because the interview is spoken.",
+          "Cramming the week before instead of steady reps."
+        ],
+        "handsOn": "Set a fixed weekly DSA slot in your calendar. Do this week's batch by pattern, narrating aloud. Log which patterns feel weak.",
+        "doneWhen": "You have a running weekly routine and can talk through an Easy/Medium approach fluently.",
+        "checks": [
+          {
+            "q": "Why solve by pattern rather than randomly?",
+            "a": "Patterns compound — recognising the technique a problem needs is the real interview skill."
+          },
+          {
+            "q": "Why practise explaining out loud?",
+            "a": "Interviews are spoken; you're judged on communicating your reasoning, not just a passing solution."
+          }
+        ]
+      },
+      {
+        "id": "c5",
+        "title": "Online assessments & aptitude",
+        "concept": "Many companies gate with a timed online round: coding plus aptitude (quantitative, logical, verbal). It's a speed-and-accuracy filter. Freshers lose here not from inability but from lack of timed practice. Fixable with reps.",
+        "analogy": "It's the entrance turnstile, not the destination. Practised, it's a formality; unpractised, it quietly ends good candidates' runs.",
+        "examples": [
+          {
+            "code": "# Aptitude buckets to drill (timed):\n- Quant: percentages, ratios, time-speed-distance, P&C\n- Logical: series, puzzles, seating, syllogisms\n- Verbal: reading comprehension, error spotting\n# plus 1-2 timed coding problems",
+            "note": "Do these under a timer from day one — the pressure, not the topic, is the real test."
+          }
+        ],
+        "mistakes": [
+          "Practising untimed, then freezing when the clock appears.",
+          "Ignoring aptitude because it feels 'below' a CS student — it still gates you.",
+          "No company-specific prep (patterns repeat per company)."
+        ],
+        "handsOn": "Take one full timed mock (aptitude + coding) this week. Note your slowest section and drill it specifically.",
+        "doneWhen": "You can clear a timed aptitude + coding round without panicking, and know your weak section.",
+        "checks": [
+          {
+            "q": "Why do capable freshers fail online assessments?",
+            "a": "Lack of TIMED practice — it's a speed-and-accuracy filter, not a difficulty wall."
+          },
+          {
+            "q": "What three aptitude areas typically appear?",
+            "a": "Quantitative, logical reasoning, and verbal."
+          }
+        ]
+      },
+      {
+        "id": "c6",
+        "title": "Behavioral & the STAR method",
+        "concept": "Non-technical rounds test communication and fit: 'tell me about a project', 'a time you were stuck', 'why this company'. Structure answers with STAR — Situation, Task, Action, Result — so you sound clear and outcome-focused instead of rambling.",
+        "analogy": "STAR is the skeleton that keeps a story standing up. Without it, answers flop into a shapeless ramble; with it, they land.",
+        "examples": [
+          {
+            "code": "# STAR for 'a time you were stuck':\nSituation: deploying my app, container kept exiting\nTask:      needed it running on the VM by demo day\nAction:    read docker logs, found a missing CMD, fixed it\nResult:    deployed live; learned to read logs first",
+            "note": "Prepare 4–5 STAR stories from YOUR real projects — they double as answers to many different questions."
+          }
+        ],
+        "mistakes": [
+          "Rambling with no structure or no result.",
+          "Memorising word-for-word scripts that sound robotic — know the beats, speak naturally.",
+          "No specific 'why this company' answer."
+        ],
+        "handsOn": "Write 4–5 STAR stories from your real projects. Say each aloud in under two minutes. Practise 'why product companies / why this role'.",
+        "doneWhen": "You can answer common behavioral questions with a clear STAR structure, drawn from real work.",
+        "checks": [
+          {
+            "q": "What does STAR stand for?",
+            "a": "Situation, Task, Action, Result."
+          },
+          {
+            "q": "Why prepare stories from your own projects?",
+            "a": "They're real (so you can go deep under follow-ups) and one story often answers several different questions."
+          }
+        ]
+      },
+      {
+        "id": "c7",
+        "title": "System-design-lite (awareness)",
+        "concept": "Freshers aren't expected to design Netflix, but showing you can think about how pieces fit — client, server, database, API — sets you apart. Aim for vocabulary and reasoning, not deep expertise: what talks to what, and why.",
+        "analogy": "You don't need to be the city planner, but you should be able to sketch how the roads, houses, and water pipes connect. That sketch-level fluency is the goal.",
+        "examples": [
+          {
+            "code": "# Be able to sketch, at a high level:\nBrowser -> (HTTP) -> Web server -> API -> Database\n         where does caching help?\n         what happens when traffic 10x's?",
+            "note": "Tie it to YOUR deployed project: 'my browser hits my Flask API in a container on the VM, which reads the database.' Concrete beats abstract."
+          }
+        ],
+        "mistakes": [
+          "Over-preparing FAANG-scale design as a fresher — that's not the bar.",
+          "Only abstract theory with no connection to something you actually built.",
+          "Freezing because you think you must know it all — reasoning aloud is what's scored."
+        ],
+        "handsOn": "Draw the architecture of your own deployed project on paper: client → server → API → database. Explain where it'd strain under 10x traffic.",
+        "doneWhen": "You can sketch and narrate a simple client-server-database design, grounded in your own project.",
+        "checks": [
+          {
+            "q": "What's the fresher bar for system design?",
+            "a": "Vocabulary and clear reasoning about how components connect — not designing large-scale systems."
+          },
+          {
+            "q": "How do you make a design answer concrete?",
+            "a": "Anchor it to a real project you built and can walk through end to end."
+          }
+        ]
+      },
+      {
+        "id": "c9",
+        "title": "Core CS fundamentals interviews ask (OS · networks · DBMS)",
+        "concept": "Product-company interviews sprinkle in fundamentals questions to test depth: process vs thread, what happens when you type a URL, what a database index is, SQL vs NoSQL, HTTP vs HTTPS. The bar for a fresher is awareness-level answers — one or two clear sentences, ideally tied to something you actually did. You already touched most of these in the plan; this lesson just names them so interview questions feel familiar, not alien.",
+        "analogy": "These are the road-sign questions of the driving test. You've been driving these roads for five months (ps in Month 1, SQL in Month 3, HTTP in Month 5) — now you learn the official names for what you already did.",
+        "examples": [
+          {
+            "code": "# The classics, with one-line answers:\nProcess vs thread   -> a process is a running program with its own\n                       memory; threads run inside it sharing that memory\nType a URL, then?   -> DNS finds the server's address -> browser sends an\n                       HTTP request -> server responds -> browser renders\nDB index            -> like a book's index page: much faster lookups,\n                       small extra cost on every write\nSQL vs NoSQL        -> tables with a fixed schema vs flexible documents;\n                       SQL for structured relational data\nHTTP vs HTTPS       -> same protocol, but encrypted so nobody can read\n                       or tamper in transit",
+            "note": "Don't memorise essays. One clean sentence, plus 'I saw this when...' from your own work, beats a recited page every time."
+          }
+        ],
+        "mistakes": [
+          "Memorising long definitions instead of one clear sentence + a real example.",
+          "Skipping these because 'I'm a fresher' — product companies ask them precisely to find depth.",
+          "Answering in the abstract when you could anchor it: 'I listed processes with ps in Month 1.'"
+        ],
+        "handsOn": "Write one-line answers to all five classics in your notes, each ending with a link to something you did in this plan. Say them aloud until they're fluent.",
+        "doneWhen": "You can answer each classic in 1–2 spoken sentences, grounded in your own experience.",
+        "checks": [
+          {
+            "q": "What is a database index?",
+            "a": "A lookup structure like a book's index: it makes reads much faster at a small cost to every write."
+          },
+          {
+            "q": "Process vs thread?",
+            "a": "A process is a running program with its own memory; threads are lighter units inside it that share that memory."
+          }
+        ]
+      },
+      {
+        "id": "c8",
+        "title": "PROJECT: your job-hunt kit",
+        "concept": "Assemble the machine that gets you hired: a polished one-page resume, a tracked list of target applications, and at least two mock interviews you've passed (technical + behavioral). This is the deliverable that turns preparation into applications.",
+        "analogy": "You've forged the tools all year; this is packing the toolbox and actually walking to the job site.",
+        "examples": [
+          {
+            "code": "# Application tracker (a simple sheet):\nCompany | Role | Applied | Status | Next step | Notes\n--------|------|---------|--------|-----------|------\nAcme    | SWE  | Jul 3   | OA     | Jul 8     | ...",
+            "note": "Track every application so you follow up and learn from patterns. Run /mock (or the stuck button) for realistic mock interviews with feedback."
+          }
+        ],
+        "mistakes": [
+          "Endlessly polishing prep and never actually applying.",
+          "Applying with no tracking, so follow-ups and lessons get lost.",
+          "Skipping mock interviews — the first real one shouldn't be your first ever."
+        ],
+        "handsOn": "Finalise your resume, build an application tracker with 10+ target companies, and complete two mock interviews (one technical, one behavioral) using /mock — noting the feedback.",
+        "doneWhen": "Resume done, tracker started with real targets, and two mock interviews passed with feedback logged.",
+        "checks": [
+          {
+            "q": "Why keep an application tracker?",
+            "a": "To follow up on time and spot patterns in what's working, instead of losing track across many applications."
+          },
+          {
+            "q": "Why do mock interviews before real ones?",
+            "a": "So your first real interview isn't your first-ever attempt — you practise the pressure and get feedback safely."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ml",
+    "title": "ML Bridge (Optional)",
+    "tag": "Optional — AI&DS direction",
+    "tagClass": "opt",
+    "why": "OPTIONAL, best after Month 3. Your degree covers the theory; this bridges it to the industry workflow — a model that's trained, evaluated, and SERVED. Do it if the ML Engineer track calls to you.",
+    "topics": [
+      {
+        "id": "ml1",
+        "title": "What ML actually is",
+        "concept": "Machine learning is writing a program that learns patterns from examples instead of being explicitly coded with rules. You show it labelled data (input → known answer); it finds a function that maps them, then predicts on new inputs. That's the whole idea underneath the jargon.",
+        "analogy": "Instead of writing thousands of if-rules to recognise spam, you show the machine thousands of emails labelled spam/not-spam and let it infer the rule itself.",
+        "examples": [
+          {
+            "code": "# The mental model:\ndata (features X, labels y)  ->  train  ->  model\nnew X  ->  model.predict()   ->  prediction",
+            "note": "Supervised learning = you have labelled answers to learn from. Most practical industry ML is exactly this shape."
+          }
+        ],
+        "mistakes": [
+          "Thinking ML is magic rather than pattern-fitting on data.",
+          "Jumping to deep learning before understanding basic supervised learning.",
+          "Ignoring that data quality matters far more than fancy models."
+        ],
+        "handsOn": "In your notes, write in plain English the difference between traditional rule-based code and machine learning, with your own example.",
+        "doneWhen": "You can explain, without jargon, how ML differs from normal programming.",
+        "checks": [
+          {
+            "q": "How does ML differ from normal programming?",
+            "a": "Normal code follows rules you write; ML learns the rules from labelled examples."
+          },
+          {
+            "q": "What is supervised learning?",
+            "a": "Learning from data where each input comes with a known correct answer (label)."
+          }
+        ]
+      },
+      {
+        "id": "ml2",
+        "title": "The end-to-end workflow",
+        "concept": "Real ML is a pipeline, not a single model call: get data → clean/prepare it → split it → train a model → evaluate it → serve it. Most of the work (and most of the value) is in the data and evaluation steps, not the one line that fits the model.",
+        "analogy": "The model is the engine, but a car is mostly everything else — fuel, wheels, brakes, dashboard. The workflow is the whole car.",
+        "examples": [
+          {
+            "code": "1. Collect data        (a CSV to start)\n2. Clean + features    (pandas from Month 3!)\n3. Split train/test\n4. Train model\n5. Evaluate\n6. Save + serve        (Docker from Month 5!)",
+            "note": "Notice this reuses pandas (M3) and Docker (M5) — the bridge connects what you already built."
+          }
+        ],
+        "mistakes": [
+          "Spending all effort on the model and none on data quality.",
+          "Skipping evaluation and trusting the model blindly.",
+          "Treating it as one step instead of a repeatable pipeline."
+        ],
+        "handsOn": "Sketch the six-step pipeline in your notes and mark which earlier Foundry skills feed each step.",
+        "doneWhen": "You can list the ML pipeline stages and see how they connect to skills you already have.",
+        "checks": [
+          {
+            "q": "Where does most of the real ML work happen?",
+            "a": "In getting, cleaning, and preparing the data, and in evaluation — not the single model-fitting line."
+          },
+          {
+            "q": "Which earlier Foundry skills feed the ML workflow?",
+            "a": "pandas (data prep, Month 3) and Docker (serving, Month 5)."
+          }
+        ]
+      },
+      {
+        "id": "ml3",
+        "title": "scikit-learn: fit & predict",
+        "concept": "scikit-learn is Python's classic ML library. Its whole API is two verbs: model.fit(X, y) learns from training data, model.predict(X) makes predictions on new data. Once you see this pattern, most classical models feel the same.",
+        "analogy": "fit is studying for the exam from past papers; predict is answering the new exam. Same student (model), new questions.",
+        "examples": [
+          {
+            "code": "from sklearn.linear_model import LogisticRegression\nmodel = LogisticRegression()\nmodel.fit(X_train, y_train)     # learn\npreds = model.predict(X_test)   # apply",
+            "note": "Swap LogisticRegression for another model and the fit/predict shape stays identical. That consistency is the point of the library."
+          }
+        ],
+        "mistakes": [
+          "Calling predict on data with different columns than fit saw.",
+          "Fitting on the test set (leaking answers) — fit only on training data.",
+          "Expecting great results without any data cleaning first."
+        ],
+        "handsOn": "On a simple dataset (e.g. iris), split the data, fit a classifier, and predict on the test set — all with scikit-learn.",
+        "doneWhen": "You can train and predict with a scikit-learn model and explain fit vs predict.",
+        "checks": [
+          {
+            "q": "What do fit and predict do?",
+            "a": "fit learns patterns from training data; predict applies the learned model to new data."
+          },
+          {
+            "q": "Why must you never fit on the test set?",
+            "a": "It leaks the answers into training, giving falsely high scores that won't hold on real new data."
+          }
+        ]
+      },
+      {
+        "id": "ml4",
+        "title": "Train/validation/test & overfitting",
+        "concept": "You split data so you can trust your results. Train to learn, validation to tune, test to get an honest final score on data the model never saw. Overfitting is when a model memorises the training data and fails on new data — great scores in practice, poor scores in reality.",
+        "analogy": "Overfitting is a student who memorised last year's exact answers. Perfect on the old paper, lost on this year's new questions. The test set is this year's paper.",
+        "examples": [
+          {
+            "code": "from sklearn.model_selection import train_test_split\nX_tr, X_te, y_tr, y_te = train_test_split(\n    X, y, test_size=0.2, random_state=42)\n# train on X_tr, judge ONLY on X_te",
+            "note": "Big gap between training score and test score = overfitting. The honest number is always the one on unseen data."
+          }
+        ],
+        "mistakes": [
+          "Reporting the training score as if it were real performance.",
+          "Peeking at the test set while tuning (that's what validation is for).",
+          "Ignoring a huge train-vs-test gap."
+        ],
+        "handsOn": "Split a dataset, train a model, and compare its training score to its test score. If there's a big gap, note why (overfitting).",
+        "doneWhen": "You can explain overfitting and why the test score is the honest one.",
+        "checks": [
+          {
+            "q": "What is overfitting?",
+            "a": "When a model memorises training data and performs poorly on new, unseen data."
+          },
+          {
+            "q": "Why keep a separate test set?",
+            "a": "To get an honest estimate of performance on data the model never learned from."
+          }
+        ]
+      },
+      {
+        "id": "ml5",
+        "title": "Evaluation metrics that matter",
+        "concept": "Accuracy alone lies, especially on imbalanced data. Know precision (of what you flagged, how much was right), recall (of the real cases, how many you caught), and the trade-off between them. Choosing the right metric for the problem is a senior-sounding skill.",
+        "analogy": "A test that says 'healthy' for everyone is 99% accurate if disease is rare — and useless. Precision and recall are what reveal that the model actually catches nothing.",
+        "examples": [
+          {
+            "code": "from sklearn.metrics import classification_report\nprint(classification_report(y_te, preds))\n# shows precision, recall, f1 per class",
+            "note": "Fraud, disease, spam — all imbalanced, all need precision/recall, not accuracy. Pick the metric that matches the real-world cost of each error."
+          }
+        ],
+        "mistakes": [
+          "Reporting accuracy on imbalanced data and declaring success.",
+          "Ignoring which error is costlier (missing fraud vs a false alarm).",
+          "Not being able to explain precision vs recall in words."
+        ],
+        "handsOn": "Print a classification report for your model. In your notes, explain precision and recall for your specific problem and which matters more.",
+        "doneWhen": "You can explain precision vs recall and why accuracy can mislead.",
+        "checks": [
+          {
+            "q": "Why can accuracy be misleading?",
+            "a": "On imbalanced data, always predicting the majority class scores high accuracy while being useless."
+          },
+          {
+            "q": "Precision vs recall in plain words?",
+            "a": "Precision: of the things you flagged, how many were right. Recall: of the real positives, how many you caught."
+          }
+        ]
+      },
+      {
+        "id": "ml6",
+        "title": "PROJECT: train → serve → containerise",
+        "concept": "The bridge's payoff: take a model from a notebook to a running service. Train it, save it to a file, wrap it in a tiny API that returns predictions, and containerise that with Docker. This 'served model' is exactly what ML Engineering is about — and a standout portfolio piece.",
+        "analogy": "Everyone can bake a cake in their kitchen (a notebook model). An ML Engineer opens a shop that serves it to anyone who walks up (a deployed API). The shop is what companies pay for.",
+        "examples": [
+          {
+            "code": "import joblib\njoblib.dump(model, \"model.pkl\")   # save the trained model\n# tiny Flask API:\n# load model.pkl, expose /predict, return model.predict(input)\n# then: Dockerfile -> build -> run  (Month 5 skills)",
+            "note": "This reuses your Month 5 Docker skills directly. A model behind a live /predict endpoint is a genuinely strong fresher project."
+          }
+        ],
+        "mistakes": [
+          "Leaving the model in a notebook — serving is what makes it engineering.",
+          "Retraining on every request instead of loading the saved model once.",
+          "Forgetting to containerise, losing the reproducibility win."
+        ],
+        "handsOn": "Train a small model, save it with joblib, wrap it in a minimal Flask /predict API, containerise with Docker, and run it — ideally deploy it to your Month 5 VM.",
+        "doneWhen": "You have a containerised, running model API that returns predictions from an HTTP request.",
+        "checks": [
+          {
+            "q": "What turns a notebook model into 'ML engineering'?",
+            "a": "Saving it and serving it behind an API (ideally containerised and deployed) so others can use it reliably."
+          },
+          {
+            "q": "Why load the saved model once instead of retraining per request?",
+            "a": "Training is slow and unnecessary at prediction time; you load the already-trained model and just call predict."
+          }
+        ]
+      }
+    ]
+  }
+]
