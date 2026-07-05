@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
+import { CheckCircle2, HelpCircle } from "@/components/ui/icons";
 
 export function MarkDoneButton({
   lessonId,
@@ -24,7 +26,7 @@ export function MarkDoneButton({
     if (error) return setReward(error.message);
     setDone(true);
     const xp = (data as { xp_awarded?: number })?.xp_awarded ?? 0;
-    if (xp > 0) setReward(`+${xp} XP 🎉`);
+    if (xp > 0) setReward(`+${xp} XP`);
     router.refresh();
   }
 
@@ -33,18 +35,29 @@ export function MarkDoneButton({
       <button
         onClick={markDone}
         disabled={done || busy}
-        className={`px-4 py-2 rounded-lg text-sm font-semibold ${
+        className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-colors ${
           done
-            ? "bg-[#22303f] text-[#3fb950] cursor-default"
+            ? "bg-[#3fb950]/15 text-[#3fb950] cursor-default"
             : "bg-[#3fb950] text-[#04240f] hover:bg-[#35a344]"
         }`}
       >
-        {done ? "✓ Completed" : busy ? "Saving..." : "Mark as done"}
+        {done && <CheckCircle2 size={16} />}
+        {done ? "Completed" : busy ? "Saving..." : "Mark as done"}
       </button>
-      {reward && <span className="text-sm text-[#3fb950] font-semibold">{reward}</span>}
+      <AnimatePresence>
+        {reward && (
+          <motion.span
+            initial={{ opacity: 0, scale: 0.8, y: 6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="text-sm text-[#3fb950] font-bold"
+          >
+            {reward}
+          </motion.span>
+        )}
+      </AnimatePresence>
       {!done && (
-        <span className="text-xs text-[#9aa7b4]">
-          Only when you did the hands-on AND can explain it.
+        <span className="text-xs text-[#9aa7b4] hidden sm:inline">
+          Only when you did the task AND can explain it.
         </span>
       )}
     </div>
@@ -71,10 +84,7 @@ export function NotesBox({ lessonId, initial }: { lessonId: string; initial: str
 
   return (
     <div>
-      <div className="flex items-baseline justify-between">
-        <p className="text-xs font-bold uppercase tracking-widest text-[#4c8dff] mb-2">
-          Your notes
-        </p>
+      <div className="flex items-center justify-end -mt-6 mb-1">
         <span className="text-[10px] text-[#9aa7b4]">
           {saved === "saving" ? "saving..." : saved === "saved" ? "saved ✓" : ""}
         </span>
@@ -83,7 +93,7 @@ export function NotesBox({ lessonId, initial }: { lessonId: string; initial: str
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Write what you'd tell a friend about this topic..."
-        className="w-full min-h-24 bg-[#0b0f14] border border-[#2a323d] rounded-lg p-3 text-sm outline-none focus:border-[#4c8dff] resize-y"
+        className="w-full min-h-24 bg-black/30 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-[#4c8dff] resize-y transition-colors"
       />
     </div>
   );
@@ -92,20 +102,30 @@ export function NotesBox({ lessonId, initial }: { lessonId: string; initial: str
 export function CheckReveal({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-[#2a323d] rounded-lg overflow-hidden">
+    <div className="glass rounded-xl overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full text-left px-4 py-2.5 bg-[#1c232d] text-sm hover:bg-[#22303f]"
+        className="w-full text-left px-4 py-2.5 text-sm hover:bg-white/[0.03] flex items-start gap-2 transition-colors"
       >
-        <span className="text-[#59d3c5] font-bold mr-2">Q</span>
-        {q}
+        <HelpCircle size={16} className="text-[#59d3c5] mt-0.5 shrink-0" />
+        <span className="flex-1">{q}</span>
       </button>
-      {open && (
-        <div className="px-4 py-2.5 text-sm text-[#9aa7b4] border-t border-[#2a323d]">
-          <span className="text-[#3fb950] font-bold mr-2">A</span>
-          {a}
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <p className="px-4 py-2.5 text-sm text-[#9aa7b4] border-t border-white/[0.06]">
+              <span className="text-[#3fb950] font-bold mr-1">A</span>
+              {a}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

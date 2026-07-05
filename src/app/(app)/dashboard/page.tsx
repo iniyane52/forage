@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getAllLessons } from "@/lib/content";
+import { Stagger, StaggerItem, AnimatedBar, FadeUp } from "@/components/ui/motion";
+import { streamIcon, Lock, ArrowRight, ChevronRight } from "@/components/ui/icons";
 
-type StreamRow = { id: string; slug: string; title: string; tagline: string; icon: string; sort: number };
+type StreamRow = { id: string; slug: string; title: string; tagline: string; sort: number };
 
 export default async function Dashboard() {
   const supabase = await createClient();
@@ -27,7 +29,6 @@ export default async function Dashboard() {
     perStream.set(sid, s);
   }
 
-  // "Your next step" = first Stream-1 lesson not yet done
   const bySlugDone = new Set(
     (lessonCounts ?? []).filter((l) => doneIds.has(l.id)).map((l) => l.slug)
   );
@@ -36,66 +37,82 @@ export default async function Dashboard() {
   return (
     <div className="space-y-8">
       {next && (
-        <section className="rounded-2xl border border-[#4c8dff] bg-gradient-to-br from-[#13233d] to-[#0e1116] p-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-[#4c8dff] mb-1">
-            Your next step
-          </p>
-          <h2 className="text-xl font-bold">{next.topic.title}</h2>
-          <p className="text-sm text-[#9aa7b4] mt-1">{next.module.title}</p>
-          <Link
-            href={`/learn/${next.topic.id}`}
-            className="inline-block mt-4 px-4 py-2 rounded-lg bg-[#4c8dff] text-white text-sm font-semibold hover:bg-[#3a7bee]"
-          >
-            Continue learning →
-          </Link>
-        </section>
+        <FadeUp>
+          <div className="glass glass-hover rounded-2xl p-6 relative overflow-hidden">
+            <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-[#4c8dff]/10 blur-2xl pointer-events-none" />
+            <p className="text-xs font-bold uppercase tracking-widest text-[#4c8dff] mb-1">
+              Your next step
+            </p>
+            <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
+              {next.topic.title}
+            </h2>
+            <p className="text-sm text-[#9aa7b4] mt-1">{next.module.title}</p>
+            <Link
+              href={`/learn/${next.topic.id}`}
+              className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-xl bg-[#4c8dff] text-white text-sm font-semibold hover:bg-[#3a7bee] transition-colors"
+            >
+              Continue learning <ArrowRight size={16} />
+            </Link>
+          </div>
+        </FadeUp>
       )}
 
       <section>
-        <h1 className="text-2xl font-bold mb-4">Your streams</h1>
-        <div className="grid sm:grid-cols-2 gap-4">
+        <h1 className="text-2xl font-bold mb-4" style={{ fontFamily: "var(--font-display)" }}>
+          Your streams
+        </h1>
+        <Stagger className="grid sm:grid-cols-2 gap-4">
           {((streams ?? []) as StreamRow[]).map((s) => {
             const st = perStream.get(s.id) ?? { total: 0, done: 0 };
             const pct = st.total ? Math.round((st.done / st.total) * 100) : 0;
             const live = st.total > 0;
+            const Icon = streamIcon[s.slug] ?? streamIcon.foundations;
             return (
-              <Link
-                key={s.id}
-                href={live ? `/stream/${s.slug}` : "#"}
-                className={`rounded-2xl border p-5 transition-colors ${
-                  live
-                    ? "border-[#2a323d] bg-[#161b22] hover:border-[#4c8dff]"
-                    : "border-[#2a323d] bg-[#12161c] opacity-70 cursor-default"
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">{s.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold">{s.title}</h3>
-                    <p className="text-xs text-[#9aa7b4] mt-0.5">{s.tagline}</p>
-                  </div>
-                </div>
-                {live ? (
-                  <div className="mt-4">
-                    <div className="h-2 rounded-full bg-[#1c232d] overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-[#4c8dff] to-[#3fb950]"
-                        style={{ width: `${pct}%` }}
-                      />
+              <StaggerItem key={s.id}>
+                <Link
+                  href={live ? `/stream/${s.slug}` : "#"}
+                  className={`group block glass rounded-2xl p-5 h-full ${
+                    live ? "glass-hover hover:-translate-y-0.5" : "opacity-70 cursor-default"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      className={`shrink-0 w-11 h-11 rounded-xl grid place-items-center ${
+                        live ? "bg-[#4c8dff]/15 text-[#4c8dff]" : "bg-white/[0.05] text-[#9aa7b4]"
+                      }`}
+                    >
+                      <Icon size={22} />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold flex items-center gap-1">
+                        {s.title}
+                        {live && (
+                          <ChevronRight
+                            size={16}
+                            className="text-[#9aa7b4] opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+                          />
+                        )}
+                      </h3>
+                      <p className="text-xs text-[#9aa7b4] mt-0.5">{s.tagline}</p>
                     </div>
-                    <p className="text-xs text-[#9aa7b4] mt-1.5">
-                      {st.done} of {st.total} lessons · {pct}%
-                    </p>
                   </div>
-                ) : (
-                  <p className="mt-4 text-xs font-semibold text-[#e3a008]">
-                    In production — launching module by module
-                  </p>
-                )}
-              </Link>
+                  {live ? (
+                    <div className="mt-4">
+                      <AnimatedBar pct={pct} />
+                      <p className="text-xs text-[#9aa7b4] mt-1.5">
+                        {st.done} of {st.total} lessons · {pct}%
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="mt-4 text-xs font-semibold text-[#e3a008] flex items-center gap-1.5">
+                      <Lock size={13} /> In production — launching module by module
+                    </p>
+                  )}
+                </Link>
+              </StaggerItem>
             );
           })}
-        </div>
+        </Stagger>
       </section>
     </div>
   );

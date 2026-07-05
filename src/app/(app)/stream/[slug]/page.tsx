@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { AnimatedBar, Stagger, StaggerItem } from "@/components/ui/motion";
+import { streamIcon, CheckCircle2, ChevronRight } from "@/components/ui/icons";
 
 export default async function StreamPage({
   params,
@@ -28,72 +30,87 @@ export default async function StreamPage({
 
   const done = new Set((progress ?? []).filter((p) => p.status === "done").map((p) => p.lesson_id));
   const quizPassed = new Map((results ?? []).map((r) => [r.lesson_id, r]));
+  const Icon = streamIcon[stream.slug] ?? streamIcon.foundations;
 
   return (
     <div className="space-y-8">
       <div>
         <p className="text-xs text-[#9aa7b4]">
-          <Link href="/dashboard" className="hover:text-white">Dashboard</Link> / {stream.title}
+          <Link href="/dashboard" className="hover:text-white transition-colors">
+            Dashboard
+          </Link>{" "}
+          / {stream.title}
         </p>
-        <h1 className="text-2xl font-bold mt-1">
-          {stream.icon} {stream.title}
+        <h1
+          className="text-2xl font-bold mt-1 flex items-center gap-2.5"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          <span className="w-9 h-9 rounded-xl grid place-items-center bg-[#4c8dff]/15 text-[#4c8dff]">
+            <Icon size={20} />
+          </span>
+          {stream.title}
         </h1>
         <p className="text-sm text-[#9aa7b4] mt-1">{stream.tagline}</p>
       </div>
 
-      {(modules ?? []).map((m) => {
-        const lessons = (m.lessons as { id: string; slug: string; title: string; sort: number }[])
-          .slice()
-          .sort((a, b) => a.sort - b.sort);
-        const doneCount = lessons.filter((l) => done.has(l.id)).length;
-        const pct = lessons.length ? Math.round((doneCount / lessons.length) * 100) : 0;
-        return (
-          <section key={m.id} className="rounded-2xl border border-[#2a323d] bg-[#161b22] p-5">
-            <div className="flex items-baseline justify-between gap-3 flex-wrap">
-              <h2 className="text-lg font-bold">{m.title}</h2>
-              <span className="text-xs text-[#9aa7b4]">
-                {doneCount}/{lessons.length} done
-              </span>
-            </div>
-            <div className="h-1.5 mt-2 rounded-full bg-[#1c232d] overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-[#4c8dff] to-[#3fb950]"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-            <p className="text-xs text-[#9aa7b4] mt-2">{m.why}</p>
-            <ul className="mt-4 divide-y divide-[#2a323d]">
-              {lessons.map((l, i) => {
-                const r = quizPassed.get(l.id);
-                return (
-                  <li key={l.id}>
-                    <Link
-                      href={`/learn/${l.slug}`}
-                      className="flex items-center gap-3 py-2.5 group"
-                    >
-                      <span
-                        className={`w-5 h-5 rounded-full border flex items-center justify-center text-[10px] shrink-0 ${
-                          done.has(l.id)
-                            ? "bg-[#3fb950] border-[#3fb950] text-[#04240f] font-bold"
-                            : "border-[#2a323d] text-[#9aa7b4]"
-                        }`}
-                      >
-                        {done.has(l.id) ? "✓" : i + 1}
-                      </span>
-                      <span className="text-sm group-hover:text-white flex-1">{l.title}</span>
-                      {r?.passed && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#22303f] text-[#3fb950] font-semibold">
-                          quiz {r.best_score}%
-                        </span>
-                      )}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        );
-      })}
+      <Stagger className="space-y-6">
+        {(modules ?? []).map((m) => {
+          const lessons = (m.lessons as { id: string; slug: string; title: string; sort: number }[])
+            .slice()
+            .sort((a, b) => a.sort - b.sort);
+          const doneCount = lessons.filter((l) => done.has(l.id)).length;
+          const pct = lessons.length ? Math.round((doneCount / lessons.length) * 100) : 0;
+          return (
+            <StaggerItem key={m.id}>
+              <section className="glass rounded-2xl p-5">
+                <div className="flex items-baseline justify-between gap-3 flex-wrap">
+                  <h2 className="text-lg font-bold" style={{ fontFamily: "var(--font-display)" }}>
+                    {m.title}
+                  </h2>
+                  <span className="text-xs text-[#9aa7b4]">
+                    {doneCount}/{lessons.length} done
+                  </span>
+                </div>
+                <AnimatedBar pct={pct} className="mt-2 h-1.5" />
+                <p className="text-xs text-[#9aa7b4] mt-2">{m.why}</p>
+                <ul className="mt-4 divide-y divide-white/[0.06]">
+                  {lessons.map((l, i) => {
+                    const r = quizPassed.get(l.id);
+                    const isDone = done.has(l.id);
+                    return (
+                      <li key={l.id}>
+                        <Link href={`/learn/${l.slug}`} className="flex items-center gap-3 py-2.5 group">
+                          <span
+                            className={`w-6 h-6 rounded-full grid place-items-center text-[10px] shrink-0 ${
+                              isDone
+                                ? "text-[#3fb950]"
+                                : "border border-white/10 text-[#9aa7b4]"
+                            }`}
+                          >
+                            {isDone ? <CheckCircle2 size={20} /> : i + 1}
+                          </span>
+                          <span className="text-sm group-hover:text-white flex-1 transition-colors">
+                            {l.title}
+                          </span>
+                          {r?.passed && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#3fb950]/15 text-[#3fb950] font-semibold">
+                              quiz {r.best_score}%
+                            </span>
+                          )}
+                          <ChevronRight
+                            size={15}
+                            className="text-[#9aa7b4] opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+                          />
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            </StaggerItem>
+          );
+        })}
+      </Stagger>
     </div>
   );
 }

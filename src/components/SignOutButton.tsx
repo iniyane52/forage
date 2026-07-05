@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { LogOut } from "@/components/ui/icons";
 
 export function SignOutButton() {
   const router = useRouter();
@@ -12,9 +13,10 @@ export function SignOutButton() {
         router.push("/auth");
         router.refresh();
       }}
-      className="text-[#9aa7b4] hover:text-white text-xs border border-[#2a323d] rounded-md px-2 py-1"
+      aria-label="Sign out"
+      className="text-[#9aa7b4] hover:text-white p-1.5 rounded-lg hover:bg-white/[0.05] transition-colors"
     >
-      Sign out
+      <LogOut size={16} />
     </button>
   );
 }
