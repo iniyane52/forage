@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getLesson, getAdjacent } from "@/lib/content";
 import { MarkDoneButton, NotesBox, CheckReveal } from "@/components/LessonActions";
@@ -53,8 +53,23 @@ export default async function LessonPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: row } = await supabase.from("lessons").select("id").eq("slug", slug).single();
+  const { data: row } = await supabase
+    .from("lessons")
+    .select("id, modules(streams(slug, title, access_tier))")
+    .eq("slug", slug)
+    .single();
   if (!row) notFound();
+
+  const stream = (row.modules as unknown as { streams: { slug: string; title: string; access_tier: string } } | null)
+    ?.streams;
+  if (stream?.access_tier === "pro") {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("plan")
+      .eq("user_id", user!.id)
+      .single();
+    if (profile?.plan !== "pro") redirect("/pricing");
+  }
 
   const [{ data: progress }, { count: questionCount }] = await Promise.all([
     supabase
@@ -77,8 +92,11 @@ export default async function LessonPage({
             Dashboard
           </Link>{" "}
           /{" "}
-          <Link href="/stream/foundations" className="hover:text-white transition-colors">
-            {mod.title}
+          <Link
+            href={`/stream/${stream?.slug ?? "common-core"}`}
+            className="hover:text-white transition-colors"
+          >
+            {stream?.title ?? mod.title}
           </Link>
         </p>
         <h1 className="text-2xl font-bold mt-2" style={{ fontFamily: "var(--font-display)" }}>

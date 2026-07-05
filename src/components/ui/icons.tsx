@@ -3,6 +3,11 @@ import {
   Globe,
   BarChart3,
   BrainCircuit,
+  GraduationCap,
+  Cloud,
+  ShieldCheck,
+  Code2 as CodeIcon,
+  Compass,
   Flame,
   Sparkles,
   Trophy,
@@ -29,10 +34,16 @@ import {
 
 // Stream icon by slug — professional SVG icons, never emoji.
 export const streamIcon: Record<string, LucideIcon> = {
-  foundations: Terminal,
-  fullstack: Globe,
-  data: BarChart3,
+  "common-core": GraduationCap,
+  "ai-engineer": BrainCircuit,
   aiml: BrainCircuit,
+  "software-engineer": CodeIcon,
+  fullstack: Globe,
+  "data-scientist": BarChart3,
+  data: BarChart3,
+  "cloud-devops": Cloud,
+  cybersecurity: ShieldCheck,
+  foundations: Terminal,
 };
 
 export {
@@ -40,6 +51,10 @@ export {
   Globe,
   BarChart3,
   BrainCircuit,
+  GraduationCap,
+  Cloud,
+  ShieldCheck,
+  Compass,
   Flame,
   Sparkles,
   Trophy,

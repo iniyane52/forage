@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AnimatedBar, Stagger, StaggerItem } from "@/components/ui/motion";
-import { streamIcon, CheckCircle2, ChevronRight } from "@/components/ui/icons";
+import { streamIcon, CheckCircle2, ChevronRight, Lock } from "@/components/ui/icons";
 
 export default async function StreamPage({
   params,
@@ -17,6 +17,44 @@ export default async function StreamPage({
 
   const { data: stream } = await supabase.from("streams").select("*").eq("slug", slug).single();
   if (!stream) notFound();
+
+  // Access gate: pro streams require a pro plan.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan")
+    .eq("user_id", user!.id)
+    .single();
+  if (stream.access_tier === "pro" && profile?.plan !== "pro") {
+    const Icon = streamIcon[stream.slug] ?? streamIcon.foundations;
+    return (
+      <div className="max-w-lg mx-auto text-center py-12">
+        <span className="w-14 h-14 rounded-2xl grid place-items-center bg-[#7c5cff]/15 text-[#a78bfa] mx-auto">
+          <Icon size={28} />
+        </span>
+        <h1 className="text-2xl font-bold mt-4" style={{ fontFamily: "var(--font-display)" }}>
+          {stream.title}
+        </h1>
+        <p className="text-sm text-[#a79fc0] mt-2">{stream.blurb}</p>
+        <div className="glass rounded-2xl p-6 mt-6 text-left">
+          <p className="text-sm flex items-center gap-2 font-semibold">
+            <Lock size={16} className="text-[#c86bff]" /> This is a Pro career path
+          </p>
+          <p className="text-sm text-[#a79fc0] mt-2">
+            Finish the free Common Core first, then unlock any career path with Pro.
+          </p>
+          <Link
+            href="/pricing"
+            className="inline-block mt-4 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#7c5cff] to-[#c86bff] text-white text-sm font-semibold"
+          >
+            See Pro plans
+          </Link>
+        </div>
+        <Link href="/dashboard" className="inline-block mt-6 text-sm text-[#a79fc0] hover:text-white">
+          ← Back to dashboard
+        </Link>
+      </div>
+    );
+  }
 
   const [{ data: modules }, { data: progress }, { data: results }] = await Promise.all([
     supabase
