@@ -506,5 +506,496 @@
         ]
       }
     ]
+  },
+  {
+    "id": "cc-git",
+    "title": "Git & GitHub Essentials",
+    "why": "Every team on earth saves and shares code with Git. Learn to snapshot your work, undo mistakes, and put your projects online where employers can see them.",
+    "topics": [
+      {
+        "id": "cc-git-what",
+        "title": "What Git is & why it matters",
+        "concept": "Git is a version-control system — a time machine for your files. It saves snapshots ('commits') of your project so you can see its history, undo mistakes by going back to a good snapshot, and work with others without overwriting each other. GitHub is a website that hosts your Git projects online so you can back them up and share them.",
+        "analogy": "Git is the save-points in a video game. You save often; if you mess up a level, you reload the last good save instead of restarting the whole game. GitHub is the cloud where those saves are stored and shared.",
+        "mistakes": [
+          "Confusing Git (the tool on your computer) with GitHub (the website that hosts it).",
+          "Thinking version control is only for big teams — it protects solo work too.",
+          "Never committing until the end — commit small and often so you always have a recent save."
+        ],
+        "handsOn": "Watch a 5-minute 'what is Git' video (see resources) and write, in one sentence each, what a commit is and what GitHub is for.",
+        "doneWhen": "You can explain, with the save-point analogy, what Git does and how GitHub differs from it.",
+        "checks": [
+          {
+            "q": "Git vs GitHub — the difference?",
+            "a": "Git is the version-control tool that runs on your computer; GitHub is a website that hosts Git projects online for backup and sharing."
+          },
+          {
+            "q": "Why commit often?",
+            "a": "Each commit is a save point; frequent commits mean you can always return to a recent working state instead of losing lots of work."
+          }
+        ],
+        "keyTakeaways": [
+          "Git = time machine (snapshots you can return to).",
+          "GitHub = online home for your Git projects.",
+          "Commit small and often."
+        ],
+        "resources": [
+          {
+            "label": "Git — official docs & intro",
+            "url": "https://git-scm.com/doc",
+            "kind": "docs"
+          },
+          {
+            "label": "GitHub 'Hello World' quickstart",
+            "url": "https://docs.github.com/en/get-started/start-your-journey/hello-world",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-git-commit",
+        "title": "Your first commit",
+        "concept": "The daily Git loop is three steps: change your files, `git add` to choose what to save, and `git commit -m \"message\"` to save that snapshot with a note about what changed. `git status` shows what's changed and `git log` shows your history. The message matters — write what you did and why, so future-you understands the history.",
+        "analogy": "Committing is packing a labelled box when moving house. `add` decides which items go in this box; `commit` seals and labels it. A clear label ('kitchen — plates') is a good commit message; 'stuff' is not.",
+        "examples": [
+          {
+            "code": "git init                     # start tracking this folder (once)\ngit status                   # what has changed?\ngit add .                    # stage all changes for the snapshot\ngit commit -m \"add homepage\" # save the snapshot with a message\ngit log --oneline            # see your history",
+            "note": "add then commit is two steps on purpose: add chooses WHAT to include, commit saves it. Messages should say what changed."
+          }
+        ],
+        "mistakes": [
+          "Vague messages like 'update' or 'stuff' — say what actually changed.",
+          "Forgetting `git add` before commit (nothing gets saved).",
+          "Committing secrets or huge files — use a .gitignore to exclude them."
+        ],
+        "handsOn": "Install Git, make a folder with one text file, and do the full loop: git init → add → commit. Then change the file and make a second commit. Run git log --oneline to see both.",
+        "doneWhen": "You can make a commit from scratch and read your own history with git log.",
+        "checks": [
+          {
+            "q": "What's the difference between git add and git commit?",
+            "a": "add stages which changes to include in the next snapshot; commit saves that snapshot with a message."
+          },
+          {
+            "q": "What makes a good commit message?",
+            "a": "A short, clear statement of what changed (and why), so the history is understandable later."
+          }
+        ],
+        "keyTakeaways": [
+          "The loop: change → add → commit.",
+          "Messages describe what changed.",
+          "git status and git log show state and history."
+        ],
+        "resources": [
+          {
+            "label": "Git basics — recording changes",
+            "url": "https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository",
+            "kind": "book"
+          }
+        ]
+      },
+      {
+        "id": "cc-git-push",
+        "title": "Push to GitHub",
+        "concept": "To get your project online, you create an empty repository on GitHub, connect your local project to it (a 'remote'), and `git push` your commits up. Now it's backed up and shareable — and it becomes your public proof of work. A good repo has a README explaining what the project is and how to run it.",
+        "analogy": "Your computer is your private workshop; GitHub is putting your finished pieces in a shop window on the street. Pushing is moving a piece from the workshop to the window where people can see it.",
+        "examples": [
+          {
+            "code": "git remote add origin https://github.com/you/my-repo.git\ngit branch -M main\ngit push -u origin main   # upload your commits to GitHub",
+            "note": "Create the empty repo on github.com first, then connect and push. After the first `-u`, later pushes are just `git push`."
+          }
+        ],
+        "mistakes": [
+          "A repo with no README — reviewers can't tell what it is.",
+          "Pushing secrets/passwords — never commit them; use environment variables + .gitignore.",
+          "Forgetting to commit before pushing — push only sends committed snapshots."
+        ],
+        "handsOn": "Create a free GitHub account and a new empty repository. Push a small project (even a single README.md) to it. Confirm it appears online.",
+        "doneWhen": "You have one project live on GitHub with a README, pushed from your own machine.",
+        "checks": [
+          {
+            "q": "What does git push do?",
+            "a": "Uploads your local commits to a remote repository (like GitHub) for backup and sharing."
+          },
+          {
+            "q": "Why does a README matter?",
+            "a": "It's the first thing a visitor (or employer) reads — it explains what the project is and how to use it."
+          }
+        ],
+        "keyTakeaways": [
+          "Push sends commits to GitHub.",
+          "A README makes your repo understandable.",
+          "Public repos are your proof of work."
+        ],
+        "resources": [
+          {
+            "label": "GitHub — create a repo",
+            "url": "https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository",
+            "kind": "docs"
+          },
+          {
+            "label": "About READMEs",
+            "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cc-professional",
+    "title": "Professional Skills",
+    "why": "Skills get you hired; communication keeps you employed and promoted. How you explain, write, collaborate, and present yourself often matters as much as your code.",
+    "topics": [
+      {
+        "id": "cc-explain",
+        "title": "Explaining technical ideas simply",
+        "concept": "The most valuable engineers can explain complex things clearly to non-experts. The technique: start with the big picture and why it matters, avoid jargon (or define it), use an analogy, and check the listener is following. If you can't explain it simply, you don't fully understand it yet.",
+        "analogy": "Explaining tech is like giving directions. You don't recite GPS coordinates — you say 'go past the temple, turn left at the bakery'. Landmarks (analogies) and plain words get people there; jargon leaves them lost.",
+        "mistakes": [
+          "Drowning people in jargon to sound smart — it does the opposite.",
+          "Starting with details before the big picture ('what' and 'why' first).",
+          "Not checking whether the listener is actually following."
+        ],
+        "handsOn": "Take one concept you learned in this Common Core and explain it in writing to an imaginary non-technical friend, in under 100 words, using an analogy. Read it back — is there any jargon you could remove?",
+        "doneWhen": "You can explain a technical idea to a non-expert using plain words and an analogy.",
+        "checks": [
+          {
+            "q": "What's the sign you truly understand something?",
+            "a": "You can explain it simply, without jargon, so a non-expert gets it."
+          },
+          {
+            "q": "Where should a good explanation start?",
+            "a": "With the big picture and why it matters — then the details."
+          }
+        ],
+        "keyTakeaways": [
+          "Big picture and 'why' first.",
+          "Plain words + an analogy beat jargon.",
+          "If you can't explain it simply, you don't fully get it."
+        ],
+        "resources": [
+          {
+            "label": "Technical writing for beginners (Google)",
+            "url": "https://developers.google.com/tech-writing/overview",
+            "kind": "course"
+          }
+        ]
+      },
+      {
+        "id": "cc-email",
+        "title": "Technical email & messages",
+        "concept": "Clear written communication is how modern teams work (email, Slack, tickets). Good practice: a clear subject/first line stating what you need, context up front, one main ask, and specifics (what you tried, what you expected, what happened). Respect people's time — be concise and make it easy to reply.",
+        "analogy": "A good technical message is a well-labelled package: the label (subject) says what's inside, the contents are organised, and there's a clear 'action required' note. A bad one is an unlabelled box the receiver has to dig through.",
+        "examples": [
+          {
+            "code": "Subject: Need review on login PR by Fri\n\nHi Priya,\nI opened PR #42 (adds email login). Could you review by\nFriday? One open question: should we allow social login too?\nThanks!",
+            "note": "Notice: clear subject with a deadline, context, one specific ask, and a focused question. Easy to act on."
+          }
+        ],
+        "mistakes": [
+          "Vague subjects like 'question' or 'help' — say what it's about.",
+          "Burying the ask in a wall of text — put the main request near the top.",
+          "Asking 'it doesn't work' without saying what you tried and what happened."
+        ],
+        "handsOn": "Write a short message asking a teammate for help with a bug. Include: what you're trying to do, what you expected, what actually happened, and what you've already tried.",
+        "doneWhen": "You can write a clear, concise technical message with a specific ask and enough context to act on.",
+        "checks": [
+          {
+            "q": "What belongs near the top of a technical message?",
+            "a": "The main ask and enough context to understand it — don't bury it."
+          },
+          {
+            "q": "How do you ask for help with a bug well?",
+            "a": "State what you tried, what you expected, and what actually happened — not just 'it doesn't work'."
+          }
+        ],
+        "keyTakeaways": [
+          "Clear subject + one main ask.",
+          "Context up front, be concise.",
+          "For bugs: expected vs actual vs tried."
+        ],
+        "resources": [
+          {
+            "label": "How to ask good questions (Stack Overflow)",
+            "url": "https://stackoverflow.com/help/how-to-ask",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-team",
+        "title": "Working in a team",
+        "concept": "Software is a team sport. What makes a good teammate: communicate early when you're blocked (don't suffer in silence for days), give and take feedback about the work (not the person), keep your commitments or flag early when you can't, and help others. Reliability and kindness compound over a career.",
+        "analogy": "A team is a relay race. It's not about being the fastest runner; it's about clean handoffs — passing the baton (information, work) smoothly so the team wins. A brilliant runner who fumbles every handoff loses the race.",
+        "mistakes": [
+          "Staying blocked for days instead of asking early — it wastes everyone's time.",
+          "Taking code feedback personally — it's about the work, not you.",
+          "Over-promising then going silent — flag slippage early instead."
+        ],
+        "handsOn": "Reflect and write: think of a group project you've done. What was one communication breakdown, and what's one specific thing you'd do differently now (e.g. 'raise blockers within a day')?",
+        "doneWhen": "You can name three behaviours of a good teammate and why each builds trust.",
+        "checks": [
+          {
+            "q": "What should you do when you're blocked?",
+            "a": "Communicate early and ask for help — don't stay stuck silently for days."
+          },
+          {
+            "q": "How should you treat code feedback?",
+            "a": "As being about the work, not about you personally — it's how the work improves."
+          }
+        ],
+        "keyTakeaways": [
+          "Raise blockers early.",
+          "Feedback is about the work, not the person.",
+          "Reliability + kindness compound."
+        ],
+        "resources": [
+          {
+            "label": "How to give and receive feedback (Atlassian)",
+            "url": "https://www.atlassian.com/blog/teamwork/how-to-give-and-take-constructive-criticism",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-resume",
+        "title": "Resume fundamentals",
+        "concept": "For a beginner, the resume is won on PROJECTS, not a wall of skills. Keep it to one page. Lead with 3–4 real projects, each as a couple of bullets: what you built, the tech used, and a concrete result or link. Every bullet starts with an action verb and is something you can talk about in an interview. No lies, no rated skill bars.",
+        "analogy": "Your resume is a movie trailer, not the whole film. It shows the best scenes (your projects) to earn a ticket (the interview) — it doesn't try to tell the entire story.",
+        "examples": [
+          {
+            "code": "Strong bullet:\n- Built and deployed a to-do web app (React + Node);\n  live at myapp.com, used by 20+ classmates.\n\nWeak bullet:\n- Made a website using coding.",
+            "note": "Strong = specific tech + what you did + a result/link. Every line should survive the question 'tell me more about this'."
+          }
+        ],
+        "mistakes": [
+          "Listing 30 skills you can't defend — interviewers probe the weakest one.",
+          "Vague bullets with no tech and no result.",
+          "Two pages as a beginner — cut to one."
+        ],
+        "handsOn": "Draft a one-page resume outline: your details, then 3 projects (even small ones from this course counts as a start) each with 2 metric-or-tech bullets. You'll refine this in the Interview Prep of your chosen path.",
+        "doneWhen": "You have a one-page, projects-first resume outline where you can defend every line.",
+        "checks": [
+          {
+            "q": "What should lead a beginner's resume?",
+            "a": "Real projects — concrete proof of ability, since beginners can't show years of experience."
+          },
+          {
+            "q": "Why avoid listing skills you can't defend?",
+            "a": "Interviewers often probe the weakest-looking claim; an indefensible line costs credibility."
+          }
+        ],
+        "keyTakeaways": [
+          "Projects first, one page.",
+          "Each bullet: what + tech + result.",
+          "Only claim what you can defend."
+        ],
+        "resources": [
+          {
+            "label": "Tech resume tips (freeCodeCamp)",
+            "url": "https://www.freecodecamp.org/news/how-to-write-a-good-resume/",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cc-careers",
+    "title": "Career Discovery",
+    "why": "Six tech careers, what each actually does day-to-day, and who each suits — so you can choose the path worth going deep on. This is the map before you pick your road.",
+    "topics": [
+      {
+        "id": "cc-map",
+        "title": "The tech career map",
+        "concept": "Most computer careers split into a few families: building software (Software Engineer, Full-Stack Developer), working with data & AI (Data Scientist, AI/ML Engineer), running the systems software lives on (Cloud & DevOps), and protecting it all (Cybersecurity). They share foundations (which you just learned) but diverge in what you go deep on and what interviews test.",
+        "analogy": "Tech careers are like medicine: everyone studies the same basics first, then specialises — surgeon, radiologist, GP. You've done the shared first year; now you're choosing your specialty.",
+        "mistakes": [
+          "Choosing a path purely on salary rumours instead of what the work actually involves.",
+          "Thinking you must pick perfectly forever — it's a starting direction you can adjust.",
+          "Believing the paths are totally separate — they share a big foundation."
+        ],
+        "handsOn": "As you read the next lessons, keep a note titled 'what energised me'. For each career, jot a quick gut reaction: 'yes / maybe / no' and one word why.",
+        "doneWhen": "You can name the main career families and that they share a common foundation.",
+        "checks": [
+          {
+            "q": "Do these careers share anything?",
+            "a": "Yes — a big common foundation (the Common Core); they diverge in what they go deep on."
+          },
+          {
+            "q": "Is your first path choice permanent?",
+            "a": "No — it's a starting direction you can adjust later; the foundation transfers."
+          }
+        ],
+        "keyTakeaways": [
+          "Careers = build / data & AI / operate / protect.",
+          "Shared foundation, different depth.",
+          "Choose a direction, not a life sentence."
+        ],
+        "resources": [
+          {
+            "label": "Roadmaps for every role (roadmap.sh)",
+            "url": "https://roadmap.sh/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-ai-data",
+        "title": "AI Engineer & Data Scientist",
+        "concept": "A Data Scientist finds insight in data: cleaning it, analysing it with statistics, building models, and — crucially — explaining what the numbers MEAN to decision-makers. An AI/ML Engineer leans more toward building and deploying the models as real software (training, serving, monitoring). Data Science asks 'what does the data tell us?'; ML Engineering asks 'how do we ship this model reliably?'.",
+        "analogy": "A Data Scientist is a detective who studies clues (data) and writes the report that cracks the case. An ML Engineer is the one who then builds the machine that catches criminals automatically, at scale, every day.",
+        "mistakes": [
+          "Thinking these are all glamorous model-building — most of the work is data cleaning and evaluation.",
+          "Assuming you need a PhD — many roles want solid practical skills, not research.",
+          "Confusing the two — one leans analysis/communication, the other leans engineering/deployment."
+        ],
+        "handsOn": "In your 'what energised me' note: would you rather (a) dig into data to find a surprising insight and explain it, or (b) build the system that runs a model in production? Jot your gut reaction.",
+        "doneWhen": "You can describe what a Data Scientist and an AI/ML Engineer each do, and how they differ.",
+        "checks": [
+          {
+            "q": "Core question of a Data Scientist vs an ML Engineer?",
+            "a": "Data Scientist: 'what does the data tell us?' ML Engineer: 'how do we ship and run this model reliably?'"
+          },
+          {
+            "q": "What's most of the real work in data roles?",
+            "a": "Cleaning and preparing data, and evaluating results — not just building fancy models."
+          }
+        ],
+        "keyTakeaways": [
+          "Data Scientist = insight + explanation.",
+          "ML Engineer = build & deploy models.",
+          "Both: most work is data + evaluation."
+        ],
+        "resources": [
+          {
+            "label": "Forage AI Engineer path",
+            "url": "/stream/aiml",
+            "kind": "practice"
+          },
+          {
+            "label": "Forage Data Scientist path",
+            "url": "/stream/data",
+            "kind": "practice"
+          }
+        ]
+      },
+      {
+        "id": "cc-swe-fs",
+        "title": "Software Engineer & Full-Stack Developer",
+        "concept": "A Software Engineer builds software systems — often focused on a language, data structures & algorithms, and system design; interviews lean heavily on DSA and design. A Full-Stack Developer builds complete web applications end-to-end: the front-end (what users see: HTML/CSS/JavaScript/React) and the back-end (servers, databases, APIs). SWE is broad/deep on fundamentals; Full-Stack is focused on shipping web products.",
+        "analogy": "A Software Engineer is a structural engineer who can work on many kinds of buildings and cares deeply about the fundamentals of what holds them up. A Full-Stack Developer is a builder who can do everything on a house — foundation to paint — and loves seeing people move in.",
+        "mistakes": [
+          "Thinking 'Software Engineer' and 'Full-Stack' are identical — they overlap but emphasise different things.",
+          "Believing Full-Stack means expert at everything — it means competent across the stack.",
+          "Skipping DSA for SWE roles — it's the core of those interviews."
+        ],
+        "handsOn": "In your note: does 'solve tricky algorithm problems and design robust systems' (SWE) or 'build a whole web app people can use' (Full-Stack) sound more like you?",
+        "doneWhen": "You can describe what a Software Engineer and a Full-Stack Developer each do, and how their interviews differ.",
+        "checks": [
+          {
+            "q": "What do SWE interviews lean on most?",
+            "a": "Data structures & algorithms and system design."
+          },
+          {
+            "q": "What does 'full-stack' mean?",
+            "a": "Working across both the front-end (user interface) and the back-end (servers, databases, APIs) of a web app."
+          }
+        ],
+        "keyTakeaways": [
+          "SWE = fundamentals-deep (DSA, system design).",
+          "Full-Stack = whole web app, front to back.",
+          "They overlap but emphasise differently."
+        ],
+        "resources": [
+          {
+            "label": "Forage Software Engineer path",
+            "url": "/stream/software-engineer",
+            "kind": "practice"
+          },
+          {
+            "label": "Forage Full-Stack path",
+            "url": "/stream/fullstack",
+            "kind": "practice"
+          }
+        ]
+      },
+      {
+        "id": "cc-cloud-sec",
+        "title": "Cloud & DevOps and Cybersecurity",
+        "concept": "Cloud & DevOps engineers run the infrastructure software lives on: Linux servers, containers (Docker/Kubernetes), cloud platforms (AWS/Azure), and automation pipelines (CI/CD) that deploy code safely and repeatedly. Cybersecurity professionals protect systems and data: understanding networks and Linux deeply, finding weaknesses (ethically, with permission), and defending against attacks. Both are about reliability and trust rather than building features.",
+        "analogy": "If an app is a restaurant, Cloud/DevOps is the kitchen operations and supply chain that keep it running smoothly at scale; Cybersecurity is the security team and locks that keep the restaurant (and its customers' data) safe.",
+        "warn": "Cybersecurity skills are powerful and must be used ETHICALLY and LEGALLY — only test systems you own or have explicit written permission to test. The path teaches defensive and authorized-lab skills only.",
+        "mistakes": [
+          "Thinking DevOps is 'just ops' — it's heavy automation and engineering.",
+          "Believing Cybersecurity is all glamorous hacking — much of it is defense, monitoring, and hardening.",
+          "Assuming security skills can be used freely — unauthorized access is illegal."
+        ],
+        "handsOn": "In your note: does 'automate deployments and keep systems running reliably at scale' (Cloud/DevOps) or 'find and fix security weaknesses to protect people' (Cybersecurity) pull at you more?",
+        "doneWhen": "You can describe what Cloud/DevOps and Cybersecurity each do, and state the ethics rule for security work.",
+        "checks": [
+          {
+            "q": "What does a Cloud/DevOps engineer focus on?",
+            "a": "The infrastructure software runs on — Linux, containers, cloud, and automated CI/CD deployment pipelines."
+          },
+          {
+            "q": "What's the golden rule of security work?",
+            "a": "Only test systems you own or have explicit written permission to test — anything else is illegal."
+          }
+        ],
+        "keyTakeaways": [
+          "Cloud/DevOps = run & automate the infrastructure.",
+          "Cybersecurity = protect systems (ethically, with permission).",
+          "Both are about reliability and trust."
+        ],
+        "resources": [
+          {
+            "label": "Forage Cloud & DevOps path",
+            "url": "/stream/cloud-devops",
+            "kind": "practice"
+          },
+          {
+            "label": "Forage Cybersecurity path",
+            "url": "/stream/cybersecurity",
+            "kind": "practice"
+          }
+        ]
+      },
+      {
+        "id": "cc-choose",
+        "title": "Choosing your path",
+        "concept": "Now decide your first direction — not forever, just next. Use evidence: which career lessons made you lean forward? Which kind of work (building, analysing, operating, protecting) energised you? Pick the path that matches, go deep, and build projects. The foundation you have transfers if you pivot later, so you lose nothing by committing to one now.",
+        "analogy": "Choosing a path is like picking a sport to specialise in after PE class. You tried a bit of everything; now you commit to the one that felt right, and train seriously. You can switch sports later — the fitness carries over.",
+        "mistakes": [
+          "Refusing to choose and staying shallow in everything.",
+          "Choosing by hype instead of what genuinely engaged you.",
+          "Thinking you must master the path before starting — you learn it by doing it."
+        ],
+        "handsOn": "Read back your 'what energised me' notes. Write one sentence: 'I'm choosing the ___ path because ___.' Then, on the dashboard, open that path (Pro unlocks all six).",
+        "doneWhen": "You've named your chosen path and one honest reason, backed by which lessons energised you.",
+        "checks": [
+          {
+            "q": "How should you choose a path?",
+            "a": "By evidence — which work energised you — not by hype; and knowing you can adjust later since the foundation transfers."
+          },
+          {
+            "q": "Do you need to master a path before starting it?",
+            "a": "No — you learn it by doing it. Pick one, go deep, and build projects."
+          }
+        ],
+        "keyTakeaways": [
+          "Choose by what energised you.",
+          "Commit to one, go deep.",
+          "The foundation transfers if you pivot."
+        ],
+        "resources": [
+          {
+            "label": "See all career paths (Pricing)",
+            "url": "/pricing",
+            "kind": "practice"
+          }
+        ]
+      }
+    ]
   }
 ]
