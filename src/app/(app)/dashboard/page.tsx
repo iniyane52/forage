@@ -39,8 +39,8 @@ export default async function Dashboard() {
       {next && (
         <FadeUp>
           <div className="glass glass-hover rounded-2xl p-6 relative overflow-hidden">
-            <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-[#4c8dff]/10 blur-2xl pointer-events-none" />
-            <p className="text-xs font-bold uppercase tracking-widest text-[#4c8dff] mb-1">
+            <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-[#7c5cff]/10 blur-2xl pointer-events-none" />
+            <p className="text-xs font-bold uppercase tracking-widest text-[#7c5cff] mb-1">
               Your next step
             </p>
             <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
@@ -49,7 +49,7 @@ export default async function Dashboard() {
             <p className="text-sm text-[#9aa7b4] mt-1">{next.module.title}</p>
             <Link
               href={`/learn/${next.topic.id}`}
-              className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-xl bg-[#4c8dff] text-white text-sm font-semibold hover:bg-[#3a7bee] transition-colors"
+              className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-xl bg-[#7c5cff] text-white text-sm font-semibold hover:bg-[#6a4ff0] transition-colors"
             >
               Continue learning <ArrowRight size={16} />
             </Link>
@@ -78,7 +78,7 @@ export default async function Dashboard() {
                   <div className="flex items-start gap-3">
                     <span
                       className={`shrink-0 w-11 h-11 rounded-xl grid place-items-center ${
-                        live ? "bg-[#4c8dff]/15 text-[#4c8dff]" : "bg-white/[0.05] text-[#9aa7b4]"
+                        live ? "bg-[#7c5cff]/15 text-[#7c5cff]" : "bg-white/[0.05] text-[#9aa7b4]"
                       }`}
                     >
                       <Icon size={22} />

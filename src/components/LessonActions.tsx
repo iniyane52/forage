@@ -93,7 +93,7 @@ export function NotesBox({ lessonId, initial }: { lessonId: string; initial: str
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Write what you'd tell a friend about this topic..."
-        className="w-full min-h-24 bg-black/30 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-[#4c8dff] resize-y transition-colors"
+        className="w-full min-h-24 bg-black/30 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-[#7c5cff] resize-y transition-colors"
       />
     </div>
   );

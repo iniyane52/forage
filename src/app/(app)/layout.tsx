@@ -28,7 +28,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               className="font-bold text-lg tracking-tight"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Foundary<span className="text-[#4c8dff]">.</span>
+              Forage<span className="text-[#7c5cff]">.</span>
             </Link>
             <nav className="hidden sm:flex gap-4 text-sm text-[#9aa7b4]">
               <Link href="/dashboard" className="hover:text-white transition-colors">
@@ -39,7 +39,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               </Link>
             </nav>
             <div className="ml-auto flex items-center gap-2 text-sm">
-              <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] text-[#4c8dff] font-semibold text-xs">
+              <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] text-[#7c5cff] font-semibold text-xs">
                 Lv {profile?.level ?? 1}
               </span>
               <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] text-[#3fb950] font-semibold text-xs flex items-center gap-1">

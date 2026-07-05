@@ -30,7 +30,7 @@ export default async function ProfilePage() {
   const xpIntoLevel = xp % 250;
 
   const stats = [
-    { label: "Level", value: profile?.level ?? 1, color: "#4c8dff", icon: Trophy },
+    { label: "Level", value: profile?.level ?? 1, color: "#7c5cff", icon: Trophy },
     { label: "Total XP", value: xp, color: "#3fb950", icon: Sparkles },
     { label: "Day streak", value: profile?.streak_days ?? 0, color: "#e3a008", icon: Flame },
     { label: "Lessons done", value: doneCount ?? 0, color: "#a371f7", icon: CheckCircle2 },

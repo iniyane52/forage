@@ -11,9 +11,9 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Foundary — learn it, prove it",
+  title: "Forage — learn it, prove it",
   description:
-    "Foundary teaches industry skills from absolute zero to hiring standard — lessons, FAANG-caliber quizzes, and real projects.",
+    "Forage teaches industry skills from absolute zero to hiring standard — lessons, FAANG-caliber quizzes, and real projects.",
 };
 
 export default function RootLayout({

@@ -140,7 +140,7 @@ export function QuizRunner({
           </button>
           <Link
             href={`/learn/${lessonSlug}`}
-            className="px-4 py-2 rounded-xl bg-[#4c8dff] text-white text-sm font-semibold hover:bg-[#3a7bee] transition-colors"
+            className="px-4 py-2 rounded-xl bg-[#7c5cff] text-white text-sm font-semibold hover:bg-[#6a4ff0] transition-colors"
           >
             Back to lesson
           </Link>
@@ -166,7 +166,7 @@ export function QuizRunner({
 
       <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden mb-6">
         <motion.div
-          className="h-full bg-gradient-to-r from-[#4c8dff] to-[#3fb950]"
+          className="h-full bg-gradient-to-r from-[#7c5cff] to-[#3fb950]"
           animate={{ width: `${(i / questions.length) * 100}%` }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         />
@@ -188,7 +188,7 @@ export function QuizRunner({
             {order.map((origIdx, displayIdx) => {
               const isCorrect = feedback && origIdx === feedback.correct_index;
               const isWrongPick = feedback && chosen === displayIdx && !isCorrect;
-              let cls = "border-white/[0.08] bg-white/[0.03] hover:border-[#4c8dff]/60 hover:bg-white/[0.05]";
+              let cls = "border-white/[0.08] bg-white/[0.03] hover:border-[#7c5cff]/60 hover:bg-white/[0.05]";
               if (feedback) {
                 if (isCorrect) cls = "border-[#3fb950]/60 bg-[#3fb950]/10";
                 else if (isWrongPick) cls = "border-[#f85149]/60 bg-[#f85149]/10";
@@ -246,7 +246,7 @@ export function QuizRunner({
             <button
               onClick={next}
               disabled={busy}
-              className="mt-5 px-5 py-2.5 rounded-xl bg-[#4c8dff] text-white text-sm font-semibold hover:bg-[#3a7bee] transition-colors"
+              className="mt-5 px-5 py-2.5 rounded-xl bg-[#7c5cff] text-white text-sm font-semibold hover:bg-[#6a4ff0] transition-colors"
             >
               {i + 1 < questions.length ? "Next question →" : "Finish quiz"}
             </button>

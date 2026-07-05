@@ -62,7 +62,7 @@ export function AnimatedBar({ pct, className = "" }: { pct: number; className?: 
   return (
     <div className={`h-2 rounded-full bg-white/[0.06] overflow-hidden ${className}`}>
       <motion.div
-        className="h-full origin-left rounded-full bg-gradient-to-r from-[#4c8dff] to-[#3fb950]"
+        className="h-full origin-left rounded-full bg-gradient-to-r from-[#7c5cff] to-[#3fb950]"
         initial={reduce ? false : { scaleX: 0 }}
         animate={{ scaleX: Math.max(0, Math.min(1, pct / 100)) }}
         transition={{ duration: 0.7, ease: easeOut }}

@@ -47,7 +47,7 @@ export default function AuthPage() {
       <FadeUp className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
-            Foundary<span className="text-[#4c8dff]">.</span>
+            Forage<span className="text-[#7c5cff]">.</span>
           </h1>
           <p className="text-[#9aa7b4] mt-3 text-sm">
             Learn it from zero. Prove it with quizzes. Ship it for real.
@@ -61,7 +61,7 @@ export default function AuthPage() {
                 key={m}
                 onClick={() => setMode(m)}
                 className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                  mode === m ? "bg-[#4c8dff] text-white" : "text-[#9aa7b4] hover:text-white"
+                  mode === m ? "bg-[#7c5cff] text-white" : "text-[#9aa7b4] hover:text-white"
                 }`}
               >
                 {m === "signin" ? "Sign in" : "Create account"}
@@ -77,7 +77,7 @@ export default function AuthPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#4c8dff] transition-colors"
+              className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#7c5cff] transition-colors"
             />
             <div className="relative">
               <input
@@ -88,7 +88,7 @@ export default function AuthPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password (6+ characters)"
-                className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 pr-11 text-sm outline-none focus:border-[#4c8dff] transition-colors"
+                className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 pr-11 text-sm outline-none focus:border-[#7c5cff] transition-colors"
               />
               <button
                 type="button"
@@ -101,7 +101,7 @@ export default function AuthPage() {
             </div>
             <button
               disabled={busy}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#4c8dff] to-[#3fb950] font-semibold text-white disabled:opacity-50 flex items-center justify-center gap-2 transition-opacity"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#7c5cff] to-[#3fb950] font-semibold text-white disabled:opacity-50 flex items-center justify-center gap-2 transition-opacity"
             >
               {busy && <Loader2 size={18} className="animate-spin" />}
               {busy ? "Working..." : mode === "signin" ? "Sign in" : "Start learning free"}

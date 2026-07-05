@@ -45,7 +45,7 @@ export default async function StreamPage({
           className="text-2xl font-bold mt-1 flex items-center gap-2.5"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          <span className="w-9 h-9 rounded-xl grid place-items-center bg-[#4c8dff]/15 text-[#4c8dff]">
+          <span className="w-9 h-9 rounded-xl grid place-items-center bg-[#7c5cff]/15 text-[#7c5cff]">
             <Icon size={20} />
           </span>
           {stream.title}
