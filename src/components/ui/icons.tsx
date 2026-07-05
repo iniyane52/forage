@@ -29,6 +29,11 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  ListChecks,
+  ExternalLink,
+  FileText,
+  GraduationCap as GradCap2,
+  BookMarked,
   type LucideIcon,
 } from "lucide-react";
 
@@ -76,4 +81,17 @@ export {
   Eye,
   EyeOff,
   Loader2,
+  ListChecks,
+  ExternalLink,
+  FileText,
+  BookMarked,
+};
+
+// Resource kind → icon
+import type { LucideIcon as LI } from "lucide-react";
+export const resourceIcon: Record<string, LI> = {
+  docs: FileText,
+  course: GradCap2,
+  book: BookMarked,
+  practice: Terminal,
 };

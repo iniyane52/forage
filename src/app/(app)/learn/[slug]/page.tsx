@@ -15,6 +15,10 @@ import {
   PenLine,
   ArrowLeft,
   ArrowRight,
+  ListChecks,
+  ExternalLink,
+  BookMarked,
+  resourceIcon,
 } from "@/components/ui/icons";
 import type { LucideIcon } from "lucide-react";
 
@@ -168,6 +172,48 @@ export default async function LessonPage({
           Done when
         </Label>
         <p className="text-sm glass rounded-xl px-4 py-2.5">{topic.doneWhen}</p>
+
+        {topic.keyTakeaways && topic.keyTakeaways.length > 0 && (
+          <>
+            <Label color="#c86bff" icon={ListChecks}>
+              Key takeaways
+            </Label>
+            <ul className="space-y-1.5 text-sm">
+              {topic.keyTakeaways.map((k, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <ListChecks size={15} className="text-[#c86bff] mt-1 shrink-0" />
+                  <span>{k}</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+
+        {topic.resources && topic.resources.length > 0 && (
+          <>
+            <Label color="#46e0ff" icon={BookMarked}>
+              Further learning
+            </Label>
+            <div className="grid sm:grid-cols-2 gap-2">
+              {topic.resources.map((r, i) => {
+                const RIcon = resourceIcon[r.kind] ?? BookMarked;
+                return (
+                  <a
+                    key={i}
+                    href={r.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="glass glass-hover rounded-xl px-3 py-2.5 flex items-center gap-2.5 text-sm group"
+                  >
+                    <RIcon size={16} className="text-[#46e0ff] shrink-0" />
+                    <span className="flex-1 min-w-0 truncate">{r.label}</span>
+                    <ExternalLink size={13} className="text-[#a79fc0] shrink-0" />
+                  </a>
+                );
+              })}
+            </div>
+          </>
+        )}
 
         {topic.checks && topic.checks.length > 0 && (
           <>

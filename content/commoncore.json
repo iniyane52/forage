@@ -1,0 +1,510 @@
+[
+  {
+    "id": "cc-mindset",
+    "title": "Engineering Mindset",
+    "why": "Before any language or tool: how engineers actually think. Break big scary problems into small solvable ones — the single most transferable skill in tech.",
+    "topics": [
+      {
+        "id": "cc-think",
+        "title": "What engineering really is",
+        "concept": "Engineering is not about memorising code — it's a way of solving problems: understand the goal, break it into small pieces, solve each piece, and combine them. A senior engineer isn't someone who knows every answer; it's someone who knows how to find the answer methodically and stay calm when things break.",
+        "analogy": "Think of a chef. A beginner follows one recipe rigidly. A chef understands techniques — heat, seasoning, timing — and combines them to cook anything. Engineering is learning the techniques of problem-solving, not memorising recipes.",
+        "mistakes": [
+          "Believing you must 'know everything' before you can build — nobody does; engineers look things up constantly.",
+          "Trying to solve the whole problem at once instead of one small piece.",
+          "Copying code you don't understand — it works until it breaks, then you're stuck."
+        ],
+        "handsOn": "Write down a real problem you'd like to solve with code (e.g. 'organise my photos by date'). Don't solve it — just break it into 3–5 smaller steps in plain English.",
+        "doneWhen": "You can take one goal and list the smaller steps it's made of, in your own words.",
+        "checks": [
+          {
+            "q": "Is a good engineer someone who has memorised all the answers?",
+            "a": "No — it's someone who can methodically find answers and break problems down. Looking things up is normal and expected."
+          },
+          {
+            "q": "What's the first move when facing a big problem?",
+            "a": "Break it into smaller pieces you can solve one at a time."
+          }
+        ],
+        "keyTakeaways": [
+          "Engineering = problem-solving, not memorisation.",
+          "Break big problems into small ones.",
+          "Looking things up is a skill, not a weakness."
+        ],
+        "resources": [
+          {
+            "label": "Harvard CS50 — 'This is CS50' intro",
+            "url": "https://cs50.harvard.edu/x/",
+            "kind": "course"
+          },
+          {
+            "label": "How to think like a programmer (freeCodeCamp)",
+            "url": "https://www.freecodecamp.org/news/how-to-think-like-a-programmer-lessons-in-problem-solving-d1d8bf1de7d2/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-decompose",
+        "title": "Breaking problems down (decomposition)",
+        "concept": "Decomposition means splitting a problem into smaller sub-problems until each is small enough to solve easily. You keep asking 'what smaller thing do I need first?' until the steps are obvious. This is how every large program is actually built — never all at once.",
+        "analogy": "Building a house: you don't 'build a house' — you lay a foundation, then walls, then a roof, then wiring. Each is a manageable job. Decomposition is drawing that build order for any problem.",
+        "examples": [
+          {
+            "code": "GOAL: send a birthday email to my friends\n1. get the list of friends + birthdays\n2. find whose birthday is today\n3. write the message\n4. send it to each of them",
+            "note": "Notice each step is small and concrete. You could solve step 2 without knowing yet how step 4 works. That independence is the point."
+          }
+        ],
+        "mistakes": [
+          "Stopping decomposition too early, leaving a step that's still huge and vague.",
+          "Worrying about later steps before the current one is done.",
+          "Confusing 'small' with 'easy' — small steps can still need learning, but they're tackleable."
+        ],
+        "handsOn": "Take the problem you wrote last lesson and decompose it further: for each of your 3–5 steps, ask 'can I do this in one action, or does it split into smaller steps?' Keep splitting until each step feels doable.",
+        "doneWhen": "Your problem is a list of steps small enough that you'd know how to start each one (even if you'd need to look something up).",
+        "checks": [
+          {
+            "q": "What question drives decomposition?",
+            "a": "'What smaller thing do I need to do first?' — repeated until each step is obvious."
+          },
+          {
+            "q": "Why solve sub-problems independently?",
+            "a": "So you can make progress on one piece without needing the others solved yet — it keeps you unstuck."
+          }
+        ],
+        "keyTakeaways": [
+          "Split until each step is doable.",
+          "Solve one sub-problem at a time.",
+          "Independent steps keep you moving."
+        ],
+        "resources": [
+          {
+            "label": "Decomposition — BBC Bitesize",
+            "url": "https://www.bbc.co.uk/bitesize/guides/zqqfyrd/revision/1",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-debug",
+        "title": "The debugging mindset",
+        "concept": "Things breaking is normal — debugging is finding out WHY. The method: read the error message (it usually tells you a lot), reproduce the problem reliably, then narrow down where it happens by checking your assumptions one at a time. Blaming the computer or randomly changing things wastes time; being a calm detective solves it.",
+        "analogy": "Debugging is detective work. The error message is the witness statement, the code is the crime scene. You don't guess the culprit — you follow the evidence step by step until only one suspect remains.",
+        "mistakes": [
+          "Ignoring the error message — it often names the exact problem and line.",
+          "Changing many things at once, so you can't tell what fixed (or broke) it.",
+          "Assuming your code is right and the tool is wrong — it's almost always your code first."
+        ],
+        "handsOn": "Next time something errors (in any app or code), STOP and read the full error message out loud. Write down: what did I expect, what happened, and what's the very first thing the message points to?",
+        "doneWhen": "You can describe the debugging loop — read the error, reproduce it, narrow it down — in your own words.",
+        "checks": [
+          {
+            "q": "What's the first thing to do when you hit an error?",
+            "a": "Read the error message carefully — it usually points to what and where."
+          },
+          {
+            "q": "Why change only one thing at a time when debugging?",
+            "a": "So you know exactly which change fixed or broke it; changing many at once hides the cause."
+          }
+        ],
+        "keyTakeaways": [
+          "Errors are normal — read them.",
+          "Reproduce, then narrow down.",
+          "One change at a time."
+        ],
+        "resources": [
+          {
+            "label": "How to debug (MDN)",
+            "url": "https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Tools_and_setup/What_are_browser_developer_tools",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-learn",
+        "title": "Learning how to learn",
+        "concept": "Tech changes fast, so the meta-skill is learning efficiently: learn just enough to build the thing in front of you (not everything up front), practise by doing rather than only watching, and revisit hard ideas after a break (spaced repetition). Understanding beats memorising — if you can explain it simply, you know it.",
+        "analogy": "Learning to swim by reading books doesn't work — you have to get in the water. Tutorials are the poolside briefing; building something is the swimming. Both matter, but the water is where it clicks.",
+        "mistakes": [
+          "'Tutorial hell' — endlessly watching without ever building your own thing.",
+          "Trying to learn everything before starting (you'll never feel ready; start anyway).",
+          "Re-reading instead of self-testing — testing yourself is what makes it stick."
+        ],
+        "handsOn": "Pick one small thing you learned today and explain it, out loud or in writing, as if to a friend who's never seen it. Notice where you get stuck — that's what you don't fully understand yet.",
+        "doneWhen": "You can name your learning loop: learn just enough → build → explain it → revisit what was shaky.",
+        "checks": [
+          {
+            "q": "What's the bar for 'I understand this'?",
+            "a": "You can explain it simply in your own words — not just recognise it."
+          },
+          {
+            "q": "Why build instead of only watching tutorials?",
+            "a": "Skills stick through doing; passive watching creates an illusion of understanding that collapses when you try it yourself."
+          }
+        ],
+        "keyTakeaways": [
+          "Learn just enough, then build.",
+          "Explain it to prove you know it.",
+          "Revisit hard ideas after a break."
+        ],
+        "resources": [
+          {
+            "label": "Learning How to Learn (free course)",
+            "url": "https://www.coursera.org/learn/learning-how-to-learn",
+            "kind": "course"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cc-digital",
+    "title": "Digital Foundations",
+    "why": "You can't build on a machine you don't understand. A clear mental model of the computer, the internet, and the web makes everything after this easier.",
+    "topics": [
+      {
+        "id": "cc-computer",
+        "title": "How a computer works",
+        "concept": "A computer has four core parts: the CPU (does the thinking/calculations), RAM (fast, temporary memory for what it's working on right now), storage (disk/SSD — slow but permanent memory), and input/output (keyboard, screen, network). A program is instructions the CPU runs, using RAM as its workspace and storage to remember things after power-off.",
+        "analogy": "Think of an office worker: the CPU is the worker, RAM is the desk (fast to reach, but cleared each night), storage is the filing cabinet (slower, but keeps things permanently), and I/O is the door and phone. Work happens on the desk; results get filed away.",
+        "mistakes": [
+          "Confusing RAM with storage — RAM is temporary workspace (lost on shutdown); storage is permanent.",
+          "Thinking more storage makes a computer faster — RAM and CPU affect speed more.",
+          "Believing programs 'live' in the CPU — they're loaded from storage into RAM to run."
+        ],
+        "handsOn": "On your own computer, open the task manager (Ctrl+Shift+Esc on Windows) and find the CPU, Memory (RAM), and Disk usage. Watch them change as you open an app.",
+        "doneWhen": "You can explain the roles of CPU, RAM, and storage with the office analogy.",
+        "checks": [
+          {
+            "q": "What's the difference between RAM and storage?",
+            "a": "RAM is fast, temporary workspace cleared on shutdown; storage (disk/SSD) is slower but keeps data permanently."
+          },
+          {
+            "q": "What does the CPU do?",
+            "a": "It executes the program's instructions — the 'thinking' and calculating part."
+          }
+        ],
+        "keyTakeaways": [
+          "CPU thinks, RAM is temporary desk, storage is the permanent cabinet.",
+          "Programs load from storage into RAM to run.",
+          "RAM + CPU drive speed more than storage size."
+        ],
+        "resources": [
+          {
+            "label": "Khan Academy — Computers & the internet",
+            "url": "https://www.khanacademy.org/computing/computers-and-internet",
+            "kind": "course"
+          },
+          {
+            "label": "Crash Course Computer Science",
+            "url": "https://www.youtube.com/playlist?list=PL8dPuuaLjXtNlUrzyH5r6jN9ulIgZBpdo",
+            "kind": "course"
+          }
+        ]
+      },
+      {
+        "id": "cc-files",
+        "title": "Files, folders & the command line",
+        "concept": "Everything on a computer is stored as files, organised into folders (directories) that nest inside each other like a tree. You usually click through them, but you can also control them by typing commands in a terminal — faster and, crucially, automatable. The command line feels intimidating but it's just typing instructions instead of clicking.",
+        "analogy": "Folders are a filing cabinet with drawers inside drawers. The graphical file explorer is opening drawers by hand; the command line is telling an assistant 'grab the file named X from the reports drawer' — faster once you know the words.",
+        "examples": [
+          {
+            "code": "pwd            # where am I right now?\nls             # list what's in this folder\ncd Documents   # go into the Documents folder\ncd ..          # go back up one level",
+            "note": "These four commands (on Mac/Linux; PowerShell is similar) let you move anywhere. You don't need to memorise many — just these to start."
+          }
+        ],
+        "mistakes": [
+          "Fear of the terminal — you can't 'break' the computer with pwd, ls, or cd; they only look and move.",
+          "Forgetting which folder you're in (run pwd to check).",
+          "Typos in names — the command line is exact; 'Documents' ≠ 'documents' on some systems."
+        ],
+        "handsOn": "Open a terminal (Terminal on Mac, PowerShell on Windows). Run pwd, then ls (or dir), then cd into a folder and ls again. You just navigated by typing.",
+        "doneWhen": "You can move between folders and list their contents using the terminal, and explain what a file path is.",
+        "checks": [
+          {
+            "q": "What is a folder, structurally?",
+            "a": "A container for files (and other folders) — they nest to form a tree of directories."
+          },
+          {
+            "q": "Why use the command line instead of clicking?",
+            "a": "It's faster for many tasks and, unlike clicking, commands can be saved and automated."
+          }
+        ],
+        "keyTakeaways": [
+          "Files live in nested folders (a tree).",
+          "pwd / ls / cd let you navigate by typing.",
+          "The terminal is just typed instructions — safe to explore."
+        ],
+        "resources": [
+          {
+            "label": "The command line for beginners (Ubuntu)",
+            "url": "https://ubuntu.com/tutorials/command-line-for-beginners",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-internet",
+        "title": "How the internet works",
+        "concept": "The internet is a giant network of computers that agree on how to talk to each other. Every device has an address (an IP address). When you use a name like google.com, the DNS system looks up its IP address (like a phone book), and your request travels across many connected networks to that computer and back. No single company 'owns' it — it's networks agreeing on shared rules (protocols).",
+        "analogy": "Sending a request over the internet is like posting a letter: your device is the sender's address, the destination server is the recipient's address, DNS is the phone book that turns a name into an address, and the networks in between are the postal system passing the envelope along.",
+        "mistakes": [
+          "Confusing the internet (the network of networks) with the web (websites on top of it) — the web is one thing that runs ON the internet.",
+          "Thinking a website 'is' in one place — it's on a server (a computer) somewhere, which you reach by its address.",
+          "Assuming a domain name and an IP address are different things — the name just maps to the address via DNS."
+        ],
+        "handsOn": "In a terminal, run `ping google.com`. You'll see it resolve to an IP address and measure the round-trip time of messages to that server and back.",
+        "doneWhen": "You can explain, using the letter analogy, what happens when you visit a website — including what DNS does.",
+        "checks": [
+          {
+            "q": "What does DNS do?",
+            "a": "It translates a human-friendly name (like google.com) into the IP address of the server — like a phone book."
+          },
+          {
+            "q": "Internet vs web — what's the difference?",
+            "a": "The internet is the underlying network of connected computers; the web (websites) is one service that runs on top of it."
+          }
+        ],
+        "keyTakeaways": [
+          "The internet = networks agreeing on shared rules.",
+          "Every device has an IP address; DNS maps names to addresses.",
+          "The web runs on the internet — they're not the same."
+        ],
+        "resources": [
+          {
+            "label": "How does the internet work? (MDN)",
+            "url": "https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Web_mechanics/How_does_the_Internet_work",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-web",
+        "title": "How the web works (HTTP & JSON)",
+        "concept": "When you open a page, your browser (the 'client') sends an HTTP request to a server, and the server sends back a response: a status code (200 OK, 404 not found, 500 server error) plus content (HTML for pages, or JSON — structured text data — for apps talking to each other). This request→response pattern is the heartbeat of every website and app.",
+        "analogy": "The web is a restaurant. You (the browser) give an order (request) to the waiter; the kitchen (server) prepares it and the waiter brings back a dish (response). The status code is the waiter's report: 200 'here you go', 404 'we don't have that', 500 'the kitchen's on fire'.",
+        "examples": [
+          {
+            "code": "# JSON — how apps send structured data:\n{ \"name\": \"Iniyan\", \"level\": 3, \"streak\": 5 }",
+            "note": "JSON is just keys and values as text — a nested version of the same idea as a labelled form. It's how an app's front-end and back-end exchange data."
+          }
+        ],
+        "mistakes": [
+          "Confusing a 404 (the thing doesn't exist — your side) with a 500 (the server itself failed).",
+          "Thinking JSON is code — it's just structured data, like a filled-in form written as text.",
+          "Believing pages are 'pushed' to you — the browser requests, the server responds."
+        ],
+        "handsOn": "Open any website, press F12 (developer tools) → Network tab → reload. Watch the requests appear, and click one to see its status code and response.",
+        "doneWhen": "You can explain request→response, what 200/404/500 mean, and what JSON is for.",
+        "checks": [
+          {
+            "q": "What is an API, versus a web page?",
+            "a": "An API returns structured data (usually JSON) for programs to use; a web page returns HTML for humans to view."
+          },
+          {
+            "q": "404 vs 500?",
+            "a": "404 = the requested thing doesn't exist (client side); 500 = the server itself failed while handling the request."
+          }
+        ],
+        "keyTakeaways": [
+          "Web = request → response between browser and server.",
+          "Status codes: 200 ok, 404 not found, 500 server error.",
+          "JSON is structured data (keys & values), not code."
+        ],
+        "resources": [
+          {
+            "label": "What is HTTP? (MDN)",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview",
+            "kind": "docs"
+          },
+          {
+            "label": "JSON introduction (MDN)",
+            "url": "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cc-programming",
+    "title": "Programming Essentials",
+    "why": "Enough programming to UNDERSTAND how software thinks — not to become a Python developer. Variables, conditions, loops, functions: the four ideas every language shares. Python is just our example.",
+    "topics": [
+      {
+        "id": "cc-variables",
+        "title": "Variables & data (what a program remembers)",
+        "concept": "A program works with data — numbers, text, true/false. A variable is a labelled box that stores a value so you can use it by name later. Values have types: a number (int/float), text (a 'string'), or a boolean (True/False). Naming things well is half of writing clear code.",
+        "analogy": "A variable is a labelled jar. You put something in (a value), write a name on it (the variable name), and later grab it by that name without remembering exactly what's inside.",
+        "examples": [
+          {
+            "code": "name = \"Iniyan\"     # a string (text)\nage = 22            # an integer (whole number)\nis_student = True   # a boolean (True/False)\nprint(name, \"is\", age)   # Iniyan is 22",
+            "note": "= stores a value in a variable. Python figures out the type automatically. print() shows values on screen."
+          }
+        ],
+        "mistakes": [
+          "Confusing text and numbers: \"22\" (text) is not 22 (number); you can't do maths on text.",
+          "Vague names like x or data2 — future-you won't know what they hold.",
+          "Thinking a variable IS the value — it's a label pointing at a value you can change."
+        ],
+        "handsOn": "In an online Python runner (see resources), create three variables — your name, your age, and whether you like coffee — and print a sentence using all three.",
+        "doneWhen": "You can create variables of different types and use them by name in a printed message.",
+        "checks": [
+          {
+            "q": "What is a variable?",
+            "a": "A named label that stores a value so you can reuse it by name later."
+          },
+          {
+            "q": "Is \"22\" the same as 22?",
+            "a": "No — \"22\" is text (a string); 22 is a number. You can do maths on the number, not the text."
+          }
+        ],
+        "keyTakeaways": [
+          "Variables are labelled boxes for values.",
+          "Types: number, text (string), boolean.",
+          "Good names make code readable."
+        ],
+        "resources": [
+          {
+            "label": "Python tutorial — an informal intro",
+            "url": "https://docs.python.org/3/tutorial/introduction.html",
+            "kind": "docs"
+          },
+          {
+            "label": "Automate the Boring Stuff — Ch.1 (free)",
+            "url": "https://automatetheboringstuff.com/2e/chapter1/",
+            "kind": "book"
+          }
+        ]
+      },
+      {
+        "id": "cc-conditions",
+        "title": "Conditions (making decisions)",
+        "concept": "Programs make choices with if / elif / else: 'IF this is true, do that; otherwise do something else.' The condition is a question that's either True or False (using comparisons like ==, >, <). This is how software reacts differently to different situations.",
+        "analogy": "A condition is a fork in the road with a signpost. The program reads the sign (the condition), and takes the left path if it's true, the right path if it's false.",
+        "examples": [
+          {
+            "code": "score = 72\nif score >= 60:\n    print(\"Pass\")\nelse:\n    print(\"Try again\")   # prints Pass, because 72 >= 60",
+            "note": "== checks equality; >= is 'greater than or equal'. The indented lines run only when their branch is chosen. Indentation is how Python groups the block."
+          }
+        ],
+        "mistakes": [
+          "Using = (assign) instead of == (compare) inside a condition.",
+          "Forgetting indentation — in Python it defines which lines belong to the if.",
+          "Writing overlapping conditions that never reach the else."
+        ],
+        "handsOn": "Write a program that stores a number and prints 'even' or 'odd' — hint: a number is even if number % 2 == 0 (% gives the remainder).",
+        "doneWhen": "You can write an if/else that reacts differently based on a condition, and predict which branch runs.",
+        "checks": [
+          {
+            "q": "What's the difference between = and ==?",
+            "a": "= assigns a value to a variable; == checks whether two values are equal."
+          },
+          {
+            "q": "When does the 'else' block run?",
+            "a": "When the if condition is False."
+          }
+        ],
+        "keyTakeaways": [
+          "if/elif/else choose between paths.",
+          "Conditions are True/False questions (==, >, <).",
+          "Indentation groups the block in Python."
+        ],
+        "resources": [
+          {
+            "label": "Python — if statements",
+            "url": "https://docs.python.org/3/tutorial/controlflow.html#if-statements",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-loops",
+        "title": "Loops (repeating work)",
+        "concept": "A loop repeats a block of code so you don't write it a hundred times. A for loop repeats once per item in a collection (or a range of numbers); a while loop repeats as long as a condition stays true. Loops are how programs handle lists of things — every user, every file, every row.",
+        "analogy": "A loop is a washing machine cycle: the same set of actions (fill, spin, drain) repeated until the condition (clothes clean / items done) is met. You describe the cycle once; it runs many times.",
+        "examples": [
+          {
+            "code": "for i in range(3):      # 0, 1, 2\n    print(\"attempt\", i)\n\nfruits = [\"apple\", \"mango\"]\nfor f in fruits:\n    print(f)            # apple, then mango",
+            "note": "range(3) gives 0,1,2 (stops BEFORE 3 — a classic gotcha). A for loop over a list runs once per item."
+          }
+        ],
+        "mistakes": [
+          "Off-by-one: range(3) is 0,1,2 — it stops before the number.",
+          "A while loop whose condition never becomes false → it runs forever (infinite loop).",
+          "Editing a list while looping over it — surprising results; loop over a copy if you must."
+        ],
+        "handsOn": "Write a loop that prints the numbers 1 to 10, then a second loop that adds them up and prints the total (55).",
+        "doneWhen": "You can write a for loop over a range and over a list, and explain when you'd use while instead.",
+        "checks": [
+          {
+            "q": "What does range(3) produce?",
+            "a": "0, 1, 2 — it starts at 0 and stops before 3."
+          },
+          {
+            "q": "for loop vs while loop?",
+            "a": "for repeats once per item (or a fixed range); while repeats as long as a condition stays true."
+          }
+        ],
+        "keyTakeaways": [
+          "Loops repeat work without copy-paste.",
+          "for = per item/range; while = until a condition is false.",
+          "range(n) stops before n."
+        ],
+        "resources": [
+          {
+            "label": "Python — for statements",
+            "url": "https://docs.python.org/3/tutorial/controlflow.html#for-statements",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-functions",
+        "title": "Functions (reusable blocks)",
+        "concept": "A function is a named block of code that takes inputs (arguments) and gives back an output (a return value). You define it once and call it as many times as you like. Functions stop you repeating yourself and let you name a piece of logic so the code reads clearly.",
+        "analogy": "A function is a coffee machine: put in beans and water (arguments), press the button (call it), get coffee out (the return value). You don't rebuild the machine each cup — you reuse it.",
+        "examples": [
+          {
+            "code": "def greet(name):\n    return \"Hi \" + name\n\nmessage = greet(\"Iniyan\")   # calls the function\nprint(message)              # Hi Iniyan",
+            "note": "def defines the function; name is the input; return hands back the result. greet(\"Iniyan\") calls it. You can call it again with any name."
+          }
+        ],
+        "mistakes": [
+          "Copy-pasting the same code instead of writing one function and calling it.",
+          "Forgetting return — without it the function gives back nothing (None).",
+          "Confusing defining a function (writing it) with calling it (running it)."
+        ],
+        "handsOn": "Write a function is_even(number) that returns True or False, then call it on three different numbers and print the results.",
+        "doneWhen": "You can write a function with an argument and a return value, and call it more than once.",
+        "checks": [
+          {
+            "q": "Why use functions?",
+            "a": "To name and reuse a block of logic instead of repeating it — less code, fewer bugs, clearer intent."
+          },
+          {
+            "q": "What does return do?",
+            "a": "It hands a value back to whoever called the function, so the result can be used."
+          }
+        ],
+        "keyTakeaways": [
+          "Functions = reusable named logic.",
+          "Inputs are arguments; output is the return value.",
+          "Define once, call many times."
+        ],
+        "resources": [
+          {
+            "label": "Python — defining functions",
+            "url": "https://docs.python.org/3/tutorial/controlflow.html#defining-functions",
+            "kind": "docs"
+          },
+          {
+            "label": "Automate the Boring Stuff — Functions",
+            "url": "https://automatetheboringstuff.com/2e/chapter3/",
+            "kind": "book"
+          }
+        ]
+      }
+    ]
+  }
+]
