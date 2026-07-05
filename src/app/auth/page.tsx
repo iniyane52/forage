@@ -117,7 +117,7 @@ export default function AuthPage() {
         </Glass>
 
         <p className="text-center text-xs text-[#9aa7b4] mt-6">
-          Free forever. Four streams, from absolute basics to hiring standard.
+          Free Common Core + 6 career paths — from absolute basics to hiring standard.
         </p>
       </FadeUp>
     </main>
