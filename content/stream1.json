@@ -36,6 +36,23 @@
             "q": "Why bother with WSL instead of just PowerShell?",
             "a": "Servers, Docker, and most industry tooling run on Linux. WSL gives you a genuine Ubuntu shell, so everything you learn transfers directly to a real job."
           }
+        ],
+        "keyTakeaways": [
+          "A shell reads typed commands and runs them.",
+          "WSL gives Windows a real Linux shell.",
+          "echo/whoami are your first proof-of-life commands."
+        ],
+        "resources": [
+          {
+            "label": "WSL install docs (Microsoft Learn)",
+            "url": "https://learn.microsoft.com/en-us/windows/wsl/install",
+            "kind": "docs"
+          },
+          {
+            "label": "The Linux command line for beginners",
+            "url": "https://ubuntu.com/tutorials/command-line-for-beginners",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -64,6 +81,18 @@
           {
             "q": "Difference between an absolute path and a relative path?",
             "a": "Absolute starts from / (root) and works from anywhere; relative starts from your current folder and depends on where you are."
+          }
+        ],
+        "keyTakeaways": [
+          "Linux is one tree starting at /.",
+          "Absolute paths start with /; relative paths start from where you stand.",
+          "pwd/ls/cd are your navigation trio."
+        ],
+        "resources": [
+          {
+            "label": "Filesystem Hierarchy Standard overview",
+            "url": "https://ubuntu.com/tutorials/command-line-for-beginners#3-a-tour-of-the-terminal",
+            "kind": "docs"
           }
         ]
       },
@@ -95,6 +124,18 @@
             "q": "What are the two jobs of mv?",
             "a": "Renaming a file, and moving it to a different folder."
           }
+        ],
+        "keyTakeaways": [
+          "rm has no recycle bin — it's permanent.",
+          "cp needs source AND destination.",
+          "mv both renames and moves."
+        ],
+        "resources": [
+          {
+            "label": "GNU Coreutils manual (cp/mv/rm)",
+            "url": "https://www.gnu.org/software/coreutils/manual/coreutils.html",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -124,6 +165,23 @@
           {
             "q": "What's the difference between apt update and apt install?",
             "a": "update refreshes the catalogue of available software; install actually downloads and installs a program."
+          }
+        ],
+        "keyTakeaways": [
+          "sudo elevates ONE command temporarily.",
+          "apt update refreshes the catalogue; apt install fetches.",
+          "man/--help answer most questions without leaving the shell."
+        ],
+        "resources": [
+          {
+            "label": "Ubuntu apt package management basics",
+            "url": "https://ubuntu.com/server/docs/package-management",
+            "kind": "docs"
+          },
+          {
+            "label": "sudo — Microsoft Learn (WSL context)",
+            "url": "https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-vscode",
+            "kind": "docs"
           }
         ]
       },
@@ -155,6 +213,18 @@
             "q": "Why is chmod 777 a bad habit?",
             "a": "It gives every user full read/write/execute — a security hole; you should grant the least access that works."
           }
+        ],
+        "keyTakeaways": [
+          "rwx = read, write, execute for owner/group/others.",
+          "chmod +x makes a script runnable.",
+          "chmod 777 is a security smell, not a fix."
+        ],
+        "resources": [
+          {
+            "label": "Linux file permissions (GNU Coreutils)",
+            "url": "https://www.gnu.org/software/coreutils/manual/html_node/File-permissions.html",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -183,6 +253,18 @@
           {
             "q": "Which tool filters lines by a pattern, and which counts them?",
             "a": "grep filters (keeps matching lines); wc -l counts lines."
+          }
+        ],
+        "keyTakeaways": [
+          "The pipe | feeds one command's output into the next.",
+          "grep filters, wc -l counts, sort/uniq tidy.",
+          "Small tools composed beats one giant command."
+        ],
+        "resources": [
+          {
+            "label": "Bash pipelines (GNU Bash manual)",
+            "url": "https://www.gnu.org/software/bash/manual/html_node/Pipelines.html",
+            "kind": "docs"
           }
         ]
       },
@@ -213,6 +295,18 @@
             "q": "How do you stop a stuck program from the shell?",
             "a": "Find its PID with ps, then run kill <PID> (kill -9 to force if needed)."
           }
+        ],
+        "keyTakeaways": [
+          "A process is a running program with a PID.",
+          "& backgrounds a command; ps finds it; kill stops it.",
+          "'Port in use' means a live process, not a broken port."
+        ],
+        "resources": [
+          {
+            "label": "ps(1) man page",
+            "url": "https://man7.org/linux/man-pages/man1/ps.1.html",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -242,6 +336,18 @@
             "q": "What does $(...) do inside a script?",
             "a": "Runs the command inside it and substitutes its output into the line."
           }
+        ],
+        "keyTakeaways": [
+          "A script is commands run top to bottom from a file.",
+          "#!/bin/bash + chmod +x makes it executable.",
+          "$(...) substitutes a command's output into a line."
+        ],
+        "resources": [
+          {
+            "label": "Bash scripting guide (GNU)",
+            "url": "https://www.gnu.org/software/bash/manual/html_node/Shell-Scripts.html",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -270,6 +376,18 @@
           {
             "q": "Why practice on Bandit instead of just reading?",
             "a": "Skills stick when your fingers do them under mild pressure; Bandit gives safe, repeatable reps."
+          }
+        ],
+        "keyTakeaways": [
+          "Bandit turns Linux commands into muscle memory.",
+          "SSH opens a shell on a remote machine.",
+          "Struggle first — hints, not full answers."
+        ],
+        "resources": [
+          {
+            "label": "OverTheWire Bandit",
+            "url": "https://overthewire.org/wargames/bandit/",
+            "kind": "practice"
           }
         ]
       }
@@ -308,6 +426,18 @@
             "q": "What's the difference between = and ==?",
             "a": "= assigns a value to a variable; == checks whether two values are equal."
           }
+        ],
+        "keyTakeaways": [
+          "Indentation defines blocks in Python — it's syntax, not style.",
+          "== compares; = assigns.",
+          "range(n) stops BEFORE n."
+        ],
+        "resources": [
+          {
+            "label": "Python tutorial — control flow",
+            "url": "https://docs.python.org/3/tutorial/controlflow.html",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -336,6 +466,18 @@
           {
             "q": "How is a tuple different from a list?",
             "a": "A tuple can't be changed after creation (immutable); a list can."
+          }
+        ],
+        "keyTakeaways": [
+          "dict = fast key→value lookup.",
+          "set = unique items, no order.",
+          "tuple is immutable; list is not."
+        ],
+        "resources": [
+          {
+            "label": "Python data structures tutorial",
+            "url": "https://docs.python.org/3/tutorial/datastructures.html",
+            "kind": "docs"
           }
         ]
       },
@@ -366,6 +508,18 @@
             "q": "Why catch a specific error instead of a bare except?",
             "a": "A bare except also swallows bugs you needed to see; catching the specific one handles the case you expect and lets real problems surface."
           }
+        ],
+        "keyTakeaways": [
+          "with open(...) guarantees the file closes.",
+          "Catch specific errors, not bare except.",
+          "Functions need return to hand back a value."
+        ],
+        "resources": [
+          {
+            "label": "Python errors & exceptions",
+            "url": "https://docs.python.org/3/tutorial/errors.html",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -394,6 +548,18 @@
           {
             "q": "What is self?",
             "a": "The particular object a method is being called on — 'this one'."
+          }
+        ],
+        "keyTakeaways": [
+          "A class is a blueprint; an object is one instance.",
+          "self refers to the current object.",
+          "Four pillars: encapsulation, inheritance, polymorphism, abstraction."
+        ],
+        "resources": [
+          {
+            "label": "Python classes tutorial",
+            "url": "https://docs.python.org/3/tutorial/classes.html",
+            "kind": "docs"
           }
         ]
       },
@@ -424,6 +590,18 @@
             "q": "What goes in requirements.txt and why?",
             "a": "The exact libraries and versions your project needs, so anyone (or any server) can recreate the same environment."
           }
+        ],
+        "keyTakeaways": [
+          "A venv isolates a project's packages.",
+          "requirements.txt records exact versions.",
+          "Containers later take this idea to the whole environment."
+        ],
+        "resources": [
+          {
+            "label": "Python venv — official docs",
+            "url": "https://docs.python.org/3/library/venv.html",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -452,6 +630,23 @@
           {
             "q": "Why commit small and often?",
             "a": "Small commits are easy to understand and undo; you can return to a recent good state instead of losing lots of work."
+          }
+        ],
+        "keyTakeaways": [
+          "Git is a time machine for code (commits = snapshots).",
+          "add stages; commit saves with a message.",
+          "Commit small and often."
+        ],
+        "resources": [
+          {
+            "label": "Git Basics (Pro Git book, free)",
+            "url": "https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository",
+            "kind": "book"
+          },
+          {
+            "label": "Git — official reference",
+            "url": "https://git-scm.com/doc",
+            "kind": "docs"
           }
         ]
       },
@@ -482,6 +677,18 @@
             "q": "What does a pull request add beyond a merge?",
             "a": "Review — teammates see, discuss, and approve the changes before they join main."
           }
+        ],
+        "keyTakeaways": [
+          "Branches isolate work until it's ready.",
+          "A pull request adds review before merging.",
+          "Solo PRs still build the team habit."
+        ],
+        "resources": [
+          {
+            "label": "Basic Branching and Merging (Pro Git)",
+            "url": "https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging",
+            "kind": "book"
+          }
         ]
       },
       {
@@ -510,6 +717,23 @@
           {
             "q": "Why does a README matter for getting hired?",
             "a": "It's the first thing a reviewer reads; it shows you can communicate what you built and how to use it."
+          }
+        ],
+        "keyTakeaways": [
+          "A README is the first thing reviewers read.",
+          "git push uploads commits to GitHub.",
+          "A .gitignore keeps secrets and venvs out of the repo."
+        ],
+        "resources": [
+          {
+            "label": "GitHub — create a repository",
+            "url": "https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository",
+            "kind": "docs"
+          },
+          {
+            "label": "About READMEs",
+            "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes",
+            "kind": "docs"
           }
         ]
       }
@@ -548,6 +772,18 @@
             "q": "If you don't write ORDER BY, what order do rows come in?",
             "a": "No guaranteed order — you must ORDER BY to control it."
           }
+        ],
+        "keyTakeaways": [
+          "Without ORDER BY, row order isn't guaranteed.",
+          "Text literals need single quotes in SQL.",
+          "WHERE filters rows before any grouping."
+        ],
+        "resources": [
+          {
+            "label": "PostgreSQL SELECT reference",
+            "url": "https://www.postgresql.org/docs/current/sql-select.html",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -576,6 +812,18 @@
           {
             "q": "INNER JOIN vs LEFT JOIN — the key difference?",
             "a": "INNER keeps only matching rows; LEFT keeps all rows from the left table, filling blanks where there's no match."
+          }
+        ],
+        "keyTakeaways": [
+          "INNER JOIN keeps only matches; LEFT JOIN keeps all left rows.",
+          "Forgetting ON causes a Cartesian product.",
+          "Aliases (s, c) keep joins readable."
+        ],
+        "resources": [
+          {
+            "label": "PostgreSQL — Joins between tables",
+            "url": "https://www.postgresql.org/docs/current/tutorial-join.html",
+            "kind": "docs"
           }
         ]
       },
@@ -606,6 +854,18 @@
             "q": "WHERE vs HAVING?",
             "a": "WHERE filters individual rows before grouping; HAVING filters the grouped results after aggregation."
           }
+        ],
+        "keyTakeaways": [
+          "GROUP BY collapses rows into per-category summaries.",
+          "WHERE filters rows; HAVING filters groups.",
+          "Aggregates: COUNT, SUM, AVG, MIN, MAX."
+        ],
+        "resources": [
+          {
+            "label": "PostgreSQL — Aggregate functions",
+            "url": "https://www.postgresql.org/docs/current/functions-aggregate.html",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -634,6 +894,18 @@
           {
             "q": "Why prefer a CTE over deeply nested subqueries?",
             "a": "It's easier to read, debug, and reuse within the query."
+          }
+        ],
+        "keyTakeaways": [
+          "A CTE (WITH ... AS) names a step for readability.",
+          "CTEs beat deeply nested subqueries for clarity.",
+          "The named result only exists for that query."
+        ],
+        "resources": [
+          {
+            "label": "PostgreSQL — WITH queries (CTEs)",
+            "url": "https://www.postgresql.org/docs/current/queries-with.html",
+            "kind": "docs"
           }
         ]
       },
@@ -664,6 +936,23 @@
             "q": "What's the pandas equivalent of SQL's WHERE?",
             "a": "Boolean indexing, e.g. df[df['score'] >= 60]."
           }
+        ],
+        "keyTakeaways": [
+          "A DataFrame is a table you can filter, group, and transform in Python.",
+          "Boolean indexing is pandas' WHERE.",
+          "groupby(...).mean() is pandas' GROUP BY + AVG."
+        ],
+        "resources": [
+          {
+            "label": "pandas — 10 minutes to pandas",
+            "url": "https://pandas.pydata.org/docs/user_guide/10min.html",
+            "kind": "docs"
+          },
+          {
+            "label": "pandas.DataFrame.groupby reference",
+            "url": "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.groupby.html",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -692,6 +981,18 @@
           {
             "q": "Why end a write-up with a 'so what'?",
             "a": "A finding is only useful if it leads to a decision or action; the 'so what' turns analysis into value."
+          }
+        ],
+        "keyTakeaways": [
+          "The real differentiator is explaining what numbers MEAN.",
+          "One clear chart beats ten confusing ones.",
+          "End with a recommendation, not just a number."
+        ],
+        "resources": [
+          {
+            "label": "Kaggle Datasets (free, public data)",
+            "url": "https://www.kaggle.com/datasets",
+            "kind": "practice"
           }
         ]
       }
@@ -730,6 +1031,18 @@
             "q": "Why is binary search O(log n) and not O(n)?",
             "a": "Because the data is sorted, each step throws away half the remaining items, so the work barely grows as data grows."
           }
+        ],
+        "keyTakeaways": [
+          "Big-O describes how work grows with input size.",
+          "Sorted data + halving = O(log n) (binary search).",
+          "Nested loops over the same data ~ O(n²)."
+        ],
+        "resources": [
+          {
+            "label": "Big-O Cheat Sheet",
+            "url": "https://www.bigocheatsheet.com/",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -758,6 +1071,18 @@
           {
             "q": "What's a palindrome, and one way to check it in one pass?",
             "a": "A string that reads the same backwards; compare characters from both ends moving inward until they meet."
+          }
+        ],
+        "keyTakeaways": [
+          "array[i] is O(1) — direct address computation.",
+          "Negative indices count from the end.",
+          "Slicing [::-1] reverses a sequence."
+        ],
+        "resources": [
+          {
+            "label": "Python sequence types reference",
+            "url": "https://docs.python.org/3/library/stdtypes.html#sequence-types-list-tuple-range",
+            "kind": "docs"
           }
         ]
       },
@@ -788,6 +1113,18 @@
             "q": "How does a hash map turn Two-Sum from O(n²) into O(n)?",
             "a": "For each number you check in O(1) whether its complement was already seen, instead of comparing every pair."
           }
+        ],
+        "keyTakeaways": [
+          "Hash maps give ~O(1) lookup/insert.",
+          "Two-Sum: O(n²) pairs → O(n) with a dict.",
+          "'Have I seen this?' is the classic hash-map signal."
+        ],
+        "resources": [
+          {
+            "label": "Python dict — data model & performance",
+            "url": "https://docs.python.org/3/library/stdtypes.html#mapping-types-dict",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -816,6 +1153,18 @@
           {
             "q": "Why is sliding the window faster than re-summing it?",
             "a": "You update the sum by adding the entering element and removing the leaving one — O(1) per step instead of O(k)."
+          }
+        ],
+        "keyTakeaways": [
+          "Sliding window avoids re-summing a range.",
+          "Two pointers close in from both ends.",
+          "Signal: 'contiguous run' or 'sorted pair'."
+        ],
+        "resources": [
+          {
+            "label": "NeetCode — patterns roadmap",
+            "url": "https://neetcode.io/roadmap",
+            "kind": "practice"
           }
         ]
       },
@@ -846,6 +1195,18 @@
             "q": "What happens if you forget the base case?",
             "a": "It recurses forever and crashes with a stack overflow."
           }
+        ],
+        "keyTakeaways": [
+          "Every recursion needs a base case + a shrinking step.",
+          "Missing a base case → infinite recursion.",
+          "Trace small examples on paper first."
+        ],
+        "resources": [
+          {
+            "label": "Python — recursive functions (tutorial)",
+            "url": "https://docs.python.org/3/tutorial/controlflow.html#defining-functions",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -875,6 +1236,18 @@
             "q": "What is binary search's Big-O and why?",
             "a": "O(log n), because each step discards half the remaining elements."
           }
+        ],
+        "keyTakeaways": [
+          "Binary search needs sorted input.",
+          "Each step halves the search space → O(log n).",
+          "Test edges: first, last, missing, empty."
+        ],
+        "resources": [
+          {
+            "label": "Binary search — Python bisect module",
+            "url": "https://docs.python.org/3/library/bisect.html",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -903,6 +1276,18 @@
           {
             "q": "Why use a stack to check balanced brackets?",
             "a": "Each opening bracket is pushed; each closing bracket must match the most recent unmatched opening — exactly LIFO behaviour."
+          }
+        ],
+        "keyTakeaways": [
+          "Stack = LIFO (undo); queue = FIFO (a line).",
+          "deque gives an efficient queue in Python.",
+          "Balanced brackets is the classic stack problem."
+        ],
+        "resources": [
+          {
+            "label": "Python collections.deque reference",
+            "url": "https://docs.python.org/3/library/collections.html#collections.deque",
+            "kind": "docs"
           }
         ]
       }
@@ -941,6 +1326,23 @@
             "q": "Image vs container?",
             "a": "An image is the blueprint/recipe; a container is a running instance created from that image."
           }
+        ],
+        "keyTakeaways": [
+          "Containers package code + dependencies + environment.",
+          "Image = blueprint; container = running instance.",
+          "Containers share the host kernel — lighter than a VM."
+        ],
+        "resources": [
+          {
+            "label": "Docker overview (official docs)",
+            "url": "https://docs.docker.com/get-started/docker-overview/",
+            "kind": "docs"
+          },
+          {
+            "label": "Docker curriculum (free)",
+            "url": "https://docker-curriculum.com/",
+            "kind": "course"
+          }
         ]
       },
       {
@@ -970,6 +1372,23 @@
             "q": "Why copy requirements and install before copying the rest of the code?",
             "a": "So Docker caches the dependency install and only re-runs it when requirements change, making rebuilds fast."
           }
+        ],
+        "keyTakeaways": [
+          "Copy dependency manifests + install BEFORE the rest of the code.",
+          "This lets Docker cache the install layer.",
+          "Never bake secrets into an image."
+        ],
+        "resources": [
+          {
+            "label": "Dockerfile reference (official)",
+            "url": "https://docs.docker.com/reference/dockerfile/",
+            "kind": "docs"
+          },
+          {
+            "label": "Optimize build cache — official guide",
+            "url": "https://docs.docker.com/build/cache/optimize/",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -998,6 +1417,23 @@
           {
             "q": "404 vs 500?",
             "a": "404: the requested thing doesn't exist (client-side problem). 500: the server itself failed while handling the request."
+          }
+        ],
+        "keyTakeaways": [
+          "HTTP is request → response between client and server.",
+          "404 = client-side (not found); 500 = server-side failure.",
+          "JSON is structured data, not code."
+        ],
+        "resources": [
+          {
+            "label": "HTTP overview (MDN)",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview",
+            "kind": "docs"
+          },
+          {
+            "label": "HTTP response status codes (MDN)",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status",
+            "kind": "docs"
           }
         ]
       },
@@ -1029,6 +1465,23 @@
             "q": "What's the one habit that prevents surprise cloud bills?",
             "a": "Use the free tier, set a billing alert, and stop/delete resources when you're done."
           }
+        ],
+        "keyTakeaways": [
+          "The cloud is renting someone else's computers.",
+          "A VM is a Linux box you SSH into — same skills as Month 1.",
+          "Free tier + billing alert + stop-when-done prevents surprise bills."
+        ],
+        "resources": [
+          {
+            "label": "AWS Free Tier",
+            "url": "https://aws.amazon.com/free/",
+            "kind": "docs"
+          },
+          {
+            "label": "AWS Skill Builder (free training)",
+            "url": "https://skillbuilder.aws/",
+            "kind": "course"
+          }
         ]
       },
       {
@@ -1057,6 +1510,18 @@
           {
             "q": "What does -p 80:8000 do in docker run?",
             "a": "Maps the host's port 80 to the container's port 8000, so the app is reachable from outside."
+          }
+        ],
+        "keyTakeaways": [
+          "A deployed link is stronger proof than any certificate.",
+          "-p maps a host port to a container port.",
+          "Document the steps so the story is reproducible."
+        ],
+        "resources": [
+          {
+            "label": "Docker run reference (official)",
+            "url": "https://docs.docker.com/reference/cli/docker/container/run/",
+            "kind": "docs"
           }
         ]
       },
@@ -1087,6 +1552,18 @@
             "q": "Four polished repos or twenty half-finished ones — which, and why?",
             "a": "Four polished ones; reviewers judge your best visible work, not your quantity."
           }
+        ],
+        "keyTakeaways": [
+          "A stranger should understand a project in 60 seconds from its README.",
+          "Pin 3–4 polished repos, not twenty half-finished ones.",
+          "A live demo link gets clicked."
+        ],
+        "resources": [
+          {
+            "label": "About READMEs (GitHub docs)",
+            "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -1116,6 +1593,18 @@
             "q": "What matters more than the number of problems solved?",
             "a": "Understanding the patterns and being able to explain your approach out loud."
           }
+        ],
+        "keyTakeaways": [
+          "LeetCode is rehearsal AFTER understanding the pieces.",
+          "Restate, plan, code, note Big-O — that's a rep.",
+          "Redo missed problems from memory a day later."
+        ],
+        "resources": [
+          {
+            "label": "NeetCode 150 (free roadmap)",
+            "url": "https://neetcode.io/practice",
+            "kind": "practice"
+          }
         ]
       },
       {
@@ -1144,6 +1633,18 @@
           {
             "q": "Why is aiming for ML Engineer 'safe' even if you fall back to SWE?",
             "a": "They share the same foundation, so preparing for the deeper role loses you nothing if you pivot to software engineering."
+          }
+        ],
+        "keyTakeaways": [
+          "The 'two Fridays' test: shipping vs understanding.",
+          "Choosing a track loses nothing — the foundation transfers.",
+          "Evidence from your own projects beats guessing."
+        ],
+        "resources": [
+          {
+            "label": "roadmap.sh — career roadmaps",
+            "url": "https://roadmap.sh/",
+            "kind": "docs"
           }
         ]
       }
@@ -1183,6 +1684,18 @@
             "q": "Why does 'explain your code' matter so much at product companies?",
             "a": "They hire for understanding and ownership, not just output — you'll defend your choices in interviews and on the job."
           }
+        ],
+        "keyTakeaways": [
+          "Product companies test fundamentals more deeply than service companies.",
+          "Know your target role before you prep.",
+          "Being able to explain your code matters as much as writing it."
+        ],
+        "resources": [
+          {
+            "label": "roadmap.sh — role-based roadmaps",
+            "url": "https://roadmap.sh/",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -1211,6 +1724,18 @@
           {
             "q": "Why avoid listing skills you can't defend?",
             "a": "Interviewers often probe the weakest-looking claim; an indefensible line costs you credibility."
+          }
+        ],
+        "keyTakeaways": [
+          "Projects first, one page, metric-bearing bullets.",
+          "Every bullet should survive 'tell me more'.",
+          "Never list a skill you can't defend."
+        ],
+        "resources": [
+          {
+            "label": "Tech resume guide (freeCodeCamp)",
+            "url": "https://www.freecodecamp.org/news/how-to-write-a-good-resume/",
+            "kind": "docs"
           }
         ]
       },
@@ -1241,6 +1766,18 @@
             "q": "What single asset most strengthens a fresher portfolio?",
             "a": "One genuinely deployed, live project with a clear README."
           }
+        ],
+        "keyTakeaways": [
+          "GitHub is the receipt behind the resume's claim.",
+          "Pin your best repos with real READMEs.",
+          "A clean commit history signals a careful engineer."
+        ],
+        "resources": [
+          {
+            "label": "GitHub profile README guide",
+            "url": "https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-profile/customizing-your-profile/managing-your-profile-readme",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -1269,6 +1806,18 @@
           {
             "q": "Why practise explaining out loud?",
             "a": "Interviews are spoken; you're judged on communicating your reasoning, not just a passing solution."
+          }
+        ],
+        "keyTakeaways": [
+          "Steady weekly reps beat a pre-interview cram.",
+          "Explain your approach and Big-O out loud.",
+          "Re-solve missed problems cold, days later."
+        ],
+        "resources": [
+          {
+            "label": "NeetCode roadmap (free)",
+            "url": "https://neetcode.io/roadmap",
+            "kind": "practice"
           }
         ]
       },
@@ -1299,6 +1848,18 @@
             "q": "What three aptitude areas typically appear?",
             "a": "Quantitative, logical reasoning, and verbal."
           }
+        ],
+        "keyTakeaways": [
+          "Online assessments are a speed filter, not just a difficulty wall.",
+          "Timed practice fixes most failures here.",
+          "Track your two weakest topics."
+        ],
+        "resources": [
+          {
+            "label": "IndiaBIX — aptitude practice",
+            "url": "https://www.indiabix.com/",
+            "kind": "practice"
+          }
         ]
       },
       {
@@ -1327,6 +1888,18 @@
           {
             "q": "Why prepare stories from your own projects?",
             "a": "They're real (so you can go deep under follow-ups) and one story often answers several different questions."
+          }
+        ],
+        "keyTakeaways": [
+          "STAR: Situation, Task, Action, Result.",
+          "Your own projects ARE your stories.",
+          "Prepare 4–5 stories that flex to many questions."
+        ],
+        "resources": [
+          {
+            "label": "STAR method — Big Interview guide",
+            "url": "https://resources.biginterview.com/behavioral-interviews/star-interview-method/",
+            "kind": "docs"
           }
         ]
       },
@@ -1357,6 +1930,18 @@
             "q": "How do you make a design answer concrete?",
             "a": "Anchor it to a real project you built and can walk through end to end."
           }
+        ],
+        "keyTakeaways": [
+          "Freshers need vocabulary and instinct, not FAANG-scale design.",
+          "Client → API → database is the base sketch.",
+          "Anchor answers to a project you actually built."
+        ],
+        "resources": [
+          {
+            "label": "System Design Primer (free, GitHub)",
+            "url": "https://github.com/donnemartin/system-design-primer",
+            "kind": "book"
+          }
         ]
       },
       {
@@ -1386,6 +1971,23 @@
             "q": "Process vs thread?",
             "a": "A process is a running program with its own memory; threads are lighter units inside it that share that memory."
           }
+        ],
+        "keyTakeaways": [
+          "Process vs thread, DNS→HTTP flow, DB index, HTTP vs HTTPS — know these cold.",
+          "One clean sentence beats a recited paragraph.",
+          "Anchor each answer to something you did in this course."
+        ],
+        "resources": [
+          {
+            "label": "Computer Networking: A Top-Down Approach (info)",
+            "url": "https://gaia.cs.umass.edu/kurose_ross/index.php",
+            "kind": "book"
+          },
+          {
+            "label": "PostgreSQL — indexes overview",
+            "url": "https://www.postgresql.org/docs/current/indexes.html",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -1414,6 +2016,18 @@
           {
             "q": "Why do mock interviews before real ones?",
             "a": "So your first real interview isn't your first-ever attempt — you practise the pressure and get feedback safely."
+          }
+        ],
+        "keyTakeaways": [
+          "Track every application — company, role, status, next step.",
+          "Referrals beat cold applications.",
+          "Mock interviews close the 'know it' vs 'perform it' gap."
+        ],
+        "resources": [
+          {
+            "label": "roadmap.sh — interview prep",
+            "url": "https://roadmap.sh/",
+            "kind": "docs"
           }
         ]
       }
@@ -1453,6 +2067,18 @@
             "q": "What is supervised learning?",
             "a": "Learning from data where each input comes with a known correct answer (label)."
           }
+        ],
+        "keyTakeaways": [
+          "ML learns patterns from labelled examples instead of hard-coded rules.",
+          "Supervised learning = data with known answers.",
+          "Data quality matters more than model choice."
+        ],
+        "resources": [
+          {
+            "label": "scikit-learn — Getting Started",
+            "url": "https://scikit-learn.org/stable/getting_started.html",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -1481,6 +2107,18 @@
           {
             "q": "Which earlier Foundry skills feed the ML workflow?",
             "a": "pandas (data prep, Month 3) and Docker (serving, Month 5)."
+          }
+        ],
+        "keyTakeaways": [
+          "The pipeline: collect → clean → split → train → evaluate → serve.",
+          "Most real work is data prep and evaluation.",
+          "This reuses pandas (M3) and Docker (M5)."
+        ],
+        "resources": [
+          {
+            "label": "scikit-learn — user guide",
+            "url": "https://scikit-learn.org/stable/user_guide.html",
+            "kind": "docs"
           }
         ]
       },
@@ -1511,6 +2149,18 @@
             "q": "Why must you never fit on the test set?",
             "a": "It leaks the answers into training, giving falsely high scores that won't hold on real new data."
           }
+        ],
+        "keyTakeaways": [
+          "fit() learns; predict() applies.",
+          "Never fit on the test set.",
+          "The fit/predict shape is consistent across scikit-learn models."
+        ],
+        "resources": [
+          {
+            "label": "scikit-learn — LogisticRegression docs",
+            "url": "https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -1539,6 +2189,18 @@
           {
             "q": "Why keep a separate test set?",
             "a": "To get an honest estimate of performance on data the model never learned from."
+          }
+        ],
+        "keyTakeaways": [
+          "Train to learn, test to honestly evaluate.",
+          "Overfitting = memorising training data, failing on new data.",
+          "A big train/test gap signals overfitting."
+        ],
+        "resources": [
+          {
+            "label": "scikit-learn — train_test_split docs",
+            "url": "https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html",
+            "kind": "docs"
           }
         ]
       },
@@ -1569,6 +2231,18 @@
             "q": "Precision vs recall in plain words?",
             "a": "Precision: of the things you flagged, how many were right. Recall: of the real positives, how many you caught."
           }
+        ],
+        "keyTakeaways": [
+          "Accuracy can lie on imbalanced data.",
+          "Precision: of what you flagged, how much was right.",
+          "Recall: of the real positives, how many you caught."
+        ],
+        "resources": [
+          {
+            "label": "scikit-learn — classification_report docs",
+            "url": "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.classification_report.html",
+            "kind": "docs"
+          }
         ]
       },
       {
@@ -1597,6 +2271,23 @@
           {
             "q": "Why load the saved model once instead of retraining per request?",
             "a": "Training is slow and unnecessary at prediction time; you load the already-trained model and just call predict."
+          }
+        ],
+        "keyTakeaways": [
+          "Serving turns a notebook model into ML engineering.",
+          "Save once, load once, predict many times.",
+          "Containerising the API makes it reproducible and deployable."
+        ],
+        "resources": [
+          {
+            "label": "joblib — persistence docs",
+            "url": "https://joblib.readthedocs.io/en/latest/persistence.html",
+            "kind": "docs"
+          },
+          {
+            "label": "Flask — quickstart (official)",
+            "url": "https://flask.palletsprojects.com/en/latest/quickstart/",
+            "kind": "docs"
           }
         ]
       }
