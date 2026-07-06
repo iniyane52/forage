@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getLesson, getAdjacent } from "@/lib/content";
 import { MarkDoneButton, NotesBox, CheckReveal } from "@/components/LessonActions";
+import { TutorDrawer } from "@/components/TutorDrawer";
 import { FadeUp } from "@/components/ui/motion";
 import {
   BookOpen,
@@ -281,6 +282,14 @@ export default async function LessonPage({
           )}
         </nav>
       </article>
+
+      <TutorDrawer
+        lessonTitle={topic.title}
+        concept={topic.concept}
+        analogy={topic.analogy}
+        handsOn={topic.handsOn}
+        doneWhen={topic.doneWhen}
+      />
     </FadeUp>
   );
 }
