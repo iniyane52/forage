@@ -103,12 +103,10 @@ export default async function LessonPage({
             {stream?.title ?? mod.title}
           </Link>
         </p>
-        <h1 className="text-2xl font-bold mt-2" style={{ fontFamily: "var(--font-display)" }}>
-          {topic.title}
-        </h1>
+        <h1 className="display text-3xl sm:text-4xl md:text-5xl mt-3 mb-1">{topic.title}</h1>
 
         <Label icon={BookOpen}>What it is</Label>
-        <p className="text-[15px] leading-relaxed">{topic.concept}</p>
+        <p className="lead">{topic.concept}</p>
 
         {topic.analogy && (
           <>

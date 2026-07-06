@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { CheckCircle2, XCircle, Trophy, Sparkles } from "@/components/ui/icons";
+import { Confetti } from "@/components/ui/Confetti";
 
 export type PublicQuestion = {
   id: string;
@@ -22,10 +23,19 @@ type Feedback = {
   xp_awarded: number;
 };
 
-function shuffled(n: number): number[] {
+// Deterministic seeded shuffle: identical on server and client (no Math.random),
+// so there is no hydration mismatch and no client-only loading state is needed.
+// `seed` mixes in the question id + a retake counter so a retake reshuffles.
+function seededShuffle(n: number, seed: string): number[] {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  const rand = () => {
+    h = (h * 1103515245 + 12345) >>> 0;
+    return h / 4294967296;
+  };
   const a = Array.from({ length: n }, (_, i) => i);
   for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(rand() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
@@ -49,10 +59,10 @@ export function QuizRunner({
   const [busy, setBusy] = useState(false);
   const [xpTotal, setXpTotal] = useState(0);
   const [result, setResult] = useState<{ score: number; passed: boolean } | null>(null);
+  const [attempt, setAttempt] = useState(0); // bumped on retake so options reshuffle
 
-  const orders = useMemo(() => questions.map((q) => shuffled(q.options.length)), [questions]);
   const q = questions[i];
-  const order = orders[i];
+  const order = seededShuffle(q.options.length, q.id + ":" + attempt);
 
   async function answer(displayIdx: number) {
     if (feedback || busy) return;
@@ -90,8 +100,9 @@ export function QuizRunner({
       <motion.div
         initial={reduce ? false : { opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="text-center py-8"
+        className="text-center py-8 relative"
       >
+        {result.passed && <Confetti />}
         <div className="relative w-36 h-36 mx-auto mb-4">
           <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
             <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
@@ -133,6 +144,7 @@ export function QuizRunner({
           <button
             onClick={() => {
               setI(0); setChosen(null); setFeedback(null); setResult(null); setXpTotal(0);
+              setAttempt((a) => a + 1);
             }}
             className="px-4 py-2 rounded-xl glass glass-hover text-sm"
           >
