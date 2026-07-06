@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getLesson } from "@/lib/content";
 import { QuizRunner, type PublicQuestion } from "@/components/QuizRunner";
@@ -14,8 +14,20 @@ export default async function QuizPage({
   if (!lesson) notFound();
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const { data: row } = await supabase.from("lessons").select("id, title").eq("slug", slug).single();
   if (!row) notFound();
+
+  // Study-first: the quiz only unlocks once the lesson is marked done.
+  const { data: progress } = await supabase
+    .from("lesson_progress")
+    .select("status")
+    .eq("user_id", user!.id)
+    .eq("lesson_id", row.id)
+    .maybeSingle();
+  if (progress?.status !== "done") redirect(`/learn/${slug}`);
 
   const { data: questions } = await supabase
     .from("quiz_questions_public")

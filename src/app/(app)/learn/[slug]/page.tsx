@@ -18,6 +18,7 @@ import {
   ListChecks,
   ExternalLink,
   BookMarked,
+  Lock,
   resourceIcon,
 } from "@/components/ui/icons";
 import type { LucideIcon } from "lucide-react";
@@ -231,21 +232,33 @@ export default async function LessonPage({
           <NotesBox lessonId={row.id} initial={progress?.notes ?? ""} />
         </div>
 
-        <div className="mt-6 flex items-center gap-3 flex-wrap">
-          <MarkDoneButton lessonId={row.id} initiallyDone={progress?.status === "done"} />
-          {(questionCount ?? 0) > 0 ? (
-            <Link
-              href={`/quiz/${slug}`}
-              className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#7c5cff] text-white hover:bg-[#6a4ff0] transition-colors"
-            >
-              Take the quiz ({questionCount} questions) →
-            </Link>
-          ) : (
-            <span className="text-xs text-[#9aa7b4] glass rounded-xl px-3 py-2">
-              Quiz coming soon
-            </span>
-          )}
-        </div>
+        {(() => {
+          const isDone = progress?.status === "done";
+          return (
+            <div className="mt-6 flex items-center gap-3 flex-wrap">
+              <MarkDoneButton lessonId={row.id} initiallyDone={isDone} />
+              {(questionCount ?? 0) === 0 ? (
+                <span className="text-xs text-[#9aa7b4] glass rounded-xl px-3 py-2">
+                  Quiz coming soon
+                </span>
+              ) : isDone ? (
+                <Link
+                  href={`/quiz/${slug}`}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#7c5cff] text-white hover:bg-[#6a4ff0] transition-colors"
+                >
+                  Take the quiz ({questionCount} questions) →
+                </Link>
+              ) : (
+                <span
+                  title="Study the lesson and mark it done to unlock the quiz"
+                  className="flex items-center gap-1.5 text-xs text-[#9aa7b4] glass rounded-xl px-3 py-2 cursor-not-allowed"
+                >
+                  <Lock size={13} /> Study this first to unlock the quiz
+                </span>
+              )}
+            </div>
+          );
+        })()}
 
         <nav className="mt-10 pt-6 border-t border-white/[0.06] flex justify-between text-sm gap-4">
           {prev ? (
