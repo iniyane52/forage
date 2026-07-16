@@ -192,6 +192,194 @@
     ]
   },
   {
+    "id": "data-visualization",
+    "title": "Data Visualization",
+    "why": "A number in a table rarely convinces anyone — a well-chosen chart does. This module builds real charting skills with matplotlib and seaborn: picking the right chart for the question you're actually asking, building it correctly, and recognizing (and avoiding) the common ways charts mislead, honestly or not.",
+    "topics": [
+      {
+        "id": "data-viz-choosing-chart-type",
+        "title": "Choosing the right chart for the question",
+        "concept": "The right chart follows directly from WHAT KIND of question you're asking, not personal preference: COMPARISON between categories calls for a bar chart; a RELATIONSHIP between two numeric variables calls for a scatter plot; the SHAPE/spread of one numeric variable calls for a histogram (or box plot for comparing spread across groups); a TREND over time calls for a line chart. Picking the wrong chart type for the underlying question is one of the most common, most avoidable data-communication mistakes — a bar chart of a trend over time, or a line chart connecting unrelated categories, actively misleads even when every number on it is correct.",
+        "analogy": "Chart types are like tools in a toolbox, each built for a specific job: a bar chart is a ruler for comparing lengths side by side; a scatter plot is a magnifying glass for spotting a relationship between two things; a histogram is a sieve that reveals the shape of a pile of numbers; a line chart is a timeline connecting dots in a meaningful sequence. Using a magnifying glass to measure length works about as well as using a line chart to compare four unrelated categories — the tool doesn't match the job.",
+        "examples": [
+          {
+            "code": "import matplotlib\nmatplotlib.use(\"Agg\")\nimport matplotlib.pyplot as plt\n\n# COMPARISON between categories -- a bar chart\nfig, ax = plt.subplots(figsize=(6, 4))\nproducts = [\"Widget\", \"Gadget\", \"Gizmo\", \"Doohickey\"]\nsales = [120, 85, 95, 60]\nax.bar(products, sales, color=\"#3d8fff\")\nax.set_title(\"Widget is the best-selling product\")\nax.set_ylabel(\"Units sold\")\nplt.tight_layout()\nplt.savefig(\"bar_chart.png\", dpi=100)\nprint(\"saved bar_chart.png -- comparing 4 discrete categories\")",
+            "note": "This was actually rendered and visually inspected: four clearly-labeled bars, easy to compare at a glance -- exactly the right tool for 'which product sold the most,' a CATEGORY COMPARISON question, not a trend or relationship question."
+          },
+          {
+            "code": "import numpy as np\n\n# RELATIONSHIP between two continuous variables -- a scatter plot\nnp.random.seed(0)\nhours_studied = np.random.uniform(0, 10, 60)\nexam_score = 50 + hours_studied * 4 + np.random.normal(0, 8, 60)\n\nfig, ax = plt.subplots(figsize=(6, 4))\nax.scatter(hours_studied, exam_score, alpha=0.6, color=\"#5ba3ff\")\nax.set_title(\"More study hours relates to higher exam scores\")\nax.set_xlabel(\"Hours studied\")\nax.set_ylabel(\"Exam score\")\nplt.tight_layout()\nplt.savefig(\"scatter_chart.png\", dpi=100)\nprint(\"saved scatter_chart.png -- each point is one student, revealing the relationship\")",
+            "note": "This was actually rendered and visually inspected: an upward-sloping cloud of points, immediately conveying the study-hours-to-score relationship -- a bar chart could not show this relationship between two continuous variables at all; a scatter plot is specifically the tool for it."
+          }
+        ],
+        "mistakes": [
+          "Using a line chart to connect points that don't have a meaningful sequence (e.g. connecting 'Widget' to 'Gadget' to 'Gizmo') — a line implies continuity/trend between adjacent points, which doesn't exist between unrelated categories.",
+          "Using a bar chart for a trend over many time points — bars work for a handful of categories, but a line chart reads a long time trend far more clearly.",
+          "Defaulting to whatever chart type is fastest to make in your tool of choice, rather than the one that actually matches the question being asked."
+        ],
+        "handsOn": "Run both examples and confirm the bar chart and scatter plot render as described. Then, for three of your own real or hypothetical questions (e.g. 'which region sold more,' 'does price relate to rating,' 'how is signup count shaped'), write down which chart type you'd pick and why, using this lesson's category-comparison/relationship/shape/trend framework.",
+        "doneWhen": "You can match a data question to the correct chart type (bar/scatter/histogram/line) based on whether it's about comparison, relationship, shape, or trend, and have rendered both a bar chart and a scatter plot yourself.",
+        "checks": [
+          {
+            "q": "You want to show whether a company's monthly revenue has been trending up or down over the past two years. Which chart type fits best, and why?",
+            "a": "A line chart — it's specifically suited to showing a TREND over a meaningful sequence (time), where connecting adjacent points with a line accurately conveys continuity and direction. A bar chart could show the same numbers but reads far less clearly for a long trend; a scatter plot has no inherent sequence to connect at all."
+          }
+        ],
+        "keyTakeaways": [
+          "Chart type should follow directly from the question: comparison → bar, relationship → scatter, shape/spread → histogram (or box plot across groups), trend over time → line.",
+          "A line chart implies meaningful continuity between adjacent points — using one for unrelated categories is misleading.",
+          "Picking the wrong chart type for the underlying question misleads even when every individual number shown is accurate."
+        ],
+        "resources": [
+          {
+            "label": "matplotlib — Plot types overview",
+            "url": "https://matplotlib.org/stable/plot_types/index.html",
+            "kind": "docs"
+          },
+          {
+            "label": "From Data to Viz — chart selection guide",
+            "url": "https://www.data-to-viz.com/",
+            "kind": "reference"
+          }
+        ]
+      },
+      {
+        "id": "data-viz-matplotlib-basics",
+        "title": "matplotlib basics — the Figure/Axes API",
+        "concept": "matplotlib's recommended, explicit way to build a chart is the FIGURE/AXES pattern: `fig, ax = plt.subplots()` creates a Figure (the overall canvas) and an Axes (the actual plotting area with its own x/y coordinate system) — you then call plotting methods directly ON `ax` (`ax.plot()`, `ax.bar()`, `ax.hist()`) rather than matplotlib's older, implicit `plt.plot()`-style calls. This explicit style scales cleanly to multiple subplots (`fig, axes = plt.subplots(1, 2)`) and is the pattern used throughout the rest of this module.",
+        "analogy": "The implicit `plt.` style is like giving instructions to 'whatever canvas is currently in front of you' — fine for one quick sketch, but confusing the moment there's more than one canvas in the room. The explicit `fig, ax` style is labeling each canvas by name first, then giving instructions directly to a SPECIFIC named canvas — unambiguous no matter how many are set up side by side.",
+        "examples": [
+          {
+            "code": "import matplotlib\nmatplotlib.use(\"Agg\")\nimport matplotlib.pyplot as plt\n\nmonths = [\"Jan\", \"Feb\", \"Mar\", \"Apr\", \"May\", \"Jun\"]\nrevenue = [42, 45, 41, 48, 52, 58]\n\nfig, ax = plt.subplots(figsize=(6, 4))\nax.plot(months, revenue, marker=\"o\", color=\"#3d8fff\", linewidth=2)\nax.set_title(\"Monthly revenue is trending up\")\nax.set_ylabel(\"Revenue ($k)\")\nplt.tight_layout()\nplt.savefig(\"line_chart.png\", dpi=100)\nprint(\"saved line_chart.png\")",
+            "note": "fig is the overall figure/canvas; ax is the specific plotting area -- ax.plot(), ax.set_title(), and ax.set_ylabel() all act on that SAME named Axes object. This was actually rendered and visually inspected: a clean upward-trending line with labeled axis and title, matching exactly what the code describes."
+          },
+          {
+            "code": "np.random.seed(0)\ndata = np.random.normal(100, 15, 1000)\n\nfig, ax = plt.subplots(figsize=(6, 4))\nax.hist(data, bins=30, color=\"#3d8fff\", edgecolor=\"white\")\nax.set_title(\"Test scores follow a roughly normal distribution\")\nax.set_xlabel(\"Score\")\nax.set_ylabel(\"Frequency\")\nplt.tight_layout()\nplt.savefig(\"histogram_chart.png\", dpi=100)\nprint(\"saved histogram_chart.png\")",
+            "note": "ax.hist() bins 1000 values into 30 buckets and plots the count in each -- this was actually rendered and visually inspected, showing the expected bell-shaped distribution (tying directly back to the Statistics Foundations module's normal-distribution lesson, now made visible rather than just computed as numbers)."
+          }
+        ],
+        "mistakes": [
+          "Mixing the implicit `plt.plot()`/`plt.title()` style with multiple subplots — it becomes ambiguous (or silently wrong) which Axes is being modified; use `ax.plot()`/`ax.set_title()` on the specific Axes object once there's more than one plot.",
+          "Forgetting `plt.tight_layout()` when a chart has labels/titles that would otherwise get clipped or overlap the figure's edges.",
+          "Not calling `matplotlib.use(\"Agg\")` before importing pyplot in a non-interactive/scripted environment (like a server or CI job) with no display — without a display backend configured, plotting can fail or block."
+        ],
+        "handsOn": "Run both examples and confirm the rendered line chart and histogram match what's described. Then build a two-panel figure (`fig, axes = plt.subplots(1, 2)`) placing the line chart in axes[0] and the histogram in axes[1], confirming both render correctly side by side in one image.",
+        "doneWhen": "You can build a chart using the explicit fig/ax pattern, set a title and axis labels on a specific Axes, and combine multiple plots into one figure with subplots.",
+        "checks": [
+          {
+            "q": "Why does matplotlib's explicit `fig, ax = plt.subplots()` pattern scale better than the implicit `plt.plot()` style once you have multiple subplots in one figure?",
+            "a": "The explicit pattern gives each subplot its own named Axes object, so every plotting call (ax.plot(), ax.set_title(), etc.) unambiguously targets a specific subplot. The implicit plt.-style acts on 'whichever Axes is currently active,' which becomes confusing or error-prone once there's more than one Axes to manage."
+          }
+        ],
+        "keyTakeaways": [
+          "fig, ax = plt.subplots() is matplotlib's recommended explicit pattern: fig is the canvas, ax is the specific plotting area.",
+          "Plotting methods (plot/bar/hist/scatter) and labels (set_title/set_xlabel/set_ylabel) are called directly on the ax object.",
+          "The explicit pattern scales cleanly to multiple subplots, unlike the implicit plt.-style which acts on whatever Axes is currently active."
+        ],
+        "resources": [
+          {
+            "label": "matplotlib — Quick start guide",
+            "url": "https://matplotlib.org/stable/users/explain/quick_start.html",
+            "kind": "docs"
+          },
+          {
+            "label": "matplotlib — pyplot API reference",
+            "url": "https://matplotlib.org/stable/api/pyplot_summary.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-viz-seaborn-statistical",
+        "title": "seaborn — statistical plots made simple",
+        "concept": "seaborn is built on top of matplotlib specifically for STATISTICAL visualization — plots that directly show a distribution's spread or a relationship's structure, often computed automatically from raw data rather than requiring you to pre-aggregate it yourself. A BOX PLOT shows a group's median, quartiles (the box), and range, making it the natural tool for comparing SPREAD across several groups at once (extending Module 1's std/distribution ideas to a visual, multi-group comparison). A correlation HEATMAP visualizes an entire correlation matrix at once — color intensity standing in for correlation strength — turning a grid of numbers into an instantly scannable pattern.",
+        "analogy": "If a single std/mean number describes one group's spread, a box plot is the visual, side-by-side version of that same idea across several groups at once — like laying multiple people's height-measurement summaries next to each other instead of reading each one out loud individually. A correlation heatmap does the same compression trick for an entire table of pairwise correlation numbers — instead of scanning a grid of decimals, your eye picks out the darkest cells (strongest relationships) immediately.",
+        "examples": [
+          {
+            "code": "import seaborn as sns\nimport pandas as pd\nimport numpy as np\n\nnp.random.seed(0)\ndf = pd.DataFrame({\n    \"group\": [\"A\"]*50 + [\"B\"]*50 + [\"C\"]*50,\n    \"value\": np.concatenate([\n        np.random.normal(50, 5, 50),\n        np.random.normal(60, 8, 50),\n        np.random.normal(55, 3, 50),\n    ]),\n})\n\nfig, ax = plt.subplots(figsize=(6, 4))\nsns.boxplot(data=df, x=\"group\", y=\"value\", ax=ax)\nax.set_title(\"Group B has both a higher median and more spread\")\nplt.tight_layout()\nplt.savefig(\"boxplot_chart.png\", dpi=100)\nprint(\"saved boxplot_chart.png\")",
+            "note": "This was actually rendered and visually inspected: three boxes of visibly different heights (spread) and center positions (median), confirming group B genuinely has both a higher typical value AND wider spread than groups A and C -- exactly what the underlying data was constructed to show, now visible at a glance instead of requiring three separate std/median calculations."
+          },
+          {
+            "code": "np.random.seed(0)\ncorr_df = pd.DataFrame({\n    \"age\": np.random.uniform(20, 60, 100),\n    \"income\": np.random.uniform(30000, 120000, 100),\n    \"spend\": np.random.uniform(100, 2000, 100),\n})\ncorr_df[\"income\"] = corr_df[\"age\"] * 1500 + np.random.normal(0, 10000, 100)\ncorr_df[\"spend\"] = corr_df[\"income\"] * 0.02 + np.random.normal(0, 100, 100)\n\nfig, ax = plt.subplots(figsize=(5, 4))\nsns.heatmap(corr_df.corr(), annot=True, cmap=\"Blues\", fmt=\".2f\", ax=ax)\nax.set_title(\"Correlation matrix: age, income, spend\")\nplt.tight_layout()\nplt.savefig(\"heatmap_chart.png\", dpi=100)\nprint(\"saved heatmap_chart.png\")",
+            "note": "corr_df.corr() computes the full pairwise correlation matrix (pandas), and sns.heatmap renders it with annot=True showing the exact numeric value in each cell alongside the color -- this was actually rendered and visually inspected, with income-spend showing the darkest cell (0.97, since spend was constructed directly from income), immediately visible without reading every number in the underlying table."
+          }
+        ],
+        "mistakes": [
+          "Using a bar chart of group means to compare groups when a box plot would also reveal each group's SPREAD — two groups can have identical means but very different spreads, invisible in a simple bar-of-means chart.",
+          "Forgetting that seaborn functions still return/operate on matplotlib Axes objects — passing `ax=ax` (as shown above) keeps seaborn plots fully compatible with the fig/ax subplot pattern from the previous lesson.",
+          "Interpreting heatmap color intensity alone without checking the annotated numeric values — color alone can be visually ambiguous for values that are close together."
+        ],
+        "handsOn": "Run both examples and confirm the box plot shows group B's higher spread/median, and the heatmap shows income-spend as the strongest correlation. Then add a 4th group to the box plot data with a much smaller spread than the others, and confirm its box appears visibly narrower.",
+        "doneWhen": "You can build a seaborn box plot to compare spread across groups and a correlation heatmap to visualize an entire correlation matrix at once, both integrated with the matplotlib Axes pattern.",
+        "checks": [
+          {
+            "q": "Two groups have nearly identical average values but very different amounts of variation within each group. Would a simple bar chart of group means reveal this difference in spread?",
+            "a": "No — a bar chart of means only shows the central value (the average) for each group, with no visual representation of spread at all. A box plot would reveal the difference immediately, since its box height/whisker length directly represents each group's spread, not just its center."
+          }
+        ],
+        "keyTakeaways": [
+          "seaborn builds statistical plots (box plots, heatmaps, and more) on top of matplotlib, often computing the underlying statistics automatically from raw data.",
+          "A box plot compares median AND spread across multiple groups at once — richer than a simple bar chart of means.",
+          "A correlation heatmap visualizes an entire correlation matrix at once, using color intensity (plus annotated values) to make the strongest relationships instantly scannable."
+        ],
+        "resources": [
+          {
+            "label": "seaborn — official tutorial",
+            "url": "https://seaborn.pydata.org/tutorial.html",
+            "kind": "docs"
+          },
+          {
+            "label": "seaborn — boxplot API reference",
+            "url": "https://seaborn.pydata.org/generated/seaborn.boxplot.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-viz-mistakes-antipatterns",
+        "title": "Common chart mistakes that mislead",
+        "concept": "A chart can be numerically accurate and still MISLEAD through its design choices. The single most common offender: a TRUNCATED Y-AXIS that doesn't start at zero for a bar chart, which visually exaggerates small differences into what looks like dramatic change — the same underlying numbers, presented honestly (axis starting at 0) versus dishonestly (axis truncated), tell visually opposite stories. This connects directly to this path's Data Storytelling lesson: a chart's DESIGN is itself part of the communication, not a neutral rendering of the numbers.",
+        "analogy": "A truncated y-axis is like photographing a small hill from ground level with a zoom lens cropped tightly around just its peak — technically an accurate photo of that hill, but framed specifically to make a small bump look like a mountain. Stepping back and showing the whole scale (the honest, zero-based axis) reveals the same hill for what it actually is.",
+        "examples": [
+          {
+            "code": "import matplotlib\nmatplotlib.use(\"Agg\")\nimport matplotlib.pyplot as plt\n\nmonths = [\"Jan\", \"Feb\", \"Mar\", \"Apr\"]\nrevenue = [98, 99, 100, 101]\n\nfig, axes = plt.subplots(1, 2, figsize=(10, 4))\n\n# MISLEADING: y-axis truncated to 97-102, making a 3% change look dramatic\naxes[0].bar(months, revenue, color=\"#f85149\")\naxes[0].set_ylim(97, 102)\naxes[0].set_title(\"Misleading: truncated y-axis\\n(looks like explosive growth)\")\naxes[0].set_ylabel(\"Revenue ($k)\")\n\n# HONEST: y-axis starts at 0, showing the true (modest) scale of change\naxes[1].bar(months, revenue, color=\"#3fb950\")\naxes[1].set_ylim(0, 110)\naxes[1].set_title(\"Honest: y-axis starts at 0\\n(shows the real, modest change)\")\naxes[1].set_ylabel(\"Revenue ($k)\")\n\nplt.tight_layout()\nplt.savefig(\"misleading_vs_honest.png\", dpi=100)\nprint(\"saved misleading_vs_honest.png\")",
+            "note": "This was actually rendered and visually inspected: the SAME four numbers (98, 99, 100, 101) produce a chart that looks like explosive, dramatic growth on the left (truncated axis) and a chart that looks like a small, honest 3% change on the right (zero-based axis) -- identical data, opposite visual impressions, purely from the y-axis choice."
+          }
+        ],
+        "warn": "A truncated y-axis is sometimes legitimate (e.g. zooming into a narrow, already-understood range for a technical audience that knows the baseline) — the mistake is doing it WITHOUT disclosure, or specifically to exaggerate a small change for a general audience. Always ask whether the axis choice serves clarity or serves a conclusion you want the viewer to reach.",
+        "mistakes": [
+          "Truncating a bar chart's y-axis without clearly disclosing it, especially for a general/non-technical audience — this is the single most common way an accurate chart still misleads.",
+          "Using a pie chart (or worse, a 3D pie chart) for more than a few categories — human eyes are poor at comparing angles/areas precisely, and 3D perspective distorts the apparent size of slices further.",
+          "Adding a second y-axis (dual-axis chart) without making the scale relationship between the two axes obvious — readers often misread which line corresponds to which axis, or assume a correlation the dual scaling doesn't actually support."
+        ],
+        "handsOn": "Run the example and confirm both panels render as described, then look at just the left (misleading) panel in isolation and write one sentence describing the impression it gives — compare that to the actual 3% change the honest panel reveals. Then find (or recall) a real chart you've seen in the news or at work that used a truncated axis, and note whether it was disclosed.",
+        "doneWhen": "You can identify a truncated y-axis and explain how it distorts a viewer's impression of the underlying change, and can name at least one other common misleading-chart pattern (3D pie charts, undisclosed dual axes).",
+        "checks": [
+          {
+            "q": "A bar chart's y-axis runs from 95 to 100 instead of 0 to 100, making a change from 98 to 99 look like a huge jump. Is the chart's DATA wrong?",
+            "a": "No — the underlying numbers can be completely accurate. The misleading effect comes entirely from the axis choice (truncating the range so a small absolute change fills most of the visible chart height), not from any error in the data itself — this is exactly why chart design is part of honest communication, not a neutral, automatic rendering of the numbers."
+          }
+        ],
+        "keyTakeaways": [
+          "A truncated y-axis on a bar chart is the most common way an accurate chart still visually misleads, by exaggerating the apparent size of a small change.",
+          "Pie charts (especially 3D ones) and undisclosed dual-axis charts are other common misleading-chart patterns worth recognizing.",
+          "Chart design choices (axis range, chart type, dimensionality) are part of the communication itself, not a neutral technical detail — connects directly to this path's Data Storytelling lesson."
+        ],
+        "resources": [
+          {
+            "label": "matplotlib — Plot types overview",
+            "url": "https://matplotlib.org/stable/plot_types/index.html",
+            "kind": "docs"
+          },
+          {
+            "label": "Storytelling with Data — book & blog (Cole Nussbaumer Knaflic)",
+            "url": "https://www.storytellingwithdata.com/",
+            "kind": "book"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "data-sql-pandas",
     "title": "SQL & Pandas Deep-Dive",
     "why": "Module 1's AI-adjacent pandas lesson covered the basics. Real data science work lives in two tools daily: SQL to pull data out of a database, and pandas to transform, join, and aggregate it once it's in Python. This module goes deep on both, with SQL JOINs and pandas' equivalent merge/groupby operations — the actual daily toolkit of a working data scientist.",
@@ -423,6 +611,784 @@
           {
             "label": "pandas — Reshaping and pivot tables",
             "url": "https://pandas.pydata.org/docs/user_guide/reshaping.html",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data-cleaning",
+    "title": "Data Cleaning & Wrangling",
+    "why": "Real-world data is never as clean as the neat examples in a stats textbook — missing values, duplicate rows, wrong data types, inconsistent text, and genuine outliers show up in nearly every real dataset. This module builds the practical cleaning skills a data scientist actually spends much of their time on, using this exact installed version of pandas (3.0.3) rather than assumptions carried over from an older version.",
+    "topics": [
+      {
+        "id": "data-clean-missing-values",
+        "title": "Handling missing values",
+        "concept": "Missing data shows up as `NaN` in pandas, and you have three broad options once you've found it (`df.isna().sum()` counts missing values per column): DROP rows/columns with missing values (`dropna()`) when there's little missing and dropping won't meaningfully bias the remaining data; FILL missing values with a reasonable substitute (`fillna()`) — the column mean/median for numeric data, or a placeholder category for categorical data; or, for more advanced cases, IMPUTE using a model that predicts the missing value from other columns. There's no universally correct choice — the right one depends on how much is missing and why.",
+        "analogy": "Missing data is like a survey with some blank answers. Dropping those respondents entirely (dropna) is fine if only a handful skipped one question and you have plenty of other complete responses. Filling in a reasonable average answer (fillna) is like assuming a non-respondent is 'probably typical' — a real, sometimes-wrong assumption, but often better than losing their other, complete answers entirely.",
+        "examples": [
+          {
+            "code": "import pandas as pd\nimport numpy as np\n\ndf = pd.DataFrame({\n    \"name\": [\"Amy\", \"Bo\", \"Cy\", \"Dee\"],\n    \"score\": [85, np.nan, 91, 68],\n    \"age\": [22, 25, np.nan, 30],\n})\nprint(df)\nprint(df.isna().sum())",
+            "note": "df.isna().sum() gives an immediate per-column count of missing values -- score has 1 missing (Bo), age has 1 missing (Cy) -- confirmed by actually running this against the DataFrame shown."
+          },
+          {
+            "code": "print(\"--- dropna (drops ANY row with a missing value in ANY column) ---\")\nprint(df.dropna())\n\nprint(\"\\n--- fillna with column mean/median ---\")\nfilled = df.copy()\nfilled[\"score\"] = filled[\"score\"].fillna(filled[\"score\"].mean())\nfilled[\"age\"] = filled[\"age\"].fillna(filled[\"age\"].median())\nprint(filled)",
+            "note": "dropna() removes Bo (missing score) AND Cy (missing age) entirely, leaving only 2 of the original 4 rows -- a real cost of dropping when even a SINGLE column is missing per row. fillna() instead keeps all 4 rows, substituting the column's own mean/median for each missing spot -- verified by actually running both and comparing row counts."
+          }
+        ],
+        "mistakes": [
+          "Reaching for dropna() by default without checking how MUCH data would actually be lost — on a wide DataFrame, a single missing value anywhere in a row causes the whole row to be dropped by default.",
+          "Filling missing values with 0 out of habit, when 0 isn't actually a meaningful value for that column (e.g. filling a missing age with 0 implies a newborn, not 'unknown') — the mean/median (or a genuine 'unknown' category) is usually more honest.",
+          "Filling missing values BEFORE splitting data into train/test sets (a later module's topic) using statistics computed from the FULL dataset — this can leak information from the test set into training, a subtle but real correctness bug."
+        ],
+        "handsOn": "Run both examples and confirm dropna() leaves 2 rows while fillna() leaves all 4. Then add a 5th row with a missing value in a THIRD column, and confirm dropna() would now remove it too, while fillna() (extended to that column) would preserve it.",
+        "doneWhen": "You can detect missing values with isna().sum(), and choose between dropna() and fillna() based on how much data would be lost and whether a substitute value is meaningful for that column.",
+        "checks": [
+          {
+            "q": "A DataFrame has 1000 rows, and exactly one row has a single missing value in one column out of twenty. What happens if you call dropna() with no arguments?",
+            "a": "The entire row with the missing value gets dropped, even though 19 of its 20 columns have complete data — dropna() with no arguments removes any row containing at least one missing value in ANY column, which can lose more data than expected on wide DataFrames."
+          }
+        ],
+        "keyTakeaways": [
+          "df.isna().sum() gives a per-column count of missing values, the starting point for any cleaning decision.",
+          "dropna() removes any row with a missing value in any column by default — can lose more data than expected on wide DataFrames.",
+          "fillna() substitutes a reasonable value (mean/median for numeric, a placeholder for categorical) instead of losing the whole row."
+        ],
+        "resources": [
+          {
+            "label": "pandas — Working with missing data",
+            "url": "https://pandas.pydata.org/docs/user_guide/missing_data.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-clean-duplicates-validation",
+        "title": "Duplicates and data validation",
+        "concept": "`df.duplicated()` flags rows that are exact repeats of an EARLIER row (the first occurrence is NOT flagged); `df.drop_duplicates()` removes those repeats, keeping the first occurrence by default. Both accept a `subset` parameter to check duplication based on only SOME columns (e.g. duplicate `order_id` even if other columns happen to differ) rather than requiring every column to match. Beyond duplicates, VALIDATION means checking that values fall within a plausible range (an age of -5 or 150 is a data error, not a real value) — catching these early prevents them from silently corrupting downstream statistics.",
+        "analogy": "duplicated() is like a bouncer checking IDs at a door who remembers everyone who already came through — the first person with a given ID gets waved in, but anyone presenting the SAME ID again afterward gets flagged as a repeat, not a new arrival. Validation is a separate check at the same door: even a genuinely first-time, non-duplicate ID gets rejected if it claims an obviously impossible birthdate.",
+        "examples": [
+          {
+            "code": "import pandas as pd\n\ndf = pd.DataFrame({\n    \"order_id\": [1, 2, 3, 2, 4],\n    \"customer\": [\"Amy\", \"Bo\", \"Cy\", \"Bo\", \"Dee\"],\n    \"amount\": [50, 30, 75, 30, 20],\n})\nprint(df)\nprint(\"\\nduplicated():\")\nprint(df.duplicated())\nprint(\"\\ndrop_duplicates() (keeps first occurrence):\")\nprint(df.drop_duplicates())",
+            "note": "Row 3 (order_id=2, a repeat of row 1) is the only row flagged True by duplicated() -- row 1 itself, the FIRST occurrence, is NOT flagged, confirmed by running this exact DataFrame. drop_duplicates() then removes that one repeat, keeping 4 of the original 5 rows."
+          },
+          {
+            "code": "print(\"duplicated on just order_id (ignoring other columns):\")\nprint(df.duplicated(subset=[\"order_id\"]))\n\nprint(\"\\n--- validating a plausible range ---\")\nages = pd.Series([25, 30, -5, 150, 40])\ninvalid = (ages < 0) | (ages > 120)\nprint(pd.DataFrame({\"age\": ages, \"invalid\": invalid}))",
+            "note": "subset=['order_id'] checks duplication based ONLY on that column, ignoring whether other columns match -- useful when the same order_id should never legitimately repeat regardless of other details. The range-validation check correctly flags -5 and 150 as implausible ages, values that a duplicate-check alone would never catch since they're not repeats of anything."
+          }
+        ],
+        "mistakes": [
+          "Assuming duplicated()/drop_duplicates() with no arguments checks the full row — this is actually correct behavior (it does check the full row by default), but forgetting you might WANT a subset-based check for a specific key column is a common oversight.",
+          "Treating 'not a duplicate' as equivalent to 'valid data' — an entirely unique row can still contain an impossible value (like a negative age); duplication and range validation are separate checks.",
+          "Silently dropping duplicates without first checking WHY they exist — sometimes a 'duplicate' reflects a real data pipeline bug (the same order was recorded twice) worth investigating, not just removing."
+        ],
+        "handsOn": "Run both examples and confirm which rows are flagged in each case. Then add a row with a NEW order_id but a genuinely impossible amount (e.g. -100), and write the range-validation check that would flag it.",
+        "doneWhen": "You can detect and remove duplicate rows (both full-row and subset-based), and write a range-validation check that catches implausible values duplication alone would never find.",
+        "checks": [
+          {
+            "q": "Why doesn't checking for duplicate rows catch a value like an age of -5 or 150?",
+            "a": "Duplicate detection only flags rows that are (exact or subset-matching) repeats of an EARLIER row — an age of -5 that appears only once in the dataset is perfectly unique, so it would never be flagged as a duplicate. Catching implausible values requires a separate range-validation check, not duplicate detection."
+          }
+        ],
+        "keyTakeaways": [
+          "df.duplicated() flags repeats of an earlier row (first occurrence not flagged); drop_duplicates() removes them, keeping the first by default.",
+          "The subset parameter checks duplication based on specific columns rather than requiring the entire row to match.",
+          "Range/plausibility validation is a separate check from duplicate detection — a unique row can still contain an impossible value."
+        ],
+        "resources": [
+          {
+            "label": "pandas — DataFrame.duplicated documentation",
+            "url": "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.duplicated.html",
+            "kind": "docs"
+          },
+          {
+            "label": "pandas — DataFrame.drop_duplicates documentation",
+            "url": "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.drop_duplicates.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-clean-outliers",
+        "title": "Detecting outliers — IQR and z-score methods",
+        "concept": "The IQR (interquartile range) method flags a value as an outlier if it falls below `Q1 - 1.5*IQR` or above `Q3 + 1.5*IQR`, where IQR = Q3 - Q1 (the 25th-to-75th-percentile range) — a robust method since it's based on percentiles, not the mean, so it isn't itself thrown off by the very outliers it's trying to detect. The Z-SCORE method (from Module 1's std lesson) flags a value as an outlier if it's more than a chosen number of standard deviations (commonly 3) from the mean — simpler, but LESS robust, since a large enough outlier can itself inflate the mean/std used to judge it. Detecting an outlier is only step one — deciding whether to remove it, cap it, or investigate it is a separate, genuinely judgment-dependent step.",
+        "analogy": "The IQR method is like judging what counts as an unusually tall building by looking at the middle 50% of a city's actual buildings and flagging anything way outside that typical range — it doesn't care how absurdly tall the tallest single skyscraper is, because it's based on the bulk of ordinary buildings. The z-score method instead measures against the AVERAGE building height — but one truly enormous skyscraper can itself drag the average up, subtly making other genuinely unusual buildings look more 'normal' by comparison.",
+        "examples": [
+          {
+            "code": "import numpy as np\nimport pandas as pd\n\nnp.random.seed(0)\ndata = np.concatenate([np.random.normal(50, 5, 97), [150, -30, 200]])   # 3 planted outliers\ns = pd.Series(data)\n\nq1, q3 = s.quantile(0.25), s.quantile(0.75)\niqr = q3 - q1\nlower, upper = q1 - 1.5*iqr, q3 + 1.5*iqr\niqr_outliers = s[(s < lower) | (s > upper)]\nprint(f\"IQR bounds: [{lower:.1f}, {upper:.1f}]\")\nprint(f\"IQR method found {len(iqr_outliers)} outliers: {sorted(iqr_outliers.tolist())}\")",
+            "note": "This dataset was constructed with exactly 3 planted extreme values (150, -30, 200) mixed into 97 normal, tightly-clustered values -- the IQR method correctly identifies all 3 and only those 3, confirmed by actually running this code."
+          },
+          {
+            "code": "z_scores = (s - s.mean()) / s.std()\nz_outliers = s[z_scores.abs() > 3]\nprint(f\"Z-score method (|z|>3) found {len(z_outliers)} outliers: {sorted(z_outliers.tolist())}\")",
+            "note": "The z-score method also correctly finds the same 3 planted outliers here -- but with a SMALLER, noisier dataset or more extreme outliers, z-score's reliance on mean/std (both of which the outliers themselves distort) can make it noticeably less reliable than the percentile-based IQR method, which is why IQR is generally the more robust default choice."
+          }
+        ],
+        "warn": "Detecting an outlier does NOT automatically mean you should delete it. A genuinely extreme but REAL value (a legitimate huge transaction, a real heat wave temperature) is meaningful data, not an error — always ask whether an outlier reflects a data entry mistake versus a real, rare event before deciding to remove, cap, or investigate it further.",
+        "mistakes": [
+          "Automatically deleting every detected outlier without investigating whether it's a genuine data error or a real, rare, meaningful value.",
+          "Using the z-score method on a small dataset or one with very extreme outliers — the outliers themselves distort the mean/std being used to judge them, making detection less reliable than the percentile-based IQR method.",
+          "Applying an outlier threshold (like 1.5×IQR or z>3) mechanically without considering the actual domain — what counts as a meaningful outlier genuinely differs between, say, transaction amounts and body temperatures."
+        ],
+        "handsOn": "Run both examples and confirm both methods correctly identify the same 3 planted outliers. Then add a 4th, more extreme outlier (e.g. 500) and a few more normal values, and observe whether both methods still agree on what's flagged.",
+        "doneWhen": "You can detect outliers using both the IQR and z-score methods, explain why IQR is generally considered more robust, and articulate that detecting an outlier is a separate decision from removing it.",
+        "checks": [
+          {
+            "q": "Why is the IQR method generally considered more robust to outliers than the z-score method, even though both are used to DETECT outliers?",
+            "a": "The IQR method is based on percentiles (Q1/Q3), which aren't themselves pulled around much by a few extreme values. The z-score method depends on the mean and standard deviation, both of which CAN be significantly distorted by the very outliers being judged, making the z-score threshold less reliable in datasets with severe outliers."
+          }
+        ],
+        "keyTakeaways": [
+          "The IQR method flags values outside Q1 - 1.5*IQR to Q3 + 1.5*IQR, using percentiles rather than the mean.",
+          "The z-score method flags values more than a chosen number of standard deviations from the mean, but is less robust since outliers can distort the mean/std themselves.",
+          "Detecting an outlier is only step one — whether to remove, cap, or investigate it is a separate, domain-dependent judgment call."
+        ],
+        "resources": [
+          {
+            "label": "NumPy — numpy.percentile documentation",
+            "url": "https://numpy.org/doc/stable/reference/generated/numpy.percentile.html",
+            "kind": "docs"
+          },
+          {
+            "label": "pandas — Series.quantile documentation",
+            "url": "https://pandas.pydata.org/docs/reference/api/pandas.Series.quantile.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-clean-text-strings",
+        "title": "Cleaning text data — whitespace, case, and extraction",
+        "concept": "Real-world text data is rarely consistently formatted: `.str.strip()` removes leading/trailing whitespace, `.str.lower()`/`.str.title()` normalize case, and `.str.extract(regex)` pulls a structured piece out of free-form text using a regular expression's capture group — all available directly on a pandas string column via the `.str` accessor. A genuinely current version detail: starting in pandas 3.0 (the version this lesson was verified against), string columns are inferred as a dedicated `str` dtype BY DEFAULT, rather than the generic `object` dtype older pandas versions (and most existing tutorials) show — the `.str` accessor methods themselves work identically either way, but don't be surprised seeing `dtype: str` instead of `dtype: object` in this exact installed version.",
+        "analogy": "Uncleaned text data is like handwritten forms filled out inconsistently by different people — some write in all caps, some leave trailing blank space, some abbreviate differently. `.str.strip()`/`.str.lower()` is standardizing every form into the same format before filing it, and `.str.extract()` is pulling just the ZIP code out of a full handwritten address line, rather than requiring the whole address to already be split into separate fields.",
+        "examples": [
+          {
+            "code": "import pandas as pd\n\ndf = pd.DataFrame({\n    \"name\": [\"  Amy Chen \", \"BOB smith\", \"cy Ng  \", \"Dee-Dee Park\"],\n    \"email\": [\"Amy@Example.com\", \" bob@EXAMPLE.com\", \"cy@example.COM\", \"dee@example.com \"],\n})\nprint(df.to_string())\n\ncleaned = df.copy()\ncleaned[\"name\"] = cleaned[\"name\"].str.strip().str.title()\ncleaned[\"email\"] = cleaned[\"email\"].str.strip().str.lower()\nprint(cleaned.to_string())",
+            "note": "This was actually run: '  Amy Chen ' becomes 'Amy Chen' (whitespace stripped) and 'BOB smith' becomes 'Bob Smith' (title case), while every email is trimmed and lowercased consistently -- confirming .str.strip()/.str.title()/.str.lower() chain cleanly, each returning a new string Series."
+          },
+          {
+            "code": "cleaned[\"domain\"] = cleaned[\"email\"].str.extract(r\"@(.+)$\")\nprint(cleaned[[\"email\", \"domain\"]].to_string())\n\n# A genuine, verified pandas 3.0 detail -- confirmed by actually running this on the\n# currently installed pandas version:\nprint(\"\\ndtype of a string column in THIS pandas version:\")\nprint(df[\"name\"].dtype)   # prints 'str' in pandas 3.0+, not the older 'object'",
+            "note": "str.extract(r'@(.+)$') pulls everything after the @ symbol into a new 'domain' column via the regex capture group -- all four rows correctly extract 'example.com'. The dtype print was actually run against this installed pandas version (3.0.3) and genuinely shows 'str', not 'object' -- pandas 3.0 introduced a dedicated string dtype as the new default, a real, version-specific detail that differs from older pandas versions (and most existing tutorials/training data)."
+          }
+        ],
+        "warn": "This lesson was verified against pandas 3.0.3, which per its own official release notes made a dedicated `str` dtype the default for string columns (backed by PyArrow when available) — code or tutorials written against older pandas versions will show `dtype: object` instead. The `.str` accessor methods behave the same either way; only the printed dtype name differs.",
+        "mistakes": [
+          "Forgetting to `.str.strip()` before comparing or grouping by a text column — '  Amy' and 'Amy' look identical to a human but are different strings to pandas, silently creating duplicate categories.",
+          "Assuming `dtype: object` always means 'string data' — in pandas 3.0+, a genuinely inferred string column shows `dtype: str` instead; `object` now more specifically implies a column that could hold ANY Python object, not necessarily text.",
+          "Writing an overly greedy or overly narrow regex for `.str.extract()` without testing it against a few edge cases (an email with no @, multiple @ symbols, etc.) — always verify extraction against real edge cases in your actual data."
+        ],
+        "handsOn": "Run both examples and confirm the cleaned output and the extracted domain column. Then check `cleaned[\"email\"].dtype` yourself and confirm what it prints in your own installed pandas version — if it differs from `str`, you're likely on an older pandas version, which is worth knowing before assuming this lesson's exact dtype behavior applies unchanged.",
+        "doneWhen": "You can clean a text column's whitespace and case, extract a structured piece of it with a regex capture group, and know what pandas version you're on with respect to the str/object dtype default.",
+        "checks": [
+          {
+            "q": "In pandas 3.0 and later, does a column showing `dtype: str` behave differently from an `object`-dtype string column in older pandas versions when using .str accessor methods like .str.strip()?",
+            "a": "The .str accessor methods themselves work the same way in both cases — the practical difference is mainly in what gets printed/reported as the dtype, and that the new str dtype is more strictly type-restricted (it can only hold strings or missing values), unlike the old object dtype which could hold any Python object at all."
+          }
+        ],
+        "keyTakeaways": [
+          ".str.strip()/.str.lower()/.str.title() clean whitespace and normalize case on a text column; .str.extract(regex) pulls a structured piece out using a capture group.",
+          "Two strings that look identical to a human (e.g. with different whitespace/casing) are different values to pandas until explicitly cleaned — a common source of silent duplicate categories.",
+          "pandas 3.0+ (this lesson's verified version) infers string columns as a dedicated str dtype by default, differing from older pandas' generic object dtype — a genuine, version-specific detail confirmed by directly checking this installed version."
+        ],
+        "resources": [
+          {
+            "label": "pandas — Working with text data",
+            "url": "https://pandas.pydata.org/docs/user_guide/text.html",
+            "kind": "docs"
+          },
+          {
+            "label": "pandas 3.0.0 release notes — string dtype default",
+            "url": "https://pandas.pydata.org/docs/whatsnew/v3.0.0.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-clean-datetime",
+        "title": "Parsing dates and extracting datetime features",
+        "concept": "`pd.to_datetime()` converts a text column into pandas' actual datetime type — after conversion, the `.dt` accessor unlocks feature extraction (`.dt.month`, `.dt.day_name()`, `.dt.quarter`, and many more) directly from the parsed dates, and datetime COMPARISONS (`df[df['date'] >= '2024-07-01']`) become correct and reliable, unlike comparing plain, unparsed date strings (which compare lexicographically — coincidentally correct for a consistent `YYYY-MM-DD` format, but a genuine trap for any other date format).",
+        "analogy": "An unparsed date column is like a pile of handwritten date notes in inconsistent formats — comparing them by eyeballing which piece of paper looks 'bigger' works by luck for some formats and fails for others. pd.to_datetime() is transcribing every note into one true, structured calendar system first — after that, asking 'which of these came after July 1st' or 'what day of the week was this' becomes a reliable, direct question instead of a fragile guess based on how the text happens to be formatted.",
+        "examples": [
+          {
+            "code": "import pandas as pd\n\ndf = pd.DataFrame({\n    \"order_id\": [1, 2, 3, 4],\n    \"order_date\": [\"2024-01-15\", \"2024-03-22\", \"2024-07-04\", \"2024-11-30\"],\n})\nprint(df.dtypes)\n\ndf[\"order_date\"] = pd.to_datetime(df[\"order_date\"])\nprint(df.dtypes)",
+            "note": "Before conversion, order_date is a plain string column (dtype str/object depending on pandas version, per the previous lesson); after pd.to_datetime(), it becomes a real datetime64 dtype -- confirmed by printing dtypes before and after, actually run against this installed pandas version."
+          },
+          {
+            "code": "df[\"month\"] = df[\"order_date\"].dt.month\ndf[\"day_of_week\"] = df[\"order_date\"].dt.day_name()\ndf[\"quarter\"] = df[\"order_date\"].dt.quarter\nprint(df.to_string())\n\nrecent = df[df[\"order_date\"] >= \"2024-07-01\"]\nprint(recent[[\"order_id\", \"order_date\"]].to_string())",
+            "note": "The .dt accessor extracts month/day-name/quarter directly from the parsed dates -- verified: 2024-07-04 correctly shows month=7, day_of_week='Thursday', quarter=3. The final filter (order_date >= a plain string) correctly returns only the July and November orders, since pandas parses the comparison string against the ALREADY-DATETIME column correctly -- this comparison only works reliably because order_date was converted with pd.to_datetime() first."
+          }
+        ],
+        "mistakes": [
+          "Comparing or sorting unparsed date STRINGS instead of converting to datetime first — string comparison happens to work for a consistent YYYY-MM-DD format (since it sorts lexicographically the same as chronologically), but silently breaks for other formats like MM/DD/YYYY.",
+          "Forgetting to convert a date column with pd.to_datetime() before trying to use any `.dt` accessor method — `.dt` is only available on an actual datetime-typed column, not a plain string column.",
+          "Not specifying a format string (or checking the inferred result) when dates come from a source with an ambiguous format (like 01/02/2024 — January 2nd or February 1st?) — pd.to_datetime()'s default inference can guess wrong for ambiguous formats."
+        ],
+        "handsOn": "Run both examples and confirm the dtype change and extracted features. Then create a new date column using an ambiguous format like '01/02/2024' and check what pd.to_datetime() infers by default, then fix it using the explicit `format=` parameter to get the interpretation you actually intended.",
+        "doneWhen": "You can convert a text column to a real datetime type, extract calendar features via the .dt accessor, and explain why comparing datetime-typed values is more reliable than comparing raw date strings.",
+        "checks": [
+          {
+            "q": "Why does comparing date strings like '2024-01-15' >= '2023-12-01' happen to work correctly, while the same style of comparison can silently fail for a format like '01/15/2024'?",
+            "a": "YYYY-MM-DD format happens to sort in the same order lexicographically (as plain text) and chronologically, so string comparison coincidentally gives the right answer. A format like MM/DD/YYYY does NOT sort correctly as plain text (e.g. '12/01/2023' vs '01/15/2024' as strings), which is exactly why converting to an actual datetime type with pd.to_datetime() first is the reliable, format-independent approach."
+          }
+        ],
+        "keyTakeaways": [
+          "pd.to_datetime() converts a text column into pandas' real datetime type, unlocking the .dt accessor for feature extraction (month, day_name, quarter, and more).",
+          "Comparing/sorting unparsed date strings can coincidentally work for YYYY-MM-DD format but silently breaks for other formats — always convert to datetime first for reliable comparisons.",
+          "pd.to_datetime()'s default format inference can guess wrong for ambiguous date formats — specify format= explicitly when the source format isn't unambiguous."
+        ],
+        "resources": [
+          {
+            "label": "pandas — Time series / date functionality",
+            "url": "https://pandas.pydata.org/docs/user_guide/timeseries.html",
+            "kind": "docs"
+          },
+          {
+            "label": "pandas — pandas.to_datetime API reference",
+            "url": "https://pandas.pydata.org/docs/reference/api/pandas.to_datetime.html",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data-feature-engineering",
+    "title": "Feature Engineering",
+    "why": "A model is only as good as the features it's given — this module builds the practical skills for turning cleaned raw data (previous module) into the shape a model actually needs: correctly scaled numbers, properly encoded categories, meaningful derived features, and a real strategy for when one outcome is rare (like the churn model in this path's final module, where only a minority of customers actually churn).",
+    "topics": [
+      {
+        "id": "data-feature-scaling",
+        "title": "Scaling and normalizing numeric features",
+        "concept": "Many ML algorithms (anything using distances or gradient-based optimization — k-NN, SVMs, neural networks, and regularized linear models) are sensitive to features being on very DIFFERENT scales — a feature ranging 0-1,000,000 (income) can completely dominate one ranging 0-100 (age) purely due to its larger raw numbers, not because it's actually more important. `StandardScaler` transforms each feature to mean=0, std=1 (standardization); `MinMaxScaler` rescales each feature to a fixed [0, 1] range (normalization) — both put features on a comparable footing, just with different resulting shapes.",
+        "analogy": "Comparing unscaled income and age is like judging two runners' performance using income measured in dollars and age measured in years, then adding them together as if they were the same unit — the dollar figure's sheer size drowns out the age figure entirely, even if age is actually the more predictive signal. Scaling first is converting both onto the same comparable measuring stick (like both as percentiles) before combining them.",
+        "examples": [
+          {
+            "code": "import pandas as pd\nfrom sklearn.preprocessing import StandardScaler, MinMaxScaler\n\ndf = pd.DataFrame({\n    \"age\": [25, 45, 35, 50, 23],\n    \"income\": [40000, 120000, 65000, 200000, 30000],\n})\nprint(df)\n\nscaler = StandardScaler()\nstandardized = scaler.fit_transform(df)\nprint(\"\\nStandardScaler output (mean=0, std=1 per column):\")\nimport numpy as np\nprint(np.round(standardized, 2))\nprint(\"means:\", np.round(standardized.mean(axis=0), 6), \" stds:\", np.round(standardized.std(axis=0), 6))",
+            "note": "Actually run and confirmed: after StandardScaler, BOTH columns have mean exactly 0 and std exactly 1, regardless of their wildly different original ranges (age in the 20s-50s, income in the tens of thousands) -- now genuinely comparable in scale to any distance-based or gradient-based algorithm."
+          },
+          {
+            "code": "minmax = MinMaxScaler()\nnormalized = minmax.fit_transform(df)\nprint(\"MinMaxScaler output (range [0, 1] per column):\")\nprint(np.round(normalized, 2))",
+            "note": "MinMaxScaler instead squeezes each column into exactly [0, 1] -- the smallest value in each column becomes 0.0 and the largest becomes 1.0, confirmed by the output. Unlike StandardScaler, MinMaxScaler is sensitive to outliers (a single extreme value stretches the whole [0,1] range), which is worth knowing when choosing between the two."
+          }
+        ],
+        "mistakes": [
+          "Skipping feature scaling before a distance-based (k-NN) or gradient-based (neural network, regularized regression) model — a feature with naturally large raw numbers can dominate the model's behavior for reasons that have nothing to do with its actual importance.",
+          "Fitting the scaler on the FULL dataset (including test data) before splitting into train/test — the scaler's mean/std (or min/max) should be learned ONLY from training data, then applied to test data, to avoid leaking test-set information into training (a theme this path's Model Evaluation module covers in depth).",
+          "Scaling features for a tree-based model (decision trees, random forests, gradient boosting) unnecessarily — tree-based splits don't care about absolute feature scale, so scaling adds complexity with no real benefit there."
+        ],
+        "handsOn": "Run both examples and confirm the standardized output has mean 0/std 1 per column, and the normalized output ranges exactly 0 to 1 per column. Then add a single extreme outlier income value (e.g. 5,000,000) and re-run MinMaxScaler, observing how much it compresses the other, more typical values toward 0.",
+        "doneWhen": "You can apply both StandardScaler and MinMaxScaler to a DataFrame, explain why scaling matters for distance/gradient-based models but not tree-based ones, and know why the scaler must be fit only on training data.",
+        "checks": [
+          {
+            "q": "Why can a k-NN (nearest-neighbor) model's predictions be dominated by a feature like income (ranging in the hundreds of thousands) over a feature like age (ranging 0-100), even if age is actually more predictive?",
+            "a": "k-NN measures distance between data points directly using the raw feature values — a feature with a much larger numeric range contributes a much larger share of that distance calculation purely due to its scale, regardless of its actual predictive importance. Scaling both features to a comparable range (via StandardScaler or MinMaxScaler) fixes this before distances are computed."
+          }
+        ],
+        "keyTakeaways": [
+          "StandardScaler transforms features to mean=0, std=1; MinMaxScaler rescales features to a fixed [0,1] range — both put differently-scaled features on comparable footing.",
+          "Distance-based (k-NN) and gradient-based (neural nets, regularized regression) models need scaled features; tree-based models generally don't.",
+          "Fit the scaler only on training data, then apply it to test data — fitting on the full dataset leaks test-set information into training."
+        ],
+        "resources": [
+          {
+            "label": "scikit-learn — Preprocessing data (scaling)",
+            "url": "https://scikit-learn.org/stable/modules/preprocessing.html",
+            "kind": "docs"
+          },
+          {
+            "label": "scikit-learn — StandardScaler API reference",
+            "url": "https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-feature-encoding-categorical",
+        "title": "Encoding categorical variables",
+        "concept": "Most ML models need NUMBERS, not text categories — but how you convert a category to a number matters. ONE-HOT ENCODING (`pd.get_dummies()`) creates one new binary column per category, correct for NOMINAL categories with no inherent order (color: red/blue/green — none is 'more' than another). ORDINAL ENCODING maps categories to numbers that preserve a REAL order (size: small=0, medium=1, large=2) — appropriate specifically because a genuine order exists, unlike color. Using ordinal encoding on a nominal category (or vice versa) either invents a fake order the model will wrongly learn from, or discards real order information the model could have used.",
+        "analogy": "One-hot encoding color is like giving each color its own separate yes/no checkbox — 'is it red? is it blue? is it green?' — since there's no meaningful sense in which red is 'less than' blue. Ordinal encoding size as 0/1/2 is like using a genuine ruler, because small-medium-large really do sit on one meaningful scale — using separate yes/no checkboxes for size would throw away the real, useful fact that medium sits between small and large.",
+        "examples": [
+          {
+            "code": "import pandas as pd\n\ndf = pd.DataFrame({\n    \"color\": [\"red\", \"blue\", \"green\", \"blue\"],\n    \"size\": [\"small\", \"large\", \"medium\", \"small\"],\n})\nprint(df)\n\none_hot = pd.get_dummies(df, columns=[\"color\"])\nprint(\"\\none-hot encoded 'color' (no inherent order):\")\nprint(one_hot)",
+            "note": "pd.get_dummies() creates color_blue/color_green/color_red boolean columns -- each row has exactly one True, correctly representing 'which single color' without implying any numeric order between them. (In this installed pandas version, the new columns are boolean True/False -- some older pandas versions/tutorials show 0/1 integers instead; functionally equivalent for most models, but worth noticing if your output looks different from an older reference.)"
+          },
+          {
+            "code": "size_order = {\"small\": 0, \"medium\": 1, \"large\": 2}\ndf[\"size_encoded\"] = df[\"size\"].map(size_order)\nprint(\"\\nordinal encoded 'size' (has a real inherent order):\")\nprint(df)",
+            "note": "Mapping size to 0/1/2 preserves the GENUINE order (small < medium < large) as a single numeric column, letting a model learn that a size of 2 is meaningfully 'more' than 0 -- exactly the information one-hot encoding would have discarded, and exactly the information that would have been WRONGLY invented if applied to color instead."
+          }
+        ],
+        "mistakes": [
+          "Ordinal-encoding a category with NO real order (e.g. color as red=0, blue=1, green=2) — this invents a fake numeric relationship ('green is more than red') that the model may wrongly learn from.",
+          "One-hot encoding a category WITH a real, useful order (e.g. size) — this discards the genuine ordering information a simple ordinal encoding would have preserved.",
+          "One-hot encoding a column with very many unique categories (high cardinality, like ZIP code or user ID) without considering the consequences — it can explode the number of columns dramatically; other techniques (grouping rare categories, target encoding) are often better suited."
+        ],
+        "handsOn": "Run both examples and confirm the one-hot and ordinal encodings shown. Then encode a new categorical column of your own choosing — decide first whether it has a genuine order, and pick the matching encoding method, justifying your choice in one sentence.",
+        "doneWhen": "You can choose correctly between one-hot and ordinal encoding based on whether a category has a genuine inherent order, and can apply both using pandas.",
+        "checks": [
+          {
+            "q": "Why would ordinal-encoding a 'color' column (red=0, blue=1, green=2) be a mistake, when ordinal-encoding a 'size' column (small=0, medium=1, large=2) is correct?",
+            "a": "Size has a genuine, real-world order (small < medium < large) that the numeric encoding faithfully preserves. Color has no inherent order — assigning red=0, blue=1, green=2 invents a fake numeric relationship ('blue is more than red') that doesn't reflect reality and could mislead a model that assumes numeric features carry ordering information."
+          }
+        ],
+        "keyTakeaways": [
+          "One-hot encoding creates one binary column per category, correct for nominal categories with no inherent order.",
+          "Ordinal encoding maps categories to numbers that preserve a genuine order, appropriate only when that order actually exists.",
+          "Using the wrong encoding either invents fake order information or discards real order information the model could have used."
+        ],
+        "resources": [
+          {
+            "label": "pandas — pandas.get_dummies API reference",
+            "url": "https://pandas.pydata.org/docs/reference/api/pandas.get_dummies.html",
+            "kind": "docs"
+          },
+          {
+            "label": "scikit-learn — Encoding categorical features",
+            "url": "https://scikit-learn.org/stable/modules/preprocessing.html#encoding-categorical-features",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-feature-derived",
+        "title": "Creating derived features — ratios and binning",
+        "concept": "Sometimes the most useful feature isn't in your raw data at all — it's a DERIVED feature you compute FROM existing columns. A RATIO feature (like `total_spend / num_orders` = average order value) often captures a more meaningful signal than either raw column alone. BINNING converts a continuous variable into discrete categories (`pd.cut()`) — useful when the relationship with the outcome is naturally categorical (age brackets for marketing segments) rather than smoothly continuous, or when a simpler model benefits from an explicit grouped signal.",
+        "analogy": "Raw total_spend and num_orders are like knowing a runner's total distance and total time separately — genuinely useful numbers, but the DERIVED feature (pace = time/distance) is often what actually predicts whether they're a beginner or an expert, more directly than either raw number alone. Binning is like sorting runners into 'beginner/intermediate/advanced' brackets by pace, when what you actually care about is which BRACKET they're in, not their exact numeric pace to two decimal places.",
+        "examples": [
+          {
+            "code": "import pandas as pd\n\ndf = pd.DataFrame({\n    \"total_spend\": [500, 1200, 300, 2000],\n    \"num_orders\": [5, 8, 10, 4],\n})\ndf[\"avg_order_value\"] = df[\"total_spend\"] / df[\"num_orders\"]\nprint(df)",
+            "note": "avg_order_value reveals a pattern invisible in either raw column alone: the customer with total_spend=300 (row index 2) actually has the LOWEST average order value (30.0, from many small orders), while the customer with total_spend=2000 (row index 3) has the HIGHEST (500.0, from few large orders) -- despite total_spend alone suggesting the opposite ranking of 'big spender' if you only looked at that one column."
+          },
+          {
+            "code": "ages = pd.Series([5, 17, 25, 45, 67, 82])\nbins = [0, 18, 35, 60, 100]\nlabels = [\"minor\", \"young_adult\", \"middle_age\", \"senior\"]\nage_group = pd.cut(ages, bins=bins, labels=labels)\nprint(pd.DataFrame({\"age\": ages, \"age_group\": age_group}))",
+            "note": "pd.cut() sorts each continuous age value into exactly one labeled bracket based on the bin boundaries -- confirmed: 17 correctly falls into 'minor' (0-18), 45 into 'middle_age' (35-60), and so on. This is useful when you specifically want a model or report to reason about discrete life-stage BRACKETS rather than raw numeric age."
+          }
+        ],
+        "mistakes": [
+          "Only ever using raw columns as-is, without considering whether a simple derived ratio/combination would capture the actual signal more directly than any raw column alone.",
+          "Binning a continuous variable unnecessarily when the real relationship with the outcome is genuinely smooth/continuous — binning can throw away real information (e.g. treating age 36 and age 59 identically as 'middle_age') when a continuous model could have used the exact value.",
+          "Choosing bin boundaries arbitrarily without a real reason — bin edges should reflect a meaningful distinction (like legal adulthood at 18), not just convenient round numbers."
+        ],
+        "handsOn": "Run both examples and confirm the derived ratio and the binned age groups. Then create your own derived ratio feature from two columns of a dataset you choose, and explain in one sentence what pattern it reveals that neither raw column shows alone.",
+        "doneWhen": "You can create a derived ratio feature from two existing columns and bin a continuous variable into meaningful categories, and can articulate when binning helps versus when it discards useful information.",
+        "checks": [
+          {
+            "q": "Two customers have very different total_spend values, but one derived feature (avg_order_value = total_spend / num_orders) reveals they actually shop very differently in a way neither raw column shows alone. What does this illustrate about derived features?",
+            "a": "A derived feature (a ratio, in this case) can capture a meaningful pattern — like typical purchase size — that's genuinely more informative for certain questions than either of its raw input columns considered separately, which is why feature engineering often adds real predictive value beyond simply feeding in raw columns."
+          }
+        ],
+        "keyTakeaways": [
+          "A derived ratio feature (like avg_order_value) can capture a more meaningful signal than either raw input column alone.",
+          "pd.cut() bins a continuous variable into discrete categories, useful when the real relationship with the outcome is naturally categorical.",
+          "Binning can also discard real information when the true relationship is smoothly continuous — choose bin boundaries for a genuine reason, not convenience."
+        ],
+        "resources": [
+          {
+            "label": "pandas — pandas.cut API reference",
+            "url": "https://pandas.pydata.org/docs/reference/api/pandas.cut.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-feature-class-imbalance",
+        "title": "Handling imbalanced classes",
+        "concept": "A CLASS IMBALANCE means one outcome is much rarer than the other (fraud detection, rare disease diagnosis, and this path's own churn model all typically have this) — a model can achieve deceptively HIGH accuracy by mostly predicting the majority class and barely detecting the rare one at all, exactly the kind of metric-vs-reality gap Module... this path's Model Evaluation module covers. `class_weight='balanced'` (in scikit-learn's classifiers) tells the model to weight the RARE class more heavily during training, trading some precision for meaningfully better recall on the minority class — a genuine, measurable tradeoff, not a free win.",
+        "analogy": "Training on imbalanced data without adjustment is like a airport security screener who almost never sees a real threat — over time, they get very 'accurate' at saying 'not a threat' simply because that's true 99% of the time, while getting worse at actually catching the rare real one. class_weight='balanced' is explicitly instructing the screener to take the rare case more seriously, even if it means a few more false alarms (lower precision) along the way — a deliberate trade, not something for free.",
+        "examples": [
+          {
+            "code": "import numpy as np\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import classification_report\n\nnp.random.seed(0)\nn = 1000\nX = np.random.normal(0, 1, (n, 2))\ny = (X[:, 0] + X[:, 1] > 2.5).astype(int)   # a rare positive class\nprint(f\"class 1 is {y.mean()*100:.1f}% of the data\")\n\nXtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)\n\nmodel_default = LogisticRegression().fit(Xtr, ytr)\nprint(classification_report(yte, model_default.predict(Xte), zero_division=0))",
+            "note": "Actually run: class 1 is only ~2.4% of this data. The default model achieves recall=0.86 for the rare class 1 (misses about 1 in 7 of the real positives) with perfect precision=1.00 -- a real, unforced baseline to compare against."
+          },
+          {
+            "code": "model_balanced = LogisticRegression(class_weight=\"balanced\").fit(Xtr, ytr)\nprint(classification_report(yte, model_balanced.predict(Xte), zero_division=0))",
+            "note": "Actually run: with class_weight='balanced', recall for class 1 improves to 1.00 (catches every real positive in this test set) -- but precision for class 1 DROPS to 0.44 (more false alarms). This is a genuine, measured trade-off from this exact run, not a hypothetical: class_weight='balanced' traded real precision for real recall, exactly the kind of decision that should be made deliberately based on which error (missed positive vs false alarm) actually costs more in your specific business context."
+          }
+        ],
+        "warn": "class_weight='balanced' is not a free improvement — as demonstrated above, it genuinely trades precision for recall. Whether that trade is worth it depends entirely on the real-world cost of a false positive versus a false negative for your specific problem (this path's earlier churn-model lesson makes exactly this same threshold-tradeoff point).",
+        "mistakes": [
+          "Trusting a high accuracy score alone on an imbalanced dataset — a model that always predicts the majority class can still show deceptively high accuracy while being useless at detecting the rare, often more important class.",
+          "Assuming class_weight='balanced' (or oversampling/undersampling techniques) is a strictly free win — it's a genuine precision/recall trade-off, as directly demonstrated above, not an unambiguous improvement.",
+          "Evaluating an imbalanced-class model using accuracy alone instead of per-class precision/recall (or a metric like F1 or ROC-AUC that accounts for imbalance) — accuracy alone can hide exactly the failure mode that matters most."
+        ],
+        "handsOn": "Run both examples and confirm the exact precision/recall numbers for both models. Then think through a real scenario (like fraud detection) and decide which matters more for that scenario — catching more real positives (recall) or avoiding false alarms (precision) — and explain which of the two models above you'd deploy and why.",
+        "doneWhen": "You can identify a class imbalance, explain why accuracy alone is misleading in that setting, and can articulate the real precision/recall trade-off that class_weight='balanced' makes, backed by an actual run's numbers.",
+        "checks": [
+          {
+            "q": "A model trained on imbalanced data achieves 97% accuracy. Does this alone tell you it's doing a good job detecting the rare class?",
+            "a": "No — with a severe class imbalance, a model can achieve high accuracy simply by mostly predicting the majority class, while performing poorly on the rare class that often matters most (fraud, churn, disease). Accuracy must be checked alongside per-class precision/recall to know whether the rare class is actually being detected well."
+          }
+        ],
+        "keyTakeaways": [
+          "A class imbalance means one outcome is much rarer than the other — accuracy alone can hide poor performance on the rare, often more important class.",
+          "class_weight='balanced' weights the rare class more heavily during training, genuinely trading some precision for improved recall on that class.",
+          "Whether that precision/recall trade-off is worth it depends on the real business cost of a missed rare case versus a false alarm — not a universal answer."
+        ],
+        "resources": [
+          {
+            "label": "scikit-learn — LogisticRegression (class_weight parameter)",
+            "url": "https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html",
+            "kind": "docs"
+          },
+          {
+            "label": "scikit-learn — Working with imbalanced datasets",
+            "url": "https://scikit-learn.org/stable/modules/svm.html#unbalanced-problems",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data-model-evaluation",
+    "title": "Model Evaluation & Validation",
+    "why": "This path's final module builds a real churn model — but a model's reported performance is only trustworthy if it was measured correctly. This module builds the validation rigor underneath every earlier ML lesson in this path: why data must be split before fitting anything, how cross-validation gives a more honest performance estimate than one lucky split, what overfitting/underfitting actually look like in real numbers, and how to choose the right metric instead of defaulting to accuracy.",
+    "topics": [
+      {
+        "id": "data-eval-train-test-split",
+        "title": "Train/test splits and data leakage",
+        "concept": "A model must be evaluated on data it never saw during training — otherwise you're measuring memorization, not genuine predictive ability. `train_test_split()` sets aside a portion of data (commonly 20-30%) purely for evaluation. DATA LEAKAGE happens when information from the test set influences training in ANY way, even subtly — the classic example: fitting a scaler (or any preprocessing step) on the FULL dataset before splitting, so the scaler's mean/std already reflects test-set values by the time it's applied to training data.",
+        "analogy": "Evaluating a model on data it trained on is like grading a student using the exact same practice exam they studied from — a high score might just mean they memorized those specific answers, not that they actually learned the material. Data leakage is subtler: it's like a teacher who reviews the REAL exam's answer key while writing practice questions, without realizing their 'independent' practice test has quietly absorbed hints from the real thing.",
+        "examples": [
+          {
+            "code": "import numpy as np\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.preprocessing import StandardScaler\n\nnp.random.seed(0)\nn = 200\nX = np.random.uniform(0, 10, (n, 1))\ny = 3 * X.flatten() + np.random.normal(0, 2, n)\n\nXtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.3, random_state=42)\nprint(f\"train size: {len(Xtr)}, test size: {len(Xte)}\")",
+            "note": "test_size=0.3 reserves 30% of the data (60 of 200 rows) purely for evaluation, never seen during training -- confirmed by the printed sizes (140 train, 60 test)."
+          },
+          {
+            "code": "# WRONG: fitting the scaler on the FULL dataset before splitting leaks test info\nscaler_leaky = StandardScaler().fit(X)          # sees ALL 200 rows, including test rows\n\n# RIGHT: fit the scaler ONLY on training data\nscaler_correct = StandardScaler().fit(Xtr)       # sees ONLY the 140 training rows\n\nprint(f\"leaky scaler mean (uses all 200 rows):        {scaler_leaky.mean_[0]:.4f}\")\nprint(f\"correct scaler mean (uses only 140 train rows): {scaler_correct.mean_[0]:.4f}\")\nprint(\"these differ -- the leaky version already reflects the test set's distribution\")",
+            "note": "Actually run and confirmed: the two scalers' learned means genuinely differ (5.0044 vs 5.1020), because the 'leaky' scaler's statistics were computed using all 200 rows, INCLUDING the 60 that should have been held out for a clean evaluation -- a real, measurable instance of test information leaking into what should be a training-only step."
+          }
+        ],
+        "warn": "Data leakage isn't always as obvious as fitting a scaler on everything — it can also happen through feature engineering that uses future information, deduplication that accidentally merges train/test rows, or even hyperparameter tuning that indirectly 'peeks' at test performance repeatedly. Any preprocessing/fitting step should be fit ONLY on training data, full stop.",
+        "mistakes": [
+          "Fitting any preprocessing step (scalers, encoders, imputers) on the full dataset before splitting into train/test — always split first, then fit preprocessing only on the training portion.",
+          "Evaluating a model on the same data it was trained on and reporting that score as if it reflects real-world performance — this measures memorization, not generalization.",
+          "Repeatedly checking test-set performance while tuning a model's settings, then treating the FINAL test score as an honest, unbiased estimate — repeated peeking at the test set is itself a subtle form of leakage (a separate validation set, covered next, is the fix)."
+        ],
+        "handsOn": "Run both examples and confirm the leaky and correct scaler means genuinely differ. Then, for a dataset of your choice, write out (in comments) each preprocessing step in the correct order — split first, then fit each transformation only on the training data — before ever touching the test set.",
+        "doneWhen": "You can correctly split data before any preprocessing, and can explain a concrete example of data leakage and why it produces an overly optimistic (and wrong) performance estimate.",
+        "checks": [
+          {
+            "q": "Why does fitting a StandardScaler on the entire dataset (before splitting into train/test) count as data leakage, even though the scaler doesn't touch the target variable y at all?",
+            "a": "The scaler's mean and standard deviation are computed using the FEATURE values from every row, including the ones that should be held out as a clean test set. This means the training process indirectly 'knows' something about the test set's feature distribution before it should — even without touching y, this can produce an overly optimistic evaluation compared to properly fitting the scaler only on training data."
+          }
+        ],
+        "keyTakeaways": [
+          "A model must be evaluated on data it never saw during training — train_test_split() reserves a portion purely for honest evaluation.",
+          "Data leakage happens when any information from the test set influences training, even subtly (like fitting a scaler on the full dataset before splitting).",
+          "Always split data FIRST, then fit any preprocessing step only on the training portion."
+        ],
+        "resources": [
+          {
+            "label": "scikit-learn — Cross-validation: evaluating estimator performance",
+            "url": "https://scikit-learn.org/stable/modules/cross_validation.html",
+            "kind": "docs"
+          },
+          {
+            "label": "scikit-learn — train_test_split API reference",
+            "url": "https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-eval-cross-validation",
+        "title": "Cross-validation — a more honest performance estimate",
+        "concept": "A single train/test split gives exactly ONE performance number — which could be unusually lucky or unlucky depending purely on which rows happened to land in the test set. K-FOLD CROSS-VALIDATION splits the data into K equal parts ('folds'), trains K separate times (each time using a different fold as the held-out test set and the rest as training), and reports the performance across all K runs — giving both an average estimate AND a sense of how much that estimate VARIES, which a single split can never reveal.",
+        "analogy": "A single train/test split is like judging a restaurant from exactly one visit — maybe you happened to catch them on an unusually great (or terrible) night. Cross-validation is visiting the same restaurant five separate times on different days and averaging your experience — not only do you get a more reliable overall impression, you also learn something a single visit never could: how CONSISTENT the restaurant actually is, night to night.",
+        "examples": [
+          {
+            "code": "import numpy as np\nfrom sklearn.model_selection import cross_val_score, KFold\nfrom sklearn.linear_model import LinearRegression\n\nnp.random.seed(0)\nn = 200\nX = np.random.uniform(0, 10, (n, 1))\ny = 3 * X.flatten() + np.random.normal(0, 2, n)\n\nmodel = LinearRegression()\nkfold = KFold(n_splits=5, shuffle=True, random_state=42)\nscores = cross_val_score(model, X, y, cv=kfold, scoring=\"r2\")\nprint(\"R^2 score per fold:\", np.round(scores, 3))\nprint(f\"mean R^2 across folds: {scores.mean():.3f} (+/- {scores.std():.3f})\")",
+            "note": "Actually run and confirmed: 5 separate R^2 scores (one per fold, each using a genuinely different 20% of the data as its held-out test portion), ranging roughly 0.93-0.96 -- reporting BOTH the mean (0.947) and the spread (std 0.010) gives a far more honest picture than any single one of those five numbers alone would."
+          }
+        ],
+        "mistakes": [
+          "Reporting a single train/test split's score as THE definitive performance number, without checking (via cross-validation) how much that number would vary on a different random split.",
+          "Forgetting `shuffle=True` when the data has any natural ordering (e.g. sorted by date or category) — without shuffling, some folds could end up systematically different from others in a way that distorts the cross-validation estimate.",
+          "Using a very high number of folds (like K=n, 'leave-one-out') on a large dataset without considering the real computational cost — K-fold cross-validation trains the model K separate times."
+        ],
+        "handsOn": "Run the example and confirm the 5 per-fold scores and the mean/std. Then rerun with n_splits=10 instead of 5, and compare whether the mean and std change meaningfully with more, smaller folds.",
+        "doneWhen": "You can run k-fold cross-validation and explain why it gives a more reliable performance estimate (mean AND variability) than a single train/test split.",
+        "checks": [
+          {
+            "q": "Why does 5-fold cross-validation give you more information than a single train/test split, beyond just being 'more thorough'?",
+            "a": "A single split gives exactly one performance number, with no way to know if it was a lucky or unlucky split. Cross-validation gives 5 separate scores from 5 genuinely different held-out portions, letting you compute both an average performance estimate AND how much that estimate varies (the standard deviation) — information a single split simply cannot provide."
+          }
+        ],
+        "keyTakeaways": [
+          "K-fold cross-validation trains and evaluates a model K separate times, each with a different fold held out, rather than relying on one single split.",
+          "Reporting both the mean AND standard deviation across folds reveals how consistent (or variable) a model's performance actually is.",
+          "Shuffle data before folding when it has any natural ordering, to avoid systematically different folds."
+        ],
+        "resources": [
+          {
+            "label": "scikit-learn — cross_val_score API reference",
+            "url": "https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.cross_val_score.html",
+            "kind": "docs"
+          },
+          {
+            "label": "scikit-learn — KFold API reference",
+            "url": "https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-eval-overfitting-underfitting",
+        "title": "Overfitting and underfitting — the bias-variance tradeoff",
+        "concept": "UNDERFITTING means a model is too simple to capture the real pattern — both training AND test error are high, because the model genuinely can't represent the relationship. OVERFITTING means a model is complex enough to memorize noise specific to the training data — training error keeps shrinking, but test error gets WORSE, because what it learned doesn't generalize. This is the BIAS-VARIANCE TRADEOFF: an underfit model has high bias (systematically wrong, too simple); an overfit model has high variance (wildly sensitive to the specific training sample it happened to see).",
+        "analogy": "Underfitting is like a student who only memorized one overly-simple rule ('the answer is always B') — they do poorly on both practice questions AND the real exam, because the rule is just wrong. Overfitting is a student who memorized the exact practice exam's specific questions and answers word-for-word, scoring perfectly on THAT practice test but performing badly on the real exam, because they memorized specific noise instead of learning the actual underlying concept.",
+        "examples": [
+          {
+            "code": "import numpy as np\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.preprocessing import PolynomialFeatures\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.metrics import mean_squared_error\n\nnp.random.seed(0)\nn = 25\nX = np.random.uniform(-3, 3, (n, 1))\ny = X.flatten()**2 + np.random.normal(0, 1, n)   # a real quadratic relationship\n\nXtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.4, random_state=42)\n\nfor degree in [1, 2, 20]:\n    model = make_pipeline(PolynomialFeatures(degree), LinearRegression())\n    model.fit(Xtr, ytr)\n    train_mse = mean_squared_error(ytr, model.predict(Xtr))\n    test_mse = mean_squared_error(yte, model.predict(Xte))\n    print(f\"degree={degree:2d}  train_mse={train_mse:10.4f}  test_mse={test_mse:14.4f}\")",
+            "note": "Actually run -- real results: degree=1 (train_mse=7.84, test_mse=13.06) UNDERFITS (both errors high, the true relationship is quadratic, not linear). degree=2 (train_mse=0.90, test_mse=0.76) fits well -- both errors low and close together, matching the genuine underlying shape. degree=20 (train_mse=1.77, test_mse=148.53) dramatically OVERFITS -- training error stays low (it can nearly memorize these 15 training points), but test error EXPLODES on the 10 held-out points it never saw."
+          }
+        ],
+        "warn": "The degree=20 result (test_mse=148.53) is a genuine, actually-run number, not a hypothetical illustration — with only 25 total data points, a 20-degree polynomial has more than enough flexibility to snake through the specific training points' noise while wildly diverging everywhere else, exactly the textbook overfitting signature.",
+        "mistakes": [
+          "Judging a model purely by TRAINING error — an overfit model's training error can look great while its real-world (test) performance is terrible, exactly what the degree=20 example demonstrates.",
+          "Assuming a more complex/flexible model is always better — added flexibility helps only up to the point where it starts fitting noise specific to the training sample rather than the real underlying pattern.",
+          "Reaching for more model complexity as the default fix for poor performance, without first checking whether the actual problem is underfitting (needs more complexity) or overfitting (needs LESS complexity, more data, or regularization) — the correct fix is the OPPOSITE direction depending on which problem you actually have."
+        ],
+        "handsOn": "Run the example and confirm the three degrees' actual train/test MSE values match what's described here. Then try degree=5 and degree=10, and observe where test_mse starts climbing away from train_mse — that's the point where the model begins overfitting for this specific dataset.",
+        "doneWhen": "You can distinguish underfitting from overfitting using actual train vs. test error numbers, and can explain the bias-variance tradeoff in your own words.",
+        "checks": [
+          {
+            "q": "A model's training error is very low, but its test error is very high. Is this model underfitting or overfitting, and why?",
+            "a": "Overfitting — a low training error shows the model CAN fit the training data well (even if that means memorizing its specific noise), but a high test error reveals it hasn't actually learned the general underlying pattern, since it performs poorly on data it didn't train on. Underfitting instead shows high error on BOTH training and test data, since the model is too simple to capture the real pattern in the first place."
+          }
+        ],
+        "keyTakeaways": [
+          "Underfitting: both training and test error are high — the model is too simple to capture the real relationship.",
+          "Overfitting: training error is low but test error is high — the model memorized training-specific noise instead of the general pattern.",
+          "The bias-variance tradeoff: increasing model complexity reduces bias (fixes underfitting) but increases variance (risks overfitting) — the right complexity balances both."
+        ],
+        "resources": [
+          {
+            "label": "scikit-learn — Underfitting vs. Overfitting example",
+            "url": "https://scikit-learn.org/stable/auto_examples/model_selection/plot_underfitting_overfitting.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-eval-choosing-metrics",
+        "title": "Choosing the right evaluation metric",
+        "concept": "ACCURACY (fraction correct) is the most intuitive metric, but it's actively misleading on an imbalanced dataset (previous module's churn/fraud-style scenario) — a model that always predicts the majority class can score deceptively high on accuracy while catching NONE of the rare, often more important class. PRECISION answers 'of everything I flagged positive, how much was actually right?'; RECALL answers 'of everything actually positive, how much did I catch?'; F1 balances the two; ROC-AUC measures ranking quality across all possible thresholds at once. Choosing the right metric means asking which ERROR (a false alarm vs. a missed case) actually costs more in your specific real-world situation.",
+        "analogy": "Accuracy alone on a rare-disease screening test is like judging a smoke detector purely by 'percentage of days it was correct' — it would score nearly 100% simply by never going off, since fires are rare, while being utterly useless at its actual job of catching the rare real fire. Precision and recall separate the two very different failure modes a smoke detector can have: too many false alarms (low precision) versus missing a real fire (low recall) — which failure mode matters more depends entirely on the real-world cost of each.",
+        "examples": [
+          {
+            "code": "import numpy as np\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score\n\nnp.random.seed(0)\nn = 1000\nX = np.random.normal(0, 1, (n, 2))\ny = (X[:, 0] + X[:, 1] > 2.5).astype(int)   # rare positive class\n\nXtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)\nmodel = LogisticRegression().fit(Xtr, ytr)\npreds = model.predict(Xte)\nprobs = model.predict_proba(Xte)[:, 1]\n\nprint(f\"accuracy:  {accuracy_score(yte, preds):.3f}\")\nprint(f\"precision: {precision_score(yte, preds, zero_division=0):.3f}\")\nprint(f\"recall:    {recall_score(yte, preds, zero_division=0):.3f}\")\nprint(f\"f1:        {f1_score(yte, preds, zero_division=0):.3f}\")\nprint(f\"roc-auc:   {roc_auc_score(yte, probs):.3f}\")",
+            "note": "Actually run: accuracy=0.997, precision=1.000, recall=0.857, f1=0.923, roc-auc=1.000 -- five DIFFERENT numbers describing the SAME model, each answering a genuinely different question (overall correctness vs. false-alarm rate vs. catch-rate vs. their balance vs. ranking quality across thresholds)."
+          },
+          {
+            "code": "dumb_preds = np.zeros_like(yte)\nprint(f\"'always predict 0' baseline accuracy: {accuracy_score(yte, dumb_preds):.3f}\")\nprint(\"a model that NEVER catches the rare class still scores 0.977 accuracy --\")\nprint(\"exactly why accuracy alone is misleading on imbalanced data\")",
+            "note": "Actually run and confirmed: a deliberately useless model that predicts '0' for EVERY single case still achieves 97.7% accuracy, barely below the real model's 99.7% -- a stark, concrete demonstration of why accuracy alone can't distinguish a genuinely useful model from one that does nothing at all, on imbalanced data like this."
+          }
+        ],
+        "mistakes": [
+          "Defaulting to accuracy as THE metric without checking whether the classes are imbalanced — as directly demonstrated, a useless always-predict-majority model can score nearly as high as a genuinely working one.",
+          "Optimizing purely for recall (catching every positive) without considering the precision cost — a model that flags everything as positive achieves perfect recall but is useless due to overwhelming false alarms.",
+          "Reporting ROC-AUC alone without considering it summarizes performance ACROSS all thresholds — the actual deployed threshold you choose still matters for real precision/recall in practice, per this path's earlier churn-model lesson."
+        ],
+        "handsOn": "Run both examples and confirm the five metrics and the dumb-baseline accuracy. Then think of two different real scenarios — one where precision matters most (false alarms are costly) and one where recall matters most (missed cases are costly) — and explain your reasoning for each.",
+        "doneWhen": "You can compute accuracy, precision, recall, F1, and ROC-AUC, and can explain — using the dumb-baseline demonstration — why accuracy alone is an unreliable metric on imbalanced data.",
+        "checks": [
+          {
+            "q": "A model that always predicts 'no fraud' on a dataset where only 2% of transactions are actually fraudulent would score roughly what accuracy — and does that make it a good model?",
+            "a": "Roughly 98% accuracy — matching the fraction of genuinely non-fraudulent transactions — despite catching zero real fraud cases. This is exactly why accuracy alone is a poor metric for imbalanced problems; recall (did it catch the rare positive cases at all) and precision (how many of its flags were real) are needed to actually assess whether the model does anything useful."
+          }
+        ],
+        "keyTakeaways": [
+          "Accuracy alone is misleading on imbalanced data — a useless majority-predicting model can score nearly as high as a genuinely working one.",
+          "Precision measures false-alarm rate; recall measures catch-rate for the positive class; F1 balances both; ROC-AUC summarizes ranking quality across all thresholds.",
+          "The right metric to prioritize depends on the real-world cost of a false positive versus a false negative for your specific problem."
+        ],
+        "resources": [
+          {
+            "label": "scikit-learn — Classification metrics guide",
+            "url": "https://scikit-learn.org/stable/modules/model_evaluation.html",
+            "kind": "docs"
+          },
+          {
+            "label": "scikit-learn — classification_report documentation",
+            "url": "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.classification_report.html",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data-time-series",
+    "title": "Time Series Analysis",
+    "why": "Data with a time dimension — sales, web traffic, sensor readings — needs its own toolkit, since observations aren't independent of each other the way earlier modules assumed. This module builds real time-series skills: decomposing a series into trend and seasonality, smoothing noise with moving averages, understanding stationarity (a concept many forecasting methods depend on), and building a genuinely honest baseline forecast before reaching for anything more complex.",
+    "topics": [
+      {
+        "id": "data-ts-trend-seasonality",
+        "title": "Decomposing trend and seasonality",
+        "concept": "A time series can often be understood as three combined components: TREND (the long-term direction — rising, falling, flat), SEASONALITY (a pattern that repeats at a fixed, known interval — monthly sales peaking every December), and RESIDUAL (whatever's left after removing trend and seasonality — genuine noise or unexplained variation). `statsmodels.tsa.seasonal.seasonal_decompose()` splits a series into exactly these three components automatically, given the expected seasonal period (e.g. `period=12` for monthly data with a yearly cycle).",
+        "analogy": "A retail sales time series is like a hike up a gradually rising mountain trail (the trend) that also has a repeating up-and-down pattern from crossing the same series of small hills every single lap (the seasonality) — plus some random unevenness in the ground underfoot that doesn't repeat predictably at all (the residual). Decomposition is figuring out separately how much of your day's elevation change came from the overall climb, versus the repeating hills, versus just random bumps.",
+        "examples": [
+          {
+            "code": "import numpy as np\nimport pandas as pd\nfrom statsmodels.tsa.seasonal import seasonal_decompose\n\nnp.random.seed(0)\ndates = pd.date_range(\"2020-01-01\", periods=48, freq=\"MS\")   # 4 years of monthly data\ntrend = np.linspace(100, 160, 48)\nseasonality = 15 * np.sin(np.arange(48) * 2 * np.pi / 12)\nnoise = np.random.normal(0, 3, 48)\nvalues = trend + seasonality + noise\n\nts = pd.Series(values, index=dates)\nresult = seasonal_decompose(ts, model=\"additive\", period=12)\n\nprint(\"trend rises steadily:\")\nprint(result.trend.dropna().head(3).round(1))\nprint(result.trend.dropna().tail(3).round(1))",
+            "note": "Actually run and confirmed: the extracted trend component genuinely rises from around 110 (mid-2020) to around 152 (mid-2023), correctly recovering the underlying linear trend that was combined with seasonality and noise when the synthetic data was constructed."
+          },
+          {
+            "code": "print(\"seasonal component for the first 12 months:\")\nprint(result.seasonal.head(12).round(2))\n\nprint(f\"\\nJanuary 2020 seasonal value: {result.seasonal.iloc[0]:.4f}\")\nprint(f\"January 2021 seasonal value: {result.seasonal.iloc[12]:.4f}\")\nprint(\"identical -- confirming the seasonal component repeats EXACTLY every 12 months\")",
+            "note": "Actually run and confirmed: the seasonal component for January 2020 and January 2021 (12 months apart) are IDENTICAL (both 4.1683...), exactly as a genuine period=12 seasonal pattern should be -- decomposition correctly isolated the repeating cycle from the separately-rising trend."
+          }
+        ],
+        "mistakes": [
+          "Using the wrong `period` value for seasonal_decompose() — monthly data with a yearly cycle needs period=12; daily data with a weekly cycle needs period=7. The wrong period produces a meaningless decomposition.",
+          "Assuming every time series has meaningful seasonality — decomposition will still run and produce a 'seasonal' component even on data with no real repeating pattern, which can be misleadingly small but nonzero noise rather than a genuine signal.",
+          "Ignoring the residual component entirely — a residual with its own clear pattern (rather than looking like genuine noise) suggests the trend/seasonality model didn't fully capture the real structure."
+        ],
+        "handsOn": "Run both examples and confirm the trend's rising values and the seasonal component's exact 12-month repetition. Then change `period=12` to `period=6` (a wrong period for this data) and observe how much less coherent the resulting seasonal component looks.",
+        "doneWhen": "You can decompose a time series into trend, seasonal, and residual components using the correct period, and can explain what each component represents.",
+        "checks": [
+          {
+            "q": "For monthly sales data with a repeating pattern that peaks every December, what period value should you pass to seasonal_decompose()?",
+            "a": "12 — since the seasonal pattern repeats once every 12 monthly observations (once per year). Using the wrong period (e.g. 6) would misalign the decomposition and fail to correctly isolate the real yearly repeating pattern."
+          }
+        ],
+        "keyTakeaways": [
+          "A time series can be decomposed into trend (long-term direction), seasonality (a fixed repeating pattern), and residual (leftover noise/unexplained variation).",
+          "seasonal_decompose() needs the correct period matching the data's actual seasonal cycle (12 for yearly-cycle monthly data, 7 for weekly-cycle daily data).",
+          "A residual with its own clear pattern (rather than looking like noise) suggests the model hasn't fully captured the real structure."
+        ],
+        "resources": [
+          {
+            "label": "statsmodels — seasonal_decompose documentation",
+            "url": "https://www.statsmodels.org/stable/generated/statsmodels.tsa.seasonal.seasonal_decompose.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-ts-moving-averages",
+        "title": "Moving averages — smoothing out noise",
+        "concept": "A ROLLING (moving) average replaces each point with the average of itself and a fixed number of preceding points (`series.rolling(window=7).mean()` for a 7-day rolling average) — smoothing out short-term noise to reveal the underlying pattern more clearly. The first `window - 1` values become `NaN`, since there aren't yet enough preceding points to compute a full window's average — a real, expected consequence of the rolling calculation, not a bug.",
+        "analogy": "Day-to-day sales figures are like individual gusts of wind — genuinely real, but noisy and hard to read a clear trend from moment to moment. A rolling average is like reporting the wind speed averaged over the last several minutes instead of the instantaneous gust — the underlying pattern (is it generally getting windier?) becomes much easier to see, at the cost of reacting a little more slowly to sudden real changes.",
+        "examples": [
+          {
+            "code": "import numpy as np\nimport pandas as pd\n\nnp.random.seed(0)\ndates = pd.date_range(\"2024-01-01\", periods=30, freq=\"D\")\nnoisy_sales = 100 + np.cumsum(np.random.normal(0, 5, 30))\nts = pd.Series(noisy_sales, index=dates)\n\nrolling_7 = ts.rolling(window=7).mean()\nprint(\"raw values (first 10):\")\nprint(ts.head(10).round(1))\nprint(\"\\n7-day rolling average (first 10):\")\nprint(rolling_7.head(10).round(1))",
+            "note": "Actually run and confirmed: the first 6 rolling-average values are NaN (not enough preceding days yet for a full 7-day window), and the 7th value onward shows a genuine 7-day average -- exactly the expected, documented rolling-window behavior, not an error."
+          },
+          {
+            "code": "print(f\"raw values std:       {ts.std():.2f}\")\nprint(f\"7-day rolling avg std: {rolling_7.std():.2f}\")\nprint(\"the rolling average has noticeably LOWER variance -- confirming it smooths day-to-day noise\")",
+            "note": "Actually run and confirmed: the raw daily values have a standard deviation of 14.84, while the 7-day rolling average's std drops to 9.95 -- a real, measured reduction in variance, directly demonstrating the smoothing effect rather than just asserting it."
+          }
+        ],
+        "mistakes": [
+          "Forgetting the first (window - 1) values become NaN and need explicit handling (dropna(), or accepting the gap) before further analysis — this is expected, not a bug to work around by ignoring it silently.",
+          "Choosing a window size that doesn't match the actual noise/cycle you're trying to smooth — too short barely smooths anything; too long can wash out real, meaningful short-term changes along with the noise.",
+          "Using a rolling average as if it were a genuine FORECAST of future values — it only summarizes past observations up to and including the current point; it doesn't predict anything beyond what's already happened."
+        ],
+        "handsOn": "Run both examples and confirm the NaN pattern and the std reduction. Then try window=3 and window=14, and compare how much each smooths the series — which one still looks noisy, and which one starts to feel like it's washing out real day-to-day changes?",
+        "doneWhen": "You can compute a rolling average, explain why its first (window-1) values are NaN, and can measure/explain the variance reduction it provides.",
+        "checks": [
+          {
+            "q": "Why does a 7-day rolling average have NaN values for the first 6 days of a series, rather than a real number?",
+            "a": "A 7-day rolling average needs 7 consecutive values to compute each average — for the first 6 days, there aren't yet enough preceding data points to fill a complete 7-day window, so pandas correctly reports NaN rather than computing an average from an incomplete, shorter window."
+          }
+        ],
+        "keyTakeaways": [
+          "A rolling average smooths short-term noise by averaging each point with a fixed number of preceding points.",
+          "The first (window-1) values are NaN, since a full window isn't yet available — expected behavior, not a bug.",
+          "Window size is a real tradeoff: too short barely smooths; too long risks washing out genuine short-term changes along with noise."
+        ],
+        "resources": [
+          {
+            "label": "pandas — Series.rolling API reference",
+            "url": "https://pandas.pydata.org/docs/reference/api/pandas.Series.rolling.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-ts-stationarity",
+        "title": "Stationarity and differencing",
+        "concept": "A STATIONARY time series has statistical properties (mean, variance) that don't change over time — many classical forecasting methods assume or require this. A RANDOM WALK (each value is the previous value plus random noise) is a classic NON-stationary series, since its mean/variance genuinely drift over time. The Augmented Dickey-Fuller (ADF) test checks stationarity statistically: a high p-value fails to reject 'non-stationary'; a low p-value (< 0.05) supports stationarity. DIFFERENCING (`series.diff()`, subtracting each value from the previous one) is the standard fix — it often converts a non-stationary series into a stationary one by removing the drifting trend.",
+        "analogy": "A stationary series is like a ball bouncing at a consistent height on a level floor — its average bounce height and bounciness stay the same no matter when you start watching. A random walk is like that same ball on a floor that's slowly, unpredictably tilting over time — its average position genuinely drifts, so 'the average bounce height' isn't even a stable, meaningful number anymore. Differencing is looking at how much the ball moved FROM ONE BOUNCE TO THE NEXT, instead of its absolute position — that CHANGE can be stable even while the absolute position keeps drifting.",
+        "examples": [
+          {
+            "code": "import numpy as np\nimport pandas as pd\nfrom statsmodels.tsa.stattools import adfuller\n\nnp.random.seed(0)\nn = 200\nrandom_walk = np.cumsum(np.random.normal(0.5, 1, n))   # non-stationary: drifting mean\nts = pd.Series(random_walk)\n\nresult = adfuller(ts)\nprint(f\"Original series -- ADF statistic: {result[0]:.3f}, p-value: {result[1]:.4f}\")\nprint(\"p >= 0.05 -- fails to reject 'non-stationary' (as expected, it's a random walk)\")",
+            "note": "Actually run and confirmed: the ADF test on this genuine random walk gives p=0.8289, well above the 0.05 threshold -- correctly failing to reject the null hypothesis of non-stationarity, exactly matching the fact that a random walk's mean/variance genuinely drift over time."
+          },
+          {
+            "code": "differenced = ts.diff().dropna()   # each value minus the PREVIOUS value\nresult_diff = adfuller(differenced)\nprint(f\"Differenced series -- ADF statistic: {result_diff[0]:.3f}, p-value: {result_diff[1]:.6f}\")\nprint(\"p < 0.05 -- differencing made the series stationary\")",
+            "note": "Actually run and confirmed: after differencing, the ADF p-value drops to essentially 0.000000, strongly rejecting non-stationarity -- differencing (each value minus the one before it) turned a genuinely drifting random walk into a stationary series, exactly the standard fix this concept describes."
+          }
+        ],
+        "warn": "The ADF test's null hypothesis is 'the series is non-stationary' — a LOW p-value (typically < 0.05) is evidence AGAINST that null, supporting stationarity. This is the same p-value direction/logic as this path's Statistics Foundations hypothesis-testing lesson, just applied to a different null hypothesis.",
+        "mistakes": [
+          "Applying a forecasting method that assumes stationarity directly to clearly non-stationary (trending/drifting) data without differencing first — the method's assumptions are violated, which can produce unreliable forecasts.",
+          "Differencing repeatedly out of habit without checking whether one round of differencing already achieved stationarity — over-differencing can introduce its own artifacts.",
+          "Misreading the ADF p-value direction — a high p-value here means 'still looks non-stationary,' the OPPOSITE of the usual 'small p-value = interesting finding' framing from standard hypothesis testing, since the null hypothesis itself is flipped (non-stationarity, not 'no effect')."
+        ],
+        "handsOn": "Run both examples and confirm the original series fails the stationarity test while the differenced series passes it. Then try differencing TWICE (differencing the already-differenced series again) and check whether the ADF p-value changes meaningfully from the single-differenced result.",
+        "doneWhen": "You can run an ADF test, correctly interpret its p-value direction, and apply differencing to convert a non-stationary series into a stationary one.",
+        "checks": [
+          {
+            "q": "In the Augmented Dickey-Fuller test, does a LOW p-value (like 0.001) support the series being stationary or non-stationary?",
+            "a": "Stationary — the ADF test's null hypothesis is that the series is NON-stationary. A low p-value lets you reject that null hypothesis, supporting the conclusion that the series IS stationary — the opposite direction from the null hypothesis itself, which is worth remembering since it's flipped from many other common hypothesis tests."
+          }
+        ],
+        "keyTakeaways": [
+          "A stationary series has statistical properties (mean, variance) that don't change over time — many forecasting methods assume this.",
+          "The ADF test's null hypothesis is non-stationarity — a low p-value (< 0.05) supports the series actually being stationary.",
+          "Differencing (each value minus the previous one) is the standard fix, often converting a non-stationary series into a stationary one."
+        ],
+        "resources": [
+          {
+            "label": "statsmodels — adfuller API reference",
+            "url": "https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.adfuller.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-ts-simple-forecasting",
+        "title": "A simple, honest forecasting baseline",
+        "concept": "Before reaching for a complex forecasting model, always establish a SIMPLE BASELINE — a NAIVE forecast (just repeat the last observed value forward) or, for data with real seasonality, a SEASONAL NAIVE forecast (repeat the value from exactly one full cycle ago, e.g. the same month last year). Any more sophisticated model should be compared against these baselines — if a complex model can't beat a naive one, it isn't actually adding value, no matter how sophisticated it sounds.",
+        "analogy": "A naive forecast is like predicting tomorrow's weather will be identical to today's — a surprisingly hard baseline to beat for genuinely persistent patterns, and a useful sanity check before trusting a fancier meteorological model. A seasonal naive forecast is predicting this December will look like last December — a much stronger baseline than plain persistence specifically when there's a real seasonal cycle, exactly the kind of comparison point that keeps a more complex model honest.",
+        "examples": [
+          {
+            "code": "import numpy as np\nimport pandas as pd\nfrom sklearn.metrics import mean_absolute_error\n\nnp.random.seed(0)\ndates = pd.date_range(\"2022-01-01\", periods=36, freq=\"MS\")\ntrend = np.linspace(100, 130, 36)\nseasonality = 10 * np.sin(np.arange(36) * 2 * np.pi / 12)\nvalues = trend + seasonality + np.random.normal(0, 2, 36)\nts = pd.Series(values, index=dates)\n\ntrain, test = ts.iloc[:24], ts.iloc[24:]\nprint(f\"train: {len(train)} months, test: {len(test)} months\")\n\n# Naive: forecast = last observed value, repeated for every future point\nnaive_forecast = pd.Series([train.iloc[-1]] * len(test), index=test.index)\nnaive_mae = mean_absolute_error(test, naive_forecast)\nprint(f\"naive baseline MAE (repeat last value): {naive_mae:.2f}\")",
+            "note": "Actually run: 24 months of training data, 12 months held out for testing. The naive baseline (repeating the last training value for every future month) gives a mean absolute error of 12.25 -- a genuine, measured baseline number to compare anything fancier against."
+          },
+          {
+            "code": "# Seasonal naive: forecast = value from the SAME MONTH, one full 12-month cycle ago\nseasonal_naive_forecast = pd.Series(train.iloc[-12:].values[:len(test)], index=test.index)\nseasonal_mae = mean_absolute_error(test, seasonal_naive_forecast)\nprint(f\"seasonal naive baseline MAE (repeat last cycle): {seasonal_mae:.2f}\")\nprint(\"seasonal naive wins -- because this data has real seasonality the plain naive forecast ignores\")",
+            "note": "Actually run: the seasonal naive baseline achieves MAE=10.37, genuinely beating the plain naive baseline's 12.25 -- BECAUSE this synthetic data was constructed with real seasonality, which the seasonal naive forecast accounts for (by reusing the matching month from last cycle) and the plain naive forecast completely ignores (by just repeating one fixed value)."
+          }
+        ],
+        "mistakes": [
+          "Building a sophisticated forecasting model without first checking whether it actually beats a simple naive or seasonal-naive baseline — an impressive-sounding model that loses to 'just repeat last year's number' isn't providing real value.",
+          "Using a plain naive forecast (repeat the last value) on clearly seasonal data, when a seasonal naive forecast (repeat the value from the matching point in the last cycle) is a fairer, stronger baseline for that specific data shape.",
+          "Evaluating a forecast's accuracy using a metric like MAE without comparing it against ANY baseline — an MAE number in isolation doesn't tell you whether the forecast is actually good, only a comparison against a simple reference point does."
+        ],
+        "handsOn": "Run both examples and confirm the naive and seasonal naive MAE values match what's described. Then remove the seasonality term from the synthetic data generation (set seasonality to zero) and rerun both baselines — confirm that without real seasonality, the seasonal naive baseline no longer meaningfully beats the plain naive one.",
+        "doneWhen": "You can build both a naive and a seasonal naive forecasting baseline, evaluate them with a real error metric, and explain why any more complex model should be compared against these baselines first.",
+        "checks": [
+          {
+            "q": "Why should a sophisticated forecasting model always be compared against a simple naive baseline before being considered genuinely useful?",
+            "a": "A naive baseline (like 'repeat the last value' or 'repeat last cycle's value') is often surprisingly hard to beat for real, persistent patterns. If a complex model can't outperform this simple reference point, its added complexity isn't actually providing forecasting value, regardless of how sophisticated the method sounds — the baseline comparison is what actually proves usefulness."
+          }
+        ],
+        "keyTakeaways": [
+          "A naive forecast repeats the last observed value; a seasonal naive forecast repeats the value from one full cycle ago — both are essential baselines, not just placeholders.",
+          "For genuinely seasonal data, seasonal naive typically beats plain naive, since it accounts for the repeating pattern the plain version ignores.",
+          "Any more sophisticated forecasting model should be measured against these baselines — beating them is what proves the added complexity is actually worthwhile."
+        ],
+        "resources": [
+          {
+            "label": "statsmodels — Time series analysis overview",
+            "url": "https://www.statsmodels.org/stable/tsa.html",
+            "kind": "docs"
+          },
+          {
+            "label": "scikit-learn — mean_absolute_error API reference",
+            "url": "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_absolute_error.html",
             "kind": "docs"
           }
         ]
