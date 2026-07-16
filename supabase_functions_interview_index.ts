@@ -22,6 +22,19 @@
 // enforced this, which was trivially bypassable). Pro sessions get a richer feedback
 // contract (per-competency scores) and a slower question pace than the free trial.
 // Feedback JSON parsing validates shape and retries once before degrading.
+//
+// Cost-control hardening (added after a review pass): the "speak" (TTS) and multipart
+// audio-transcribe (STT) actions previously had NO rate limiting at all -- callable
+// directly and repeatedly by any authenticated user regardless of session/trial state,
+// unlike start/turn which are gated by start_interview_session's trial/daily-session
+// limits. Both now call bump_interview_media_usage() (15/day free, 150/day Pro -- a
+// real per-user daily cap on Groq TTS/STT calls, mirroring tutor_bump_usage's existing
+// pattern). Separately, "turn" previously had no limit on how many question/answer
+// rounds could happen within a session's time window -- only wall-clock duration was
+// checked, so a scripted client could fire many rapid-fire turns well beyond the
+// intended pacing (2-3 questions trial, 5-6 Pro). Now capped at 10 rounds (trial) / 20
+// (Pro) using the session's own persisted transcript length, forcing early feedback
+// generation (same path as a natural time-up) once exceeded.
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -224,6 +237,11 @@ Deno.serve(async (req: Request) => {
       const form = await req.formData();
       const audio = form.get("audio");
       if (!(audio instanceof File)) return json({ error: "missing audio" }, 400);
+      const { data: usage, error: usageErr } = await supabase.rpc("bump_interview_media_usage");
+      if (usageErr) return json({ error: usageErr.message }, 500);
+      if (!usage?.allowed) {
+        return json({ error: "daily_media_limit", message: "You've hit today's voice limit for Forage Interview." }, 429);
+      }
       const text = await transcribeAudio(apiKey, audio);
       return json({ text });
     }
@@ -234,6 +252,11 @@ Deno.serve(async (req: Request) => {
     if (action === "speak") {
       const { text } = body;
       if (typeof text !== "string" || !text.trim()) return json({ error: "missing text" }, 400);
+      const { data: usage, error: usageErr } = await supabase.rpc("bump_interview_media_usage");
+      if (usageErr) return json({ error: usageErr.message }, 500);
+      if (!usage?.allowed) {
+        return json({ error: "daily_media_limit", message: "You've hit today's voice limit for Forage Interview." }, 429);
+      }
       const audio = await synthesizeSpeech(apiKey, text);
       return new Response(audio, { status: 200, headers: { "Content-Type": "audio/wav", ...CORS_HEADERS } });
     }
@@ -268,15 +291,19 @@ Deno.serve(async (req: Request) => {
       // Server-side source of truth for duration/trial status -- never trust the client's timer.
       const { data: sessionRow, error: sessionErr } = await supabase
         .from("interview_sessions")
-        .select("started_at, max_minutes, is_trial, ended_at")
+        .select("started_at, max_minutes, is_trial, ended_at, transcript")
         .eq("id", sessionId)
         .single();
       if (sessionErr || !sessionRow) return json({ error: "session_not_found" }, 404);
       if (sessionRow.ended_at) return json({ error: "session_already_ended" }, 409);
 
       const elapsedMinutes = (Date.now() - new Date(sessionRow.started_at).getTime()) / 60000;
-      const timeUp = elapsedMinutes >= sessionRow.max_minutes;
       const isTrial = Boolean(sessionRow.is_trial);
+      // Each Q&A round appends 2 transcript entries (candidate + interviewer) --
+      // caps rapid-fire spamming within the time window, independent of wall-clock duration.
+      const roundsSoFar = Math.floor((Array.isArray(sessionRow.transcript) ? sessionRow.transcript.length : 0) / 2);
+      const roundCap = isTrial ? 10 : 20;
+      const timeUp = elapsedMinutes >= sessionRow.max_minutes || roundsSoFar >= roundCap;
 
       const contents = [
         { role: "user", parts: [{ text: buildSystemPrompt(role, focus, isTrial) }] },
