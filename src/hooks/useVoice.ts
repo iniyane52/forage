@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState, useSyncExternalStore } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 // Thin wrapper around voice capture. Chromium's native SpeechRecognition (free,
@@ -41,8 +41,22 @@ function hasMediaRecorderFallback(): boolean {
   );
 }
 
+// Static per browser session (never changes after mount), so a no-op subscribe is
+// correct -- useSyncExternalStore over useState+useEffect because this reads
+// browser-only capability APIs unavailable during SSR.
+function subscribeToSupport() {
+  return () => {};
+}
+function getSupportSnapshot(): boolean {
+  const hasSynthesis = "speechSynthesis" in window;
+  return hasSynthesis && (!!getRecognitionCtor() || hasMediaRecorderFallback());
+}
+function getSupportServerSnapshot(): boolean {
+  return false;
+}
+
 export function useVoice() {
-  const [supported, setSupported] = useState(false);
+  const supported = useSyncExternalStore(subscribeToSupport, getSupportSnapshot, getSupportServerSnapshot);
   const [listening, setListening] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [transcript, setTranscript] = useState("");
@@ -52,11 +66,6 @@ export function useVoice() {
   const streamRef = useRef<MediaStream | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const onFinalRef = useRef<((text: string) => void) | null>(null);
-
-  useEffect(() => {
-    const hasSynthesis = typeof window !== "undefined" && "speechSynthesis" in window;
-    setSupported(hasSynthesis && (!!getRecognitionCtor() || hasMediaRecorderFallback()));
-  }, []);
 
   const transcribeBlob = useCallback(async (blob: Blob) => {
     try {

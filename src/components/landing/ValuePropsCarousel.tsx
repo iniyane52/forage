@@ -88,7 +88,9 @@ export function ValuePropsCarousel({ items }: { items: ValueProp[] }) {
   // Kept in a ref so the resize handler always reads the latest value
   // without re-subscribing the observer on every activeIndex change.
   const activeIndexRef = useRef(activeIndex);
-  activeIndexRef.current = activeIndex;
+  useEffect(() => {
+    activeIndexRef.current = activeIndex;
+  }, [activeIndex]);
 
   useEffect(() => {
     if (reduce) return;

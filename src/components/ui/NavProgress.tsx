@@ -12,17 +12,25 @@ import { usePathname } from "next/navigation";
  */
 export function NavProgress() {
   const pathname = usePathname();
+  const [trackedPathname, setTrackedPathname] = useState(pathname);
   const [visible, setVisible] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
+  // Adjust state during render when the route changes, per React's own guidance,
+  // instead of an effect — this is a real prop-change reset, not a side effect.
+  if (pathname !== trackedPathname) {
+    setTrackedPathname(pathname);
     setVisible(true);
+  }
+
+  useEffect(() => {
+    if (!visible) return;
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => setVisible(false), 380);
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
-  }, [pathname]);
+  }, [visible, trackedPathname]);
 
   return (
     <div

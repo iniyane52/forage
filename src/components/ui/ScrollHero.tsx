@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 
 const DESKTOP_ROTATE: [number, number] = [16, 0];
@@ -15,16 +15,23 @@ const MOBILE_MAX_SCALE = 1.1;
  * of jumping every frame. */
 const SPRING = { stiffness: 260, damping: 34, mass: 0.6, restDelta: 0.001 };
 
+// useSyncExternalStore, not useState+useEffect: matchMedia is an external browser
+// API unavailable during SSR, and this is React's own recommended way to subscribe
+// to it -- it also applies the real client value on the first client render instead
+// of one frame late.
+function subscribeToDesktopQuery(callback: () => void) {
+  const mq = window.matchMedia("(min-width: 768px)");
+  mq.addEventListener("change", callback);
+  return () => mq.removeEventListener("change", callback);
+}
+function getDesktopSnapshot() {
+  return window.matchMedia("(min-width: 768px)").matches;
+}
+function getDesktopServerSnapshot() {
+  return true;
+}
 function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = useState(true);
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    setIsDesktop(mq.matches);
-    const onChange = () => setIsDesktop(mq.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-  return isDesktop;
+  return useSyncExternalStore(subscribeToDesktopQuery, getDesktopSnapshot, getDesktopServerSnapshot);
 }
 
 /**

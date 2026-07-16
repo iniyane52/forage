@@ -241,12 +241,19 @@ export function ScrollParallax({
 export function CountUp({ value, className }: { value: number; className?: string }) {
   const reduce = useReducedMotion();
   const [display, setDisplay] = useState(reduce ? value : 0);
+  const [synced, setSynced] = useState({ value, reduce });
   const raf = useRef<number | null>(null);
+
+  // Adjust state during render (React's sanctioned pattern) when reduced-motion
+  // is discovered post-mount or `value` changes while reduced-motion is on --
+  // skips the animation entirely instead of a delayed correction from an effect.
+  if (reduce && (synced.value !== value || synced.reduce !== reduce)) {
+    setSynced({ value, reduce });
+    setDisplay(value);
+  }
+
   useEffect(() => {
-    if (reduce) {
-      setDisplay(value);
-      return;
-    }
+    if (reduce) return;
     const start = performance.now();
     const dur = 700;
     const tick = (now: number) => {

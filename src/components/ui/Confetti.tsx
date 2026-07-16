@@ -1,25 +1,26 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { useMemo } from "react";
+import { useState } from "react";
 
 const COLORS = ["#00e5ff", "#ff3d81", "#baff2e", "#3fb950", "#ffb020"];
 
 /** A one-shot confetti burst. Mount it (e.g. when a quiz is passed). Respects reduced-motion. */
 export function Confetti({ count = 28 }: { count?: number }) {
   const reduce = useReducedMotion();
-  const pieces = useMemo(
-    () =>
-      Array.from({ length: count }, (_, i) => ({
-        id: i,
-        x: (Math.random() - 0.5) * 320,
-        y: -(80 + Math.random() * 220),
-        rot: Math.random() * 360,
-        color: COLORS[i % COLORS.length],
-        delay: Math.random() * 0.15,
-        size: 6 + Math.random() * 6,
-      })),
-    [count]
+  // Lazy useState initializer, not useMemo: the random values must be computed
+  // exactly once at mount (a "one-shot" burst), and only a lazy initializer is
+  // exempt from React's render-purity rule for one-time impure setup like this.
+  const [pieces] = useState(() =>
+    Array.from({ length: count }, (_, i) => ({
+      id: i,
+      x: (Math.random() - 0.5) * 320,
+      y: -(80 + Math.random() * 220),
+      rot: Math.random() * 360,
+      color: COLORS[i % COLORS.length],
+      delay: Math.random() * 0.15,
+      size: 6 + Math.random() * 6,
+    }))
   );
 
   if (reduce) return null;
