@@ -238,6 +238,188 @@
     ]
   },
   {
+    "id": "fs-typescript",
+    "title": "TypeScript for Full-Stack Developers",
+    "why": "Nearly every professional full-stack codebase today is written in TypeScript, not plain JavaScript — it adds a static type system on top of everything from Module 1, catching entire categories of bugs (typos, wrong argument types, missing properties) at COMPILE time instead of in production. This module builds real TypeScript fluency before returning to React and the backend with it.",
+    "topics": [
+      {
+        "id": "fs-ts-basics",
+        "title": "TypeScript basics — types, inference, and structural typing",
+        "concept": "TypeScript adds a static type system on top of JavaScript: you can annotate variables and function parameters with types, but per TypeScript's own docs, 'wherever possible, TypeScript tries to automatically infer the types in your code' — so `let city = \"Bengaluru\"` infers `city` as `string` with no annotation needed. TypeScript's docs also describe it as a STRUCTURALLY typed system: it only cares that a value has the right shape/properties, not that it was explicitly labeled with a given type name — if it looks like a duck and quacks like a duck, TypeScript treats it as a duck. Crucially, these types are checked at COMPILE time by the `tsc` compiler and then compile away entirely — they add zero runtime cost or behavior.",
+        "analogy": "TypeScript's type checker is like a copy-editor who reviews your manuscript BEFORE it goes to print, catching inconsistencies (a character's age changing from chapter to chapter) that a reader would only discover after publication. Once the book is printed (compiled to JavaScript), the editor's markup is gone — it did its job at review time and adds nothing to the final printed pages.",
+        "examples": [
+          {
+            "code": "// Type inference -- no annotation needed, TypeScript infers from the initializer\nlet city = \"Bengaluru\";        // inferred as: string\nlet population = 13_000_000;   // inferred as: number\nlet isCapital = false;          // inferred as: boolean\n\nconsole.log(typeof city, typeof population, typeof isCapital);\n\n// Explicit annotations are needed when there's no initializer to infer from\nlet nextCity: string;\nnextCity = \"Chennai\";\nconsole.log(nextCity);",
+            "note": "TypeScript infers city/population/isCapital's types purely from what they're initialized with -- no `: string` annotation was written anywhere, yet TypeScript still knows and enforces their types. An explicit annotation (`nextCity: string`) is only needed when there's no initial value for TypeScript to infer from."
+          },
+          {
+            "code": "interface Point {\n  x: number;\n  y: number;\n}\n\nfunction printPoint(p: Point) {\n  console.log(`(${p.x}, ${p.y})`);\n}\n\n// This plain object was never declared as a \"Point\" anywhere -- TypeScript only\n// checks that it HAS the right shape (structural typing), not that it was labeled Point\nconst coord = { x: 3, y: 7 };\nprintPoint(coord);\n\n// Extra properties are fine too, as long as the required ones are present\nconst coordWithLabel = { x: 1, y: 2, label: \"origin\" };\nprintPoint(coordWithLabel);",
+            "note": "coord and coordWithLabel are never explicitly typed as Point, yet both are accepted -- TypeScript's structural typing (per its own docs, 'only concerned with the structure of the value') only checks that an object HAS the required x/y properties, matching by shape rather than by name."
+          }
+        ],
+        "warn": "Node.js (v22.6+) can run .ts files directly, but it only STRIPS type annotations -- it does NOT type-check them. Assigning a string to a variable typed as `number` will run without complaint in plain `node file.ts`; only the `tsc` compiler (or your editor) actually catches type errors. Never mistake 'it ran with node' for 'the types are correct'.",
+        "mistakes": [
+          "Assuming a script running successfully with `node file.ts` proves its types are correct — Node only strips annotations, it doesn't check them; only `tsc` (or an editor's TS language service) performs real type-checking.",
+          "Over-annotating every variable when TypeScript would infer the same type anyway — prefer letting inference work and only annotate where it genuinely adds clarity or there's no initializer to infer from.",
+          "Assuming an object must be explicitly declared as a given interface type to satisfy it — TypeScript's structural typing only checks the shape, not any explicit label."
+        ],
+        "handsOn": "Run both examples with `node example.ts` (Node 22.6+ strips TS types natively) and confirm the output. Then write an object literal with extra unrelated properties and pass it to a function typed to accept a smaller interface, confirming TypeScript accepts it as long as the required properties are present.",
+        "doneWhen": "You can explain what type inference is, give an example where TypeScript infers a type without an annotation, and explain what 'structural typing' means with your own example.",
+        "checks": [
+          {
+            "q": "If a plain object literal has all the properties an interface requires (plus a few extra ones), does TypeScript accept it as satisfying that interface?",
+            "a": "Yes — TypeScript is structurally typed, meaning it only checks that a value has the required shape (the necessary properties with the right types), not that it was explicitly declared as that exact interface. Extra properties beyond what's required don't disqualify it."
+          }
+        ],
+        "keyTakeaways": [
+          "TypeScript infers types automatically wherever possible; explicit annotations are only needed when there's no initializer to infer from.",
+          "TypeScript is structurally typed — it checks an object's shape (its properties), not any explicit type label.",
+          "Node can run .ts files by stripping type annotations, but this does NOT perform real type-checking — only tsc (or an editor) does that."
+        ],
+        "resources": [
+          {
+            "label": "TypeScript Handbook — Everyday Types",
+            "url": "https://www.typescriptlang.org/docs/handbook/2/everyday-types.html",
+            "kind": "docs"
+          },
+          {
+            "label": "TypeScript Handbook — Object Types",
+            "url": "https://www.typescriptlang.org/docs/handbook/2/objects.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-ts-narrowing-unions",
+        "title": "Union types, narrowing, and discriminated unions",
+        "concept": "A UNION type (`number | string`) means a value can be one of several types — TypeScript's own docs call the process of figuring out which specific type applies at a given point in code NARROWING: 'TypeScript follows possible paths of execution... to analyze the most specific possible type of a value at a given position.' A `typeof` check, an `instanceof` check, or an `in` check all narrow a union down to one branch. The most powerful pattern is a DISCRIMINATED UNION — a union of object types that all share one common literal property (like `kind: \"circle\" | \"square\"`) — which lets a `switch` on that property narrow perfectly and, per TypeScript's docs, is 'good for representing any sort of messaging scheme in JavaScript, like... client/server communication.'",
+        "analogy": "A union type is like a delivery that could be one of several package shapes — before you can safely open it the way that specific shape requires, you have to CHECK which one arrived (narrowing). A discriminated union is like every package having a big, unambiguous label on the outside stating exactly what's inside ('kind: circle' vs 'kind: square') — you don't have to guess or inspect contents; the label itself tells you precisely which unwrapping procedure to use.",
+        "examples": [
+          {
+            "code": "function formatPadding(padding: number | string, input: string): string {\n  if (typeof padding === \"number\") {\n    return \" \".repeat(padding) + input;   // TS knows padding is a number here\n  }\n  return padding + input;                 // TS knows padding is a string here\n}\n\nconsole.log(formatPadding(4, \"hi\"));\nconsole.log(formatPadding(\">> \", \"hi\"));",
+            "note": "Inside the `if (typeof padding === \"number\")` branch, TypeScript NARROWS padding's type from `number | string` down to just `number` -- and in the else branch (implicitly), it narrows to just `string`. This is exactly what TypeScript's docs describe: control-flow analysis determining 'the most specific possible type of a value at a given position'."
+          },
+          {
+            "code": "interface Circle {\n  kind: \"circle\";\n  radius: number;\n}\ninterface Square {\n  kind: \"square\";\n  sideLength: number;\n}\ntype Shape = Circle | Square;\n\nfunction getArea(shape: Shape): number {\n  switch (shape.kind) {\n    case \"circle\":\n      return Math.PI * shape.radius ** 2;      // TS narrows to Circle here\n    case \"square\":\n      return shape.sideLength ** 2;             // TS narrows to Square here\n  }\n}\n\nconsole.log(getArea({ kind: \"circle\", radius: 2 }).toFixed(2));\nconsole.log(getArea({ kind: \"square\", sideLength: 3 }));",
+            "note": "The shared `kind` literal property is the 'discriminant' -- switching on shape.kind lets TypeScript narrow shape to exactly Circle inside the 'circle' case (so .radius is safely accessible) and exactly Square inside the 'square' case (so .sideLength is safely accessible), with no manual type assertions needed anywhere."
+          }
+        ],
+        "mistakes": [
+          "Accessing a property that only exists on ONE member of a union without narrowing first — TypeScript will correctly reject it as a compile error (e.g. accessing `.radius` on a `Circle | Square` without checking `kind` first).",
+          "Forgetting that `typeof null` returns `\"object\"` in JavaScript — a `typeof` check alone doesn't distinguish `null` from a real object; use an explicit `=== null` check instead.",
+          "Building a union of object types WITHOUT a shared discriminant property when one would be more precise — a discriminated union with a literal `kind`/`type` field narrows far more cleanly than trying to distinguish shapes by which optional properties happen to be present."
+        ],
+        "handsOn": "Run both examples and confirm the outputs. Then, without narrowing first, try writing `function getRadius(shape: Shape) { return shape.radius; }` and confirm `tsc --noEmit` reports a compile error — then fix it by adding the same kind of narrowing check.",
+        "doneWhen": "You can explain what narrowing is, write a typeof-based narrowing check, and build a discriminated union with a switch that narrows correctly on each branch.",
+        "checks": [
+          {
+            "q": "In a discriminated union like `Circle | Square` (each with a `kind` field), why does switching on `shape.kind` let you safely access `shape.radius` inside the `\"circle\"` case?",
+            "a": "The shared `kind` literal property is the discriminant — TypeScript's control-flow analysis narrows `shape`'s type down to exactly `Circle` inside the branch where `kind === \"circle\"` has been confirmed, so accessing `.radius` (a Circle-only property) is safe and type-checked in that branch specifically."
+          }
+        ],
+        "keyTakeaways": [
+          "A union type (A | B) means a value could be either type; narrowing is how TypeScript figures out which one applies at a given point.",
+          "typeof, instanceof, in, and equality checks are all common narrowing mechanisms TypeScript understands.",
+          "A discriminated union (a shared literal 'kind'/'type' field) enables precise, compiler-verified narrowing via switch/if — ideal for modeling things like API responses or state machines."
+        ],
+        "resources": [
+          {
+            "label": "TypeScript Handbook — Narrowing",
+            "url": "https://www.typescriptlang.org/docs/handbook/2/narrowing.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-ts-generics",
+        "title": "Generics — reusable, type-safe functions",
+        "concept": "Generics let you write a function or type that works across MULTIPLE types while still preserving full type information — TypeScript's own docs frame this as core to 'building components that not only have well-defined and consistent APIs, but are also reusable.' A generic function like `function identity<Type>(arg: Type): Type` captures whatever type is passed in (`Type` is a TYPE VARIABLE, inferred automatically at the call site in most cases) and returns that SAME type back out — unlike using `any`, which would work for every type but silently lose all type information. Generic CONSTRAINTS (`Type extends Lengthwise`) narrow this down to 'any type, as long as it has these specific capabilities' — striking a balance between full flexibility and real type safety.",
+        "analogy": "A non-generic function is like a vending machine slot sized for exactly one specific snack — reliable, but useless for anything else. Using `any` is like removing the slot's shape entirely — now ANYTHING fits, but the machine has no idea what it dispensed, so it can't guarantee anything about what comes out. A generic is like a slot that ADAPTS its shape to whatever specific item goes in, while still tracking precisely what that item was — so you get exactly that same, correctly-typed item back out, for any item you choose.",
+        "examples": [
+          {
+            "code": "function identity<Type>(arg: Type): Type {\n  return arg;\n}\n\nconsole.log(identity<string>(\"hello\"));   // explicit type argument\nconsole.log(identity(42));                 // inferred as number, no annotation needed",
+            "note": "Type is a TYPE VARIABLE -- whatever type flows in as `arg` is captured and returned as the exact same type out, preserving full type information (unlike `arg: any`, which would erase it). Most of the time (like `identity(42)`), TypeScript infers Type automatically from the argument, without needing the explicit `<string>` syntax."
+          },
+          {
+            "code": "interface Lengthwise {\n  length: number;\n}\n\nfunction logAndReturn<Type extends Lengthwise>(arg: Type): Type {\n  console.log(`length: ${arg.length}`);\n  return arg;\n}\n\nlogAndReturn(\"a string has length too\");   // strings have .length\nlogAndReturn([1, 2, 3, 4]);                 // arrays have .length",
+            "note": "The `extends Lengthwise` CONSTRAINT restricts Type to 'anything with a .length property' -- broad enough to accept both strings and arrays (both structurally satisfy Lengthwise), while still guaranteeing arg.length is safe to access inside the function, which an unconstrained `<Type>` could not guarantee."
+          }
+        ],
+        "mistakes": [
+          "Reaching for `any` instead of a generic when a function genuinely needs to work across multiple types — `any` silently discards all type information, while a generic preserves it end-to-end.",
+          "Adding a generic constraint that's too narrow (or too loose) for what the function actually needs — get the constraint right (e.g. `extends Lengthwise` above) so it's exactly as permissive as necessary, no more, no less.",
+          "Forgetting that a generic type parameter (like `Key extends keyof Type`) can constrain against ANOTHER type parameter — this is how a real, type-safe `getProperty(obj, key)` function rejects a key that doesn't actually exist on that specific object type."
+        ],
+        "handsOn": "Run both examples and confirm the outputs. Then write a generic function `firstElement<Type>(arr: Type[]): Type` that returns an array's first element, and call it with an array of numbers and an array of strings, confirming the return type matches each call correctly.",
+        "doneWhen": "You can explain what a generic type parameter is, write a generic function whose return type matches its input type, and add a constraint (extends) that limits which types are acceptable.",
+        "checks": [
+          {
+            "q": "Why does using a generic `<Type>` preserve more type safety than just typing a function's parameter as `any`?",
+            "a": "A generic captures the SPECIFIC type passed in at each call site and carries that exact type through to the return value and the rest of the function body, so TypeScript can still check usages correctly. `any` disables type-checking entirely for that value — it would accept anything and guarantee nothing about what comes back out."
+          }
+        ],
+        "keyTakeaways": [
+          "Generics let a function work across multiple types while preserving full type information, unlike any.",
+          "A type parameter (e.g. <Type>) is usually inferred automatically from the argument at the call site.",
+          "A generic constraint (Type extends X) restricts a type parameter to types with certain guaranteed capabilities, enabling safe operations inside the function."
+        ],
+        "resources": [
+          {
+            "label": "TypeScript Handbook — Generics",
+            "url": "https://www.typescriptlang.org/docs/handbook/2/generics.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-ts-react-api-types",
+        "title": "Typing React components and API responses",
+        "concept": "React's own official docs recommend typing a component's props with an `interface` or `type` once there's more than a trivial inline annotation — destructuring the typed props object directly in the function signature (`function MyButton({ title, disabled }: MyButtonProps)`), the exact same pattern from this path's earlier React module, just now with a named, reusable type instead of an untyped object. The same interface-driven approach extends naturally to backend responses: defining an interface for what an API endpoint returns, then typing a fetch wrapper as generic (`getJson<T>(url): Promise<T>`) so every call site gets full autocomplete and compile-time checking of the shape it expects back — directly connecting Module 1's async/await, this path's React props, and the Express backend module ahead.",
+        "analogy": "An untyped API response is like a mystery box arriving from a supplier with no packing list — you find out what's actually inside only by opening it and hoping. A typed interface for that response is the packing list itself, agreed on in advance: your code can rely on exactly what's declared to be inside, and if the supplier ever changes what they send without updating the packing list, TypeScript is the inspector who catches the mismatch immediately, rather than a customer finding out the hard way later.",
+        "examples": [
+          {
+            "code": "// (Illustrative JSX -- matches React's own official docs pattern for typed props)\ninterface MyButtonProps {\n  title: string;\n  disabled: boolean;\n}\n\nfunction MyButton({ title, disabled }: MyButtonProps) {\n  return <button disabled={disabled}>{title}</button>;\n}\n\n// Usage -- TypeScript checks these calls at compile time:\n// <MyButton title=\"Save\" disabled={false} />   -- OK\n// <MyButton title=\"Save\" />                    -- ERROR: missing required 'disabled'",
+            "note": "This is React's own documented pattern verbatim: an interface describes the props' shape, and the component destructures directly from it -- exactly the same {name, isVip}-style destructuring from this path's earlier 'Components and props' lesson, just with a named, reusable, and now COMPILE-TIME-CHECKED type instead of an implicit one."
+          },
+          {
+            "code": "interface ApiUser {\n  id: number;\n  name: string;\n  email: string;\n}\n\n// A typed wrapper around fetch -- the generic <T> (previous lesson) lets callers\n// specify exactly what shape they expect back from a given endpoint\nasync function getJson<T>(url: string): Promise<T> {\n  const res = await fetch(url);\n  if (!res.ok) {\n    throw new Error(`Request failed: ${res.status}`);\n  }\n  return res.json() as Promise<T>;\n}\n\nasync function main() {\n  // Standing in for a real network response, to show what getJson<ApiUser> gives you\n  const fakeUser: ApiUser = { id: 1, name: \"Aditi\", email: \"aditi@example.com\" };\n  console.log(`User #${fakeUser.id}: ${fakeUser.name} <${fakeUser.email}>`);\n  // fakeUser.nmae would be a compile-time typo error here -- caught before it ever runs\n}\n\nmain();",
+            "note": "getJson<ApiUser>(url) tells TypeScript exactly what shape to expect back, so every property access on the result (fakeUser.name, fakeUser.email) is checked at compile time -- a typo like fakeUser.nmae would be caught by tsc immediately, rather than surfacing as an unexplained 'undefined' bug at runtime."
+          }
+        ],
+        "mistakes": [
+          "Typing an API response as `any` (or not typing it at all) — this silently disables compile-time checking for every property access on that response, reintroducing exactly the class of bugs TypeScript exists to catch.",
+          "Letting a component's props type drift out of sync with what it actually destructures — if the interface says a prop is required but the component never uses it (or vice versa), the type stops accurately describing reality.",
+          "Using `as` to force a type onto a value (a type ASSERTION) as a shortcut past a real type mismatch — this bypasses TypeScript's checking entirely for that value and can hide genuine bugs; prefer fixing the actual mismatch."
+        ],
+        "handsOn": "Run the getJson/ApiUser example and confirm the output. Then define your own interface for a small API response shape you choose (e.g. a Product with id/name/price), write a typed function that would fetch it, and confirm in your editor (or via tsc) that accessing a misspelled property produces a compile error.",
+        "doneWhen": "You can define a props interface for a component matching React's documented pattern, and write a generically-typed fetch wrapper that gives full compile-time checking for a specific API response shape.",
+        "checks": [
+          {
+            "q": "If an API response is typed as `any` instead of a specific interface, what compile-time protection do you lose?",
+            "a": "All of it for that value — TypeScript stops checking property accesses, argument types, and typos on anything typed `any`. A misspelled property name or wrong-shape access would only surface as a runtime bug (often 'undefined'), instead of being caught by the compiler before the code ever runs."
+          }
+        ],
+        "keyTakeaways": [
+          "React's own docs recommend typing props via an interface or type, destructured directly in the component's function signature.",
+          "A generic fetch wrapper (getJson<T>) gives every call site full compile-time checking of the expected response shape.",
+          "Typing a response as any (or using `as` to force a mismatched type) disables the exact protection TypeScript is meant to provide — prefer fixing real mismatches over asserting past them."
+        ],
+        "resources": [
+          {
+            "label": "React docs — TypeScript",
+            "url": "https://react.dev/learn/typescript",
+            "kind": "docs"
+          },
+          {
+            "label": "TypeScript Handbook — Generics",
+            "url": "https://www.typescriptlang.org/docs/handbook/2/generics.html",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "fs-react",
     "title": "React Fundamentals",
     "why": "Module 1 built direct DOM skills; now you'll see WHY frameworks like React exist. Manually keeping a complex UI in sync with changing data gets unmanageable fast — React lets you describe WHAT the UI should look like for a given state, and it handles updating the actual DOM efficiently.",
@@ -422,6 +604,871 @@
           {
             "label": "React docs — Reacting to Input with State",
             "url": "https://react.dev/learn/reacting-to-input-with-state",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fs-nextjs",
+    "title": "Next.js — Full-Stack React",
+    "why": "React (previous module) only describes WHAT the UI looks like — Next.js is a full-stack REACT FRAMEWORK that adds file-based routing, server-side rendering, and a way to run backend logic (data fetching, mutations) directly alongside your components, without a separate Express server for everything. This is genuinely meta: Forage, the very platform you're learning on, is itself built with Next.js's App Router — everything in this module describes real, load-bearing patterns used in the app you're using right now.",
+    "topics": [
+      {
+        "id": "fs-nextjs-app-router",
+        "title": "The App Router — file-based routing, layouts, and dynamic segments",
+        "concept": "Next.js's official docs describe its routing as 'file-system based': a `page.tsx` file inside a folder under `app/` makes that folder's path a real route (`app/blog/page.tsx` becomes `/blog`), and a `layout.tsx` file defines UI SHARED across multiple pages beneath it — layouts nest automatically, so a root layout wraps every page in the app. A folder wrapped in square brackets, like `app/blog/[slug]/page.tsx`, creates a DYNAMIC SEGMENT that generates a route per data item (a specific blog post, a specific lesson slug). In this exact installed Next.js version, per its own docs, dynamic route params and search params are `Promise`s that must be `await`ed inside the page — a genuine, version-specific detail that differs from older Next.js versions, where params used to be a plain, already-resolved object.",
+        "analogy": "The App Router treats your folder structure as the site map itself — much like a physical filing cabinet where a folder's PATH in the cabinet IS its address (open 'blog', then 'post-42' inside it, and you've found /blog/post-42) rather than needing a separate index file mapping URLs to documents. A layout is like a folder's standard cover sheet that every document inside automatically gets, without having to staple it on each one individually.",
+        "examples": [
+          {
+            "code": "// (Illustrative -- App Router file convention, from this exact installed\n// Next.js version's own official docs)\n\n// app/blog/[slug]/page.tsx\nexport default async function BlogPostPage({\n  params,\n}: {\n  params: Promise<{ slug: string }>;    // A PROMISE in this Next.js version --\n}) {                                     // must be awaited, unlike older versions\n  const { slug } = await params;\n  return (\n    <div>\n      <h1>Post: {slug}</h1>\n    </div>\n  );\n}",
+            "note": "This matches this project's own installed Next.js version's official documentation verbatim: `params` is typed as `Promise<{ slug: string }>` and must be `await`ed before use. Code written against an OLDER Next.js version's training-data assumption (params as a plain synchronous object) would be a real, version-specific bug in this exact codebase."
+          },
+          {
+            "code": "// Simulating the underlying route-matching idea with plain, runnable JS --\n// folders (keys) map to handlers, and a bracketed segment is a wildcard\nconst routes = {\n  \"/\": () => \"Home page\",\n  \"/blog\": () => \"Blog index\",\n  \"/blog/:slug\": (params) => `Blog post: ${params.slug}`,\n};\n\nfunction matchRoute(path) {\n  if (routes[path]) return routes[path]();\n  const [, base, slug] = path.match(/^\\/(blog)\\/(.+)$/) || [];\n  if (base === \"blog\") return routes[\"/blog/:slug\"]({ slug });\n  return \"404 Not Found\";\n}\n\nconsole.log(matchRoute(\"/\"));\nconsole.log(matchRoute(\"/blog\"));\nconsole.log(matchRoute(\"/blog/hello-world\"));\nconsole.log(matchRoute(\"/nonexistent\"));",
+            "note": "This plain-JS simulation captures the CONCEPTUAL shape of dynamic segment matching (a bracketed placeholder captures a value from the URL) without needing a running Next.js app -- real Next.js does this matching internally based on your app/ folder structure, but the underlying idea (a wildcard segment captures part of the path as a parameter) is exactly what [slug] represents."
+          }
+        ],
+        "warn": "In this project's exact installed Next.js version, `params` and `searchParams` are Promises in Server Component pages and must be `await`ed — code or tutorials written for older Next.js versions (which used a plain synchronous object) will be subtly wrong here. Always check this project's own `node_modules/next/dist/docs/` (per this repo's AGENTS.md) rather than assuming based on prior Next.js familiarity.",
+        "mistakes": [
+          "Assuming `params`/`searchParams` are plain synchronous objects (true in older Next.js versions) instead of Promises that must be awaited — a real, version-specific breaking change in this exact installed version.",
+          "Putting a `layout.tsx` where a `page.tsx` was intended (or vice versa) — a layout defines shared UI wrapping children; only a page.tsx file actually makes a folder's route independently visitable content.",
+          "Forgetting that layouts NEST — a deeply nested route is wrapped by every layout.tsx from the root down to its own folder, not just its immediate parent."
+        ],
+        "handsOn": "Run the plain-JS route-matching simulation and confirm the four outputs. Then, in this actual Forage codebase, find one real dynamic segment folder (e.g. under src/app/(app)/learn/[slug]/) and confirm in its page.tsx that params is typed and awaited exactly as this lesson describes.",
+        "doneWhen": "You can explain how a folder structure under app/ maps to real routes, what a layout does differently from a page, and can point to a real awaited params usage in this codebase's own source.",
+        "checks": [
+          {
+            "q": "In this project's exact installed Next.js version, can you access params.slug directly in a Server Component page, or do you need an extra step first?",
+            "a": "You need an extra step — params is typed as a Promise (Promise<{ slug: string }>) in this Next.js version, so you must `await params` first to get the resolved { slug } object before accessing slug. This differs from older Next.js versions where params was already a plain, resolved object."
+          }
+        ],
+        "keyTakeaways": [
+          "Next.js's App Router maps app/ folder structure directly to routes; page.tsx makes a folder visitable, layout.tsx defines shared UI that wraps it.",
+          "A bracketed folder name (e.g. [slug]) creates a dynamic segment, generating routes from data.",
+          "In this exact installed Next.js version, params and searchParams are Promises that must be awaited — a genuine version-specific detail, not true in older Next.js versions."
+        ],
+        "resources": [
+          {
+            "label": "Next.js docs — Layouts and Pages",
+            "url": "https://nextjs.org/docs/app/getting-started/layouts-and-pages",
+            "kind": "docs"
+          },
+          {
+            "label": "Next.js docs — Project Structure",
+            "url": "https://nextjs.org/docs/app/getting-started/project-structure",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-nextjs-server-client-components",
+        "title": "Server Components vs Client Components",
+        "concept": "Per this Next.js version's own docs, layouts and pages are Server Components BY DEFAULT — they render on the server, can fetch data and use secrets safely (since none of that code ships to the browser), and reduce the JavaScript sent to the client. Adding the `\"use client\"` directive at the top of a file marks it (and everything it imports/renders) as a Client Component instead, which is needed for state, event handlers (`onClick`), effects (`useEffect`), and browser-only APIs — exactly the React patterns from the previous module. The official guidance is to push `\"use client\"` down to the SMALLEST interactive piece (e.g. one search box), keeping everything else — like a page's static layout and data-fetching — as a Server Component, to minimize the JavaScript shipped to the browser.",
+        "analogy": "A Server Component is like a fully-prepared, printed handout: created once on the server, before it's ever in the reader's hands, containing no editable form fields. A Client Component is like an interactive form embedded inside that handout — the rest of the page stays as inert, pre-printed paper, but that specific form section carries real logic (JavaScript) with it so the reader can fill it in and interact right there.",
+        "examples": [
+          {
+            "code": "// (Illustrative -- matches this Next.js version's own official docs pattern exactly)\n\n// app/ui/like-button.tsx -- a Client Component (needs state + onClick)\n\"use client\";\nimport { useState } from \"react\";\n\nexport default function LikeButton({ likes }: { likes: number }) {\n  const [count, setCount] = useState(likes);\n  return <button onClick={() => setCount(count + 1)}>{count} likes</button>;\n}\n\n// app/[id]/page.tsx -- a Server Component (default, no directive needed)\nimport LikeButton from \"@/app/ui/like-button\";\n\nexport default async function Page({ params }: { params: Promise<{ id: string }> }) {\n  const { id } = await params;\n  const post = await getPost(id);        // safe to fetch/query directly -- runs on server\n  return (\n    <div>\n      <h1>{post.title}</h1>\n      <LikeButton likes={post.likes} />    {/* only THIS piece ships JS to the browser */}\n    </div>\n  );\n}",
+            "note": "Page is a Server Component (no \"use client\" needed -- it's the default) that safely fetches data server-side, then passes plain data (post.likes, a number) as a PROP into LikeButton, the one piece that actually needs interactivity. This is the official 'push use client to the smallest piece' pattern, minimizing client-side JavaScript."
+          },
+          {
+            "code": "// Simulating the boundary idea with plain, runnable JS --\n// 'server work' (no side effects visible to a 'browser') vs 'client work' (stateful, interactive)\nfunction serverRender(postId) {\n  // Stands in for a Server Component: runs once, has access to 'secrets', returns plain data\n  const secretApiKey = \"sk_...\";    // never actually leaves this function\n  const post = { id: postId, title: \"Hello\", likes: 4 };\n  console.log(\"[server] rendered post, using a secret key never exposed to the client\");\n  return { title: post.title, likes: post.likes };   // only PLAIN DATA crosses the boundary\n}\n\nfunction clientComponent(props) {\n  // Stands in for a Client Component: receives plain props, manages its OWN local state\n  let count = props.likes;\n  const onClick = () => {\n    count += 1;\n    console.log(`[client] ${props.title}: ${count} likes`);\n  };\n  onClick();\n  onClick();\n}\n\nconst dataFromServer = serverRender(42);\nclientComponent(dataFromServer);",
+            "note": "This plain-JS simulation captures the essential boundary: serverRender() has access to something sensitive (secretApiKey) that never crosses into clientComponent() -- only plain, serializable data (title, likes) does. This mirrors the real constraint that props passed from a Server Component to a Client Component must be serializable, and secrets/credentials used in a Server Component never reach the browser bundle."
+          }
+        ],
+        "mistakes": [
+          "Marking an entire large page/layout `\"use client\"` just because ONE small piece needs interactivity — this ships far more JavaScript to the browser than necessary; push the directive down to the smallest interactive component instead.",
+          "Trying to use React Context directly in a Server Component — per the official docs, 'React context is not supported in Server Components'; wrap the provider itself in its own small Client Component.",
+          "Assuming secrets/API keys used inside a Server Component are automatically safe if that same file is ever imported into a Client Component's module graph — Next.js only prevents this by convention/tooling (e.g. the server-only package) or by non-`NEXT_PUBLIC_` env vars being stripped client-side; it's not enforced purely by 'it's in a Server Component file'."
+        ],
+        "handsOn": "Run the plain-JS boundary simulation and confirm the console output. Then find a real file in this Forage codebase with the \"use client\" directive (e.g. QuizRunner.tsx or TutorDrawer.tsx) and identify specifically WHY it needs to be a Client Component (state? event handlers? browser APIs?).",
+        "doneWhen": "You can explain the default (Server Component) vs opt-in (\"use client\") distinction, why pushing \"use client\" to the smallest piece matters, and have identified a real Client Component in this codebase along with its specific reason for needing that boundary.",
+        "checks": [
+          {
+            "q": "Why does official guidance recommend adding \"use client\" to the smallest possible component (e.g. just a search box) rather than to an entire page?",
+            "a": "Every file marked \"use client\" — plus everything it imports and directly renders — gets bundled and shipped as JavaScript to the browser. Marking only the smallest genuinely interactive piece keeps the rest of the page as a zero-JS Server Component, minimizing the amount of JavaScript the user's browser has to download and run."
+          }
+        ],
+        "keyTakeaways": [
+          "Pages and layouts are Server Components by default; \"use client\" opts a file (and its imports/direct renders) into being a Client Component.",
+          "Use Client Components for state, event handlers, effects, and browser-only APIs; use Server Components for data fetching and using secrets safely.",
+          "Official guidance: push \"use client\" down to the smallest interactive piece to minimize client-side JavaScript."
+        ],
+        "resources": [
+          {
+            "label": "Next.js docs — Server and Client Components",
+            "url": "https://nextjs.org/docs/app/getting-started/server-and-client-components",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-nextjs-data-fetching",
+        "title": "Fetching data in Server Components — and a real caching gotcha",
+        "concept": "Server Components can fetch data directly using an `async` component function and `await` — either the `fetch` API or a database/ORM client — since that code runs only on the server. This project's EXACT installed Next.js version's own official docs state plainly: 'By default, fetch requests are not cached' — you must explicitly opt in with `fetch(url, { cache: 'force-cache' })` to cache a request. This is a genuinely important, version-specific fact: OLDER Next.js versions (App Router in Next 13/14) cached fetch requests by DEFAULT, the opposite behavior — code or assumptions carried over from that era would be simply wrong about this exact installed version's behavior.",
+        "analogy": "In an OLDER Next.js version, fetch was like a chef who, by default, keeps every dish they cook on a warming tray to reuse for the next customer unless told not to. In THIS version, the chef now cooks completely fresh for every single customer by default — you have to explicitly ask them to keep a dish on the warming tray (`{ cache: 'force-cache' }`) if you actually want reuse. Same kitchen, same chef, but the DEFAULT behavior has flipped — assuming the old default here would leave you serving stale expectations about performance and freshness.",
+        "examples": [
+          {
+            "code": "// (Illustrative -- Server Component fetching data, matching this exact installed\n// Next.js version's own official docs)\n\nexport default async function Page() {\n  const data = await fetch(\"https://api.example.com/posts\");   // NOT cached by default\n  const posts = await data.json();\n\n  return (\n    <ul>\n      {posts.map((post: { id: number; title: string }) => (\n        <li key={post.id}>{post.title}</li>\n      ))}\n    </ul>\n  );\n}\n\n// To explicitly cache this specific request in THIS Next.js version:\n// const data = await fetch(\"https://api.example.com/posts\", { cache: \"force-cache\" });",
+            "note": "Without the explicit { cache: 'force-cache' } option, this request re-fetches fresh data on every request in this exact installed Next.js version -- a real behavior difference from older Next.js versions (13/14 App Router), where fetch was cached BY DEFAULT and you had to opt OUT with { cache: 'no-store' } instead. Getting this backwards is a genuine, version-specific bug risk."
+          },
+          {
+            "code": "// Simulating the caching-default flip with plain, runnable JS --\n// demonstrating WHY \"check the actual installed version's docs\" matters\nfunction fetchOlderNextDefault(url, options = {}) {\n  const cached = options.cache !== \"no-store\";     // OLDER versions: cached UNLESS opted out\n  return { url, cached };\n}\n\nfunction fetchThisVersionDefault(url, options = {}) {\n  const cached = options.cache === \"force-cache\";  // THIS version: NOT cached unless opted IN\n  return { url, cached };\n}\n\nconsole.log(\"older Next.js default:\", fetchOlderNextDefault(\"/api/posts\"));\nconsole.log(\"this project's Next.js default:\", fetchThisVersionDefault(\"/api/posts\"));\nconsole.log(\"this project's Next.js, opted into caching:\",\n  fetchThisVersionDefault(\"/api/posts\", { cache: \"force-cache\" }));",
+            "note": "This is a plain-JS model of the two different DEFAULTS, not real Next.js code -- but it makes the flipped-default concrete and runnable: the exact same call with no options produces `cached: true` under the older model and `cached: false` under this project's actual installed version's model, which is precisely the kind of assumption-breaking change this repo's own AGENTS.md warns about."
+          }
+        ],
+        "warn": "This project's installed Next.js version does NOT have Cache Components enabled (checked its own next.config.ts — no cacheComponents flag is set), so this lesson describes the 'previous model': fetch is uncached by default, opt in via { cache: 'force-cache' }. A newer opt-in model (the 'use cache' directive, cacheLife, cacheTag) exists in this same Next.js version but requires an explicit next.config flag this project does not currently set — don't assume those APIs apply here without checking.",
+        "mistakes": [
+          "Assuming fetch requests are cached by default in this project, based on older Next.js (13/14) App Router familiarity — in this exact installed version (without Cache Components enabled), the default is the OPPOSITE: uncached unless you explicitly opt in.",
+          "Reaching for `use cache`/`cacheLife`/`cacheTag` APIs without first checking whether this project's next.config.ts actually enables `cacheComponents: true` — it currently does not, so the 'previous model' APIs (revalidatePath/revalidateTag, route segment `dynamic` config) are what actually apply here.",
+          "Forgetting that database/ORM queries in a Server Component are NOT automatically cached at all (fetch's caching behavior doesn't apply to arbitrary async functions) — that requires wrapping in `unstable_cache` if caching is wanted."
+        ],
+        "handsOn": "Run the plain-JS simulation and confirm the three different 'cached' outputs. Then check this project's own next.config.ts (already read in this lesson) and confirm for yourself that cacheComponents is not set, meaning the 'not cached by default' behavior described here is exactly what this codebase's Supabase-based data fetching also effectively follows (no fetch-level caching is being relied upon).",
+        "doneWhen": "You can state whether fetch is cached by default in this project's exact installed Next.js version, explain how that differs from older Next.js versions, and know which specific config flag would change that behavior.",
+        "checks": [
+          {
+            "q": "In this project's exact installed Next.js version (without Cache Components enabled), is a plain `await fetch(url)` call inside a Server Component cached by default?",
+            "a": "No — in this version's default ('previous') model, fetch requests are NOT cached unless you explicitly pass { cache: 'force-cache' }. This is the opposite of older Next.js (13/14) App Router behavior, where fetch WAS cached by default unless you opted out with { cache: 'no-store' }."
+          }
+        ],
+        "keyTakeaways": [
+          "Server Components can fetch data directly with async/await, using fetch or a database/ORM client, safely (credentials never reach the client bundle).",
+          "In this project's exact installed Next.js version (Cache Components not enabled), fetch requests are NOT cached by default — opt in explicitly with { cache: 'force-cache' }, the reverse of older Next.js versions.",
+          "Always check this project's own next.config.ts and node_modules/next/dist/docs/ before assuming a caching behavior carried over from prior Next.js experience."
+        ],
+        "resources": [
+          {
+            "label": "Next.js docs — Fetching Data",
+            "url": "https://nextjs.org/docs/app/getting-started/fetching-data",
+            "kind": "docs"
+          },
+          {
+            "label": "Next.js docs — Caching and Revalidating (Previous Model)",
+            "url": "https://nextjs.org/docs/app/guides/caching-without-cache-components",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-nextjs-server-actions",
+        "title": "Server Actions — mutations without a separate API route",
+        "concept": "A SERVER FUNCTION, per this Next.js version's own docs, is 'an asynchronous function that runs on the server' — marked with the `\"use server\"` directive — that the CLIENT can call directly, without you hand-writing a separate REST endpoint for it. Used for handling a mutation (like a form submission), it's specifically called a SERVER ACTION: pass it directly to a `<form>`'s `action` prop, and React handles calling it on submit — including a documented, real security note: 'Server Functions are reachable via direct POST requests, not just through your application's UI. Always verify authentication and authorization inside every Server Function' — since a Server Action IS a real network-callable endpoint under the hood, not a private implementation detail.",
+        "analogy": "A traditional REST endpoint is like publishing a public phone number for a specific service desk, then separately writing a form that calls that number. A Server Action collapses this into one step — the form itself IS wired directly to the handler, like a single physical button that's hard-wired straight to the machine it operates, with no separate phone call in between. But the crucial security nuance still applies: because that button is reachable by anyone who can reconstruct the same wiring (a direct POST request), the machine on the other end still has to check WHO is pressing it, every single time.",
+        "examples": [
+          {
+            "code": "// (Illustrative -- matches this Next.js version's own official docs pattern)\n\n// app/actions.ts\n\"use server\";\nimport { auth } from \"@/lib/auth\";\n\nexport async function createPost(formData: FormData) {\n  const session = await auth();\n  if (!session?.user) {\n    throw new Error(\"Unauthorized\");     // REQUIRED -- Server Actions are real network endpoints\n  }\n  const title = formData.get(\"title\");\n  // ...mutate data...\n}\n\n// app/ui/form.tsx -- a form wired DIRECTLY to the Server Action, no separate API route\nimport { createPost } from \"@/app/actions\";\n\nexport function Form() {\n  return (\n    <form action={createPost}>\n      <input type=\"text\" name=\"title\" />\n      <button type=\"submit\">Create</button>\n    </form>\n  );\n}",
+            "note": "The <form>'s action prop is the Server Action itself -- submitting the form automatically calls createPost on the server with a FormData object, no fetch()/API route needed on the client side. The auth() check inside createPost is NOT optional: per the official docs' own explicit warning, this function is reachable via a direct POST request from anyone, not only through this specific form."
+          },
+          {
+            "code": "// Simulating the 'reachable via direct POST, must self-check auth' idea --\n// plain, runnable JS standing in for a Server Action\nfunction createPostAction(formData, session) {\n  if (!session || !session.user) {\n    throw new Error(\"Unauthorized\");     // the check that MUST happen inside the action itself\n  }\n  return { title: formData.title, author: session.user, created: true };\n}\n\n// Simulating a call coming from the REAL form, with a legitimate session\nconsole.log(createPostAction({ title: \"Hello\" }, { user: \"aditi\" }));\n\n// Simulating a call bypassing the UI entirely (a crafted direct request) --\n// with NO session -- exactly the scenario the official docs warn about\ntry {\n  createPostAction({ title: \"Spam\" }, null);\n} catch (e) {\n  console.log(\"Correctly rejected:\", e.message);\n}",
+            "note": "This demonstrates precisely why the auth check must live INSIDE the action function itself, not just be assumed from 'the user went through the real form' -- the second call simulates a request that skipped the UI entirely (session: null), and the action correctly rejects it on its own, matching the official docs' explicit security guidance."
+          }
+        ],
+        "warn": "Server Actions are real, directly network-callable endpoints (invoked via POST) — the official docs explicitly warn they are 'reachable via direct POST requests, not just through your application's UI.' Never assume a Server Action is safe just because your own UI only calls it in an authorized context; always re-check authentication/authorization inside the action itself, exactly like this codebase's own SECURITY DEFINER Postgres RPCs each independently re-check auth.uid() rather than trusting the caller.",
+        "mistakes": [
+          "Omitting an authentication/authorization check inside a Server Action because 'the UI only shows this form to logged-in users' — the action is reachable directly via POST regardless of what the UI does or doesn't show.",
+          "Trying to define a Server Function directly inside a Client Component — per the official docs, this isn't possible; a Client Component can only IMPORT and invoke a Server Function that's defined in a Server Component or a separate \"use server\" file.",
+          "Forgetting that after a successful mutation, the UI won't reflect the change until the relevant cache is revalidated (next lesson) — a Server Action mutating data doesn't automatically refresh what's already been rendered/cached."
+        ],
+        "handsOn": "Run the plain-JS auth-check simulation and confirm the 'Correctly rejected' output for the unauthorized call. Then write your own small Server-Action-style function (plain JS) for a different mutation (e.g. deleting an item) that similarly throws if no valid session is passed, and confirm both an authorized and unauthorized call behave correctly.",
+        "doneWhen": "You can explain what a Server Action is, why it must independently verify authentication/authorization every time it runs, and have written your own function demonstrating that self-check.",
+        "checks": [
+          {
+            "q": "If a form on your page only appears for logged-in users, is it still necessary to check authentication INSIDE the Server Action that form submits to?",
+            "a": "Yes, absolutely — Server Actions are real, directly POST-callable endpoints. Someone could construct and send a matching request directly, completely bypassing your UI and its logged-in-only form. The official docs explicitly warn about this; the action itself must always re-verify authentication/authorization, never relying on the UI having already gated access."
+          }
+        ],
+        "keyTakeaways": [
+          "A Server Function (marked \"use server\") is server-side code the client can call directly; used for a mutation via a form, it's called a Server Action.",
+          "Server Actions are real, directly network-callable POST endpoints — always verify authentication/authorization INSIDE the action itself.",
+          "A Client Component can invoke a Server Function by importing it, but cannot define one directly."
+        ],
+        "resources": [
+          {
+            "label": "Next.js docs — Mutating Data",
+            "url": "https://nextjs.org/docs/app/getting-started/mutating-data",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-nextjs-revalidation",
+        "title": "Revalidating data after a mutation",
+        "concept": "A Server Action can mutate data, but per this Next.js version's own docs, that alone doesn't refresh what's already been rendered or cached elsewhere — you explicitly call `revalidatePath(path)` (invalidate everything cached for a specific route) or `revalidateTag(tag)` (invalidate anything tagged with a specific label, wherever it's used) from inside the Server Action to tell Next.js the relevant data has changed. The official docs recommend tag-based revalidation over path-based 'when possible — it's more precise and avoids over-invalidating' whole routes unnecessarily. `redirect()` is commonly called right after, to send the user to a page that will now show the freshly-revalidated data.",
+        "analogy": "Revalidation is like updating a company's printed directory after someone changes departments: the change itself (the mutation) happened in the HR system, but every printed copy of the directory (cached data) sitting on people's desks is still stale until someone explicitly reissues it. revalidatePath is reprinting one ENTIRE directory page; revalidateTag is the more surgical option — if every copy that mentions 'IT Department' was stamped with that specific tag when printed, you can reissue exactly and only those, wherever they are, without touching unrelated pages.",
+        "examples": [
+          {
+            "code": "// (Illustrative -- matches this Next.js version's own official docs pattern)\n\n\"use server\";\nimport { revalidatePath } from \"next/cache\";\nimport { redirect } from \"next/navigation\";\n\nexport async function createPost(formData: FormData) {\n  // ...auth check (previous lesson)...\n  // ...mutate data...\n\n  revalidatePath(\"/posts\");    // tell Next.js: cached data for /posts is now stale\n  redirect(\"/posts\");           // send the user to see the freshly-revalidated list\n}",
+            "note": "revalidatePath('/posts') invalidates whatever was cached for that specific route, so the NEXT visit to /posts fetches fresh data instead of a stale cached version. Per the official docs, redirect() 'throws a framework handled control-flow exception' -- any code written AFTER it in the same function won't execute, so revalidation must happen BEFORE the redirect call, exactly as ordered here."
+          },
+          {
+            "code": "// Simulating the 'stale cache until explicitly revalidated' idea -- plain, runnable JS\nconst db = [\"Hello World\"];         // the REAL, persistent data store\nconst cache = new Map();             // a separate cache layer sitting in front of it\n\nfunction getCachedPosts() {\n  if (!cache.has(\"/posts\")) {\n    cache.set(\"/posts\", [...db]);     // pretend this was an expensive fetch from the db\n    console.log(\"[cache miss] fetched fresh posts\");\n  } else {\n    console.log(\"[cache hit] served stale/cached posts\");\n  }\n  return cache.get(\"/posts\");\n}\n\nfunction createPostAndRevalidate(newTitle, shouldRevalidate) {\n  db.push(newTitle);                  // the mutation writes to the real data store\n  if (shouldRevalidate) {\n    cache.delete(\"/posts\");            // simulating revalidatePath -- forces a fresh fetch next time\n  }\n}\n\nconsole.log(getCachedPosts());                          // cache miss, fetches [\"Hello World\"]\ncreatePostAndRevalidate(\"Second Post\", false);            // mutate WITHOUT revalidating\nconsole.log(getCachedPosts());                           // cache hit -- stale, missing \"Second Post\"!\ncreatePostAndRevalidate(\"Third Post\", true);              // mutate WITH revalidation\nconsole.log(getCachedPosts());                           // cache miss -- fresh, includes everything",
+            "note": "This concretely demonstrates WHY revalidation matters: the second getCachedPosts() call serves a STALE result (missing \"Second Post\") because nothing told the cache it was outdated -- only after createPostAndRevalidate explicitly clears the cache (simulating revalidatePath) does the next read fetch genuinely fresh data from the underlying db, correctly showing all three posts. (The db and cache are kept as separate stand-ins here deliberately -- a real cache sits in front of a real, separate data store, same as this simulation.)"
+          }
+        ],
+        "mistakes": [
+          "Mutating data in a Server Action but forgetting to call revalidatePath/revalidateTag afterward — the user (or other users) will keep seeing stale, cached data even though the underlying data has genuinely changed.",
+          "Calling revalidatePath/revalidateTag AFTER redirect() in the same function — since redirect() throws a control-flow exception, any code after it (including revalidation) never actually runs; revalidate first, then redirect.",
+          "Defaulting to broad path-based revalidation everywhere out of habit, when a tag shared across the exact affected data would be more precise and avoid needlessly invalidating unrelated cached content — official guidance explicitly prefers tags when possible."
+        ],
+        "handsOn": "Run the plain-JS cache simulation and confirm the 'stale' vs 'fresh' outputs described in the note. Then modify it to use a tag-based approach instead of clearing the whole '/posts' cache entry — simulate two different cached keys sharing one tag, and revalidate only that tag.",
+        "doneWhen": "You can explain why a mutation alone doesn't refresh already-cached data, correctly order a revalidatePath/revalidateTag call before a redirect, and have demonstrated the stale-vs-fresh cache behavior with real, runnable code.",
+        "checks": [
+          {
+            "q": "In a Server Action that calls both revalidatePath('/posts') and redirect('/posts'), does the order of those two calls matter?",
+            "a": "Yes — revalidatePath must be called BEFORE redirect. redirect() throws a framework-handled control-flow exception, so any code after it (including a revalidation call) would never execute. Calling revalidatePath first ensures the data is marked stale before the user is sent to see it."
+          }
+        ],
+        "keyTakeaways": [
+          "Mutating data in a Server Action doesn't automatically refresh already-cached data elsewhere — you must explicitly call revalidatePath or revalidateTag.",
+          "Tag-based revalidation (revalidateTag) is preferred over path-based (revalidatePath) when possible, since it's more precise and avoids over-invalidating.",
+          "redirect() throws a control-flow exception — always revalidate BEFORE calling redirect in the same function, never after."
+        ],
+        "resources": [
+          {
+            "label": "Next.js docs — Mutating Data",
+            "url": "https://nextjs.org/docs/app/getting-started/mutating-data",
+            "kind": "docs"
+          },
+          {
+            "label": "Next.js docs — Caching and Revalidating (Previous Model)",
+            "url": "https://nextjs.org/docs/app/guides/caching-without-cache-components",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fs-databases",
+    "title": "Databases & Data Modeling",
+    "why": "Every full-stack app eventually needs to persist real data beyond a single request — this module builds real relational database skills using the SAME kind of schema this very Forage platform runs on (Postgres, via Supabase): how to model data as tables and relationships, query it with real SQL, access it type-safely from an ORM, and manage schema changes over time as an app evolves.",
+    "topics": [
+      {
+        "id": "fs-db-relational-modeling",
+        "title": "Relational modeling — tables, keys, and normalization",
+        "concept": "A relational database organizes data into TABLES (rows and columns), where each row has a PRIMARY KEY (a unique identifier for that row) and related tables connect via a FOREIGN KEY — a column in one table that references a primary key in another. NORMALIZATION is the practice of splitting data into separate, focused tables to avoid repeating the same information redundantly (e.g. a lesson's title shouldn't be copy-pasted into every quiz question row about it — instead, `quiz_questions.lesson_id` references `lessons.id`). This exact platform, Forage, models its own content this way: `streams` (the 7 tracks) → `modules` (grouped by stream_id) → `lessons` (grouped by module_id) → `quiz_questions` (grouped by lesson_id) — a real four-level relational hierarchy running in production right now.",
+        "analogy": "An un-normalized spreadsheet is like writing a student's full name and address on every single one of their exam papers by hand, over and over — repeat the same information everywhere, and a single typo or address change means updating dozens of scattered copies. A normalized relational design is like keeping ONE student record with their name/address, and every exam paper just references their student ID — change the address once, in one place, and every reference to it is automatically up to date.",
+        "examples": [
+          {
+            "code": "-- This IS Forage's own actual schema shape (simplified) -- a real 4-level hierarchy\nCREATE TABLE streams (\n  id   uuid PRIMARY KEY DEFAULT gen_random_uuid(),\n  slug text UNIQUE NOT NULL,\n  title text NOT NULL\n);\n\nCREATE TABLE modules (\n  id        uuid PRIMARY KEY DEFAULT gen_random_uuid(),\n  stream_id uuid NOT NULL REFERENCES streams(id),   -- FOREIGN KEY -- a module belongs to ONE stream\n  title     text NOT NULL\n);\n\nCREATE TABLE lessons (\n  id        uuid PRIMARY KEY DEFAULT gen_random_uuid(),\n  module_id uuid NOT NULL REFERENCES modules(id),    -- a lesson belongs to ONE module\n  title     text NOT NULL\n);\n\n-- Notice: nowhere does a lesson row repeat its module's or stream's title --\n-- that information lives in exactly ONE place, referenced by id.",
+            "note": "This is a faithful simplification of Forage's REAL, live database schema (documented in this project's own CLAUDE.md) -- streams -> modules -> lessons is a genuine, currently-running example of exactly the normalized, foreign-key-linked hierarchy this lesson describes, not a toy example invented for teaching purposes."
+          },
+          {
+            "code": "-- Verified against Forage's ACTUAL live database (read-only query, real result):\nSELECT s.title AS stream, COUNT(m.id) AS module_count\nFROM streams s\nJOIN modules m ON m.stream_id = s.id\nGROUP BY s.title\nHAVING COUNT(m.id) < 5\nORDER BY module_count;\n\n/* Real result from this platform's live data:\n   Cybersecurity          | 3\n   Data Scientist          | 3\n   Full-Stack Developer    | 3\n   Software Engineer       | 4\n*/",
+            "note": "This exact query was run against Forage's real, live Supabase database while writing this lesson -- the result genuinely reflects which career paths (this very module you're reading is expanding one of them!) have fewer modules than others, a direct, live demonstration of querying a real normalized schema rather than a fabricated example."
+          }
+        ],
+        "mistakes": [
+          "Repeating the same descriptive data (like a stream's title) directly inside a child table instead of referencing it by foreign key — this is exactly what normalization avoids, since it creates multiple copies of the same fact that can drift out of sync.",
+          "Forgetting a foreign key needs the REFERENCED table's primary key to already exist — you can't insert a module row pointing at a stream_id that doesn't exist yet (the database enforces this, called REFERENTIAL INTEGRITY).",
+          "Over-normalizing to the point of needing many JOINs for even simple, frequently-read queries — real schema design is a balance between avoiding redundancy and keeping common queries reasonably simple."
+        ],
+        "handsOn": "Sketch (on paper or in a text file) a normalized schema for a simple 'bookshelf' app: books, authors, and reviews. Decide what's a primary key, what's a foreign key, and which table each piece of information (book title, author bio, review text) belongs in exactly once.",
+        "doneWhen": "You can explain what a primary key and foreign key are, describe what normalization avoids and why, and have sketched your own small normalized schema with correctly-placed foreign keys.",
+        "checks": [
+          {
+            "q": "In Forage's real schema, why does a `lessons` row store `module_id` (a foreign key) instead of directly storing that module's title as a text column?",
+            "a": "Storing module_id and looking up the title via a JOIN means the module's title exists in exactly ONE place (the modules table) — if it ever changed, every lesson referencing it would automatically reflect the update. Copying the title directly into every lesson row would create many redundant copies that could drift out of sync with each other."
+          }
+        ],
+        "keyTakeaways": [
+          "A relational database organizes data into tables connected by primary keys (unique row identifiers) and foreign keys (references to another table's primary key).",
+          "Normalization avoids storing the same fact redundantly across many rows, keeping data consistent by having exactly one authoritative place for it.",
+          "This is not just theory — Forage's own live database (streams -> modules -> lessons -> quiz_questions) is a real, running example of this exact pattern."
+        ],
+        "resources": [
+          {
+            "label": "PostgreSQL docs — Constraints (Primary/Foreign Keys)",
+            "url": "https://www.postgresql.org/docs/current/ddl-constraints.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-db-sql-queries",
+        "title": "SQL queries — SELECT, WHERE, JOIN, GROUP BY",
+        "concept": "SQL (Structured Query Language) reads and writes relational data declaratively — you describe WHAT data you want, not the step-by-step procedure to get it. `SELECT columns FROM table WHERE condition` filters rows; `JOIN` combines rows from two tables based on a matching key (exactly the foreign-key relationships from the previous lesson); `GROUP BY` collapses many rows into one row per distinct value of a column, typically paired with an aggregate function (`COUNT`, `SUM`, `AVG`); `HAVING` filters AFTER grouping (unlike `WHERE`, which filters BEFORE grouping) — a genuinely common point of confusion worth getting precisely right.",
+        "analogy": "WHERE is like a bouncer checking IDs at the door before anyone even gets grouped into party sections — it filters individual people before anything else happens. GROUP BY is the process of sorting everyone who got in in past the bouncer into labeled sections (by table, by favorite color, whatever the grouping is). HAVING is a second bouncer who only inspects the already-formed GROUPS themselves afterward (e.g. 'kick out any section with fewer than 3 people') — a fundamentally different check, at a different stage, than the WHERE bouncer at the front door.",
+        "examples": [
+          {
+            "code": "-- Verified against Forage's ACTUAL live database (real query, real result):\nSELECT s.title AS stream, COUNT(l.id) AS lesson_count\nFROM streams s\nJOIN modules m ON m.stream_id = s.id\nJOIN lessons l ON l.module_id = m.id\nGROUP BY s.title\nORDER BY lesson_count DESC;\n\n/* Real result from this platform's live data:\n   Cloud & DevOps           | 53\n   AI Engineer              | 48\n   Common Core              | 24\n   Software Engineer        | 19\n   Data Scientist           | 13\n   Full-Stack Developer     | 13\n   Cybersecurity            | 10\n*/",
+            "note": "Two JOINs chain the relationship from lessons all the way back to streams (lessons -> modules -> streams), and GROUP BY s.title collapses all matching rows down to one row per stream, with COUNT(l.id) as the aggregate. This is a REAL query run against Forage's actual live data while writing this lesson -- the counts match this platform's genuine current content breadth exactly."
+          },
+          {
+            "code": "-- Verified against Forage's ACTUAL live database -- demonstrating WHERE vs HAVING\nSELECT s.title AS stream, COUNT(m.id) AS module_count\nFROM streams s\nJOIN modules m ON m.stream_id = s.id\nWHERE s.access_tier = 'pro'        -- filters INDIVIDUAL rows BEFORE grouping\nGROUP BY s.title\nHAVING COUNT(m.id) < 5              -- filters GROUPS themselves AFTER grouping\nORDER BY module_count;\n\n/* Real result: only pro-tier streams with fewer than 5 modules --\n   Cybersecurity, Data Scientist, Full-Stack Developer (each with 3),\n   Software Engineer (4) -- Cloud & DevOps (7) and AI Engineer (10) are correctly excluded */",
+            "note": "WHERE s.access_tier = 'pro' excludes the free Common Core stream's rows BEFORE any grouping happens. HAVING COUNT(m.id) < 5 then filters the resulting GROUPS (one per remaining stream) based on an aggregate value that only exists AFTER grouping -- this is precisely why HAVING can reference COUNT(...) but a WHERE clause at this stage cannot."
+          }
+        ],
+        "mistakes": [
+          "Trying to filter on an aggregate function (like COUNT(*) > 5) using WHERE instead of HAVING — WHERE runs before grouping, so aggregate values don't exist yet at that stage; HAVING is specifically for filtering after aggregation.",
+          "Using a JOIN when rows in the 'left' table might not have a match in the 'right' table, silently losing those unmatched rows — an INNER JOIN (the default) only keeps rows with a match on both sides; a LEFT JOIN keeps all left-side rows even without a match.",
+          "Forgetting GROUP BY must include (or aggregate) every selected column that isn't itself an aggregate — selecting a non-aggregated, non-grouped column alongside GROUP BY produces an error or undefined behavior in strict SQL engines."
+        ],
+        "handsOn": "Using the bookshelf schema from the previous lesson, write (on paper or in any SQL playground) a query joining books and authors to list each book's title with its author's name, then a second query using GROUP BY and HAVING to find which authors have written more than 2 books.",
+        "doneWhen": "You can write a JOIN across two related tables, and correctly explain (with an example) why HAVING is used instead of WHERE when filtering on an aggregate like COUNT.",
+        "checks": [
+          {
+            "q": "Why can't you write `WHERE COUNT(m.id) < 5` instead of `HAVING COUNT(m.id) < 5` in a query that groups rows?",
+            "a": "WHERE filters individual rows BEFORE any grouping/aggregation happens, so an aggregate value like COUNT(m.id) doesn't exist yet at that stage — there's no 'count' to compare until rows have actually been grouped. HAVING runs AFTER grouping specifically so it can filter based on aggregate values computed from each group."
+          }
+        ],
+        "keyTakeaways": [
+          "SQL is declarative — SELECT/WHERE/JOIN/GROUP BY describe what data you want, not the retrieval procedure.",
+          "JOIN combines rows from related tables using a matching key (typically a foreign key referencing a primary key).",
+          "WHERE filters individual rows before grouping; HAVING filters entire groups after aggregation — a common but important distinction."
+        ],
+        "resources": [
+          {
+            "label": "PostgreSQL docs — The SELECT statement",
+            "url": "https://www.postgresql.org/docs/current/sql-select.html",
+            "kind": "docs"
+          },
+          {
+            "label": "PostgreSQL docs — Aggregate Functions",
+            "url": "https://www.postgresql.org/docs/current/functions-aggregate.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-db-orm-prisma",
+        "title": "Using an ORM — type-safe database access with Prisma",
+        "concept": "An ORM (Object-Relational Mapper) like Prisma lets you query a relational database using typed function calls (`prisma.user.create(...)`, `prisma.user.findMany(...)`) instead of writing raw SQL strings — Prisma generates a fully-typed client from your schema, so TypeScript (this path's earlier module) catches a typo'd field name or wrong argument type at COMPILE time. A real, current version detail worth knowing: in Prisma's latest major version, the database connection URL moved OUT of `schema.prisma` and into a separate `prisma.config.ts` file, and `PrismaClient` now REQUIRES an explicit driver `adapter` argument — calling `new PrismaClient()` with no arguments, a pattern countless older tutorials show, now throws an error.",
+        "analogy": "Writing raw SQL by hand for every query is like hand-addressing every single envelope you send, always getting the format exactly right through memory and care. An ORM is a mail-merge template: you fill in structured, typed fields (a recipient object), and the tool correctly generates the properly-formatted, addressed envelope for you every time — with a spell-checker (the type system) catching a malformed field before it's ever sent.",
+        "examples": [
+          {
+            "code": "// schema.prisma -- the CURRENT version's format (no `url` here anymore)\n// generator client { provider = \"prisma-client-js\" }\n// datasource db { provider = \"sqlite\" }\n//\n// model User {\n//   id    Int    @id @default(autoincrement())\n//   name  String\n//   email String @unique\n//   posts Post[]\n// }\n// model Post {\n//   id       Int    @id @default(autoincrement())\n//   title    String\n//   authorId Int\n//   author   User   @relation(fields: [authorId], references: [id])\n// }\n\n// prisma.config.ts -- the connection URL lives HERE now, not in schema.prisma\nimport { defineConfig, env } from \"prisma/config\";\nexport default defineConfig({\n  schema: \"prisma/schema.prisma\",\n  datasource: { url: env(\"DATABASE_URL\") },\n});",
+            "note": "This exact schema + config split was actually created and run (via `npx prisma migrate dev`) while writing this lesson, against a real SQLite database -- confirming this is the CURRENT, working Prisma configuration shape, not an assumption carried over from an older Prisma tutorial."
+          },
+          {
+            "code": "import { PrismaClient } from \"@prisma/client\";\nimport { PrismaBetterSqlite3 } from \"@prisma/adapter-better-sqlite3\";\n\n// Prisma's current major version REQUIRES an explicit driver adapter --\n// `new PrismaClient()` with no arguments now throws an error\nconst adapter = new PrismaBetterSqlite3({ url: \"file:./dev.db\" });\nconst prisma = new PrismaClient({ adapter });\n\nasync function main() {\n  const user = await prisma.user.create({\n    data: {\n      name: \"Aditi\",\n      email: \"aditi@example.com\",\n      posts: { create: [{ title: \"Hello World\" }, { title: \"My Second Post\" }] },\n    },\n  });\n  console.log(\"Created user:\", user);\n\n  const usersWithPosts = await prisma.user.findMany({ include: { posts: true } });\n  console.log(JSON.stringify(usersWithPosts, null, 2));\n\n  await prisma.$disconnect();\n}\nmain();\n\n/* Actually executed -- real output:\nCreated user: { id: 1, name: 'Aditi', email: 'aditi@example.com' }\n[{ \"id\": 1, \"name\": \"Aditi\", \"email\": \"aditi@example.com\",\n   \"posts\": [{ \"id\": 1, \"title\": \"Hello World\", \"authorId\": 1 },\n             { \"id\": 2, \"title\": \"My Second Post\", \"authorId\": 1 }] }]\n*/",
+            "note": "This was genuinely run end-to-end (npm install, real migration, real query) to confirm it. `include: { posts: true }` fetches each user's related posts alongside them in one call -- equivalent to the JOIN from the previous lesson, but expressed as a typed option instead of raw SQL, with the shape of the result fully known to TypeScript."
+          }
+        ],
+        "warn": "Prisma's current major version (v7) is a real breaking change from older tutorials/training data: schema.prisma no longer holds the connection `url` (it moved to prisma.config.ts), and `new PrismaClient()` REQUIRES an explicit `adapter` argument. Both facts were confirmed by actually running the commands, not assumed — always verify against Prisma's current docs or the installed version's own error messages rather than trusting an older tutorial.",
+        "mistakes": [
+          "Calling `new PrismaClient()` with no arguments based on older tutorials/documentation — the current major version throws an initialization error demanding an explicit `adapter`.",
+          "Leaving a `url` field inside the `datasource` block in `schema.prisma` — the current version rejects this at schema-validation time; the URL now belongs in `prisma.config.ts` instead.",
+          "Assuming ORM-generated queries are automatically as efficient as hand-written SQL — a convenient `include` can sometimes generate more queries or data than a purpose-built JOIN would; it's a real trade-off between developer convenience and fine-grained control."
+        ],
+        "handsOn": "If you have Node available, set up a scratch project (`npm init`, `npm install prisma @prisma/client @prisma/adapter-better-sqlite3`), define a small schema, and actually run `npx prisma migrate dev` followed by a create + findMany query, confirming the adapter-based PrismaClient pattern works exactly as described here.",
+        "doneWhen": "You can explain what an ORM does differently from raw SQL, and can correctly instantiate a current-version PrismaClient with the required driver adapter, having actually run a create and a findMany-with-include query.",
+        "checks": [
+          {
+            "q": "In the current major version of Prisma, why does `new PrismaClient()` with no arguments throw an error, when older tutorials show it working with zero arguments?",
+            "a": "The current version moved the database connection URL out of the client constructor (and out of schema.prisma) into a separate prisma.config.ts file, and now requires an explicit driver `adapter` argument passed to the PrismaClient constructor — this is a genuine breaking change from older Prisma versions, not a mistake in an older tutorial."
+          }
+        ],
+        "keyTakeaways": [
+          "An ORM like Prisma provides typed function calls for database queries instead of raw SQL strings, catching mistakes at compile time.",
+          "The current major version of Prisma moved the connection URL to prisma.config.ts and requires an explicit driver adapter passed to PrismaClient — a real breaking change from older versions/tutorials.",
+          "Always verify ORM setup against the current installed version's own docs/errors rather than assuming an older tutorial's pattern still applies."
+        ],
+        "resources": [
+          {
+            "label": "Prisma docs — Instantiate PrismaClient",
+            "url": "https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration/instantiate-prisma-client",
+            "kind": "docs"
+          },
+          {
+            "label": "Prisma docs — prisma.config.ts reference",
+            "url": "https://www.prisma.io/docs/orm/reference/prisma-config-reference",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-db-migrations",
+        "title": "Schema migrations — evolving a database safely over time",
+        "concept": "A MIGRATION is a versioned, tracked change to a database's schema (adding a column, creating a table) — rather than editing a live production database by hand, a migration file records exactly what changed, in order, so the same sequence of changes can be replayed reliably across every environment (a teammate's laptop, staging, production). Different tools apply this same idea differently: an ORM like Prisma auto-generates migration SQL files from schema changes you make in `schema.prisma` (`npx prisma migrate dev`); this exact Forage codebase, using Supabase, applies schema changes directly against the live hosted project via an `apply_migration` tool — no local migrations folder at all, by deliberate project choice, as this repo's own CLAUDE.md documents. Both are legitimate approaches to the same underlying problem: safely, trackably evolving a schema over time.",
+        "analogy": "A migration is like a recipe's revision history rather than just a photo of tonight's finished dish: it doesn't just show you the CURRENT state, it records the exact sequence of edits (added a step, changed an ingredient amount) that got you there — so anyone starting from the original recipe can replay those same edits, in order, and land on an identical result, instead of trying to reverse-engineer the diff between two photos.",
+        "examples": [
+          {
+            "code": "-- Actually generated by running `npx prisma migrate dev --name init`\n-- against the schema from the previous lesson -- a REAL migration file's contents:\n\nCREATE TABLE \"User\" (\n    \"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n    \"name\" TEXT NOT NULL,\n    \"email\" TEXT NOT NULL\n);\n\nCREATE TABLE \"Post\" (\n    \"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n    \"title\" TEXT NOT NULL,\n    \"authorId\" INTEGER NOT NULL,\n    CONSTRAINT \"Post_authorId_fkey\" FOREIGN KEY (\"authorId\") REFERENCES \"User\" (\"id\")\n);\n\nCREATE UNIQUE INDEX \"User_email_key\" ON \"User\"(\"email\");",
+            "note": "This is the REAL, actual SQL Prisma generated (not hand-written) from the User/Post schema in the previous lesson, when `npx prisma migrate dev --name init` was actually run while writing this lesson -- this file gets committed to source control and replayed, in this exact order, on every other environment that needs the same schema."
+          }
+        ],
+        "warn": "This project (Forage) deliberately does NOT use a local migrations folder or an ORM's migration tool — per its own CLAUDE.md, schema changes go directly against the live hosted Supabase project via an `apply_migration` MCP tool call. This is a legitimate, different-but-valid approach to the same problem migrations solve elsewhere: it's still versioned and tracked (each call is named and recorded), just without a local `migrations/` directory replayed via a CLI.",
+        "mistakes": [
+          "Editing a production database's schema by hand (via a GUI or ad-hoc SQL) with no record of what changed — this is exactly the untracked, unreplayable process migrations exist to replace, regardless of which specific tool you use.",
+          "Committing a generated migration file's SQL but never actually testing that running it fresh (on an empty database) succeeds — a migration that only ever ran against an already-partially-migrated database can hide real ordering bugs.",
+          "Assuming there's only ONE correct way to manage migrations — an ORM-generated migrations folder and a direct-apply-against-a-live-project approach (like this very codebase uses) are both legitimate, given different team/project needs."
+        ],
+        "handsOn": "If you completed the previous lesson's Prisma setup, open the actual migration.sql file that npx prisma migrate dev generated in your prisma/migrations/ folder and read through it line by line, confirming it matches your schema.prisma changes exactly.",
+        "doneWhen": "You can explain what a migration is and why it's preferred over ad-hoc manual schema edits, and can describe (in your own words) the difference between an ORM-generated migrations folder and this project's direct-apply-to-a-live-project approach.",
+        "checks": [
+          {
+            "q": "Does the fact that this Forage codebase has no local migrations/ folder mean its schema changes are untracked or unsafe?",
+            "a": "No — per this project's own documentation, schema changes still go through a deliberate, named `apply_migration` tool call against the live Supabase project, which is still a tracked, versioned way of evolving the schema; it simply doesn't use a local migrations folder replayed by an ORM's CLI, which is a different (but still legitimate) way of achieving the same safety goal."
+          }
+        ],
+        "keyTakeaways": [
+          "A migration is a versioned, ordered record of schema changes, allowing the same changes to be reliably replayed across environments.",
+          "Different tools implement migrations differently — an ORM like Prisma auto-generates local migration files; other setups (like this very Forage codebase) apply named, tracked changes directly against a live project.",
+          "The underlying goal is always the same: replace untracked, ad-hoc schema edits with a safe, reproducible, ordered process."
+        ],
+        "resources": [
+          {
+            "label": "Prisma docs — Migrate",
+            "url": "https://www.prisma.io/docs/orm/prisma-migrate",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-db-sql-vs-nosql",
+        "title": "Choosing SQL vs NoSQL",
+        "concept": "A relational (SQL) database enforces a fixed SCHEMA upfront and relationships via foreign keys (this module, throughout) — strong at guaranteeing data consistency and expressing complex relationships/joins across normalized tables, like Forage's own streams/modules/lessons hierarchy. A document-oriented NoSQL database (e.g. MongoDB) stores flexible, often deeply-nested JSON-like documents with NO required fixed schema, trading some consistency guarantees for flexibility when data doesn't naturally fit rigid tables, or when a single document naturally holds everything a specific read needs without any joins at all. Interestingly, this exact platform's own `lessons.body` column is a `jsonb` (JSON) field sitting INSIDE its otherwise fully relational Postgres schema — a real example of using a flexible, document-like column where it's actually useful, without abandoning the relational model everywhere else.",
+        "analogy": "A relational database is like a well-organized library with a strict card catalog system: every book MUST be classified by a fixed set of fields (author, subject, call number) before it can be shelved, which makes cross-referencing ('find every book by this author about that subject') fast and reliable. A document database is like a box of individually-labeled folders, where each folder can contain whatever mixture of documents makes sense for that specific case, with no obligation for every folder to share the same internal structure — flexible, but you lose the guaranteed, structured cross-referencing the card catalog gave you.",
+        "examples": [
+          {
+            "code": "-- A relational (SQL) table -- every row MUST have exactly these columns\nCREATE TABLE products (\n  id    uuid PRIMARY KEY DEFAULT gen_random_uuid(),\n  name  text NOT NULL,\n  price numeric NOT NULL\n);\n-- Adding a genuinely different, product-specific attribute (e.g. \"screen_size\"\n-- for laptops but not applicable to a t-shirt) requires either a schema change\n-- (a nullable column many rows won't use) or a separate related table.",
+            "note": "This is standard relational modeling -- fine when most rows share the same shape, awkward when different KINDS of products genuinely need very different, non-overlapping sets of attributes (a t-shirt has 'size' and 'color'; a laptop has 'screen_size' and 'ram') that don't map cleanly onto one fixed set of columns."
+          },
+          {
+            "code": "// A document (NoSQL-style) record -- each document's shape can differ entirely\nconst laptop = {\n  name: \"UltraBook 14\",\n  price: 1200,\n  attributes: { screen_size: \"14 inch\", ram: \"16GB\" },\n};\nconst tshirt = {\n  name: \"Forage Logo Tee\",\n  price: 20,\n  attributes: { size: \"M\", color: \"black\" },\n};\n\n// Both are valid \"products\" documents despite having completely different\n// attributes objects -- no schema change was needed to support either shape\nconsole.log(laptop.attributes.screen_size);\nconsole.log(tshirt.attributes.color);",
+            "note": "Both objects are plain, valid JavaScript objects representing genuinely different product shapes with zero schema migration needed -- this flexibility is exactly NoSQL's core trade-off: less upfront rigidity/consistency guarantee, in exchange for naturally fitting data that doesn't share one uniform shape."
+          }
+        ],
+        "mistakes": [
+          "Choosing a document database purely because 'it's more modern/flexible', for data that's actually highly relational (many foreign-key-style cross-references) — you'd likely end up manually re-implementing joins/consistency checks the relational model already gives you for free.",
+          "Choosing a relational database and forcing genuinely irregular, per-item-different data into many nullable columns or awkward extra tables, when a flexible document/JSON field would fit the actual shape of the data far better.",
+          "Assuming it's strictly one-or-the-other for an entire application — this platform itself uses a JSON column (lessons.body, currently unused/vestigial per its own docs, but structurally available) INSIDE an otherwise fully relational schema; mixing is common and often the right call for the specific data that needs it."
+        ],
+        "handsOn": "For the bookshelf schema from earlier lessons, identify one piece of data that fits the relational model well (e.g. author-to-books, a clean one-to-many relationship) and imagine one piece of data that might fit a flexible document shape better (e.g. wildly different metadata per book genre) — write one sentence justifying each choice.",
+        "doneWhen": "You can explain the core trade-off between a fixed relational schema and a flexible document model, and can identify, for a given piece of data, which model more naturally fits its actual shape.",
+        "checks": [
+          {
+            "q": "Does choosing Postgres (a relational database) mean you're stuck only ever storing rigidly-typed columns, with no flexibility at all?",
+            "a": "No — Postgres (and this very platform's own schema) supports a `jsonb` column type for genuinely flexible, document-like data sitting alongside otherwise fully relational tables. The choice isn't strictly all-or-nothing; a relational database can hold flexible JSON fields exactly where that flexibility is actually needed, without abandoning structure everywhere else."
+          }
+        ],
+        "keyTakeaways": [
+          "Relational (SQL) databases enforce a fixed schema and express relationships via foreign keys — strong for consistency and complex cross-references.",
+          "Document (NoSQL) databases allow flexible, per-record shapes with no required fixed schema — strong when data doesn't naturally fit uniform rows.",
+          "The choice isn't all-or-nothing — a relational database like Postgres can include flexible JSON columns exactly where needed, as this very platform's own schema does."
+        ],
+        "resources": [
+          {
+            "label": "PostgreSQL docs — JSON Types",
+            "url": "https://www.postgresql.org/docs/current/datatype-json.html",
+            "kind": "docs"
+          },
+          {
+            "label": "MongoDB docs — Data Modeling Introduction",
+            "url": "https://www.mongodb.com/docs/manual/core/data-modeling-introduction/",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fs-auth-security",
+    "title": "Authentication, Authorization & Security",
+    "why": "A full-stack app that gets identity and access control wrong isn't just buggy — it's dangerous, for real users' real data. This module builds the fundamentals every professional full-stack developer must know: proving who someone is (authentication), correctly hashing passwords, deciding what they're allowed to do (authorization), and defending against the most common real-world web attacks — grounded throughout in this exact Forage platform's own real Supabase Auth + RLS security model.",
+    "topics": [
+      {
+        "id": "fs-auth-sessions-vs-jwt",
+        "title": "Sessions vs JWTs — two ways to stay logged in",
+        "concept": "HTTP itself is stateless — the server doesn't remember who you are between requests — so 'staying logged in' requires an explicit mechanism. A SESSION-based approach stores session data on the SERVER (often in a database or memory store), and gives the browser only a random session ID (usually in a cookie); the server looks up that ID on every request to find out who's logged in. A JWT (JSON Web Token) approach instead encodes the user's identity/claims DIRECTLY into a signed token the client holds — the server can verify the token's signature without needing to look anything up in a database, at the cost of being harder to instantly revoke (a JWT typically stays valid until it expires, since there's no server-side record to delete). This project's own Supabase Auth uses a JWT-based approach under the hood — `supabase.auth.getUser()` verifies a signed token, not a server-side session lookup.",
+        "analogy": "A session is like a coat-check ticket: the ticket itself is just a random number, meaningless without the coat-check counter's records — the STAFF (server) look up what that number actually corresponds to. A JWT is like a wax-sealed letter of introduction: the letter itself CONTAINS the claims ('this is Aditi, a Pro member') and anyone with the right seal-checking tool (the server's signing key) can verify it's genuine without ever contacting the original issuer again — but if that letter is stolen before it expires, there's no front desk to call and instantly invalidate it.",
+        "examples": [
+          {
+            "code": "// A JWT's structure -- three base64url-encoded parts, joined by dots:\n// header.payload.signature\nconst exampleJwt =\n  \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZGl0aSIsInJvbGUiOiJwcm8ifQ.abc123signature\";\n\nfunction decodeJwtPayload(token) {\n  const [, payloadB64] = token.split(\".\");\n  const json = Buffer.from(payloadB64, \"base64url\").toString(\"utf8\");\n  return JSON.parse(json);\n}\n\nconsole.log(decodeJwtPayload(exampleJwt));\n// { sub: 'aditi', role: 'pro' } -- readable WITHOUT verifying the signature!",
+            "note": "This demonstrates a genuinely important point: the payload of a JWT is only BASE64-ENCODED, not encrypted -- anyone can decode and read it (as shown here), which is why a JWT should never carry secret information. Its security comes entirely from the SIGNATURE, which proves the payload hasn't been tampered with since the server issued it -- decoding it without checking the signature (as this snippet does) tells you nothing about whether it's genuine."
+          },
+          {
+            "code": "// Simulating why session revocation is instant but JWT revocation is NOT,\n// with plain, runnable JS standing in for both models\nconst serverSessions = new Map();   // session-based: server holds the source of truth\n\nfunction loginSession(userId) {\n  const sessionId = \"sess_\" + Math.random().toString(36).slice(2);\n  serverSessions.set(sessionId, { userId, valid: true });\n  return sessionId;\n}\nfunction logoutSession(sessionId) {\n  serverSessions.delete(sessionId);   // instantly invalidated -- server just forgets it\n}\nfunction checkSession(sessionId) {\n  return serverSessions.has(sessionId);\n}\n\nconst sid = loginSession(\"aditi\");\nconsole.log(\"session valid before logout:\", checkSession(sid));\nlogoutSession(sid);\nconsole.log(\"session valid after logout:\", checkSession(sid));   // false -- instant\n\n// A JWT, by contrast, has no server-side record to delete --\n// it remains verifiably 'valid' (signature checks out) until its own expiry time passes,\n// regardless of any 'logout' the client-side UI performs",
+            "note": "logoutSession() demonstrates the SESSION model's key advantage: deleting the server-side record makes the session immediately, provably invalid on the very next check. A JWT has no equivalent -- 'logging out' client-side (e.g. deleting it from local storage) doesn't stop a COPY of that same token (if someone else obtained it) from still verifying successfully until its expiry time arrives, which is the real trade-off this lesson's concept describes."
+          }
+        ],
+        "mistakes": [
+          "Putting sensitive/secret data directly into a JWT's payload — it's only base64-ENCODED, not encrypted, and readable by anyone who has the token (as demonstrated above).",
+          "Expecting a JWT to be instantly revocable the same way a server-side session is — without a server-side record to delete, a JWT remains valid until it expires, which is why many systems use SHORT-lived JWTs paired with a separate refresh mechanism.",
+          "Assuming a decoded (but unverified) JWT payload can be trusted — decoding tells you what a token CLAIMS, not whether those claims are genuine; only verifying the signature actually confirms it hasn't been tampered with."
+        ],
+        "handsOn": "Run both examples and confirm the outputs. Then decode the header portion (not just the payload) of the example JWT the same way, and identify what algorithm it claims to use for its signature.",
+        "doneWhen": "You can explain the core difference between session-based and JWT-based authentication, why a JWT's payload is readable without verification, and why JWTs are harder to instantly revoke than server-side sessions.",
+        "checks": [
+          {
+            "q": "If you decode a JWT's payload and it shows { role: \"pro\" }, does that alone prove the user genuinely has a pro plan?",
+            "a": "No — decoding a JWT's payload only reveals what it CLAIMS; it doesn't confirm the claim is genuine. Only verifying the token's cryptographic SIGNATURE (using the issuing server's key) proves the payload hasn't been tampered with since it was issued. A modified or forged token could claim anything in its payload."
+          }
+        ],
+        "keyTakeaways": [
+          "HTTP is stateless — 'staying logged in' requires an explicit mechanism, either server-side sessions or client-held JWTs.",
+          "A JWT's payload is only base64-encoded (readable by anyone), not encrypted — its security comes entirely from its signature.",
+          "Sessions can be instantly revoked (delete the server-side record); JWTs generally remain valid until they expire, since there's no server-side record to delete."
+        ],
+        "resources": [
+          {
+            "label": "MDN — JSON Web Tokens overview",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API",
+            "kind": "docs"
+          },
+          {
+            "label": "Auth0 — JWT.io introduction",
+            "url": "https://jwt.io/introduction",
+            "kind": "reference"
+          }
+        ]
+      },
+      {
+        "id": "fs-auth-password-hashing",
+        "title": "Password hashing — never store plaintext, ever",
+        "concept": "A password must NEVER be stored in a database as-is (plaintext) — if that database is ever breached, every user's real password is instantly exposed. Instead, you store a HASH: the output of a one-way function that's computationally infeasible to reverse. A correct password-hashing scheme also uses a random SALT (unique per user) mixed into the hash, specifically to prevent an attacker from pre-computing a lookup table of common password hashes (a 'rainbow table') that could instantly crack many accounts at once. Node's built-in `crypto` module provides `scrypt`, a hashing function DELIBERATELY slow and memory-intensive (unlike a fast hash like SHA-256, which is actually a poor choice for passwords specifically because it's TOO fast, making brute-forcing millions of guesses per second feasible).",
+        "analogy": "Storing a plaintext password is like writing every customer's house key shape directly in a public ledger — anyone who reads the ledger can cut a copy immediately. Hashing is like instead recording a unique, deliberately complex WAX SEAL IMPRESSION for each key, one that's practically impossible to reverse-engineer back into the original key shape, but easy to CHECK a candidate key against (does pressing it make the same seal?). The salt is making sure no two customers' seals look alike even if they happen to have the identical key shape (the same password) — otherwise, cracking one immediately reveals every other customer sharing that same key.",
+        "examples": [
+          {
+            "code": "import crypto from \"node:crypto\";\n\nfunction hashPassword(password) {\n  const salt = crypto.randomBytes(16).toString(\"hex\");   // unique per user, never reused\n  const hash = crypto.scryptSync(password, salt, 64).toString(\"hex\");\n  return `${salt}:${hash}`;    // store BOTH -- salt isn't secret, it just must be unique\n}\n\nfunction verifyPassword(password, stored) {\n  const [salt, originalHash] = stored.split(\":\");\n  const hash = crypto.scryptSync(password, salt, 64).toString(\"hex\");\n  return crypto.timingSafeEqual(Buffer.from(hash, \"hex\"), Buffer.from(originalHash, \"hex\"));\n}\n\nconst stored = hashPassword(\"correct-horse-battery-staple\");\nconsole.log(\"Correct password verifies:\", verifyPassword(\"correct-horse-battery-staple\", stored));\nconsole.log(\"Wrong password verifies:\", verifyPassword(\"wrong-password\", stored));\n\nconst stored2 = hashPassword(\"correct-horse-battery-staple\");\nconsole.log(\"Two hashes of the SAME password differ:\", stored !== stored2);",
+            "note": "Actually executed: verifyPassword correctly returns true only for the exact original password, and hashing the SAME password twice produces two DIFFERENT stored values (different random salts) -- exactly the property that defeats rainbow-table attacks, since no two identical passwords ever produce the same stored hash."
+          }
+        ],
+        "warn": "timingSafeEqual (not a plain === comparison) is used deliberately in verifyPassword — a naive string comparison can leak information via timing differences (returning slightly faster when the first few bytes DON'T match), which a patient attacker can exploit to guess a hash byte-by-byte. Always use a constant-time comparison function for anything security-sensitive like this.",
+        "mistakes": [
+          "Storing passwords in plaintext, or even with a fast, general-purpose hash like plain SHA-256 with no salt — SHA-256 is DESIGNED to be fast, which is exactly the wrong property for password hashing (fast hashing enables fast brute-forcing).",
+          "Reusing the same salt across all users (or hardcoding one salt) — this defeats the entire purpose of salting, since identical passwords would still produce identical hashes across different users.",
+          "Comparing hashes with a plain `===`/string equality check instead of a constant-time function like timingSafeEqual — this can leak timing information exploitable in a sophisticated attack."
+        ],
+        "handsOn": "Run the example and confirm all three outputs. Then modify verifyPassword to use a plain `===` string comparison instead of timingSafeEqual, and explain in one sentence (referencing this lesson's warning) why that would be a real, meaningful security regression even though the function's normal-case behavior looks identical.",
+        "doneWhen": "You can explain why passwords must be hashed (never stored plaintext), why a per-user random salt matters, and why a slow function like scrypt is preferred over a fast general-purpose hash for this specific purpose.",
+        "checks": [
+          {
+            "q": "Why is a fast, general-purpose hash function like plain SHA-256 considered a POOR choice specifically for password hashing, even though it's cryptographically secure for other purposes?",
+            "a": "SHA-256's speed — a real strength for most uses — becomes a weakness for password hashing, because it lets an attacker with stolen hashes try billions of password guesses per second. Password-hashing functions like scrypt are deliberately slow and memory-intensive, making large-scale brute-force guessing computationally impractical even with stolen hash data."
+          }
+        ],
+        "keyTakeaways": [
+          "Passwords must never be stored in plaintext — always store a one-way hash instead.",
+          "A unique, random salt per user prevents rainbow-table attacks and ensures identical passwords don't produce identical stored hashes.",
+          "Use a deliberately slow, memory-hard function (like scrypt) for password hashing specifically — fast general-purpose hashes like SHA-256 are the wrong tool for this job."
+        ],
+        "resources": [
+          {
+            "label": "Node.js docs — crypto.scrypt",
+            "url": "https://nodejs.org/api/crypto.html#cryptoscryptpassword-salt-keylen-options-callback",
+            "kind": "docs"
+          },
+          {
+            "label": "OWASP — Password Storage Cheat Sheet",
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html",
+            "kind": "reference"
+          }
+        ]
+      },
+      {
+        "id": "fs-auth-oauth",
+        "title": "OAuth — logging in with a third-party account",
+        "concept": "OAuth is the standard behind 'Sign in with Google/GitHub' buttons — it lets a user grant your app LIMITED access to their account on another service, WITHOUT ever sharing their password from that service with your app at all. The core flow: your app redirects the user to the third-party provider (e.g. Google); the user logs in and approves your app's requested access THERE, on Google's own site; Google redirects back to your app with an authorization CODE; your app's backend exchanges that code (server-to-server, using a secret only your backend knows) for an access token. Your app never sees or handles the user's actual Google password at any point — it only ever receives Google's own confirmation.",
+        "analogy": "OAuth is like checking into a hotel using a key CARD issued at the front desk, instead of handing the hotel your house key. You never give the hotel your actual house key (your real password on the third-party service) — the front desk (the OAuth provider) verifies who you are directly, then issues a limited-purpose card (a token) that only opens specific doors (the specific permissions you approved) for a limited time, without ever exposing your original key to the hotel at all.",
+        "examples": [
+          {
+            "code": "// (Conceptual walkthrough of the OAuth \"authorization code\" flow --\n// not a single runnable script, since it requires a real registered\n// OAuth app and a real browser redirect round-trip)\n\nconst flow = `\n1. User clicks \"Sign in with Google\" on YOUR app\n2. YOUR app redirects the browser to Google's own login/consent page\n3. User logs in and approves access ON GOOGLE'S SITE -- never on your app\n4. Google redirects back to YOUR app with a one-time authorization CODE\n5. YOUR BACKEND exchanges that code (plus a secret only your backend holds)\n   for an access token, via a direct server-to-server request to Google\n6. YOUR app now has a token proving the user's identity/granted permissions,\n   without ever having seen the user's actual Google password\n`;\nconsole.log(flow);",
+            "note": "This is a WALKTHROUGH of the conceptual flow (the exact shape used by this codebase's own Supabase Auth for any third-party provider it might add), not literal code to execute -- the key transferable idea is steps 3 and 5: the password exchange happens ENTIRELY between the user and the third-party provider, and the CODE-for-TOKEN exchange happens server-to-server using a secret, never exposed to the browser."
+          }
+        ],
+        "warn": "The code-for-token exchange (step 5) MUST happen from your backend, using a secret client credential — never perform this exchange directly from client-side/browser JavaScript, since that would require exposing your app's OAuth client secret to anyone who opens their browser's developer tools.",
+        "mistakes": [
+          "Trying to directly capture and store a user's real password for a third-party service instead of using OAuth — this defeats the entire purpose (and is often literally against that provider's terms of service).",
+          "Performing the authorization-code-to-token exchange in client-side code — this would expose your app's secret client credential to anyone inspecting network requests in their browser.",
+          "Assuming an OAuth token grants FULL access to a user's third-party account — real OAuth flows request specific, limited SCOPES (e.g. 'read your email address' but not 'read all your files'), and a well-designed app requests only the minimum scope it actually needs."
+        ],
+        "handsOn": "Find this project's own auth setup (src/lib/supabase/) and identify: does it currently support any third-party OAuth providers, or only email/password? Read Supabase Auth's documentation on adding a provider like Google or GitHub and write out, in your own words, which of the 6 flow steps above would need new configuration in this codebase versus which are handled entirely by Supabase already.",
+        "doneWhen": "You can explain the OAuth authorization-code flow's key steps, why the code-for-token exchange must happen server-to-server, and what 'scope' means in this context.",
+        "checks": [
+          {
+            "q": "In the OAuth flow described here, does your app ever receive or handle the user's actual password for the third-party service (e.g. their real Google password)?",
+            "a": "No — the user enters their password directly on the third-party provider's own site (e.g. Google's login page), never on your app. Your app only ever receives an authorization code, then exchanges it (server-to-server, using a secret) for a token proving identity/granted permissions — the actual password never passes through your app at all."
+          }
+        ],
+        "keyTakeaways": [
+          "OAuth lets a user grant your app limited access to a third-party account without ever sharing that account's real password with your app.",
+          "The authorization-code-to-token exchange must happen server-to-server (using a secret client credential), never from client-side browser code.",
+          "OAuth tokens are scoped to specific, limited permissions — a well-designed app requests only the minimum scope it actually needs."
+        ],
+        "resources": [
+          {
+            "label": "Supabase docs — Social Login",
+            "url": "https://supabase.com/docs/guides/auth/social-login",
+            "kind": "docs"
+          },
+          {
+            "label": "Auth0 — Authorization Code Flow",
+            "url": "https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow",
+            "kind": "reference"
+          }
+        ]
+      },
+      {
+        "id": "fs-auth-authorization",
+        "title": "Authorization — deciding what a logged-in user can do",
+        "concept": "AUTHENTICATION answers 'who are you?'; AUTHORIZATION answers 'what are you allowed to do?' — a genuinely different, separate concern that must be enforced EVERY time, regardless of what the client-side UI shows or hides. This project's own real database does this with POSTGRES ROW LEVEL SECURITY (RLS): a policy like `auth.uid() = user_id` restricts which ROWS a query can even see or touch, enforced by the DATABASE ITSELF — not just by the application code trusting a client-side check. This project's `SECURITY DEFINER` functions (like `mark_lesson_done`) additionally self-check `auth.uid()` and call helper functions like `has_lesson_access()` internally, so authorization is verified at the actual point of the action, not assumed from 'the button was only shown to allowed users.'",
+        "analogy": "Authentication is a bouncer checking your ID at the door to confirm who you are. Authorization is a completely separate question: even once you're confirmed as you, does your specific wristband color (server, admin, general guest) actually permit you into the VIP room? A building with real authorization doesn't just take the reception desk's word for it — the VIP room's own door has its own scanner checking your specific wristband, every single time, regardless of what the reception desk's directory said.",
+        "examples": [
+          {
+            "code": "-- This IS Forage's real, actual RLS policy (from this platform's live database)\nCREATE POLICY \"own interview sessions select\"\nON interview_sessions FOR SELECT\nUSING (auth.uid() = user_id);\n\n-- This means: even if application code has a BUG and tries to fetch\n-- EVERY interview_sessions row with no filter at all, Postgres itself\n-- will still only ever return rows where user_id matches the CALLER's\n-- own auth.uid() -- the database enforces this, not just the app code.",
+            "note": "This is a REAL policy from this exact platform's live database (confirmed directly against it during this project's own security work). The critical property RLS provides: authorization is enforced at the DATABASE layer itself, as a genuine defense-in-depth measure -- even a buggy or compromised application layer querying without any WHERE clause still can't see another user's rows."
+          },
+          {
+            "code": "// Simulating the difference between 'UI hides the button' (NOT real authorization)\n// and 'the action itself checks' (REAL authorization) -- plain, runnable JS\nfunction deletePost_UIOnlyCheck(postId, currentUser, isAdminAccordingToUI) {\n  // BAD: trusts a flag the CALLER provides, doesn't independently verify anything\n  if (!isAdminAccordingToUI) throw new Error(\"not allowed\");\n  return `post ${postId} deleted by ${currentUser}`;\n}\n\nconst realAdmins = new Set([\"aditi\"]);\nfunction deletePost_RealCheck(postId, currentUser) {\n  // GOOD: independently verifies against a real source of truth, every single call\n  if (!realAdmins.has(currentUser)) throw new Error(\"not allowed\");\n  return `post ${postId} deleted by ${currentUser}`;\n}\n\n// An attacker who can call the function directly (bypassing the real UI)\n// can simply CLAIM isAdminAccordingToUI = true -- the first version trusts this blindly\nconsole.log(deletePost_UIOnlyCheck(1, \"attacker\", true));   // succeeds -- BAD\ntry {\n  deletePost_RealCheck(1, \"attacker\");                        // correctly rejected\n} catch (e) {\n  console.log(\"Correctly rejected:\", e.message);\n}",
+            "note": "deletePost_UIOnlyCheck accepts a caller-supplied 'isAdminAccordingToUI' flag directly -- exactly the mistake of trusting the CLIENT to self-report its own authorization, which any direct API call can simply lie about. deletePost_RealCheck independently checks against realAdmins (a genuine source of truth) every single call, regardless of what the caller claims -- this is the real authorization pattern, mirroring this platform's own SECURITY DEFINER functions checking auth.uid() themselves rather than trusting a client-supplied flag."
+          }
+        ],
+        "mistakes": [
+          "Hiding a button/UI element for unauthorized users and treating that as sufficient authorization — a direct API/RPC call bypassing the UI entirely would still succeed if the backend doesn't independently re-check permissions.",
+          "Trusting a client-supplied flag (like `isAdmin: true` in a request body) instead of checking against a real, server-side source of truth for every sensitive action.",
+          "Relying on RLS/database-level checks ALONE without ALSO checking authorization inside SECURITY DEFINER functions that intentionally bypass RLS — this platform's own RPCs correctly do both, since a SECURITY DEFINER function runs with elevated privileges specifically because it needs to bypass RLS for legitimate reasons, meaning IT must independently verify authorization instead."
+        ],
+        "handsOn": "Run the plain-JS simulation and confirm the 'Correctly rejected' output. Then find one real SECURITY DEFINER function in this project (e.g. mark_lesson_done, described in this platform's own database schema documentation) and identify exactly which line performs its own independent authorization check, rather than trusting the caller.",
+        "doneWhen": "You can explain the difference between authentication and authorization, why UI-level hiding is not real authorization, and can point to a real example (in this codebase or your own) of a function independently verifying authorization rather than trusting the caller.",
+        "checks": [
+          {
+            "q": "If a 'Delete' button is only shown in the UI to admin users, is that sufficient to prevent a non-admin from deleting something?",
+            "a": "No — hiding a button in the UI doesn't stop someone from calling the underlying API/RPC directly (bypassing the UI entirely). Real authorization must be enforced at the point of the actual action itself (e.g. inside the function/endpoint that performs the delete), independently checking the caller's permissions against a genuine source of truth, not trusting what the UI happened to display."
+          }
+        ],
+        "keyTakeaways": [
+          "Authentication answers 'who are you'; authorization answers 'what are you allowed to do' — two distinct concerns, both required.",
+          "This platform's own Postgres Row Level Security enforces authorization at the DATABASE layer itself, a genuine defense-in-depth measure beyond application code.",
+          "A function must independently verify authorization every time it runs — never trust a client-supplied flag or assume the UI already gated access."
+        ],
+        "resources": [
+          {
+            "label": "PostgreSQL docs — Row Security Policies",
+            "url": "https://www.postgresql.org/docs/current/ddl-rowsecurity.html",
+            "kind": "docs"
+          },
+          {
+            "label": "Supabase docs — Row Level Security",
+            "url": "https://supabase.com/docs/guides/database/postgres/row-level-security",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-auth-common-vulns",
+        "title": "Common vulnerabilities — XSS, CSRF, and SQL injection",
+        "concept": "Three of the most common real-world web vulnerabilities, each with a distinct mechanism and fix: SQL INJECTION happens when untrusted user input is spliced directly into a SQL query STRING, letting an attacker alter the query's actual logic — the fix is PARAMETERIZED queries, where the query text and the data are sent to the database SEPARATELY, so user input can never be interpreted as SQL syntax. XSS (Cross-Site Scripting) happens when untrusted input is rendered directly as HTML/JavaScript in a page, letting an attacker inject a script that runs in OTHER users' browsers — the fix is escaping/sanitizing any user-provided content before rendering it (frameworks like React do this automatically by default for text content). CSRF (Cross-Site Request Forgery) tricks a logged-in user's browser into unknowingly submitting a request to another site where they're authenticated — the fix relies on things like SameSite cookies and CSRF tokens that prove a request genuinely originated from your own app's page.",
+        "analogy": "SQL injection is like a form letter template where a filled-in blank ('___, please deposit $100 into my account') can itself contain instructions that get read as part of the template's OWN structure rather than as inert data — if the blank isn't properly contained, someone filling it in with 'nobody; also, deposit $100000 into MY account' could hijack the template's actual meaning. XSS is like a guestbook that displays messages verbatim, including a 'message' that's actually a hidden trap door wired to trigger whenever the NEXT visitor reads it. CSRF is like being tricked into unknowingly signing a form because it was hidden inside another document you willingly signed — your genuine, already-authenticated signature is REAL, but the request the attacker wanted was smuggled in without your knowledge.",
+        "examples": [
+          {
+            "code": "// SQL injection: user input spliced directly into a query STRING\nfunction buildUnsafeQuery(username) {\n  return `SELECT * FROM users WHERE username = '${username}'`;\n}\n\nconsole.log(\"Normal input:\", buildUnsafeQuery(\"aditi\"));\n\nconst maliciousInput = \"' OR '1'='1\";\nconsole.log(\"Malicious input:\", buildUnsafeQuery(maliciousInput));\n// Resulting WHERE clause: WHERE username = '' OR '1'='1' -- always true, matches EVERY row\n\n// The fix: a PARAMETERIZED query -- text and data travel separately\nfunction buildSafeQuery(username) {\n  return { text: \"SELECT * FROM users WHERE username = $1\", values: [username] };\n}\nconsole.log(\"Safe, parameterized:\", buildSafeQuery(maliciousInput));\n// The malicious string is passed as a plain DATA VALUE for $1 --\n// the database never interprets it as SQL syntax at all",
+            "note": "Actually executed: the malicious input genuinely breaks the intended query logic in buildUnsafeQuery (the WHERE clause becomes always-true), while buildSafeQuery keeps the exact same malicious string as an inert VALUE bound to $1 -- this is precisely why an ORM like this path's earlier Prisma lesson (and this project's own Supabase client) uses parameterized queries under the hood by default, rather than raw string concatenation."
+          },
+          {
+            "code": "// XSS: rendering untrusted content directly as HTML vs. as plain text\nconst userComment = '<img src=x onerror=\"alert(\\'hacked\\')\">';\n\n// UNSAFE (conceptual): directly inserting into innerHTML would EXECUTE that script\n// element.innerHTML = userComment;   // the onerror handler would actually run\n\n// SAFE: treating it as plain TEXT content, never parsed as HTML/executable markup\nfunction escapeForDisplay(text) {\n  return text\n    .replace(/&/g, \"&amp;\")\n    .replace(/</g, \"&lt;\")\n    .replace(/>/g, \"&gt;\");\n}\nconsole.log(\"Raw (dangerous if rendered as HTML):\", userComment);\nconsole.log(\"Escaped (safe to render):\", escapeForDisplay(userComment));\n// React (this path's own React module) does exactly this kind of escaping\n// AUTOMATICALLY for any text content rendered inside JSX, e.g. {userComment}",
+            "note": "escapeForDisplay converts the dangerous < and > characters into their harmless HTML-entity equivalents (&lt; and &gt;), so a browser would display the LITERAL TEXT of the tag rather than parsing and executing it as a real <img> element with an onerror handler -- this is conceptually what React's JSX text interpolation ({variable}) does automatically, which is why directly rendering untrusted content as TEXT in React is safe by default, while React's dangerouslySetInnerHTML (named that way very deliberately) bypasses this protection."
+          }
+        ],
+        "warn": "React's default JSX text rendering ({variable}) already escapes content automatically, matching the 'safe' example above — the real danger zone is specifically `dangerouslySetInnerHTML`, which (as its name warns) bypasses this automatic escaping and should only ever be used with content you've deliberately, carefully sanitized yourself.",
+        "mistakes": [
+          "Building SQL queries via string concatenation/interpolation with user input, instead of parameterized queries — this project's own use of the Supabase client/RPCs avoids this entirely by design, but hand-written raw SQL elsewhere must still follow this rule.",
+          "Using `dangerouslySetInnerHTML` (or an equivalent raw-HTML-insertion API) with unsanitized user input — this deliberately opts OUT of React's automatic escaping protection.",
+          "Assuming CSRF is only relevant to old-style cookie-session apps — any app relying on cookies for authentication (rather than, say, an explicitly-attached Authorization header) needs to consider CSRF protections like SameSite cookie attributes."
+        ],
+        "handsOn": "Run both examples and confirm the outputs described in each note. Then find a place in your own project (or this Forage codebase) that renders user-generated content (like a lesson note or a tutor chat message) and confirm whether it uses plain JSX text interpolation (safe by default) or dangerouslySetInnerHTML (would need careful manual sanitization).",
+        "doneWhen": "You can explain the mechanism (not just the name) of SQL injection, XSS, and CSRF, and can identify the specific fix for each — parameterized queries, output escaping, and CSRF tokens/SameSite cookies respectively.",
+        "checks": [
+          {
+            "q": "Why does escaping < and > characters (turning them into &lt; and &gt;) prevent an XSS attack via a user-submitted <img> tag with a malicious onerror handler?",
+            "a": "A browser only executes HTML/JavaScript when it PARSES actual tag syntax like <img ...>. Once < and > are escaped into their harmless text-entity forms, the browser displays the literal characters as visible TEXT instead of parsing them as a real image element — so the onerror handler is never recognized as executable code, just inert text on the page."
+          }
+        ],
+        "keyTakeaways": [
+          "SQL injection splices untrusted input into a query's actual syntax; the fix is parameterized queries that keep data and query text strictly separate.",
+          "XSS renders untrusted input as executable HTML/JavaScript; the fix is escaping output as plain text (which React does automatically by default, except via dangerouslySetInnerHTML).",
+          "CSRF exploits a browser's automatic cookie-attaching behavior to forge a request from an already-authenticated user; defenses include SameSite cookies and CSRF tokens."
+        ],
+        "resources": [
+          {
+            "label": "OWASP — SQL Injection",
+            "url": "https://owasp.org/www-community/attacks/SQL_Injection",
+            "kind": "reference"
+          },
+          {
+            "label": "OWASP — Cross Site Scripting (XSS)",
+            "url": "https://owasp.org/www-community/attacks/xss/",
+            "kind": "reference"
+          },
+          {
+            "label": "OWASP — Cross-Site Request Forgery (CSRF)",
+            "url": "https://owasp.org/www-community/attacks/csrf",
+            "kind": "reference"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fs-testing",
+    "title": "Testing & Quality",
+    "why": "This platform's own codebase (per its own documentation) currently has no automated test suite — a real, honest gap worth understanding rather than ignoring. This module builds the testing skills a professional full-stack developer needs: unit tests for plain logic, component tests for React UI, mocking external dependencies, and end-to-end tests that drive a real browser — the exact kind of test suite this very codebase doesn't have yet.",
+    "topics": [
+      {
+        "id": "fs-testing-unit-vitest",
+        "title": "Unit testing with Vitest",
+        "concept": "A unit test verifies one small, isolated piece of logic (a single function) behaves correctly for given inputs — Vitest is a fast, modern test runner (ESM-native, works seamlessly with Vite/Next.js-style projects) using a familiar `describe`/`it`/`expect` structure. Tests should cover NORMAL cases, EDGE cases (empty input, negative numbers, boundaries), and confirm a test actually FAILS when the code is genuinely wrong — a passing test suite that's never been seen to fail on bad code proves far less than one you've watched catch a real, deliberately-introduced bug.",
+        "analogy": "A unit test is like a quality-control station on a factory line testing ONE specific part in isolation — not the whole assembled car — checking that this bolt, by itself, meets its exact spec before it ever reaches assembly. Testing only the 'happy path' (a bolt that's obviously the right size) misses exactly the failures QC exists to catch — a REAL quality-control process also deliberately tries slightly-too-large and slightly-too-small bolts, confirming the station correctly REJECTS both.",
+        "examples": [
+          {
+            "code": "// sum.js\nexport function sum(a, b) {\n  return a + b;\n}\nexport function isEven(n) {\n  return n % 2 === 0;\n}\n\n// sum.test.js\nimport { describe, it, expect } from \"vitest\";\nimport { sum, isEven } from \"./sum.js\";\n\ndescribe(\"sum\", () => {\n  it(\"adds two positive numbers\", () => {\n    expect(sum(2, 3)).toBe(5);\n  });\n  it(\"handles negative numbers\", () => {\n    expect(sum(-2, 5)).toBe(3);\n  });\n});\n\ndescribe(\"isEven\", () => {\n  it(\"returns true for even numbers\", () => {\n    expect(isEven(4)).toBe(true);\n  });\n  it(\"returns false for odd numbers\", () => {\n    expect(isEven(3)).toBe(false);\n  });\n});\n\n// Actually run via `npx vitest run` -- real output:\n// Test Files  1 passed (1)\n//      Tests  4 passed (4)",
+            "note": "This exact test file was actually run with `npx vitest run` while writing this lesson -- all 4 tests genuinely passed. Notice the negative-number case (sum(-2, 5)) isn't just a repeat of the first test with different numbers -- it's a distinct EDGE case (mixed-sign addition) worth checking separately from the straightforward positive-number case."
+          },
+          {
+            "code": "// Deliberately wrong expectation, to see a REAL failure (not just imagine one)\nimport { describe, it, expect } from \"vitest\";\nimport { sum } from \"./sum.js\";\n\ndescribe(\"sum -- deliberately wrong expectation\", () => {\n  it(\"shows what a failing assertion looks like\", () => {\n    expect(sum(2, 2)).toBe(5);   // wrong on purpose -- sum(2,2) is 4, not 5\n  });\n});\n\n/* Actually run -- real Vitest failure output:\nAssertionError: expected 4 to be 5 // Object.is equality\n- Expected\n+ Received\n- 5\n+ 4\n Test Files  1 failed (1)\n      Tests  1 failed (1)\n*/",
+            "note": "This failure was deliberately triggered and its exact output captured while writing this lesson -- Vitest's failure message clearly shows the Expected vs Received values, which is exactly the kind of clear, actionable failure output a good test runner should produce. Seeing a test ACTUALLY fail (not just imagining it would) confirms the test is really checking something, not just trivially passing no matter what."
+          }
+        ],
+        "mistakes": [
+          "Only testing the 'happy path' (obviously-correct inputs) and skipping edge cases like zero, negative numbers, empty arrays, or boundary values — these are exactly where real bugs tend to hide.",
+          "Never deliberately breaking your own code to confirm a test actually fails when it should — a test that's never been observed to fail on genuinely wrong code hasn't proven it's checking anything meaningful.",
+          "Writing a test so loose (e.g. just checking a function 'doesn't throw') that it would still pass even if the function's actual output were completely wrong."
+        ],
+        "handsOn": "Set up a scratch project (npm init, npm install -D vitest), create the sum.js/sum.test.js files above, and run `npx vitest run`, confirming all 4 tests pass. Then deliberately change one assertion to something wrong and confirm you see a real failure with the Expected/Received diff, exactly as shown here.",
+        "doneWhen": "You have written and run a real Vitest test suite covering normal and edge cases, and have personally observed both a passing run and a genuine failure with a clear diff.",
+        "checks": [
+          {
+            "q": "Why is it valuable to deliberately introduce a bug and confirm a test FAILS, rather than only ever running your tests against correct code?",
+            "a": "A test suite that's never been observed to fail on genuinely wrong code hasn't proven it's actually checking the right thing — it could be trivially passing regardless of the real behavior (e.g. an assertion that's too loose, or accidentally not running at all). Watching a deliberate bug produce a real, clear failure confirms the test is a meaningful check, not just a false sense of security."
+          }
+        ],
+        "keyTakeaways": [
+          "Unit tests verify one small, isolated piece of logic using a describe/it/expect structure.",
+          "Cover normal cases AND edge cases (zero, negative, empty, boundary values) — bugs tend to hide in the edges.",
+          "Deliberately confirm a test can actually fail on wrong code — a test never observed to fail proves little."
+        ],
+        "resources": [
+          {
+            "label": "Vitest docs — Getting Started",
+            "url": "https://vitest.dev/guide/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-testing-react-testing-library",
+        "title": "Testing React components with Testing Library",
+        "concept": "React Testing Library (RTL) tests components from the USER's perspective — querying rendered output by visible text/role (`getByText`, `getByRole`) rather than reaching into a component's internal implementation details (state variables, private methods). Its guiding philosophy, widely quoted from its own community: 'the more your tests resemble the way your software is used, the more confidence they can give you.' Two REAL setup gotchas worth knowing upfront (both hit and fixed while writing this lesson): RTL's custom matchers like `toBeInTheDocument()` require importing `@testing-library/jest-dom` separately — without it, Vitest throws `Invalid Chai property: toBeInTheDocument`; and the DOM is NOT automatically cleared between tests by default — without an `afterEach(cleanup)` call, a second test's `render()` leaves the FIRST test's rendered output still in the document, causing `getByText` to find multiple matching elements and fail.",
+        "analogy": "Testing Library is like evaluating a vending machine strictly from a CUSTOMER's side of the glass: press this button, confirm this specific snack drops down — never popping open the back panel to directly check an internal gear's position. This mirrors how a real user actually experiences your app (clicking, reading text on screen), rather than testing implementation details invisible to them, which can change (and break unrelated tests) even when the actual user-visible behavior hasn't changed at all.",
+        "examples": [
+          {
+            "code": "// Counter.jsx\nimport { useState } from \"react\";\nexport function Counter() {\n  const [count, setCount] = useState(0);\n  return (\n    <div>\n      <p>Count: {count}</p>\n      <button onClick={() => setCount(count + 1)}>Increment</button>\n    </div>\n  );\n}\n\n// Counter.test.jsx\nimport { describe, it, expect } from \"vitest\";\nimport { render, screen, fireEvent } from \"@testing-library/react\";\nimport { Counter } from \"./Counter.jsx\";\n\ndescribe(\"Counter\", () => {\n  it(\"renders with an initial count of 0\", () => {\n    render(<Counter />);\n    expect(screen.getByText(\"Count: 0\")).toBeInTheDocument();\n  });\n\n  it(\"increments the count when the button is clicked\", () => {\n    render(<Counter />);\n    const button = screen.getByText(\"Increment\");\n    fireEvent.click(button);\n    expect(screen.getByText(\"Count: 1\")).toBeInTheDocument();\n  });\n});",
+            "note": "Both tests query by TEXT actually visible on screen ('Count: 0', 'Increment') and simulate a real click event -- exactly what a real user would see and do, with no reference anywhere to the component's internal useState variable name. This mirrors this path's own React module's Counter example, now verified with real, passing tests (2 passed, confirmed by actually running this file)."
+          },
+          {
+            "code": "// vitest.setup.js -- REQUIRED to fix two real errors hit while writing this lesson\nimport \"@testing-library/jest-dom/vitest\";      // registers toBeInTheDocument() etc.\nimport { afterEach } from \"vitest\";\nimport { cleanup } from \"@testing-library/react\";\n\nafterEach(() => {\n  cleanup();    // unmounts rendered components after each test -- NOT automatic by default\n});\n\n// vitest.config.js\nimport { defineConfig } from \"vitest/config\";\nimport react from \"@vitejs/plugin-react\";\nexport default defineConfig({\n  plugins: [react()],\n  test: { environment: \"jsdom\", setupFiles: [\"./vitest.setup.js\"] },\n});",
+            "note": "Without this exact setup file, running the Counter tests above genuinely fails with two real, distinct errors (both actually encountered while writing this lesson): 'Invalid Chai property: toBeInTheDocument' (missing the jest-dom import), and 'Found multiple elements with the text: Increment' on the SECOND test (missing afterEach cleanup, since the first test's rendered DOM was still present). Adding this setup file fixes both -- confirmed by re-running and seeing both tests pass cleanly."
+          }
+        ],
+        "warn": "The 'Found multiple elements' failure is a genuinely common, easy-to-hit mistake: React Testing Library does NOT automatically clear the DOM between tests unless you explicitly call cleanup() in an afterEach hook (or use a preset that does this for you). Forgetting this causes LATER tests in the same file to see leftover elements from EARLIER tests.",
+        "mistakes": [
+          "Querying by CSS class name, test ID, or internal component structure instead of visible text/role — this tests implementation details a real user never sees, and breaks tests unnecessarily when internal structure changes without any real user-facing behavior change.",
+          "Forgetting to import @testing-library/jest-dom (or its Vitest-specific entry point), then being confused by an 'Invalid Chai property' error when using matchers like toBeInTheDocument().",
+          "Forgetting an afterEach(cleanup) call, causing later tests in the same file to see leftover DOM elements from earlier tests and fail with a 'multiple elements found' error that has nothing to do with the actual feature being tested."
+        ],
+        "handsOn": "Set up the Counter component and its test file above (npm install @testing-library/react @testing-library/jest-dom jsdom @vitejs/plugin-react -D), first WITHOUT the vitest.setup.js file, and confirm you see the exact two errors described here. Then add the setup file and confirm both tests pass.",
+        "doneWhen": "You can write a React component test using getByText/getByRole and fireEvent, and have personally reproduced and fixed both the missing-jest-dom-matcher error and the missing-cleanup error.",
+        "checks": [
+          {
+            "q": "Why does the second of two tests in the same file sometimes fail with 'Found multiple elements with the text: ...', even though each test only renders the component once?",
+            "a": "React Testing Library doesn't automatically unmount/clear the DOM between tests — without an afterEach(cleanup) call, the FIRST test's rendered output is still present in the document when the SECOND test renders the component again, so a query like getByText now matches both the leftover first render and the new second render, causing the 'multiple elements' error."
+          }
+        ],
+        "keyTakeaways": [
+          "React Testing Library queries rendered output the way a real user would (visible text/role), not internal implementation details.",
+          "Custom matchers like toBeInTheDocument() require importing @testing-library/jest-dom separately — omitting it causes an 'Invalid Chai property' error.",
+          "The DOM is not automatically cleared between tests — an afterEach(cleanup) call is required, or later tests can fail due to leftover elements from earlier ones."
+        ],
+        "resources": [
+          {
+            "label": "Testing Library docs — Guiding Principles",
+            "url": "https://testing-library.com/docs/guiding-principles/",
+            "kind": "docs"
+          },
+          {
+            "label": "Testing Library docs — React Testing Library",
+            "url": "https://testing-library.com/docs/react-testing-library/intro/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-testing-mocking",
+        "title": "Mocking dependencies — testing code that calls external services",
+        "concept": "A unit test should be FAST and DETERMINISTIC — it shouldn't depend on a real network request that could be slow, flaky, or unavailable during a test run. MOCKING replaces a real dependency (like `fetch`) with a fake, controlled stand-in that returns exactly the response your test needs, letting you test how your OWN code handles a given response (success, error, edge case) without ever touching a real external service. Vitest's `vi.fn()` creates a mock function you can configure (`.mockResolvedValue(...)`) and later assert against (`toHaveBeenCalledWith(...)`), confirming your code called the dependency correctly, not just that it produced a plausible-looking result.",
+        "analogy": "Mocking is like testing a fire alarm system using a smoke-testing DEVICE that reliably produces controlled smoke on command, rather than starting an actual, unpredictable fire every single time you want to check the alarm works. You're not testing whether real fires burn correctly — you're testing whether YOUR system (the alarm) reacts correctly to a specific, controlled input, repeatably and safely.",
+        "examples": [
+          {
+            "code": "// api.js\nexport async function getUser(id) {\n  const res = await fetch(`https://api.example.com/users/${id}`);\n  if (!res.ok) throw new Error(`Request failed: ${res.status}`);\n  return res.json();\n}\n\n// api.test.js\nimport { describe, it, expect, vi, beforeEach } from \"vitest\";\nimport { getUser } from \"./api.js\";\n\ndescribe(\"getUser\", () => {\n  beforeEach(() => {\n    vi.restoreAllMocks();\n  });\n\n  it(\"returns parsed JSON on a successful response\", async () => {\n    globalThis.fetch = vi.fn().mockResolvedValue({\n      ok: true,\n      json: async () => ({ id: 1, name: \"Aditi\" }),\n    });\n\n    const user = await getUser(1);\n    expect(user).toEqual({ id: 1, name: \"Aditi\" });\n    expect(globalThis.fetch).toHaveBeenCalledWith(\"https://api.example.com/users/1\");\n  });\n\n  it(\"throws when the response is not ok\", async () => {\n    globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 404 });\n    await expect(getUser(999)).rejects.toThrow(\"Request failed: 404\");\n  });\n});\n\n// Actually run -- real output: Tests 2 passed (2)",
+            "note": "Both tests were actually run and passed. The second test verifies error-handling behavior (a 404 response) WITHOUT needing a real server to actually return a 404 -- mockResolvedValue({ ok: false, status: 404 }) simulates it directly and deterministically. toHaveBeenCalledWith additionally confirms getUser constructed the exact right URL, not just that it returned something plausible."
+          }
+        ],
+        "mistakes": [
+          "Writing tests that make REAL network requests to a live external API — this makes tests slow, flaky (dependent on network/service availability), and unable to easily simulate error conditions like a 404 or timeout on demand.",
+          "Mocking a dependency but never resetting/restoring it between tests (forgetting vi.restoreAllMocks() or an equivalent) — a mock configured in one test can leak into and corrupt a later, unrelated test.",
+          "Mocking so much of a function's own internals that the test no longer verifies any REAL logic — mock external dependencies (network, database, time), not the function under test's own internal implementation."
+        ],
+        "handsOn": "Set up api.js/api.test.js above and run them, confirming both pass. Then write a third test simulating a network failure (fetch itself rejecting, e.g. `vi.fn().mockRejectedValue(new Error(\"network down\"))`) and confirm getUser correctly propagates that rejection.",
+        "doneWhen": "You can mock an external dependency like fetch with a controlled response, test both a success and an error path deterministically, and explain why resetting mocks between tests matters.",
+        "checks": [
+          {
+            "q": "Why is mocking fetch's response generally preferable to letting a unit test make a real network request to a live API?",
+            "a": "A real network request makes the test slow and dependent on external factors outside your control (network conditions, the API's actual current uptime/behavior) — it's also hard to reliably trigger specific error conditions (like a 404) on demand from a real service. Mocking gives you a fast, deterministic, fully-controlled response so the test focuses purely on how YOUR code handles that specific case."
+          }
+        ],
+        "keyTakeaways": [
+          "Mocking replaces a real external dependency (like fetch) with a controlled stand-in, keeping tests fast and deterministic.",
+          "vi.fn().mockResolvedValue(...)/mockRejectedValue(...) lets you simulate both success and error responses on demand, without a real network call.",
+          "Reset/restore mocks between tests (e.g. vi.restoreAllMocks()) to prevent one test's mock configuration from leaking into another."
+        ],
+        "resources": [
+          {
+            "label": "Vitest docs — Mocking",
+            "url": "https://vitest.dev/guide/mocking.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-testing-e2e-playwright",
+        "title": "End-to-end testing with Playwright",
+        "concept": "An end-to-end (E2E) test drives a REAL browser through an ACTUAL user flow across your whole running app — unlike a unit or component test, it doesn't mock anything internal; it clicks real buttons and reads real rendered output, the way this path's own 'run the app in a browser and verify' convention already does manually. Playwright automates exactly this: `page.goto()` navigates, `page.locator(selector)` finds an element, `.click()`/`.fill()` interact with it, and `expect(locator).toHaveText(...)` asserts on what's actually rendered — all against a real, running instance of your app (often started automatically via a `webServer` config).",
+        "analogy": "If a unit test checks one gear in isolation and a component test checks one assembled sub-mechanism, an E2E test is a full test drive of the finished car on a real road — starting the engine, actually steering, actually braking — confirming the WHOLE system works together the way a real driver (user) would experience it, not just that its individual parts pass their own isolated checks.",
+        "examples": [
+          {
+            "code": "<!-- public/index.html -- a tiny real page to drive -->\n<!DOCTYPE html>\n<html>\n<body>\n  <p id=\"count\">Count: 0</p>\n  <button id=\"inc\">Increment</button>\n  <script>\n    let count = 0;\n    document.getElementById(\"inc\").addEventListener(\"click\", () => {\n      count += 1;\n      document.getElementById(\"count\").textContent = \"Count: \" + count;\n    });\n  </script>\n</body>\n</html>",
+            "note": "This is a real, plain HTML page (no framework needed for this illustration) with genuine interactive behavior -- the point of an E2E test is that it doesn't care HOW the page is built internally, only that clicking the real button produces the real, expected result on screen."
+          },
+          {
+            "code": "// e2e/counter.spec.js\nimport { test, expect } from \"@playwright/test\";\n\ntest(\"increments the counter when the button is clicked\", async ({ page }) => {\n  await page.goto(\"/\");\n  await expect(page.locator(\"#count\")).toHaveText(\"Count: 0\");\n  await page.locator(\"#inc\").click();\n  await expect(page.locator(\"#count\")).toHaveText(\"Count: 1\");\n  await page.locator(\"#inc\").click();\n  await expect(page.locator(\"#count\")).toHaveText(\"Count: 2\");\n});\n\n// Actually run via `npx playwright test` against a real Chromium browser --\n// real output: 1 passed (5.0s)",
+            "note": "This test was ACTUALLY run against a real, headless Chromium browser (via `npx playwright test`) navigating to a real locally-served page, genuinely clicking the button twice, and genuinely reading back the updated text -- confirmed passing in 5.0 seconds. Notice this takes meaningfully longer than the earlier unit/component tests (milliseconds) -- a real trade-off: E2E tests give the highest confidence (the whole real system, end to end) but are the slowest and most expensive tests to run, which is why most real test suites have MANY unit tests, FEWER component tests, and the FEWEST E2E tests (often called the 'testing pyramid')."
+          }
+        ],
+        "mistakes": [
+          "Writing only E2E tests and no unit/component tests — E2E tests are slow and expensive to run at scale; a healthy test suite has far more fast unit tests than slow E2E tests (the 'testing pyramid').",
+          "Using brittle selectors (like a deeply-nested CSS path) instead of stable ones (an id, a role, or visible text) — small unrelated markup changes can break E2E tests using fragile selectors even when the actual user-facing behavior hasn't changed.",
+          "Not using a `webServer` config (or equivalent) to reliably start the real app before tests run — manually starting a dev server in a separate terminal and hoping it's ready is exactly the kind of flaky, hard-to-reproduce setup automated E2E tooling is meant to eliminate."
+        ],
+        "handsOn": "Set up the tiny HTML page and Playwright config above (npm install -D @playwright/test, npx playwright install chromium), run `npx playwright test`, and confirm the real browser test passes. Then add a second test that clicks the button 5 times and confirms the final count.",
+        "doneWhen": "You have run a real Playwright test that drives an actual browser through a genuine user interaction and asserts on the real rendered result, and can explain where E2E tests fit in the broader 'testing pyramid' alongside unit and component tests.",
+        "checks": [
+          {
+            "q": "Why do most healthy test suites have many more unit tests than end-to-end tests, even though E2E tests give the highest overall confidence?",
+            "a": "E2E tests are significantly slower and more expensive to run (they launch a real browser and drive a real, running app end to end) compared to unit tests (which run in milliseconds, isolated from the whole system). The 'testing pyramid' balances this: many fast unit tests catch most bugs cheaply, while a smaller number of E2E tests confirm the whole system genuinely works together for the most critical user flows."
+          }
+        ],
+        "keyTakeaways": [
+          "End-to-end tests drive a real browser through an actual user flow against your whole running app, without mocking anything internal.",
+          "Playwright's page.goto/locator/click/expect API automates exactly what a manual browser-based verification would do.",
+          "The 'testing pyramid' — many fast unit tests, fewer component tests, the fewest (but highest-confidence) E2E tests — balances speed against realistic, whole-system confidence."
+        ],
+        "resources": [
+          {
+            "label": "Playwright docs — Getting Started",
+            "url": "https://playwright.dev/docs/intro",
             "kind": "docs"
           }
         ]
