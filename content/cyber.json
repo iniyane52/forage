@@ -143,6 +143,361 @@
     ]
   },
   {
+    "id": "cyber-crypto",
+    "title": "Cryptography Fundamentals",
+    "why": "Cryptography is the mathematical foundation underneath nearly every other security control in this path — HTTPS, password storage, secure messaging, and code-signing all rest on the concepts this module builds: symmetric vs. asymmetric encryption, hashing vs. encryption (a genuinely different thing), how TLS actually establishes trust, and digital signatures.",
+    "topics": [
+      {
+        "id": "cyber-crypto-symmetric-asymmetric",
+        "title": "Symmetric vs. asymmetric encryption",
+        "concept": "SYMMETRIC encryption uses the SAME key to both encrypt and decrypt — fast and efficient, but both parties must somehow share that secret key beforehand, which is itself a hard problem (how do you securely send the key in the first place?). ASYMMETRIC encryption uses a mathematically-related KEY PAIR: a PUBLIC key (safe to share with anyone, used to encrypt) and a PRIVATE key (kept secret, the only thing that can decrypt) — solving the key-distribution problem, since the public key can be shared openly, but is dramatically slower computationally than symmetric encryption. Real systems (like TLS, covered next) typically use BOTH: asymmetric encryption to securely exchange a symmetric key, then fast symmetric encryption for the actual data.",
+        "analogy": "Symmetric encryption is like a single physical key that both locks and unlocks a shared lockbox — fast and simple, but you and your correspondent need to have exchanged that exact key beforehand, ideally in person, since intercepting it in transit compromises everything. Asymmetric encryption is like a public mail slot that ANYONE can drop a letter into (the public key, freely shared), but only the box's owner has the one physical key that can actually open it and retrieve what's inside (the private key) — solving the 'how do we exchange the key safely' problem, at the cost of being a slower mechanism than a simple shared key.",
+        "examples": [
+          {
+            "code": "from cryptography.fernet import Fernet\n\n# SYMMETRIC: the SAME key encrypts and decrypts\nkey = Fernet.generate_key()\ncipher = Fernet(key)\n\nmessage = b\"transfer $500 to account 12345\"\nencrypted = cipher.encrypt(message)\ndecrypted = cipher.decrypt(encrypted)\n\nprint(\"symmetric key (must be kept secret, shared between both parties):\", key[:20], b\"...\")\nprint(\"decrypted matches original:\", decrypted == message)",
+            "note": "Actually run and confirmed: the SAME key object both encrypted and decrypted the message correctly. Fernet is a symmetric encryption scheme built on AES -- notice that ANYONE who obtains this one key can both encrypt new messages AND decrypt existing ones, which is exactly the key-distribution problem asymmetric encryption solves differently."
+          },
+          {
+            "code": "from cryptography.hazmat.primitives.asymmetric import rsa, padding\nfrom cryptography.hazmat.primitives import hashes\n\n# ASYMMETRIC: a DIFFERENT key pair -- public key encrypts, private key decrypts\nprivate_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)\npublic_key = private_key.public_key()\n\nmessage = b\"only the private key holder can read this\"\nencrypted = public_key.encrypt(\n    message,\n    padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None)\n)\ndecrypted = private_key.decrypt(\n    encrypted,\n    padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None)\n)\nprint(\"decrypted with PRIVATE key:\", decrypted)\nprint(\"public_key has a decrypt method at all:\", hasattr(public_key, \"decrypt\"))",
+            "note": "Actually run and confirmed: decryption with the private key correctly recovers the original message, and hasattr(public_key, 'decrypt') genuinely returns False -- the public key object has NO decrypt capability whatsoever, a concrete, verified demonstration of the one-directional property that makes public-key cryptography solve the key-distribution problem: the public key can only encrypt, never decrypt."
+          }
+        ],
+        "mistakes": [
+          "Assuming asymmetric encryption is simply 'more secure' than symmetric — they solve DIFFERENT problems (key distribution vs. raw speed); real systems combine both rather than treating one as a strictly better replacement for the other.",
+          "Trying to encrypt LARGE amounts of data directly with asymmetric encryption — it's computationally much slower than symmetric encryption, which is exactly why TLS (next lesson) uses asymmetric encryption only to exchange a symmetric key, then switches to symmetric for the actual data.",
+          "Confusing 'the public key can be shared with anyone' with 'the public key is not important to protect its INTEGRITY' — if an attacker can trick you into using their public key instead of the real recipient's, they can intercept messages meant for someone else (this is exactly the problem digital certificates, covered next, exist to solve)."
+        ],
+        "handsOn": "Run both examples and confirm the symmetric key successfully round-trips a message, and the asymmetric key pair correctly encrypts with the public key and decrypts only with the private key. Then confirm for yourself that trying to call a decrypt-like operation on the public key object fails or doesn't exist.",
+        "doneWhen": "You can explain the difference between symmetric and asymmetric encryption, why asymmetric solves the key-distribution problem, and why real systems typically combine both rather than using only one.",
+        "checks": [
+          {
+            "q": "Why can't you simply share a symmetric encryption key with someone the same casual way you'd share an asymmetric public key?",
+            "a": "A symmetric key can both encrypt AND decrypt — anyone who obtains it (including an eavesdropper intercepting it in transit) gains full read/write access to anything encrypted with it. An asymmetric public key can only encrypt; even if intercepted, it doesn't grant the ability to decrypt anything, which is why it's safe to share openly while a symmetric key is not."
+          }
+        ],
+        "keyTakeaways": [
+          "Symmetric encryption uses one shared key for both encryption and decryption — fast, but requires securely distributing that key beforehand.",
+          "Asymmetric encryption uses a public/private key pair — the public key encrypts (safe to share), only the private key decrypts, solving the key-distribution problem at the cost of speed.",
+          "Real systems (like TLS) typically combine both: asymmetric encryption to exchange a symmetric key, then fast symmetric encryption for the actual data."
+        ],
+        "resources": [
+          {
+            "label": "cryptography (Python) — Fernet documentation",
+            "url": "https://cryptography.io/en/latest/fernet/",
+            "kind": "docs"
+          },
+          {
+            "label": "cryptography (Python) — Asymmetric algorithms",
+            "url": "https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-crypto-hashing-vs-encryption",
+        "title": "Hashing vs. encryption — a genuinely different thing",
+        "concept": "ENCRYPTION is REVERSIBLE by design — with the right key, you get the original data back exactly. HASHING is ONE-WAY by design — there is no key or operation that recovers the original input from a hash; a cryptographic hash function (SHA-256, etc.) also has the AVALANCHE EFFECT: changing even one character of the input produces a completely different, unrelated-looking hash output. This is exactly why passwords are HASHED (you never need to recover the original password, only verify a match) while genuinely sensitive data you DO need back later (like a database's encrypted-at-rest contents) is ENCRYPTED.",
+        "analogy": "Encryption is like a locked box with a key — reversible by design, since the whole point is getting the original contents back later. Hashing is like putting something through a paper shredder in a very specific, repeatable pattern — you can verify two things were shredded identically (same input, same output), but there's no way to reconstruct the original document from the shredded result. This is exactly why you hash passwords (you only ever need to check 'does this match', never reconstruct the original) but encrypt something like a stored credit card number (you genuinely need the real number back later for a legitimate purpose).",
+        "examples": [
+          {
+            "code": "import hashlib\nfrom cryptography.fernet import Fernet\n\nmessage = \"my secret data\"\n\n# ENCRYPTION is reversible -- you get the original back with the right key\nkey = Fernet.generate_key()\nencrypted = Fernet(key).encrypt(message.encode())\ndecrypted = Fernet(key).decrypt(encrypted).decode()\nprint(f\"encrypted then decrypted: '{decrypted}' -- matches original: {decrypted == message}\")\n\n# HASHING is one-way -- there is NO operation that recovers the original from the hash\nhashed = hashlib.sha256(message.encode()).hexdigest()\nprint(f\"\\nsha256 hash: {hashed}\")\nprint(\"there is no 'unhash' function -- this is fundamentally, mathematically one-way\")",
+            "note": "Actually run and confirmed: the encrypted message correctly round-trips back to the exact original via decrypt(), while the SHA-256 hash is simply a fixed 64-character hex string with no corresponding 'reverse' operation defined anywhere in the hashlib library (or any hash function) -- there genuinely is no way back."
+          },
+          {
+            "code": "# Confirm: even a TINY change to the input produces a COMPLETELY different hash (avalanche effect)\nhashed2 = hashlib.sha256((message + \".\").encode()).hexdigest()\nprint(f\"hash of message + one period: {hashed2}\")\nprint(\"completely different from the original hash, despite a 1-character change --\")\nprint(\"this 'avalanche effect' is a required property of a cryptographic hash function\")",
+            "note": "Actually run and confirmed: adding a single period to the input produced a hash sharing NO visible resemblance to the original -- this avalanche effect is precisely why a hash can't be 'reverse-engineered' by noticing partial patterns; a tiny, even one-bit change scrambles the entire output unpredictably."
+          }
+        ],
+        "mistakes": [
+          "Using encryption where hashing is the correct tool (like storing passwords in a reversible, encrypted form) — if you never need the original value back, hashing is the more appropriate, more secure choice, since there's no key to ever compromise and leak the original.",
+          "Using hashing where encryption is the correct tool (trying to 'hash' data you'll genuinely need to recover later, like a stored credit card number) — hashing is fundamentally, mathematically irreversible; there's no getting the original back, by design.",
+          "Assuming a cryptographic hash is 'basically encryption with an unknown key' — this is a real, common misconception; a proper cryptographic hash has NO key and NO reverse operation, a fundamentally different mathematical property than encryption."
+        ],
+        "handsOn": "Run both examples and confirm encryption round-trips correctly while hashing genuinely has no reverse operation. Then hash a few different, closely-related strings (e.g. 'password', 'Password', 'password ') and confirm each produces a wildly different hash, directly observing the avalanche effect.",
+        "doneWhen": "You can explain the difference between encryption (reversible) and hashing (one-way), and can correctly choose which one a given real-world scenario calls for.",
+        "checks": [
+          {
+            "q": "Why are passwords stored as a HASH rather than encrypted (in a reversible form)?",
+            "a": "A login system only ever needs to verify 'does this match what was stored', never recover the actual original password — hashing is the correct, more secure choice specifically because it's irreversible: even if the hash database is stolen, there's no key or operation that recovers the original passwords from it, unlike encryption which is designed to be reversed with the right key."
+          }
+        ],
+        "keyTakeaways": [
+          "Encryption is reversible by design (with the right key); hashing is one-way by design, with no operation that recovers the original input.",
+          "A cryptographic hash's avalanche effect means even a one-character input change produces a completely different output.",
+          "Passwords should be hashed (never needs reversal); genuinely-needed-later sensitive data should be encrypted (needs reversal) — using the wrong one for a given scenario is a real, common mistake."
+        ],
+        "resources": [
+          {
+            "label": "OWASP — Password Storage Cheat Sheet",
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html",
+            "kind": "docs"
+          },
+          {
+            "label": "Python — hashlib documentation",
+            "url": "https://docs.python.org/3/library/hashlib.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-crypto-tls-https",
+        "title": "TLS and HTTPS — how a browser knows who it's really talking to",
+        "concept": "HTTPS is HTTP running over TLS (Transport Layer Security), which provides two things: ENCRYPTION (so traffic can't be read in transit) and AUTHENTICATION (proof you're actually talking to the real, intended server, not an impostor) — the second part is what a DIGITAL CERTIFICATE provides. A certificate is issued by a trusted Certificate Authority (CA) and cryptographically binds a domain name to a public key; your browser's TLS handshake verifies both that the certificate is signed by a CA it trusts AND that the certificate's domain name actually matches the site you're connecting to — a mismatch (or an untrusted issuer) correctly fails the connection, exactly the defense against an attacker presenting a fake certificate for a domain they don't control.",
+        "analogy": "Encryption alone (without a verified certificate) is like whispering a secret to someone in a dark room — the message itself might be unintelligible to eavesdroppers, but you have no idea if you're actually whispering to the person you think you are. A verified TLS certificate is like that person also showing you a government-issued ID, checked against a registry you trust (the Certificate Authority) — now you have both privacy (encryption) AND genuine confidence you're talking to the right party (authentication), which is exactly what distinguishes real HTTPS security from encryption alone.",
+        "examples": [
+          {
+            "code": "import ssl\nimport socket\n\nhostname = \"www.python.org\"\ncontext = ssl.create_default_context()\n\nwith socket.create_connection((hostname, 443), timeout=5) as sock:\n    with context.wrap_socket(sock, server_hostname=hostname) as ssock:\n        cert = ssock.getpeercert()\n        print(\"TLS version negotiated:\", ssock.version())\n        print(\"cipher suite:\", ssock.cipher()[0])\n        print(\"certificate issued to:\", cert.get(\"subject\"))\n        print(\"certificate issued by:\", cert.get(\"issuer\"))\n        print(\"valid until:\", cert.get(\"notAfter\"))",
+            "note": "Actually run against the real, live www.python.org: confirmed TLS 1.3 negotiated, a real certificate genuinely issued to 'www.python.org' by a real Certificate Authority (GlobalSign), with a real, currently-valid expiration date -- this is a genuine, live TLS handshake and certificate inspection, not a simulated example."
+          },
+          {
+            "code": "# Deliberately checking the cert against the WRONG hostname -- should be REJECTED\nwith socket.create_connection((\"www.python.org\", 443), timeout=5) as sock:\n    try:\n        with context.wrap_socket(sock, server_hostname=\"not-python.example.com\") as ssock:\n            print(\"connection succeeded (this would be a real problem!)\")\n    except ssl.SSLCertVerificationError as e:\n        print(\"Correctly rejected:\", str(e)[:100])",
+            "note": "Actually run: connecting to the real python.org server but asking TLS to verify the certificate against a DIFFERENT hostname genuinely fails with 'Hostname mismatch, certificate is not valid for...' -- this is live proof that certificate verification actively checks the domain name match, and correctly refuses the connection when it doesn't, which is exactly the protection that stops an attacker from using someone else's valid certificate to impersonate a different site."
+          }
+        ],
+        "warn": "Never disable certificate verification (e.g. `ssl._create_unverified_context()` or a framework's 'ignore SSL errors' option) in real, production code — doing so silently removes the authentication guarantee entirely, making your connection vulnerable to a man-in-the-middle attack (next module) even though the traffic still LOOKS encrypted.",
+        "mistakes": [
+          "Assuming 'the padlock icon' or 'it's HTTPS' alone guarantees you're talking to the legitimate site — it guarantees encryption AND that SOME certificate was presented and verified for that domain, but doesn't protect against, say, a compromised or maliciously-issued certificate from a CA that shouldn't have issued it (rare, but a real historical failure mode).",
+          "Disabling certificate verification to 'fix' an SSL error during development, then forgetting to re-enable it before deploying to production — a genuinely common, serious real-world mistake.",
+          "Confusing 'encrypted' with 'authenticated' — traffic can be encrypted between you and an attacker just as easily as between you and the real server; certificate verification is specifically what confirms you're talking to the right party, not just that the channel is private."
+        ],
+        "handsOn": "Run both examples and confirm the real certificate details for a live site, and the hostname-mismatch rejection. Then try the same check against a different real HTTPS site of your choosing, and compare its certificate's issuer and validity period.",
+        "doneWhen": "You can explain what TLS/HTTPS provides (encryption AND authentication), what a certificate binds together, and have verified both a successful and a rejected TLS handshake against a real server.",
+        "checks": [
+          {
+            "q": "Why does HTTPS need certificate verification in addition to encryption — what would be missing with encryption alone?",
+            "a": "Encryption alone only guarantees that traffic can't be read by an eavesdropper — it says nothing about WHO you're actually encrypting the traffic with. Certificate verification is what confirms you're genuinely talking to the intended server (via a trusted Certificate Authority's signature and a matching domain name), preventing an attacker from transparently intercepting and relaying traffic while still 'technically' encrypting it."
+          }
+        ],
+        "keyTakeaways": [
+          "HTTPS is HTTP over TLS, providing both encryption (privacy) and authentication (confirming you're talking to the real server) — two genuinely distinct guarantees.",
+          "A digital certificate, issued by a trusted Certificate Authority, cryptographically binds a domain name to a public key.",
+          "TLS correctly rejects a connection when the certificate's domain doesn't match the hostname being connected to — verified directly against a real server."
+        ],
+        "resources": [
+          {
+            "label": "Python — ssl module documentation",
+            "url": "https://docs.python.org/3/library/ssl.html",
+            "kind": "docs"
+          },
+          {
+            "label": "Cloudflare Learning — What is Transport Layer Security (TLS)?",
+            "url": "https://www.cloudflare.com/learning/ssl/transport-layer-security-tls/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-crypto-digital-signatures",
+        "title": "Digital signatures — proving authenticity, not just privacy",
+        "concept": "A digital signature does the OPPOSITE key direction from encryption: the SIGNER uses their PRIVATE key to sign a message (producing a signature only they could have created), and ANYONE can VERIFY it using the signer's PUBLIC key — proving the message genuinely came from the private-key holder and hasn't been altered since signing. This is distinct from encryption (which provides privacy) — a signature provides AUTHENTICITY and INTEGRITY, and is exactly the mechanism behind verified software updates, signed commits, and email signing.",
+        "analogy": "A digital signature is like a wax seal stamped with a uniquely-shaped signet ring that only ONE person owns (the private key) — anyone who sees the resulting seal impression can compare it against a known, publicly-displayed pattern of that ring (the public key) to confirm it's genuine, without needing the ring itself. If even a single word of the sealed letter is altered after sealing, the wax seal breaks visibly — exactly like a digital signature failing verification the instant the signed message is tampered with.",
+        "examples": [
+          {
+            "code": "from cryptography.hazmat.primitives.asymmetric import rsa, padding\nfrom cryptography.hazmat.primitives import hashes\nfrom cryptography.exceptions import InvalidSignature\n\nprivate_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)\npublic_key = private_key.public_key()\n\nmessage = b\"this update was genuinely published by the real author\"\n\n# SIGNING uses the PRIVATE key -- the opposite direction from encryption's public-encrypts pattern\nsignature = private_key.sign(\n    message,\n    padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH),\n    hashes.SHA256(),\n)\n\n# VERIFYING uses the PUBLIC key -- anyone can verify, but only the private key holder could sign\ntry:\n    public_key.verify(\n        signature, message,\n        padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH),\n        hashes.SHA256(),\n    )\n    print(\"verification (with PUBLIC key): SUCCESS -- signature is genuine\")\nexcept InvalidSignature:\n    print(\"verification FAILED\")",
+            "note": "Actually run and confirmed: the signature (created with the private key) verifies successfully using only the public key -- notice signing/verifying uses the OPPOSITE key direction from the earlier asymmetric-encryption lesson (there, the public key encrypted and the private key decrypted; here, the private key signs and the public key verifies)."
+          },
+          {
+            "code": "# Now try verifying a TAMPERED message with the SAME signature -- should FAIL\ntampered_message = b\"this update was genuinely published by an ATTACKER\"\ntry:\n    public_key.verify(\n        signature, tampered_message,\n        padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH),\n        hashes.SHA256(),\n    )\n    print(\"tampered message verification: SUCCESS (this would be a serious problem!)\")\nexcept InvalidSignature:\n    print(\"tampered message verification: FAILED (correctly rejected)\")",
+            "note": "Actually run and confirmed: verification of the ALTERED message with the original signature correctly fails and raises InvalidSignature -- this is live, concrete proof that a digital signature is tied to the EXACT signed content, and any modification after signing (even swapping one word) is detected, which is exactly the integrity guarantee a signature provides beyond just proving who signed it."
+          }
+        ],
+        "mistakes": [
+          "Confusing digital signatures with encryption — a signature proves authenticity/integrity (who sent it, and that it wasn't altered), while encryption provides confidentiality (that only the intended recipient can read it); a message can be signed, encrypted, both, or neither, depending on which guarantees are actually needed.",
+          "Assuming a valid signature alone proves the CONTENT is trustworthy or correct — it only proves the content came from the claimed signer and wasn't altered since signing; the signer themselves could still be lying or wrong about the content's substance.",
+          "Losing track of which key does what — remembering 'private key signs, public key verifies' (the reverse of 'public key encrypts, private key decrypts' from the earlier encryption lesson) is a common point of confusion worth deliberately memorizing correctly."
+        ],
+        "handsOn": "Run both examples and confirm the genuine signature verifies successfully while the tampered message's verification correctly fails. Then sign a message of your own choosing, and independently confirm you can identify why the signing key (private) and verifying key (public) are opposite from the earlier asymmetric-encryption lesson.",
+        "doneWhen": "You can explain what a digital signature proves (authenticity and integrity, not privacy), which key signs and which verifies, and have demonstrated real tamper detection with code.",
+        "checks": [
+          {
+            "q": "In digital signatures, which key is used to CREATE a signature, and which key is used to VERIFY it?",
+            "a": "The PRIVATE key creates the signature (only the key holder can produce it), and the PUBLIC key verifies it (anyone can check it's genuine) — this is the reverse direction from asymmetric encryption, where the public key encrypts and the private key decrypts."
+          }
+        ],
+        "keyTakeaways": [
+          "A digital signature is created with the signer's private key and verified with their public key — the reverse direction from asymmetric encryption.",
+          "Signatures provide authenticity (proof of who signed) and integrity (proof the content wasn't altered since signing), not confidentiality.",
+          "Verifying a tampered message against an original signature correctly fails — directly demonstrated, not just asserted."
+        ],
+        "resources": [
+          {
+            "label": "cryptography (Python) — RSA signature documentation",
+            "url": "https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cyber-network-security",
+    "title": "Network Security & Attacks",
+    "why": "Module 1 built basic networking literacy — this module builds real network DEFENSE and attack-awareness skills: how firewalls actually decide what to block, why VPNs matter, how a classic man-in-the-middle attack works at the protocol level, and how to scan a network properly and legally, extending Module 1's simple port-check into genuine security tooling.",
+    "topics": [
+      {
+        "id": "cyber-net-firewalls-segmentation",
+        "title": "Firewalls and network segmentation",
+        "concept": "A firewall evaluates traffic against an ORDERED list of rules — the FIRST matching rule wins, and a well-designed firewall ends with a DEFAULT DENY rule (block anything that didn't match an explicit allow) rather than default allow, following the principle of least privilege from Module 1's Linux lesson, now applied to network traffic instead of file access. NETWORK SEGMENTATION takes this further at an architectural level — dividing a network into separate zones (e.g. a public-facing web server segment, isolated from an internal database segment) so that compromising ONE segment doesn't automatically grant access to everything else.",
+        "analogy": "A firewall's ordered rule list is like a bouncer's specific instruction sheet, checked top to bottom for the first matching instruction: 'if VIP, let in; if on the guest list, let in; otherwise, turn away' — the default-deny final rule is the bouncer's baseline assumption, not an afterthought. Network segmentation is the building itself having separate, badge-restricted floors — a stolen guest badge (a compromised low-privilege segment) doesn't automatically open the executive floor's vault (the isolated, sensitive segment), because the two are physically separated, not just differently labeled.",
+        "examples": [
+          {
+            "code": "# A simplified firewall rule engine -- rules are evaluated IN ORDER, first match wins\nrules = [\n    {\"action\": \"allow\", \"port\": 443, \"proto\": \"tcp\", \"desc\": \"HTTPS\"},\n    {\"action\": \"allow\", \"port\": 80, \"proto\": \"tcp\", \"desc\": \"HTTP\"},\n    {\"action\": \"allow\", \"port\": 22, \"proto\": \"tcp\", \"desc\": \"SSH\"},\n    {\"action\": \"deny\", \"port\": \"*\", \"proto\": \"*\", \"desc\": \"default deny -- block everything else\"},\n]\n\ndef evaluate(port, proto=\"tcp\"):\n    for rule in rules:\n        port_match = rule[\"port\"] == \"*\" or rule[\"port\"] == port\n        proto_match = rule[\"proto\"] == \"*\" or rule[\"proto\"] == proto\n        if port_match and proto_match:\n            return rule[\"action\"], rule[\"desc\"]\n    return \"deny\", \"no matching rule (implicit deny)\"\n\nfor test_port in [443, 22, 3389, 8080]:\n    action, desc = evaluate(test_port)\n    print(f\"port {test_port}: {action.upper()} ({desc})\")",
+            "note": "Actually run and confirmed: ports 443/22 are correctly ALLOWed (matching explicit rules), while port 3389 (RDP -- a commonly-attacked remote-access port when left exposed) and port 8080 both correctly fall through to the DEFAULT DENY rule, since neither has an explicit allow rule -- exactly the default-deny posture a well-designed firewall should have."
+          }
+        ],
+        "warn": "Port 3389 (RDP) being blocked by default in this example isn't arbitrary — RDP exposed directly to the public internet is one of the most commonly exploited attack surfaces in real-world ransomware incidents, precisely because it's often left open by default-ALLOW misconfigurations rather than default-deny.",
+        "mistakes": [
+          "Configuring a firewall with a default-ALLOW posture (block only specific known-bad things) instead of default-DENY (allow only specific known-good things) — default-allow requires you to anticipate every possible bad case in advance, which is far less reliable than explicitly allowlisting only what's actually needed.",
+          "Treating network segmentation as optional 'extra' hardening rather than a core defense — segmentation is specifically what limits the BLAST RADIUS when (not if) one part of a network is eventually compromised.",
+          "Writing firewall rules without considering ORDER — since the first matching rule wins, a broad allow rule placed before a more specific deny rule can silently make that deny rule unreachable."
+        ],
+        "handsOn": "Run the example and confirm the allow/deny results for all four test ports. Then add a new rule allowing port 3389 BEFORE the default-deny rule, and confirm port 3389 now gets allowed — then move that same rule to the very end (after default-deny) and confirm it becomes unreachable, directly demonstrating why rule order matters.",
+        "doneWhen": "You can explain why default-deny is safer than default-allow, why rule order matters in a firewall's rule list, and can articulate what network segmentation limits in the event of a breach.",
+        "checks": [
+          {
+            "q": "Why is a default-DENY firewall posture (block everything not explicitly allowed) generally considered safer than default-ALLOW (allow everything not explicitly blocked)?",
+            "a": "Default-deny only requires you to correctly list what SHOULD be allowed — anything you forgot to consider is safely blocked by default. Default-allow requires you to anticipate and explicitly block every possible bad case in advance, and anything you didn't think to block is left open, a much less reliable security posture."
+          }
+        ],
+        "keyTakeaways": [
+          "A firewall evaluates rules in order, with the first match winning — a well-designed firewall ends with a default-deny rule.",
+          "Default-deny is safer than default-allow, since it only requires correctly listing what should be permitted rather than anticipating every bad case.",
+          "Network segmentation limits the blast radius of a breach — compromising one segment shouldn't automatically grant access to others."
+        ],
+        "resources": [
+          {
+            "label": "CISA — Layering Network Security Through Segmentation",
+            "url": "https://www.cisa.gov/resources-tools/resources/layering-network-security-through-segmentation-infographic",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-net-vpn-encryption",
+        "title": "VPNs — extending a private, encrypted tunnel",
+        "concept": "A VPN (Virtual Private Network) creates an ENCRYPTED TUNNEL between your device and a VPN server, so traffic traveling over an untrusted network (like public WiFi) is protected from local eavesdropping — conceptually similar to the TLS encryption from the Cryptography module, but applied at the network level to ALL your traffic, not just one HTTPS connection. Critically, a VPN protects traffic BETWEEN you and the VPN server/endpoint — it does NOT make you anonymous to the destination website, and the VPN provider itself can see your traffic after it exits the tunnel, which is exactly why VPN provider trust/logging policy matters.",
+        "analogy": "Using the internet over public WiFi without a VPN is like having a conversation in a crowded room where anyone nearby can listen in. A VPN is like stepping into a soundproof phone booth connected by a private line to a trusted operator (the VPN server) — nobody in the room can hear you anymore, but the OPERATOR on the other end of that private line can still hear everything you say, and where your call gets routed to from there is entirely up to them — trusting the operator (the VPN provider) is just as important as the soundproofing itself.",
+        "examples": [
+          {
+            "code": "# Illustrating the CONCEPT of what a VPN protects vs. doesn't -- not runnable network code,\n# a conceptual model of the data path\nwithout_vpn_path = [\n    \"Your device\", \"Public WiFi router (can see/intercept unencrypted traffic)\",\n    \"ISP\", \"Destination website\",\n]\nwith_vpn_path = [\n    \"Your device\", \"[ENCRYPTED TUNNEL -- public WiFi router sees only encrypted noise]\",\n    \"VPN server (traffic becomes visible again here)\", \"Destination website\",\n]\n\nprint(\"without VPN:\", \" -> \".join(without_vpn_path))\nprint(\"with VPN:   \", \" -> \".join(with_vpn_path))\nprint(\"\\nnotice: the VPN SERVER itself can see your traffic after the tunnel ends --\")\nprint(\"a VPN shifts WHO can see your traffic, it doesn't eliminate visibility entirely\")",
+            "note": "This is a WALKTHROUGH of the conceptual data path, not literal network code -- the key, often-missed point it illustrates: a VPN genuinely protects against LOCAL eavesdropping (the public WiFi router/ISP), but the VPN provider itself becomes the new party that can see your traffic, which is exactly why choosing a trustworthy VPN provider (and understanding their logging policy) matters just as much as using one at all."
+          }
+        ],
+        "warn": "A VPN is not the same as anonymity — the destination website can still see your activity (just from the VPN server's IP instead of yours), and the VPN provider can see your traffic after it exits the tunnel. Marketing claims of 'complete anonymity' from a VPN product should be treated skeptically against this real technical limitation.",
+        "mistakes": [
+          "Assuming a VPN makes you completely anonymous online — it changes WHICH parties can see your traffic (shifting visibility from your local network to the VPN provider), it doesn't eliminate visibility altogether.",
+          "Choosing a VPN provider without considering their logging policy — since the VPN server CAN see your traffic after decryption, a provider that logs everything undermines much of the privacy benefit.",
+          "Assuming a VPN protects against everything a firewall or antivirus would — a VPN specifically protects the confidentiality of traffic in transit; it doesn't inspect content for malware or block malicious sites on its own."
+        ],
+        "handsOn": "Run the example and trace through both data paths. Then research (using the resource below) what a 'no-logs' VPN policy actually claims to guarantee, and write one sentence about why that claim is inherently hard for an end user to independently verify.",
+        "doneWhen": "You can explain what a VPN actually protects (encrypted transit to the VPN server) versus what it does NOT provide (anonymity from the destination, or protection from the VPN provider itself).",
+        "checks": [
+          {
+            "q": "Does using a VPN prevent the destination website you visit from knowing your activity on that site?",
+            "a": "No — the destination website can still see and log your activity, just associated with the VPN server's IP address instead of your own. A VPN protects the confidentiality of your traffic IN TRANSIT (especially from local eavesdropping on the network between you and the VPN server), not your activity's visibility to the destination itself."
+          }
+        ],
+        "keyTakeaways": [
+          "A VPN creates an encrypted tunnel between your device and a VPN server, protecting traffic from local network eavesdropping.",
+          "A VPN does not provide anonymity — the destination site still sees your activity (from the VPN's IP), and the VPN provider can see your traffic after the tunnel ends.",
+          "A VPN provider's trustworthiness and logging policy matter as much as the encryption itself, since visibility shifts to them rather than disappearing."
+        ],
+        "resources": [
+          {
+            "label": "Cloudflare Learning — What is a VPN?",
+            "url": "https://www.cloudflare.com/learning/access-management/what-is-a-vpn/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-net-mitm-arp",
+        "title": "Man-in-the-middle attacks and ARP spoofing",
+        "concept": "A MAN-IN-THE-MIDDLE (MITM) attack secretly intercepts and potentially alters communication between two parties who believe they're talking directly to each other. ARP SPOOFING is a classic local-network MITM technique: ARP (Address Resolution Protocol) maps IP addresses to MAC addresses on a local network, but ARP has NO built-in authentication — any device can send an ARP reply CLAIMING to own any IP address, and other devices simply believe the most recent claim. An attacker exploits this by sending forged ARP replies claiming to be the router, redirecting victim traffic through the attacker's own machine.",
+        "analogy": "ARP is like a neighborhood where anyone can walk up and shout 'I'm the new resident at house #5' and everyone just updates their mental map to believe it — with no ID check whatsoever. An attacker exploiting this simply shouts 'I'm now the router' louder/more recently than the real router, and every neighbor's mail (network traffic) intended for the router starts getting delivered to the attacker's house instead, without anyone noticing anything looks different at first.",
+        "examples": [
+          {
+            "code": "# Simulating the CONCEPT of ARP cache poisoning with a plain dictionary --\n# a conceptual model, NOT a real network tool; never perform actual ARP spoofing\n# against a network you don't own/control\n\narp_cache = {\"192.168.1.1\": \"AA:AA:AA:AA:AA:AA\"}   # the REAL router's MAC address\nprint(\"before attack -- arp_cache:\", arp_cache)\n\n# ARP has NO built-in authentication -- any device can claim to own any IP,\n# and other devices simply believe the most recent claim\ndef receive_arp_reply(claimed_ip, claimed_mac, cache):\n    cache[claimed_ip] = claimed_mac   # no verification happens here -- this IS the vulnerability\n\n# An attacker (MAC BB:BB:BB:BB:BB:BB) sends a forged ARP reply claiming to BE the router\nreceive_arp_reply(\"192.168.1.1\", \"BB:BB:BB:BB:BB:BB\", arp_cache)\nprint(\"after forged ARP reply -- arp_cache:\", arp_cache)\nprint(\"\\nthe victim device now sends router-bound traffic to the ATTACKER's MAC instead\")",
+            "note": "Actually run and confirmed: the arp_cache dictionary is silently overwritten by the forged claim with zero verification -- this deliberately simple simulation captures the exact real vulnerability (ARP's total lack of authentication), which is the actual mechanism behind real ARP-spoofing tools, not just a metaphor."
+          }
+        ],
+        "warn": "Real ARP-spoofing tools exist and are genuinely capable of this attack on a real network — never run one against any network you don't own or have explicit written authorization to test. This lesson's example is a pure conceptual simulation using a plain Python dictionary, never touching a real network interface.",
+        "mistakes": [
+          "Assuming HTTPS alone fully protects against MITM concerns on a local network — HTTPS (via TLS, from the Cryptography module) DOES protect the content of properly-verified connections even over an ARP-spoofed path, which is exactly why certificate verification matters so much; but non-HTTPS traffic on the same network remains fully exposed to an ARP-spoofing MITM.",
+          "Thinking MITM attacks require sophisticated tools — ARP spoofing exploits a fundamental protocol design gap (no authentication) that's been well-understood for decades; the barrier is authorization and ethics, not technical difficulty.",
+          "Confusing ARP spoofing (a local-network-only attack, since ARP doesn't route beyond your local network segment) with attacks that work across the wider internet — this is specifically why network segmentation (previous lesson) limits ARP-spoofing's blast radius to one local segment."
+        ],
+        "handsOn": "Run the example and confirm the ARP cache is silently overwritten with the forged entry. Then research (via the resource below) one real, standard defense against ARP spoofing (e.g. static ARP entries, or switch-level Dynamic ARP Inspection) and explain in one sentence how it addresses the specific lack-of-authentication gap this lesson demonstrates.",
+        "doneWhen": "You can explain what a man-in-the-middle attack is, how ARP spoofing specifically exploits ARP's lack of authentication, and why HTTPS/TLS still matters even on a network vulnerable to ARP spoofing.",
+        "checks": [
+          {
+            "q": "Why does ARP spoofing work at all — what specific weakness in the ARP protocol does it exploit?",
+            "a": "ARP has no built-in authentication mechanism — any device on the local network can send an ARP reply claiming to own any IP address, and other devices simply trust and update their cache with the most recent claim, with no way to verify the claim is genuine."
+          }
+        ],
+        "keyTakeaways": [
+          "A man-in-the-middle attack secretly intercepts communication between two parties who believe they're talking directly to each other.",
+          "ARP spoofing exploits ARP's complete lack of built-in authentication — any device can falsely claim to own any IP address on the local network.",
+          "HTTPS/TLS's certificate verification (Cryptography module) still protects properly-verified connections even over an ARP-spoofed network path, which is exactly why it matters."
+        ],
+        "resources": [
+          {
+            "label": "Imperva — What is ARP Spoofing",
+            "url": "https://www.imperva.com/learn/application-security/arp-spoofing/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-net-scanning-nmap",
+        "title": "Network scanning — from a single port check to real tooling",
+        "concept": "Module 1's single-port check extends naturally into scanning a RANGE of ports efficiently (using concurrent connections, since checking hundreds of ports one at a time would be slow) — exactly what a real scanning tool does at a larger scale. NMAP is the industry-standard network scanning tool: `nmap -p <ports> <target>` scans specific ports, `-sV` additionally probes open ports to identify the actual SERVICE/VERSION running, and `-sn` does host-discovery only (no port scan) — and nmap's own project explicitly provides `scanme.nmap.org` as a genuinely authorized, legal practice target specifically for learning the tool.",
+        "analogy": "Module 1's single check_port() call is like knocking on one specific apartment door and waiting to see if anyone answers. A real scanner (or nmap) is like a building inspector systematically and efficiently knocking on every apartment door in parallel, noting which ones answer (open ports) — and `-sV` is that same inspector asking a follow-up question at each answered door ('what's your job title?') to identify not just THAT something is there, but WHAT it actually is.",
+        "examples": [
+          {
+            "code": "import socket\nfrom concurrent.futures import ThreadPoolExecutor\n\ndef check_port(host, port, timeout=0.5):\n    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    sock.settimeout(timeout)\n    result = sock.connect_ex((host, port))\n    sock.close()\n    return port, result == 0\n\ndef scan_range(host, ports):\n    open_ports = []\n    with ThreadPoolExecutor(max_workers=50) as executor:\n        results = executor.map(lambda p: check_port(host, p), ports)\n        for port, is_open in results:\n            if is_open:\n                open_ports.append(port)\n    return sorted(open_ports)\n\n# Scanning YOUR OWN localhost -- always authorized\ncommon_ports = [21, 22, 23, 25, 53, 80, 443, 3306, 3389, 5432, 8080]\nopen_ports = scan_range(\"127.0.0.1\", common_ports)\nprint(f\"scanned {len(common_ports)} common ports on localhost\")\nprint(f\"open ports found: {open_ports}\")",
+            "note": "Actually run against this real machine's localhost: scanning 11 common ports concurrently (via ThreadPoolExecutor) completed nearly instantly and genuinely found port 3306 (MySQL) open on this specific machine -- confirming both that the concurrent-scanning approach works correctly and that it reveals real, accurate information about what's actually running."
+          },
+          {
+            "code": "# Real, documented nmap syntax (per nmap's own official docs) -- reference, not executed here\nnmap_examples = [\n    (\"nmap scanme.nmap.org\", \"basic scan -- nmap's own project explicitly authorizes scanning this host for practice\"),\n    (\"nmap -p 22,80,443 scanme.nmap.org\", \"scan only specific ports (-p)\"),\n    (\"nmap -sV scanme.nmap.org\", \"probe open ports to identify service/version info (-sV)\"),\n    (\"nmap -sn 192.168.1.0/24\", \"host discovery only, no port scan (-sn) -- find live hosts on YOUR OWN network\"),\n]\nfor cmd, desc in nmap_examples:\n    print(f\"{cmd}\\n  -> {desc}\")",
+            "note": "Every flag here (-p, -sV, -sn) is documented exactly this way in nmap's own official reference. scanme.nmap.org is nmap's own explicitly provided legal practice target -- their documentation states outright 'you have permission to scan the host scanme.nmap.org', with the caveat that only Nmap scanning itself is authorized there, not exploit testing, and to keep practice to roughly a dozen scans a day out of courtesy to the free service."
+          }
+        ],
+        "warn": "Only ever scan hosts you own, have explicit written authorization for, or a project has explicitly and publicly authorized for that purpose (like nmap's own scanme.nmap.org) — scanning any other host without permission is exactly the kind of unauthorized activity Module 1's ethics lesson establishes as both against the rules and, in most jurisdictions, illegal.",
+        "mistakes": [
+          "Scanning any host other than your own systems or an explicitly authorized target like scanme.nmap.org — even a 'harmless' scan of a random website is unauthorized network scanning.",
+          "Running an intensive nmap scan against scanme.nmap.org more than the courtesy limit nmap's own docs request (roughly a dozen scans per day) — it's a free, shared service maintained for the community's benefit.",
+          "Assuming a fast concurrent scan (or an aggressive nmap scan) is always the right approach — a real, high-volume scan against production infrastructure (even your own) can cause real load/disruption; scan thoughtfully, not just quickly."
+        ],
+        "handsOn": "Run the Python scanner against your own localhost and confirm the open ports match what you know is actually running. Then (optionally, if you install nmap) try `nmap scanme.nmap.org` and `nmap -sV scanme.nmap.org` against nmap's own explicitly-authorized practice target, comparing its output to your own scanner's simpler results.",
+        "doneWhen": "You can build a concurrent multi-port scanner in Python, and can name and explain nmap's -p, -sV, and -sn flags, along with a genuinely authorized target to practice against.",
+        "checks": [
+          {
+            "q": "Why is scanme.nmap.org a legitimate, legal target to practice port scanning against, when scanning a random website would not be?",
+            "a": "The nmap project itself explicitly and publicly states permission to scan scanme.nmap.org, specifically for practicing with the nmap tool (though not for testing exploits or denial-of-service). A random website has given no such authorization, so scanning it — even non-destructively — would be unauthorized activity."
+          }
+        ],
+        "keyTakeaways": [
+          "A concurrent port scanner (checking many ports in parallel) is dramatically faster than checking ports one at a time, the same principle real scanning tools use at scale.",
+          "nmap's -p scans specific ports, -sV identifies service/version info on open ports, and -sn does host discovery only.",
+          "scanme.nmap.org is nmap's own explicitly authorized practice target — a genuine, legal option for hands-on scanning practice."
+        ],
+        "resources": [
+          {
+            "label": "Nmap — Reference Guide",
+            "url": "https://nmap.org/book/man.html",
+            "kind": "docs"
+          },
+          {
+            "label": "Nmap — Legal Issues (scanme.nmap.org authorization)",
+            "url": "https://nmap.org/book/legal-issues.html",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "cyber-websec",
     "title": "Web Security Fundamentals",
     "why": "Most real-world breaches exploit a small set of well-understood web vulnerability classes. Understanding HOW they work — conceptually, defensively — is what lets you actually prevent them in code you write or review, which is the daily reality of application security work.",
@@ -291,6 +646,506 @@
     ]
   },
   {
+    "id": "cyber-webvulns2",
+    "title": "More Web Vulnerabilities — OWASP Top 10 Continued",
+    "why": "Module 2 covered SQL injection and XSS — two OWASP Top 10 categories. This module covers four more genuinely common, high-impact vulnerability classes: broken access control (OWASP's own #1 most common category), CSRF, security misconfiguration, and SSRF — rounding out a much more complete picture of the real-world web vulnerability landscape.",
+    "topics": [
+      {
+        "id": "cyber-web-broken-access-control",
+        "title": "Broken access control — the most common web vulnerability",
+        "concept": "Per OWASP's Top 10, Broken Access Control is the single most commonly observed vulnerability category in real applications. A classic form is an IDOR (Insecure Direct Object Reference): an endpoint like `/api/orders/102` fetches a resource by ID with NO check that the requesting user actually OWNS that resource — simply being logged in as SOME user is treated as sufficient, when the check that actually matters is 'does THIS user own THIS specific resource.' The fix is straightforward but must be applied at EVERY access point: explicitly verify ownership/authorization on every request, never relying on the assumption that a user simply won't guess or enumerate other IDs.",
+        "analogy": "A hotel key card that opens every room, not just the one you booked, is broken access control — the card correctly proves you're a legitimate hotel guest (authentication), but does nothing to confirm THIS specific room is actually yours (authorization). An IDOR is exactly a system that checks 'is this a valid guest?' while forgetting to also check 'is this valid guest's specific booking THIS room?'",
+        "examples": [
+          {
+            "code": "orders_db = {\n    101: {\"owner\": \"alice\", \"total\": 250},\n    102: {\"owner\": \"bob\", \"total\": 75},\n    103: {\"owner\": \"alice\", \"total\": 500},\n}\n\n# VULNERABLE: fetches ANY order by ID with no ownership check at all\ndef get_order_vulnerable(order_id, requesting_user):\n    return orders_db.get(order_id)\n\nprint(\"alice requests order 102 (which belongs to bob):\")\nprint(get_order_vulnerable(102, requesting_user=\"alice\"))\nprint(\"alice can see bob's order details -- a real, classic IDOR vulnerability\")",
+            "note": "Actually run and confirmed: alice's request for order 102 (bob's order, identified purely by guessing/incrementing the ID) returns bob's real order data with zero ownership verification -- exactly the mechanism OWASP describes as the most commonly observed access-control failure."
+          },
+          {
+            "code": "# FIX: verify the requesting user actually OWNS the resource before returning it\ndef get_order_secure(order_id, requesting_user):\n    order = orders_db.get(order_id)\n    if order is None:\n        return None\n    if order[\"owner\"] != requesting_user:\n        return {\"error\": \"not authorized to view this order\"}\n    return order\n\nprint(\"secure: alice requests order 102 (bob's order):\", get_order_secure(102, \"alice\"))\nprint(\"secure: alice requests order 101 (her own order):\", get_order_secure(101, \"alice\"))",
+            "note": "Actually run and confirmed: the same request for bob's order now correctly returns an authorization error, while alice's own order (101) is correctly returned -- the fix is a single, explicit ownership check applied at the point of access, not a complex mechanism, but it must be applied consistently EVERYWHERE resources are fetched by ID."
+          }
+        ],
+        "mistakes": [
+          "Assuming that because an ID is long/random/hard-to-guess, checking ownership is unnecessary — 'security through obscurity' is not real access control; IDs can be leaked, enumerated, or found in logs/URLs.",
+          "Checking authorization on the main page/view but forgetting a related endpoint (e.g. an export/download/edit action for the same resource) — access control must be verified at EVERY access point, not just the most obvious one.",
+          "Relying purely on hiding a link/button in the UI as the access control — this project's own earlier authorization lesson (Full-Stack path) makes exactly this point: a hidden button doesn't stop a direct request to the underlying endpoint."
+        ],
+        "handsOn": "Run both examples and confirm the vulnerable version leaks bob's order while the secure version correctly rejects it. Then add a third function simulating a DELETE action, and write the ownership check it would need before actually deleting an order.",
+        "doneWhen": "You can explain what an IDOR vulnerability is, why authentication alone isn't sufficient, and can write an explicit ownership check that fixes it.",
+        "checks": [
+          {
+            "q": "Why doesn't confirming a user is logged in (authenticated) automatically mean they should be allowed to access a specific resource by its ID?",
+            "a": "Authentication only confirms WHO is making the request; authorization is the separate check of WHAT that specific user is allowed to access. An IDOR vulnerability happens exactly when authentication is checked but the specific ownership/authorization check for that particular resource is missing or forgotten."
+          }
+        ],
+        "keyTakeaways": [
+          "Broken access control is OWASP's most commonly observed vulnerability category in real applications.",
+          "An IDOR happens when a resource is fetched by ID with no check that the requesting user actually owns/is authorized for that specific resource.",
+          "Authorization checks must be applied consistently at EVERY access point for a resource, not just the most obvious one."
+        ],
+        "resources": [
+          {
+            "label": "OWASP Top 10 — A01 Broken Access Control",
+            "url": "https://owasp.org/Top10/A01_2021-Broken_Access_Control/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-web-csrf",
+        "title": "Cross-Site Request Forgery (CSRF)",
+        "concept": "CSRF tricks a victim's browser into submitting an unwanted request to a site where they're ALREADY authenticated — the attacker's malicious page doesn't need to steal the victim's session; it just needs the victim's browser to automatically attach their existing cookies, which browsers do by default for any request to that domain, regardless of which page triggered it. The standard defense is a CSRF TOKEN: a unique, unpredictable value embedded in each legitimate form, checked on submission — an attacker's forged cross-site request has no way to know or include this token, so it's rejected even though the victim's cookies are genuinely valid.",
+        "analogy": "CSRF is like a con artist who can't forge your signature, but discovers your office automatically stamps and mails ANY envelope with your name on the return address, no matter who dropped it in the outgoing mail tray — the con artist doesn't need your actual signature; they just need to drop a forged letter with your name on it into that tray. A CSRF token is like requiring every legitimate outgoing letter to also include a unique, freshly-issued authorization code known only to your office and you — the con artist's forged letter has no way to include a code they were never given, so it gets rejected despite bearing your genuine name.",
+        "examples": [
+          {
+            "code": "import secrets\n\nactive_sessions = {}\n\ndef start_session(user):\n    token = secrets.token_hex(16)\n    active_sessions[user] = token\n    return token\n\ndef submit_form_vulnerable(user, requested_action):\n    # VULNERABLE: no CSRF token check -- relies only on cookies, which an attacker's\n    # cross-site form can trigger the browser into sending just as easily as the real site\n    return f\"executed '{requested_action}' for {user} -- no token was checked!\"\n\ntoken = start_session(\"alice\")\nprint(submit_form_vulnerable(\"alice\", \"change_email_to_attacker@evil.com\"))",
+            "note": "Actually run and confirmed: the vulnerable version executes the sensitive action purely because a request 'from alice' arrived at all -- exactly the gap CSRF exploits, since a forged cross-site form can trigger this same request via the victim's browser, using their real, valid cookies, without the attacker ever needing to know alice's password or session details directly."
+          },
+          {
+            "code": "def submit_form_secure(user, submitted_token, requested_action):\n    real_token = active_sessions.get(user)\n    if submitted_token != real_token:\n        return \"REJECTED -- CSRF token mismatch\"\n    return f\"executed '{requested_action}' for {user} -- token verified\"\n\nprint(\"attacker's forged request (no valid token):\")\nprint(submit_form_secure(\"alice\", \"wrong-guessed-token\", \"change_email_to_attacker@evil.com\"))\n\nprint(\"\\nlegitimate request (real token from alice's own session):\")\nprint(submit_form_secure(\"alice\", token, \"update_profile_bio\"))",
+            "note": "Actually run and confirmed: the forged request is correctly REJECTED (the attacker has no way to know alice's real, unique token, even though they can trigger a request using her valid cookies), while the legitimate request (carrying the actual token from alice's own page) succeeds -- exactly the CSRF-token defense mechanism in action."
+          }
+        ],
+        "mistakes": [
+          "Relying only on cookies/session identification to authorize a state-changing request — cookies are automatically attached by the browser regardless of which page triggered the request, which is precisely what CSRF exploits.",
+          "Using a CSRF token that's predictable or reused across sessions — the token's value must be genuinely unpredictable and tied to the specific session, or an attacker could potentially guess or reuse a known valid token.",
+          "Only protecting some state-changing endpoints with CSRF tokens while missing others (e.g. an account-settings form protected, but a lesser-used 'delete account' endpoint forgotten) — every state-changing request needs the same protection."
+        ],
+        "handsOn": "Run both examples and confirm the forged request is rejected while the legitimate one succeeds. Then simulate an attacker who somehow obtains a STALE, previously-used token, and consider (in one sentence) whether your implementation would need to also expire tokens after use to fully close that gap.",
+        "doneWhen": "You can explain how CSRF exploits a browser's automatic cookie-attaching behavior, and can implement a basic CSRF token check that correctly rejects a forged request.",
+        "checks": [
+          {
+            "q": "Why can a CSRF attack succeed even without the attacker ever learning the victim's password or session cookie value?",
+            "a": "The attacker doesn't need to know the cookie's value at all — they only need the victim's own browser to send a request to the target site, and browsers automatically attach existing cookies for that domain to ANY request, regardless of which page triggered it. The victim's browser does the work of including valid authentication; the attacker just needs to get a forged request to fire."
+          }
+        ],
+        "keyTakeaways": [
+          "CSRF tricks a victim's authenticated browser into submitting an unwanted request, exploiting the browser's automatic cookie-attaching behavior.",
+          "A CSRF token — a unique, unpredictable value checked on submission — is the standard defense, since a forged cross-site request has no way to include it.",
+          "CSRF protection must be applied consistently to every state-changing endpoint, not just the most obvious ones."
+        ],
+        "resources": [
+          {
+            "label": "OWASP — Cross-Site Request Forgery (CSRF)",
+            "url": "https://owasp.org/www-community/attacks/csrf",
+            "kind": "docs"
+          },
+          {
+            "label": "OWASP — CSRF Prevention Cheat Sheet",
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-web-security-misconfig",
+        "title": "Security misconfiguration — the preventable category",
+        "concept": "Security Misconfiguration (another OWASP Top 10 category) covers a genuinely broad, common set of issues that aren't sophisticated attacks at all — they're PREVENTABLE oversights: default credentials left unchanged, verbose error messages leaking internal details (stack traces, file paths, framework versions) in production, directory listing accidentally enabled, or unnecessary services/ports left running and reachable. What unites this category is that the fix is usually straightforward CONFIGURATION discipline, not complex code changes — which is exactly why it remains so common despite being, in principle, entirely preventable.",
+        "analogy": "Security misconfiguration is like a store that installed a genuinely excellent alarm system but never actually turned it on, left the manufacturer's default code (0000) unchanged, and left a side door propped open for deliveries — none of these are sophisticated attacks defeating good security; they're the security controls simply never being properly configured or maintained in the first place.",
+        "examples": [
+          {
+            "code": "misconfigs = [\n    {\n        \"issue\": \"Default credentials left unchanged\",\n        \"example\": \"admin/admin still works on the production database dashboard\",\n        \"risk\": \"Attackers routinely try well-known default credential lists first\",\n    },\n    {\n        \"issue\": \"Verbose error messages in production\",\n        \"example\": \"A stack trace showing the exact framework version, file paths, and SQL query\",\n        \"risk\": \"Leaks internal implementation details attackers can use to craft targeted exploits\",\n    },\n    {\n        \"issue\": \"Directory listing enabled\",\n        \"example\": \"Visiting /uploads/ shows a full file listing instead of a 403/404\",\n        \"risk\": \"Exposes files never meant to be publicly browsable or discoverable\",\n    },\n    {\n        \"issue\": \"Unnecessary services/ports left running\",\n        \"example\": \"A database's admin port (e.g. 9200 for Elasticsearch) reachable from the public internet\",\n        \"risk\": \"Every open service is additional attack surface, whether or not it's actively used\",\n    },\n]\nfor m in misconfigs:\n    print(f\"ISSUE: {m['issue']}\\n  Example: {m['example']}\\n  Risk: {m['risk']}\\n\")",
+            "note": "Actually run -- this is a real, representative checklist of the most common security misconfiguration patterns encountered in real applications, each verified against widely-documented real-world incident patterns. Notice none of these require a sophisticated attack technique to exploit; they require only that someone checks for them, which is exactly the point."
+          }
+        ],
+        "mistakes": [
+          "Assuming a framework's default configuration is automatically production-safe — many frameworks default to verbose error pages, permissive CORS, or other developer-friendly settings that must be deliberately hardened before production deployment.",
+          "Fixing a misconfiguration once but never re-checking as the system evolves — a new service added later, or a config file reset during a deployment, can silently reintroduce a previously-fixed misconfiguration.",
+          "Treating security misconfiguration as a lower priority than 'real' vulnerabilities like SQL injection — it's consistently one of the most common categories in real breach post-mortems, precisely because it's often overlooked as 'boring' configuration work."
+        ],
+        "handsOn": "Run the example and review each misconfiguration pattern. Then pick one real system you have access to (your own project, a personal server) and check it against at least two of these four patterns — report what you found (even 'this one is fine') as if writing a mini security note.",
+        "doneWhen": "You can name at least four common security misconfiguration patterns and explain why this category remains common despite being conceptually simple to prevent.",
+        "checks": [
+          {
+            "q": "Why is security misconfiguration considered a genuinely serious vulnerability category, even though none of its typical examples require a sophisticated attack technique?",
+            "a": "The category's danger comes from its prevalence and preventability being mismatched — these are straightforward configuration oversights (default credentials, verbose errors, exposed services) that require no special attacker skill to exploit once found, yet they recur constantly in real systems because configuration discipline is easy to overlook or let drift over time."
+          }
+        ],
+        "keyTakeaways": [
+          "Security misconfiguration covers preventable configuration oversights: default credentials, verbose errors, directory listing, and unnecessary exposed services.",
+          "The fix is typically configuration discipline, not complex code changes — which is exactly why the category remains common despite being conceptually simple.",
+          "Misconfigurations must be re-checked as a system evolves, since a new deployment or added service can silently reintroduce a previously-fixed issue."
+        ],
+        "resources": [
+          {
+            "label": "OWASP Top 10 — A05 Security Misconfiguration",
+            "url": "https://owasp.org/Top10/A05_2021-Security_Misconfiguration/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-web-ssrf",
+        "title": "Server-Side Request Forgery (SSRF)",
+        "concept": "SSRF happens when a server-side feature that fetches a URL (e.g. 'import an avatar from this URL,' or a webhook) can be tricked into fetching an INTERNAL address instead of the intended external one — since the SERVER (not the attacker's browser) makes the request, this can reach internal-only services, localhost, or CLOUD METADATA ENDPOINTS (a special internal IP like `169.254.169.254` that many cloud providers use to serve instance credentials — a genuinely common, high-impact real-world SSRF target). The fix validates that a resolved destination IP is not private/internal/loopback before allowing the fetch.",
+        "analogy": "SSRF is like a hotel's front desk offering a 'we'll deliver a package addressed anywhere for you' service, not realizing a guest could write the hotel's OWN restricted back-office address on the package label — since the delivery is performed by hotel staff (who have access everywhere in the building), the guest gets something delivered to/from a place they'd never have reached directly. A cloud metadata endpoint is like the hotel manager's own private safe, reachable via that same 'internal delivery' path if it's never explicitly excluded.",
+        "examples": [
+          {
+            "code": "import ipaddress\nfrom urllib.parse import urlparse\nimport socket\n\ndef is_safe_url(url):\n    try:\n        parsed = urlparse(url)\n        if parsed.scheme not in (\"http\", \"https\"):\n            return False, \"only http/https allowed\"\n        host = parsed.hostname\n        if host is None:\n            return False, \"no hostname\"\n        ip = socket.gethostbyname(host)\n        ip_obj = ipaddress.ip_address(ip)\n        if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local:\n            return False, f\"blocked -- {ip} is a private/internal/loopback address\"\n        return True, f\"resolved to public IP {ip}\"\n    except Exception as e:\n        return False, f\"error: {e}\"\n\ntest_urls = [\n    \"http://example.com/avatar.png\",\n    \"http://127.0.0.1:8080/admin\",\n    \"http://169.254.169.254/latest/meta-data/\",\n    \"http://localhost:6379/\",\n]\nfor url in test_urls:\n    safe, reason = is_safe_url(url)\n    print(f\"{'ALLOWED' if safe else 'BLOCKED'}: {url}  ({reason})\")",
+            "note": "Actually run and confirmed: the legitimate external URL is correctly ALLOWED, while all three SSRF attempts are correctly BLOCKED -- including http://169.254.169.254/, the REAL link-local address AWS and other cloud providers use to serve instance metadata (including, in vulnerable configurations, temporary security credentials), which is exactly the target of numerous real, high-profile SSRF breaches in cloud-hosted applications."
+          }
+        ],
+        "warn": "The cloud metadata endpoint (169.254.169.254) is a genuine, real address used by AWS, Azure, and GCP to serve instance metadata — an unvalidated URL-fetching feature in a cloud-hosted application is a real, well-documented path attackers have used to steal cloud credentials in actual breaches, not a hypothetical concern.",
+        "mistakes": [
+          "Validating a URL's hostname string alone (e.g. blocking the literal text 'localhost') without resolving it to an actual IP address first — an attacker can use alternate representations (decimal IP notation, a DNS name that resolves to an internal IP, etc.) to bypass a naive string-based check.",
+          "Checking the destination only once, at validation time, without considering DNS rebinding (where a hostname resolves to a safe IP at check-time but a different, internal IP by the time the actual request is made) — a genuinely subtle, real bypass technique for simple validation.",
+          "Assuming SSRF is only a concern for obviously URL-fetching features — anything that processes a user-supplied URL, hostname, or even certain file-path-like inputs server-side deserves the same scrutiny."
+        ],
+        "handsOn": "Run the example and confirm the legitimate URL is allowed while all three attack attempts are blocked. Then add a test case using the raw decimal representation of an internal IP (e.g. 2130706433, which is 127.0.0.1) and check whether your validation function still correctly catches it — if not, that's a real bypass worth understanding.",
+        "doneWhen": "You can explain what SSRF is, why it's dangerous specifically in cloud environments (metadata endpoints), and can implement a basic IP-based validation check against it.",
+        "checks": [
+          {
+            "q": "Why is the address 169.254.169.254 specifically significant in the context of SSRF attacks against cloud-hosted applications?",
+            "a": "It's a real, standard link-local address that major cloud providers (AWS, Azure, GCP) use to serve instance metadata to the running server, including — in vulnerable configurations — temporary security credentials. An SSRF vulnerability that can reach this address may allow an attacker to steal real cloud credentials, making it one of the most valuable and commonly targeted SSRF destinations in practice."
+          }
+        ],
+        "keyTakeaways": [
+          "SSRF tricks a server-side feature into fetching an internal/unintended address, since the request is made by the server itself (with its own network access), not the attacker directly.",
+          "Cloud metadata endpoints (like 169.254.169.254) are a real, high-value, commonly-targeted SSRF destination that can expose actual cloud credentials.",
+          "SSRF validation must resolve hostnames to actual IP addresses and check those (private/loopback/link-local), not just pattern-match the URL string, to avoid common bypasses."
+        ],
+        "resources": [
+          {
+            "label": "OWASP — Server-Side Request Forgery Prevention Cheat Sheet",
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html",
+            "kind": "docs"
+          },
+          {
+            "label": "OWASP Top 10 — A10 Server-Side Request Forgery",
+            "url": "https://owasp.org/Top10/A10_2021-Server-Side_Request_Forgery_%28SSRF%29/",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cyber-malware-social-eng",
+    "title": "Malware & Social Engineering",
+    "why": "Modules 2-4 covered technical vulnerabilities in code and infrastructure — but a huge share of real-world breaches start with a HUMAN being tricked, not a system being technically exploited. This module builds real understanding of malware types, phishing/social engineering tactics, ransomware specifically (given its outsized real-world impact), and the defense-in-depth mindset that assumes any single layer, including human judgment, can fail.",
+    "topics": [
+      {
+        "id": "cyber-malware-types",
+        "title": "Types of malware — and what actually distinguishes them",
+        "concept": "Malware types are distinguished by HOW they spread and what they do, not just 'being bad software': a VIRUS attaches itself to a legitimate file/program and spreads when that file is shared/run; a WORM self-propagates across a network entirely on its own, with NO user interaction needed at all — the key distinguishing feature from a virus; a TROJAN disguises itself as legitimate software and relies entirely on the user being tricked into running it (unlike a worm, it doesn't spread on its own); RANSOMWARE encrypts a victim's files and demands payment for the decryption key; SPYWARE covertly monitors/exfiltrates activity or data.",
+        "analogy": "A virus is like a common cold that needs direct contact (sharing an infected file) to spread from person to person. A worm is like an airborne pathogen that spreads through the air on its own, needing no direct contact or cooperation from anyone — dramatically faster and harder to contain. A trojan is like a gift box that looks legitimate and appealing, but only causes harm once the recipient actually chooses to open it — the harm requires the victim's own action, unlike the worm's automatic spread.",
+        "examples": [
+          {
+            "code": "# Simulating the CONCEPT of worm self-propagation -- a pure logic simulation,\n# no real network activity or actual code execution\nclass SimulatedNetwork:\n    def __init__(self, hosts):\n        self.hosts = {h: {\"infected\": False} for h in hosts}\n        self.connections = {\n            \"host_a\": [\"host_b\", \"host_c\"], \"host_b\": [\"host_a\", \"host_d\"],\n            \"host_c\": [\"host_a\"], \"host_d\": [\"host_b\", \"host_e\"], \"host_e\": [\"host_d\"],\n        }\n\n    def infect(self, host):\n        if self.hosts[host][\"infected\"]:\n            return\n        self.hosts[host][\"infected\"] = True\n        print(f\"  {host} infected\")\n        for neighbor in self.connections.get(host, []):   # WORM: auto-spreads, no user action\n            self.infect(neighbor)\n\nnet = SimulatedNetwork([\"host_a\", \"host_b\", \"host_c\", \"host_d\", \"host_e\"])\nnet.infect(\"host_a\")\nprint(\"final state:\", {h: v[\"infected\"] for h, v in net.hosts.items()})",
+            "note": "Actually run and confirmed: starting infection at just host_a automatically spread to ALL 5 hosts, purely by following network connections with zero simulated 'user' ever needing to click or run anything -- this automatic, self-directed spread is precisely what distinguishes a worm from a trojan, which requires the user to actively run something."
+          }
+        ],
+        "mistakes": [
+          "Using 'virus' as a generic catch-all term for any malware — the specific propagation mechanism (requires a host file vs. self-propagates vs. requires the user to run it) is what actually determines appropriate defenses, not just severity.",
+          "Assuming a trojan is 'less dangerous' than a worm because it needs user interaction — a trojan can deliver an equally or more damaging payload (including ransomware); the distinction is about SPREAD mechanism, not impact severity.",
+          "Underestimating a worm's speed of spread specifically because it requires no user interaction — this is precisely why historical worm outbreaks have spread globally within hours, far faster than malware requiring individual user actions."
+        ],
+        "handsOn": "Run the example and confirm all 5 hosts become infected automatically. Then modify the connections dictionary to make host_c isolated (no connections to/from any infected host), and confirm it correctly stays uninfected — demonstrating how network segmentation (this path's Network Security module) can genuinely limit a worm's spread.",
+        "doneWhen": "You can distinguish a virus, worm, trojan, ransomware, and spyware by their actual propagation/behavior mechanism, not just 'malware in general'.",
+        "checks": [
+          {
+            "q": "What specifically distinguishes a worm from a trojan, in terms of how each spreads?",
+            "a": "A worm self-propagates across a network entirely on its own, requiring no user interaction at all. A trojan disguises itself as legitimate software and depends entirely on a user being tricked into actively running it — without that action, a trojan does not spread on its own the way a worm does."
+          }
+        ],
+        "keyTakeaways": [
+          "Malware types are distinguished by their propagation mechanism and behavior, not just severity: virus (needs a host file), worm (self-propagates automatically), trojan (needs the user to run it).",
+          "A worm's ability to spread with zero user interaction makes it capable of spreading dramatically faster than malware requiring individual user actions.",
+          "Network segmentation (previous module) genuinely limits a worm's ability to spread, since it depends on reachable network connections."
+        ],
+        "resources": [
+          {
+            "label": "CISA — Understanding Malware",
+            "url": "https://www.cisa.gov/topics/cyber-threats-and-advisories/malware-phishing-and-ransomware",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-phishing-social-engineering",
+        "title": "Phishing and social engineering — attacking the human, not the system",
+        "concept": "Social engineering manipulates a person into doing something they wouldn't otherwise do (clicking a link, revealing a password, wiring money) by exploiting trust, urgency, or authority — rather than exploiting a technical flaw. PHISHING is the most common form: a message impersonating a trusted source, commonly using a LOOKALIKE DOMAIN (a slightly misspelled or visually-similar domain, or the real domain embedded as a SUBDOMAIN of an attacker-controlled one) to appear legitimate at a glance. Checking the ACTUAL registered domain — not just what a URL superficially contains — is the single most reliable technical check against this specific trick.",
+        "analogy": "A phishing email impersonating your bank is like someone calling and claiming to be from your bank's fraud department, using real details they found online to sound convincing, and creating urgency ('your account will be locked in 10 minutes') to prevent you from pausing to verify independently. A lookalike domain is the digital equivalent of a scammer displaying a caller ID that looks almost identical to your bank's real number — convincing at a glance, but not the genuine source if you look closely.",
+        "examples": [
+          {
+            "code": "import re\n\nlegitimate_domain = \"paypal.com\"\nsuspicious_urls = [\n    \"https://paypal.com/login\",\n    \"https://paypa1.com/login\",                                  # '1' instead of 'l'\n    \"https://paypal-secure-verify.com/login\",                     # extra words appended\n    \"https://accounts.paypal.com.verify-now.ru/login\",            # real domain as a SUBdomain of an attacker's domain\n]\n\ndef extract_registered_domain(url):\n    match = re.match(r\"https?://([^/]+)\", url)\n    return match.group(1) if match else None\n\nfor url in suspicious_urls:\n    domain = extract_registered_domain(url)\n    looks_legit = domain == legitimate_domain\n    print(f\"{'LEGITIMATE' if looks_legit else 'SUSPICIOUS'}: {url}\")\n    print(f\"  actual host: {domain}\")",
+            "note": "Actually run and confirmed: only the first URL's actual host exactly matches paypal.com -- notice the fourth URL, 'accounts.paypal.com.verify-now.ru', VISUALLY contains 'paypal.com' right in the middle, which is precisely the trick: the ACTUAL registered domain is verify-now.ru, with 'accounts.paypal.com' merely being an attacker-chosen SUBdomain label they fully control, not Paypal's real domain at all."
+          }
+        ],
+        "warn": "The most dangerous phishing red flag in this example (a real domain embedded as a subdomain of an attacker's domain) is genuinely easy to miss at a glance — always check what comes IMMEDIATELY before the FIRST single slash after 'https://', reading from the right side of that host string, not just scanning for a familiar-looking substring anywhere in the URL.",
+        "mistakes": [
+          "Trusting a URL because it contains a familiar company name ANYWHERE in the string, rather than checking the actual registered domain specifically.",
+          "Reacting immediately to urgency/pressure in a message ('act now or your account will be locked') without pausing to independently verify through a separate, known-trusted channel (e.g. calling the company's official number, not one provided in the suspicious message itself).",
+          "Assuming phishing only happens via email — social engineering tactics apply equally to phone calls (vishing), text messages (smishing), and even in-person pretexting."
+        ],
+        "handsOn": "Run the example and confirm which URLs are correctly flagged as suspicious. Then write your own extract_registered_domain check that would correctly identify the legitimate_domain even when it appears as a substring elsewhere in a malicious URL, and test it against 2-3 new lookalike examples you construct yourself.",
+        "doneWhen": "You can explain the psychological tactics social engineering exploits (trust, urgency, authority), and can technically identify a lookalike-domain phishing attempt by checking the actual registered domain.",
+        "checks": [
+          {
+            "q": "Why does the URL 'https://accounts.paypal.com.verify-now.ru/login' NOT actually belong to PayPal, despite visibly containing the text 'paypal.com'?",
+            "a": "The actual registered domain is verify-now.ru — 'accounts.paypal.com' is merely a subdomain LABEL that the owner of verify-now.ru can name however they want, including choosing a label designed to look like PayPal's real domain. The domain that actually controls the server and receives the request is determined by what comes at the end (verify-now.ru), not by any text appearing earlier in the string."
+          }
+        ],
+        "keyTakeaways": [
+          "Social engineering manipulates human trust, urgency, or authority rather than exploiting a technical vulnerability.",
+          "Phishing commonly uses lookalike domains — including embedding a real domain name as a subdomain of an attacker-controlled domain — to appear legitimate at a glance.",
+          "The reliable technical check is the ACTUAL registered domain (what comes right before the first slash, read from the right), not whether a familiar name appears anywhere in the URL."
+        ],
+        "resources": [
+          {
+            "label": "CISA — Avoiding Social Engineering and Phishing Attacks",
+            "url": "https://www.cisa.gov/news-events/news/avoiding-social-engineering-and-phishing-attacks",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-ransomware-defense",
+        "title": "Ransomware — and the backup strategy that actually defends against it",
+        "concept": "Ransomware encrypts a victim's files and demands payment (typically cryptocurrency) for the decryption key — one of the most financially damaging malware categories in recent years precisely because it directly monetizes the attack. The single most effective defense isn't prevention alone (which can fail) but RECOVERABILITY: a genuinely reliable, tested backup strategy, commonly summarized as the 3-2-1 rule — 3 total copies of your data, on 2 different types of storage media, with 1 copy kept OFFLINE or off-site — specifically because ransomware that has already compromised a network can and does target connected/networked backups too, which an offline copy is immune to.",
+        "analogy": "Relying purely on prevention against ransomware is like a city relying ENTIRELY on locks to prevent fires, with no fire department or sprinkler system as a backup plan — locks help, but a real defense-in-depth plan assumes prevention can fail, and asks 'what happens next if it does?' A tested, OFFLINE backup is the equivalent of a fireproof safe kept somewhere the fire literally cannot reach — even if everything connected and accessible burns, the safe's contents survive completely untouched.",
+        "examples": [
+          {
+            "code": "# Illustrating WHY a networked/connected backup is not sufficient on its own\nbackup_scenario = \"\"\"\nWEAK: Backups stored on a network drive, permanently connected and accessible\n      from the same network as the production systems\n      -> Ransomware that compromises the network can ALSO encrypt/delete\n         this backup, since it's just another reachable, writable location\n\nSTRONG (3-2-1 rule): 3 total copies of data, on 2 different media types,\n      with 1 copy kept OFFLINE (physically disconnected) or off-site\n      -> The offline copy is genuinely unreachable by ransomware running on\n         the compromised network, since there is no live connection to encrypt\n\"\"\"\nprint(backup_scenario)",
+            "note": "This is a WALKTHROUGH of the conceptual reasoning, not literal code -- the key, often-missed point: a backup that's ALWAYS connected and writable from the same network as production systems provides much weaker real protection against ransomware specifically, since the ransomware can simply encrypt that backup too once it has network access, unlike a genuinely offline or air-gapped copy."
+          }
+        ],
+        "warn": "Paying a ransomware demand is widely discouraged by security agencies and law enforcement — it doesn't guarantee data recovery (decryption keys don't always work, or aren't provided even after payment), and it directly funds and incentivizes future attacks. A tested backup/recovery plan is the defense that avoids ever facing that choice in the first place.",
+        "mistakes": [
+          "Having backups that are always connected/writable from the same network as production data — ransomware with network access can encrypt these too, defeating their purpose as a genuinely independent recovery option.",
+          "Never actually TESTING a backup's restore process — a backup that turns out to be corrupted, incomplete, or unrestorable when you actually need it provides false confidence, not real protection.",
+          "Treating ransomware purely as a prevention problem (better antivirus, more training) without also building genuine recoverability — defense-in-depth (next lesson) assumes any single layer, including prevention, can fail."
+        ],
+        "handsOn": "Run the example and confirm you understand why a connected backup is insufficient against ransomware. Then research (using the resource below) what 'air-gapped' means specifically, and write one sentence explaining why an air-gapped backup provides a stronger guarantee than one that's merely 'not currently connected but could be plugged back in.'",
+        "doneWhen": "You can explain what ransomware does, why paying the ransom is discouraged, and can articulate the 3-2-1 backup rule and specifically why the OFFLINE copy is the critical piece against ransomware.",
+        "checks": [
+          {
+            "q": "Why does the 3-2-1 backup rule specifically require at least ONE copy to be kept OFFLINE, rather than simply having 3 copies all connected to the network for convenience?",
+            "a": "Ransomware that has compromised a network can reach and encrypt any backup that's still connected and writable from that same network, defeating the purpose of having multiple copies. An OFFLINE (physically disconnected or air-gapped) copy is genuinely unreachable by network-based ransomware, providing a real, independent recovery option even if every connected system and backup is compromised."
+          }
+        ],
+        "keyTakeaways": [
+          "Ransomware encrypts a victim's files and demands payment for the decryption key — recoverability, not just prevention, is the critical defense.",
+          "The 3-2-1 backup rule — 3 copies, 2 media types, 1 offline — specifically defends against ransomware reaching and encrypting connected backups too.",
+          "Backups must be actually TESTED for successful restoration, not just assumed to work when needed."
+        ],
+        "resources": [
+          {
+            "label": "CISA — StopRansomware Guide",
+            "url": "https://www.cisa.gov/stopransomware/ransomware-guide",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-defense-in-depth",
+        "title": "Defense in depth — assuming any single layer can fail",
+        "concept": "DEFENSE IN DEPTH is the principle of layering MULTIPLE, INDEPENDENT security controls so that no single failure results in a full compromise — a firewall, patched software, least-privilege access, monitoring/detection, tested backups, and security-aware users are all separate layers, and this module's own content demonstrates why: technical controls (Modules 2-4) can have bugs or misconfigurations, and even well-trained people (this module) can be fooled by a sufficiently convincing social engineering attempt. The security posture doesn't rely on any ONE of these being perfect — it relies on an attacker needing to defeat MULTIPLE independent layers simultaneously.",
+        "analogy": "Defense in depth is like a medieval castle that doesn't rely on ONE single wall — it has a moat, an outer wall, an inner wall, guards, and a keep, each an independent obstacle. A single breached gate doesn't hand over the whole castle; the attacker still faces the next layer, and the next. Relying on just one excellent wall (a single, perfect security control) means a single successful attack against that ONE thing ends the defense entirely — layering means no single point of failure grants total compromise.",
+        "examples": [
+          {
+            "code": "# Illustrating the layered-defense CONCEPT with a simple simulation:\n# an attack must defeat EVERY layer to fully succeed, not just one\nlayers = [\n    (\"Firewall (Module 4)\", 0.9),          # 90% chance this layer alone stops the attack\n    (\"Patched, non-misconfigured system (Modules 2-4)\", 0.8),\n    (\"Least-privilege access (Module 1)\", 0.85),\n    (\"Security-aware user (this module)\", 0.7),\n    (\"Monitoring & fast incident response (Module 5)\", 0.75),\n]\n\n# Probability the attack succeeds through ALL layers (a simplified illustrative model --\n# real risk isn't simply multiplicative like this, but the DIRECTION of the effect is real)\nfail_all_layers_prob = 1.0\nfor name, stop_prob in layers:\n    fail_all_layers_prob *= (1 - stop_prob)\n\nprint(f\"single-layer defense (just the firewall): {1 - layers[0][1]:.1%} chance attack succeeds\")\nprint(f\"all {len(layers)} layers combined: {fail_all_layers_prob:.4%} chance attack succeeds\")\nprint(\"\\nnotice the combined risk is dramatically lower than any single layer alone --\")\nprint(\"this is the core mathematical intuition behind defense in depth\")",
+            "note": "This is a SIMPLIFIED illustrative model (real-world layers aren't perfectly independent the way this multiplication assumes) -- but it correctly demonstrates the core, real intuition: combining multiple imperfect layers produces a dramatically lower overall failure probability than relying on any single layer being perfect, which is exactly why defense in depth is a foundational security strategy rather than 'redundant extra work'."
+          }
+        ],
+        "mistakes": [
+          "Relying on one 'best' security control (e.g. an excellent firewall) as if it alone were sufficient — even a 90%-effective single layer still fails 10% of the time, and a determined or lucky attacker only needs one success.",
+          "Treating security awareness training as a replacement for technical controls, or vice versa — this module and Modules 2-4 are complementary LAYERS, not competing approaches; real defense needs both.",
+          "Assuming more layers always means proportionally more security regardless of what they actually cover — layers should be genuinely INDEPENDENT (a firewall bug and a phishing-susceptible user are unrelated failure modes); several overlapping controls that all fail for the SAME underlying reason don't provide real defense-in-depth benefit."
+        ],
+        "handsOn": "Run the example and confirm the combined failure probability is dramatically lower than any single layer's. Then remove one layer from the list (simulating that control not existing) and observe how much the combined risk increases — write one sentence about which layer's removal affected the result most and why.",
+        "doneWhen": "You can explain the defense-in-depth principle, why it doesn't rely on any single control being perfect, and can demonstrate with a simple model why combining independent layers reduces overall risk.",
+        "checks": [
+          {
+            "q": "Why does defense in depth not simply rely on having the single BEST possible security control, if you could somehow build one?",
+            "a": "Even an excellent single control still has some nonzero failure rate, and a determined or lucky attacker only needs it to fail once. Defense in depth layers multiple independent controls specifically so that a single failure doesn't result in full compromise — the attacker must defeat several genuinely different obstacles, not just one, however good that one obstacle is."
+          }
+        ],
+        "keyTakeaways": [
+          "Defense in depth layers multiple independent security controls so no single failure results in full compromise.",
+          "Technical controls (firewalls, patching, least privilege) and human factors (security awareness) are complementary layers, not competing approaches.",
+          "Layers should be genuinely independent — several controls that all fail for the same underlying reason don't provide real additional protection."
+        ],
+        "resources": [
+          {
+            "label": "NIST — Defense in Depth (glossary definition)",
+            "url": "https://csrc.nist.gov/glossary/term/defense_in_depth",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cyber-cloud-security",
+    "title": "Cloud Security Basics",
+    "why": "Most real infrastructure today runs on a cloud provider (AWS, Azure, GCP) — and cloud security has its own distinct failure modes beyond the general concepts in earlier modules: a shared responsibility boundary that's easy to misunderstand, IAM policies that are trivial to over-grant, and misconfigurations (public storage, exposed metadata endpoints) that have caused numerous real, well-documented breaches.",
+    "topics": [
+      {
+        "id": "cyber-cloud-shared-responsibility",
+        "title": "The shared responsibility model",
+        "concept": "Per AWS's own official framing, cloud security is explicitly split: the provider is responsible for SECURITY 'OF' THE CLOUD (the physical infrastructure, hardware, networking, and the underlying virtualization layer), while the CUSTOMER is responsible for SECURITY 'IN' THE CLOUD (their own data, application configuration, access management, and — depending on the service type — the guest operating system and patching). Critically, this split SHIFTS depending on the service model: an EC2 virtual machine (Infrastructure-as-a-Service) leaves the customer responsible for far more (OS patching, firewall config) than a fully-managed service like S3, where AWS handles more of the stack. Misunderstanding this boundary — assuming the provider handles something that's actually the customer's job — is a genuine, common root cause of real cloud breaches.",
+        "analogy": "The shared responsibility model is like renting an apartment: the landlord (cloud provider) is responsible for the building's structural integrity, the roof, and the exterior locks on the main entrance — but you're responsible for locking YOUR OWN apartment door, not leaving your windows open, and not giving your key to strangers. A tenant who assumes 'the landlord handles all security' and leaves their own door unlocked has misunderstood exactly where the boundary actually falls — the building being secure doesn't make an unlocked personal door secure.",
+        "examples": [
+          {
+            "code": "# Illustrating how the responsibility split SHIFTS by service type -- a reference table,\n# not executable code\nresponsibility_by_service = {\n    \"EC2 (virtual machine, IaaS)\": {\n        \"provider handles\": [\"physical hardware\", \"hypervisor/virtualization\", \"physical network\"],\n        \"customer handles\": [\"guest OS patching\", \"firewall/security group rules\", \"application code\", \"data\", \"IAM configuration\"],\n    },\n    \"S3 (managed storage service)\": {\n        \"provider handles\": [\"physical hardware\", \"the storage service's own software\", \"host OS patching\"],\n        \"customer handles\": [\"bucket access policy configuration\", \"what data is stored\", \"encryption settings\", \"IAM configuration\"],\n    },\n}\nfor service, split in responsibility_by_service.items():\n    print(f\"{service}:\")\n    print(f\"  provider handles: {split['provider handles']}\")\n    print(f\"  customer handles: {split['customer handles']}\\n\")",
+            "note": "This reference table reflects AWS's own officially documented shared responsibility framing -- notice 'IAM configuration' and 'data' appear as CUSTOMER responsibilities in BOTH service types; no matter how much of the underlying infrastructure a provider manages, access control and data configuration decisions remain the customer's job, which is exactly the boundary most frequently misunderstood in real incidents."
+          }
+        ],
+        "mistakes": [
+          "Assuming a managed service (like S3) being 'more secure by default' means access configuration is also the provider's job — bucket policies, IAM permissions, and encryption settings remain customer responsibilities regardless of how managed the underlying service is.",
+          "Treating the shared responsibility model as static across all services — the split genuinely shifts based on service type (IaaS vs. managed/PaaS/SaaS), and assuming a fixed boundary regardless of which service you're using is a real, common mistake.",
+          "Believing 'the cloud provider handles security' as a blanket statement — this correctly describes only the 'of the cloud' half; the 'in the cloud' half is unambiguously the customer's responsibility, and a breach caused by a misconfigured customer setting is not the provider's fault."
+        ],
+        "handsOn": "Run the example and review the responsibility split for both service types. Then pick a cloud service you're familiar with (or research one), and write out what you believe falls on each side of the responsibility line for that specific service.",
+        "doneWhen": "You can explain the shared responsibility model's core split (security OF vs IN the cloud), and can identify how that split shifts between an IaaS service and a fully-managed service.",
+        "checks": [
+          {
+            "q": "If a company's S3 bucket is publicly readable due to a misconfigured bucket policy, is that AWS's responsibility or the customer's, under the shared responsibility model?",
+            "a": "The customer's — bucket access policy configuration falls under 'security IN the cloud,' which is explicitly the customer's responsibility regardless of how much of the underlying storage service infrastructure AWS manages. AWS is responsible for the security OF the underlying service; the customer is responsible for how they configure and use it."
+          }
+        ],
+        "keyTakeaways": [
+          "The shared responsibility model splits cloud security: the provider handles security OF the cloud (infrastructure); the customer handles security IN the cloud (data, configuration, access).",
+          "This split shifts depending on service type — IaaS (like EC2) leaves customers responsible for more than a fully-managed service (like S3).",
+          "Access management, IAM configuration, and data handling remain customer responsibilities across virtually every service type, regardless of how managed the underlying infrastructure is."
+        ],
+        "resources": [
+          {
+            "label": "AWS — Shared Responsibility Model",
+            "url": "https://aws.amazon.com/compliance/shared-responsibility-model/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-cloud-iam-least-privilege",
+        "title": "Cloud IAM and the least-privilege trap",
+        "concept": "Cloud Identity and Access Management (IAM) controls WHO can do WHAT to WHICH resources — expressed as JSON policy documents with `Effect` (Allow/Deny), `Action` (the specific operations permitted), and `Resource` (what it applies to). The single most common cloud IAM mistake, extending Module 1's least-privilege principle into the cloud: a policy granting `\"Action\": \"*\", \"Resource\": \"*\"` — EVERY action on EVERY resource — often used 'temporarily' to unblock development and never tightened afterward. A least-privilege policy instead names the SPECIFIC actions and resources actually needed, nothing more.",
+        "analogy": "An overly permissive IAM policy (Action: *, Resource: *) is like giving an employee a master key that opens every door in every building the company owns, when their actual job only ever requires access to one specific storage closet — convenient to hand out and stop thinking about, but a single compromised or careless employee (or credential) now has the keys to everything, not just what their role genuinely needs.",
+        "examples": [
+          {
+            "code": "import json\n\n# OVERLY PERMISSIVE: grants EVERY action on EVERY resource -- a real, common misconfiguration\noverly_permissive = {\n    \"Version\": \"2012-10-17\",\n    \"Statement\": [\n        {\"Effect\": \"Allow\", \"Action\": \"*\", \"Resource\": \"*\"}\n    ]\n}\n\n# LEAST PRIVILEGE: grants only the specific actions needed, on only the specific resource\nleast_privilege = {\n    \"Version\": \"2012-10-17\",\n    \"Statement\": [\n        {\n            \"Effect\": \"Allow\",\n            \"Action\": [\"s3:GetObject\", \"s3:PutObject\"],\n            \"Resource\": \"arn:aws:s3:::my-app-uploads/*\"\n        }\n    ]\n}\nprint(json.dumps(overly_permissive, indent=2))\nprint(json.dumps(least_privilege, indent=2))",
+            "note": "Actually run and confirmed valid JSON, matching AWS's own real, documented IAM policy structure exactly (Version '2012-10-17' is the actual current policy language version AWS uses). The overly-permissive version would let a compromised credential using this policy do literally ANYTHING across the entire AWS account -- delete unrelated databases, read every bucket, modify billing -- while the least-privilege version is scoped to exactly the two S3 actions, on exactly one bucket path."
+          }
+        ],
+        "mistakes": [
+          "Granting `Action: \"*\"` 'temporarily' to unblock development or debugging, then forgetting to tighten it afterward — this is genuinely one of the most common real-world cloud IAM mistakes.",
+          "Scoping a policy to the right ACTIONS but leaving `Resource: \"*\"` (or vice versa) — both dimensions need to be scoped; a policy allowing only 's3:GetObject' but on EVERY bucket in the account is still far broader than most roles actually need.",
+          "Attaching an overly broad policy directly to a long-lived user credential instead of a short-lived, role-based credential — even a correctly-scoped policy is riskier when tied to a permanent credential that could be leaked and used indefinitely."
+        ],
+        "handsOn": "Run the example and compare both policy documents. Then write your own least-privilege IAM policy for a hypothetical role that only needs to read (not write) objects from a specific bucket path, and explain which AWS action name you chose and why.",
+        "doneWhen": "You can read and write a basic IAM policy document, and can identify why Action: *, Resource: * is a serious real-world misconfiguration rather than a convenient shortcut.",
+        "checks": [
+          {
+            "q": "Why is an IAM policy with `\"Action\": \"*\", \"Resource\": \"*\"` considered a serious security risk, even if the credential using it is never actually misused for anything beyond its intended purpose?",
+            "a": "The policy defines the MAXIMUM possible damage if that credential is ever compromised, leaked, or misused — regardless of intended use. A credential with unrestricted access becomes capable of affecting literally anything in the account the moment it's compromised, while a least-privilege policy limits the blast radius to only what that specific role genuinely needs, even in the worst case."
+          }
+        ],
+        "keyTakeaways": [
+          "Cloud IAM policies define who can do what to which resources via Effect, Action, and Resource elements.",
+          "Action: *, Resource: * grants unrestricted access — a genuinely common real-world misconfiguration, often introduced 'temporarily' and never tightened.",
+          "A least-privilege policy scopes both the specific actions AND the specific resources to only what a role genuinely needs, limiting the damage if that credential is ever compromised."
+        ],
+        "resources": [
+          {
+            "label": "AWS IAM — JSON Policy Elements Reference",
+            "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-cloud-public-storage-misconfig",
+        "title": "Public storage misconfigurations — a recurring, preventable breach cause",
+        "concept": "A cloud storage bucket (like AWS S3) accidentally left PUBLICLY READABLE — via a bucket policy with `\"Principal\": \"*\"` (meaning literally anyone on the internet, not just your own account/roles) — has been the specific root cause of numerous real, well-documented data breaches, often exposing customer data, credentials, or internal documents that were never intended to be public. This is a genuinely PREVENTABLE misconfiguration (this path's own Security Misconfiguration lesson, applied specifically to cloud storage) — modern cloud providers now offer account-level 'block all public access' settings specifically because this pattern recurred so often.",
+        "analogy": "A misconfigured public storage bucket is like a company renting a private storage unit for sensitive archives, but accidentally leaving the unit's door wide open with a sign reading 'anyone welcome to browse' — not because anyone broke in, but because the door was simply never properly closed and locked in the first place. This is exactly why cloud providers now offer a single, account-wide 'keep every unit's door locked, no exceptions' setting: the specific failure mode recurred often enough that a blanket, provider-level safeguard was worth building.",
+        "examples": [
+          {
+            "code": "import json\n\n# A real, well-known misconfiguration pattern: a bucket policy making an S3 bucket\n# publicly readable by ANYONE on the internet -- \"Principal\": \"*\" is the key red flag\npublic_bucket_policy = {\n    \"Version\": \"2012-10-17\",\n    \"Statement\": [\n        {\n            \"Effect\": \"Allow\",\n            \"Principal\": \"*\",\n            \"Action\": \"s3:GetObject\",\n            \"Resource\": \"arn:aws:s3:::my-company-backups/*\"\n        }\n    ]\n}\nprint(json.dumps(public_bucket_policy, indent=2))\nprint(\"'Principal': '*' means ANYONE on the internet, not just your own AWS account/roles\")",
+            "note": "Actually run and confirmed valid JSON, matching AWS's real bucket policy structure -- 'Principal': '*' is precisely the pattern that has appeared in numerous real, publicly-documented breach post-mortems where a company's backups, customer data, or internal files were discovered exposed to anyone who happened to find the bucket's URL, often via automated internet-wide scanning specifically looking for this exact misconfiguration."
+          },
+          {
+            "code": "def check_bucket_policy_risk(policy):\n    risky_statements = []\n    for stmt in policy.get(\"Statement\", []):\n        if stmt.get(\"Effect\") == \"Allow\" and stmt.get(\"Principal\") == \"*\":\n            risky_statements.append(stmt)\n    return risky_statements\n\nrisks = check_bucket_policy_risk(public_bucket_policy)\nprint(f\"detected {len(risks)} publicly-accessible statement(s) -- flagged for review\")",
+            "note": "Actually run and confirmed: this simple check correctly flags the risky statement -- real cloud security tooling (AWS's own IAM Access Analyzer, third-party cloud security posture management tools) automates exactly this kind of check at scale across an entire account's storage buckets, which is why running such a check regularly (not just once at setup) matters."
+          }
+        ],
+        "warn": "Automated internet-wide scanning for exactly this misconfiguration pattern (publicly-readable cloud storage) is a real, ongoing activity — both by security researchers responsibly reporting findings and, less charitably, by attackers looking for exposed data. A public bucket is not merely a theoretical risk; it is actively, continuously being searched for.",
+        "mistakes": [
+          "Making a storage bucket public 'temporarily' for a legitimate reason (serving static website assets, sharing a file) without a plan to review or restrict it afterward.",
+          "Assuming a bucket is private simply because it wasn't intentionally made public — a misconfiguration, an overly broad IAM policy elsewhere, or an accidentally-applied public-access template can all result in unintended exposure without anyone deliberately choosing it.",
+          "Not using the cloud provider's account-level 'block all public access' safeguard (where available) as a baseline default, only relying on remembering to check each individual bucket's settings manually."
+        ],
+        "handsOn": "Run both examples and confirm the risky policy is correctly detected. Then write a second, genuinely private bucket policy (scoped to a specific IAM role's ARN as the Principal, instead of \"*\"), and confirm your check_bucket_policy_risk function correctly does NOT flag it.",
+        "doneWhen": "You can identify a publicly-accessible cloud storage policy by its Principal field, and can write a basic automated check that flags this specific misconfiguration pattern.",
+        "checks": [
+          {
+            "q": "In an S3 bucket policy, what does `\"Principal\": \"*\"` specifically grant access to?",
+            "a": "It grants the specified action (e.g. reading objects) to ANYONE on the internet — not just your own AWS account, IAM users, or roles. This is the specific pattern responsible for numerous real, well-documented data breaches where cloud storage was unintentionally left publicly accessible."
+          }
+        ],
+        "keyTakeaways": [
+          "A bucket policy with Principal: \"*\" grants access to anyone on the internet — a real, recurring root cause of documented data breaches.",
+          "This misconfiguration is actively, continuously searched for by both security researchers and attackers, not merely a theoretical risk.",
+          "An automated check for this exact pattern (Principal: \"*\" combined with Allow) can and should be run regularly across all storage resources, not just checked once at setup."
+        ],
+        "resources": [
+          {
+            "label": "AWS — Blocking public access to your Amazon S3 storage",
+            "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-cloud-metadata-network-security",
+        "title": "Protecting the cloud metadata endpoint and network security groups",
+        "concept": "This path's earlier SSRF lesson identified `169.254.169.254` (the cloud instance metadata endpoint) as a real, high-value SSRF target — this lesson covers the cloud-side defenses. Modern cloud providers offer IMDSv2-style protections (AWS's newer metadata service version requires a session token obtained via a special request first, which a simple SSRF-forwarded GET request typically can't replicate) specifically to harden this endpoint. Separately, cloud SECURITY GROUPS (AWS) / NETWORK SECURITY GROUPS (Azure) are cloud-native firewalls (this path's Network Security module, applied at the cloud layer) that should follow the same default-deny, least-privilege posture — a security group accidentally allowing inbound traffic from `0.0.0.0/0` (any IP address) on a sensitive port is the cloud-networking equivalent of the public-bucket mistake.",
+        "analogy": "The original cloud metadata service was like a company directory that would answer any question asked over the phone, including from an OUTSIDE line accidentally transferred in — IMDSv2's token requirement is like requiring the caller to first say a specific, freshly-issued passphrase obtained through a completely separate, harder-to-forward channel before the directory will answer anything, closing off exactly the kind of accidental forwarding an SSRF vulnerability exploits. A security group open to 0.0.0.0/0 is a building's front door propped open for 'whoever happens to walk by on the street', rather than only unlocking for people who badge in through the specific mechanism meant for legitimate access.",
+        "examples": [
+          {
+            "code": "# Illustrating WHY IMDSv2's token requirement specifically defeats a typical SSRF attack --\n# a conceptual model, not executable infrastructure code\nimdsv1_flow = \"\"\"\nIMDSv1 (older, vulnerable to simple SSRF forwarding):\n  GET http://169.254.169.254/latest/meta-data/iam/security-credentials/role-name\n  -> immediately returns credentials, no extra step required\n  -> a basic SSRF vulnerability (this path's earlier lesson) can often replicate\n     this exact simple GET request with no modification\n\"\"\"\nimdsv2_flow = \"\"\"\nIMDSv2 (newer, hardened):\n  Step 1: PUT http://169.254.169.254/latest/api/token  (with a special header)\n  Step 2: GET .../meta-data/...  (with that token attached as a header)\n  -> a typical SSRF vulnerability (which usually only forwards a simple GET\n     request based on user input) often cannot replicate the required PUT\n     request or custom header, meaningfully raising the bar for exploitation\n\"\"\"\nprint(imdsv1_flow)\nprint(imdsv2_flow)",
+            "note": "This is a WALKTHROUGH of the documented, real difference between AWS's IMDSv1 and IMDSv2 metadata service versions -- the key point: IMDSv2's two-step, token-based flow specifically breaks the simple 'SSRF forwards one GET request' exploitation pattern from this path's earlier SSRF lesson, which is exactly why enabling IMDSv2 (and, where possible, requiring it exclusively) is a genuinely meaningful hardening step against SSRF-to-credential-theft attacks specifically."
+          },
+          {
+            "code": "# Security group rule evaluation -- the SAME default-deny logic from this path's\n# Network Security module, now applied at the cloud layer\nsecurity_group_rules = [\n    {\"port\": 443, \"source\": \"0.0.0.0/0\", \"desc\": \"HTTPS -- intentionally public\"},\n    {\"port\": 22, \"source\": \"10.0.0.0/8\", \"desc\": \"SSH -- restricted to internal VPC range only\"},\n    {\"port\": 3389, \"source\": \"0.0.0.0/0\", \"desc\": \"RDP -- ACCIDENTALLY open to the entire internet\"},\n]\n\nfor rule in security_group_rules:\n    is_risky = rule[\"source\"] == \"0.0.0.0/0\" and rule[\"port\"] not in (80, 443)\n    flag = \"RISKY -- sensitive port open to the whole internet\" if is_risky else \"OK\"\n    print(f\"port {rule['port']:5d} from {rule['source']:12s} -- {rule['desc']:40s} [{flag}]\")",
+            "note": "Actually run and confirmed: the check correctly flags port 3389 (RDP) open to 0.0.0.0/0 as risky, while leaving port 443 (intentionally public HTTPS) and the internally-restricted SSH rule unflagged -- this exact pattern (a remote-access port like RDP or SSH accidentally left open to the whole internet via 0.0.0.0/0) is a real, common cause of real-world cloud compromises, directly extending this path's Network Security module's firewall concepts into the cloud context."
+          }
+        ],
+        "mistakes": [
+          "Leaving a cloud instance on the older, unauthenticated metadata service version (IMDSv1) when the provider offers a hardened, token-based alternative (IMDSv2) — a straightforward, low-cost hardening step against SSRF-based credential theft specifically.",
+          "Opening a security group rule to 0.0.0.0/0 (the entire internet) for a sensitive port (SSH, RDP, a database port) instead of restricting the source to a specific, known IP range or internal network.",
+          "Treating cloud network security groups as a 'set once and forget' configuration — the same default-deny, least-privilege discipline from this path's Network Security module needs to be periodically reviewed as cloud infrastructure evolves."
+        ],
+        "handsOn": "Run both examples and confirm you understand why IMDSv2 specifically defeats simple SSRF forwarding, and that port 3389 is correctly flagged as risky in the security group check. Then add a new rule for port 5432 (PostgreSQL) with source 0.0.0.0/0, and confirm your check correctly flags it too.",
+        "doneWhen": "You can explain why IMDSv2's token requirement specifically hardens against SSRF-based credential theft, and can identify a security group rule that dangerously opens a sensitive port to the entire internet.",
+        "checks": [
+          {
+            "q": "Why does requiring a session token (IMDSv2) specifically help defend against SSRF attacks targeting the cloud metadata endpoint, when a simple GET request (IMDSv1) does not?",
+            "a": "A typical SSRF vulnerability forwards a simple GET request based on attacker-supplied input. IMDSv2 requires an initial PUT request (with a special header) to first obtain a token before any metadata GET request will succeed — a simple SSRF flaw usually can't replicate this extra PUT-then-GET flow with the required header, meaningfully raising the bar for successful exploitation compared to IMDSv1's single, unauthenticated GET request."
+          }
+        ],
+        "keyTakeaways": [
+          "IMDSv2's token-based, two-step flow specifically hardens the cloud metadata endpoint against simple SSRF-forwarded GET requests, unlike the older, unauthenticated IMDSv1.",
+          "Cloud security groups are cloud-native firewalls that should follow the same default-deny, least-privilege posture as traditional network firewalls.",
+          "A security group rule opening a sensitive port (SSH, RDP, a database port) to 0.0.0.0/0 (the entire internet) is a real, common cause of cloud compromises."
+        ],
+        "resources": [
+          {
+            "label": "AWS — Use IMDSv2",
+            "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html",
+            "kind": "docs"
+          },
+          {
+            "label": "AWS — Security groups for your VPC",
+            "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "cyber-secops",
     "title": "Security Operations & Capstone",
     "why": "Understanding vulnerabilities (Module 2) is half the job — the other half is actually watching for and responding to real incidents. This module covers the SOC (Security Operations Center) fundamentals: monitoring, log analysis, and incident response — then a capstone where you harden and document a real system, tying the whole path together.",
@@ -345,12 +1200,12 @@
       {
         "id": "cyber-incident-response",
         "title": "Incident response — the basic process",
-        "concept": "When a real security incident is detected, response follows a structured process — commonly summarized (per NIST's own incident handling guide) as PREPARATION (having a plan before anything happens), DETECTION & ANALYSIS (confirming it's real and understanding scope), CONTAINMENT (stopping it from getting worse — e.g. isolating an affected system), ERADICATION & RECOVERY (removing the threat and restoring normal operation), and POST-INCIDENT REVIEW (what happened, what worked, what to improve). Skipping straight to 'fix it' without containment or a review afterward is a common, costly mistake — you can make things worse, or the same incident can recur.",
+        "concept": "When a real security incident is detected, response follows a structured process — per NIST's own Computer Security Incident Handling Guide (SP 800-61), exactly FOUR phases: PREPARATION (having a plan before anything happens), DETECTION & ANALYSIS (confirming it's real and understanding scope), CONTAINMENT, ERADICATION & RECOVERY (NIST groups these three as ONE combined phase — first stopping it from getting worse, e.g. isolating an affected system, then removing the threat and restoring normal operation), and POST-INCIDENT ACTIVITY (what happened, what worked, what to improve). Skipping straight to 'fix it' without containing first, or skipping the review afterward, is a common, costly mistake — you can make things worse, or the same incident can recur.",
         "analogy": "Incident response is like a hospital's emergency protocol, not just a doctor's individual judgment call in the moment: STABILIZE the patient first (containment) before attempting a full diagnosis and cure (eradication), and every case gets reviewed afterward (post-incident review) so the team gets better at handling the next one — skipping straight to 'just fix it' without stabilizing first, or never reviewing afterward, are both real, costly mistakes hospitals (and security teams) learned NOT to make.",
         "examples": [
           {
-            "code": "incident_response_phases = [\n    (\"Preparation\", \"Have a plan, contacts, and tools ready BEFORE an incident happens\"),\n    (\"Detection & Analysis\", \"Confirm it's real, understand scope -- what's affected, how bad\"),\n    (\"Containment\", \"Stop it from spreading/getting worse -- e.g. isolate the affected system\"),\n    (\"Eradication & Recovery\", \"Remove the actual threat, restore normal, verified-clean operation\"),\n    (\"Post-Incident Review\", \"What happened, what worked, what to improve for next time\"),\n]\nfor phase, description in incident_response_phases:\n    print(f\"{phase}: {description}\")",
-            "note": "This is the standard structure per NIST's own Computer Security Incident Handling Guide (SP 800-61) -- worth memorizing as an ordered sequence, since the ORDER matters: containment before full eradication prevents the incident from spreading further while you're still working the problem."
+            "code": "# NIST SP 800-61's official incident response life cycle has exactly FOUR phases --\n# notice Containment, Eradication, and Recovery are ONE combined phase, not three separate ones\nincident_response_phases = [\n    (\"Preparation\", \"Have a plan, contacts, and tools ready BEFORE an incident happens\"),\n    (\"Detection & Analysis\", \"Confirm it's real, understand scope -- what's affected, how bad\"),\n    (\"Containment, Eradication & Recovery\", \"Stop it from spreading (contain), remove the actual threat (eradicate), then restore normal, verified-clean operation (recover) -- NIST treats these three steps as one phase\"),\n    (\"Post-Incident Activity\", \"What happened, what worked, what to improve for next time\"),\n]\nfor phase, description in incident_response_phases:\n    print(f\"{phase}: {description}\")",
+            "note": "This is the exact 4-phase structure per NIST's own Computer Security Incident Handling Guide (SP 800-61) -- verified directly against the guide, since it's easy to assume Containment/Eradication/Recovery are three separate phases (they're closely related but distinct activities), when NIST specifically groups them as one combined phase. The order still matters within that phase: contain before you fully eradicate, so the incident can't keep spreading while you're still working the problem."
           },
           {
             "code": "# Illustrating WHY skipping containment is a real, common mistake\nmistake_scenario = \"\"\"\nWRONG order: detect malware -> immediately try to remove it -> discover it had\nalready spread to 3 other systems while you were focused on the first one\n\nRIGHT order: detect malware -> CONTAIN (isolate the affected system from the\nnetwork) -> THEN investigate and remove it, now that it can't spread further\n\"\"\"\nprint(mistake_scenario)",
@@ -362,8 +1217,8 @@
           "Skipping the post-incident review because 'the problem is fixed now' — without it, the same class of incident is more likely to recur, and the team never improves its response process.",
           "Having no PREPARATION (no plan, no defined roles, no practiced process) before an incident happens — improvising a response in the moment, under pressure, is far more error-prone than following a rehearsed plan."
         ],
-        "handsOn": "Run the phases example and memorize the five-phase order. Then write a short (3-4 sentence) hypothetical incident scenario of your own and walk through what would happen at each of the five phases.",
-        "doneWhen": "You can name the five incident response phases in order and explain why containment must happen before eradication.",
+        "handsOn": "Run the phases example and memorize the four-phase order (noting that containment/eradication/recovery are one combined phase, not three). Then write a short (3-4 sentence) hypothetical incident scenario of your own and walk through what would happen at each of the four phases.",
+        "doneWhen": "You can name NIST's four incident response phases in order (correctly grouping containment/eradication/recovery as one phase) and explain why containment must happen before eradication within that phase.",
         "checks": [
           {
             "q": "Why should containment happen before eradication in incident response, rather than jumping straight to removing the threat?",
@@ -371,9 +1226,9 @@
           }
         ],
         "keyTakeaways": [
-          "Incident response follows a structured process: preparation, detection & analysis, containment, eradication & recovery, post-incident review.",
-          "Containment must happen before eradication to prevent an incident from spreading further during response.",
-          "Post-incident review is essential for improving future response and preventing recurrence — not an optional step."
+          "NIST SP 800-61 defines exactly four incident response phases: preparation, detection & analysis, containment/eradication/recovery (one combined phase), and post-incident activity.",
+          "Within that third phase, containment must happen before full eradication to prevent an incident from spreading further during response.",
+          "Post-incident activity (review) is essential for improving future response and preventing recurrence — not an optional step."
         ],
         "resources": [
           {
