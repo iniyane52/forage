@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { CountUp, AnimatedBar, Stagger, StaggerItem } from "@/components/ui/motion";
+import { CountUp, AnimatedBar, Stagger, StaggerItem, ProgressRing, HoverTilt } from "@/components/ui/motion";
 import { Sparkles, Flame, Trophy, Medal, Lock, CheckCircle2 } from "@/components/ui/icons";
 
 export default async function ProfilePage() {
@@ -30,10 +30,10 @@ export default async function ProfilePage() {
   const xpIntoLevel = xp % 250;
 
   const stats = [
-    { label: "Level", value: profile?.level ?? 1, color: "#7c5cff", icon: Trophy },
+    { label: "Level", value: profile?.level ?? 1, color: "#00e5ff", icon: Trophy },
     { label: "Total XP", value: xp, color: "#3fb950", icon: Sparkles },
-    { label: "Day streak", value: profile?.streak_days ?? 0, color: "#e3a008", icon: Flame },
-    { label: "Lessons done", value: doneCount ?? 0, color: "#a371f7", icon: CheckCircle2 },
+    { label: "Day streak", value: profile?.streak_days ?? 0, color: "#ffb020", icon: Flame },
+    { label: "Lessons done", value: doneCount ?? 0, color: "#b967ff", icon: CheckCircle2 },
   ];
 
   return (
@@ -42,7 +42,7 @@ export default async function ProfilePage() {
         <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
           {profile?.username ?? user!.email}
         </h1>
-        <p className="text-sm text-[#9aa7b4]">{user!.email}</p>
+        <p className="text-sm text-[#7d99a3]">{user!.email}</p>
       </div>
 
       <Stagger className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -53,19 +53,26 @@ export default async function ProfilePage() {
               <p className="text-2xl font-bold" style={{ color: s.color, fontFamily: "var(--font-display)" }}>
                 <CountUp value={s.value} />
               </p>
-              <p className="text-xs text-[#9aa7b4] mt-1">{s.label}</p>
+              <p className="text-xs text-[#7d99a3] mt-1">{s.label}</p>
             </div>
           </StaggerItem>
         ))}
       </Stagger>
 
-      <section>
-        <div className="flex justify-between text-xs text-[#9aa7b4] mb-1.5">
-          <span>Level {profile?.level ?? 1}</span>
-          <span>{xpIntoLevel}/250 XP to next level</span>
+      <section className="glass rounded-2xl p-5 flex items-center gap-5 flex-wrap">
+        <ProgressRing pct={(xpIntoLevel / 250) * 100} size={80} strokeWidth={7} className="shrink-0">
+          <span className="text-base font-bold" style={{ fontFamily: "var(--font-display)" }}>
+            Lv {profile?.level ?? 1}
+          </span>
+        </ProgressRing>
+        <div className="flex-1 min-w-[200px]">
+          <div className="flex justify-between text-xs text-[#7d99a3] mb-1.5">
+            <span>Level {profile?.level ?? 1}</span>
+            <span>{xpIntoLevel}/250 XP to next level</span>
+          </div>
+          <AnimatedBar pct={(xpIntoLevel / 250) * 100} />
+          <p className="text-xs text-[#7d99a3] mt-2">{passedCount ?? 0} quizzes passed</p>
         </div>
-        <AnimatedBar pct={(xpIntoLevel / 250) * 100} />
-        <p className="text-xs text-[#9aa7b4] mt-2">{passedCount ?? 0} quizzes passed</p>
       </section>
 
       <section>
@@ -76,24 +83,25 @@ export default async function ProfilePage() {
           {(allBadges ?? []).map((b) => {
             const has = earnedIds.has(b.id);
             return (
-              <div
-                key={b.id}
-                className={`glass rounded-xl p-4 flex items-start gap-3 ${
-                  has ? "border-[#3fb950]/40" : "opacity-55"
-                }`}
-              >
-                <span
-                  className={`w-9 h-9 rounded-xl grid place-items-center shrink-0 ${
-                    has ? "bg-[#3fb950]/15 text-[#3fb950]" : "bg-white/[0.05] text-[#9aa7b4]"
+              <HoverTilt key={b.id}>
+                <div
+                  className={`glass rounded-xl p-4 flex items-start gap-3 h-full ${
+                    has ? "border-[#3fb950]/40" : "opacity-55"
                   }`}
                 >
-                  {has ? <Medal size={20} /> : <Lock size={18} />}
-                </span>
-                <div>
-                  <p className="font-semibold text-sm">{b.title}</p>
-                  <p className="text-xs text-[#9aa7b4] mt-0.5">{b.description}</p>
+                  <span
+                    className={`w-9 h-9 rounded-xl grid place-items-center shrink-0 ${
+                      has ? "bg-[#3fb950]/15 text-[#3fb950]" : "bg-white/[0.05] text-[#7d99a3]"
+                    }`}
+                  >
+                    {has ? <Medal size={20} /> : <Lock size={18} />}
+                  </span>
+                  <div>
+                    <p className="font-semibold text-sm">{b.title}</p>
+                    <p className="text-xs text-[#7d99a3] mt-0.5">{b.description}</p>
+                  </div>
                 </div>
-              </div>
+              </HoverTilt>
             );
           })}
         </div>

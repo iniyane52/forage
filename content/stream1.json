@@ -179,7 +179,7 @@
             "kind": "docs"
           },
           {
-            "label": "sudo — Microsoft Learn (WSL context)",
+            "label": "Set up WSL with VS Code — Microsoft Learn",
             "url": "https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-vscode",
             "kind": "docs"
           }

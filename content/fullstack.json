@@ -1,0 +1,616 @@
+[
+  {
+    "id": "fs-js-fundamentals",
+    "title": "JavaScript Fundamentals",
+    "why": "JavaScript is the one language that runs natively in every browser and, via Node.js, on the server too — it's the thread connecting everything in this path. This module builds real JavaScript fluency from zero, focused on the parts that trip up beginners and matter most for building real apps.",
+    "topics": [
+      {
+        "id": "fs-js-variables-scope",
+        "title": "Variables and scope — let, const, and why var is avoided",
+        "concept": "Modern JavaScript uses `let` (reassignable) and `const` (cannot be reassigned) for variables, both BLOCK-scoped — they only exist within the `{ }` block they're declared in. The older `var` keyword is FUNCTION-scoped (it leaks out of blocks like if/for into the whole function) and can be redeclared, which causes real, confusing bugs — modern JavaScript style avoids it almost entirely in favor of let/const.",
+        "analogy": "Think of `var` as a walkie-talkie that broadcasts to the entire building no matter which room you're in — convenient-sounding, but everyone hears everything, causing chaos in a big building. `let`/`const` are like a conversation that stays in the room it started in — once you leave that room (block), the conversation is over, which is exactly the predictability you want in real code.",
+        "examples": [
+          {
+            "code": "// var leaks out of blocks -- a classic source of bugs\nif (true) {\n  var leaked = \"I'm visible outside the if-block!\";\n}\nconsole.log(leaked);   // works -- var ignores block boundaries\n\nif (true) {\n  let scoped = \"I'm only visible inside the if-block\";\n}\ntry {\n  console.log(scoped);   // ReferenceError -- let respects block boundaries\n} catch (e) {\n  console.log(\"Error:\", e.message);\n}",
+            "note": "var 'leaks' out of the if-block into the surrounding scope -- a real, common source of bugs (you might accidentally reuse a variable name you thought was contained). let correctly throws a ReferenceError once you try to use it outside its block, which is far safer and more predictable."
+          },
+          {
+            "code": "const x = 5;\ntry {\n  x = 10;               // TypeError -- const cannot be reassigned\n} catch (e) {\n  console.log(\"Error:\", e.message);\n}\n\nconst arr = [1, 2, 3];\narr.push(4);            // this is FINE -- const prevents REASSIGNING the variable,\nconsole.log(arr);        // not mutating the object/array it points to",
+            "note": "A common beginner confusion: const does NOT make an array or object immutable -- it only prevents the VARIABLE itself from being reassigned to point at something else. Mutating the contents (like .push()) is still allowed, which is why arr.push(4) succeeds even though arr is const."
+          }
+        ],
+        "mistakes": [
+          "Using `var` out of old habit or copied code — it leaks scope in ways that cause real bugs; default to `const`, use `let` only when reassignment is genuinely needed.",
+          "Assuming `const` makes an object/array fully immutable — it only locks the VARIABLE binding, not the object's contents.",
+          "Not understanding block scope — a variable declared inside an if/for block with let/const genuinely doesn't exist outside it."
+        ],
+        "handsOn": "Run both examples in Node (or a browser console) and confirm the errors/behavior shown. Then write a small function using a for loop with `let` as the loop variable, and explain in one sentence why `let` (not `var`) is the standard modern choice for loop variables.",
+        "doneWhen": "You can explain the difference between let/const and var, and correctly predict whether a variable is accessible outside a given block.",
+        "checks": [
+          {
+            "q": "Does declaring an array with `const` prevent you from pushing new items into it?",
+            "a": "No — const only prevents the VARIABLE from being reassigned to point at a different value; it doesn't make the array's contents immutable. Methods like .push() that mutate the existing array still work fine."
+          }
+        ],
+        "keyTakeaways": [
+          "let and const are block-scoped; var is function-scoped and leaks out of blocks.",
+          "const prevents reassignment of the variable, not mutation of the object/array it points to.",
+          "Modern JavaScript style defaults to const, uses let only when reassignment is needed, and avoids var."
+        ],
+        "resources": [
+          {
+            "label": "MDN — let",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let",
+            "kind": "docs"
+          },
+          {
+            "label": "MDN — JavaScript Guide: Grammar and types",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Grammar_and_types",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-js-functions-closures",
+        "title": "Functions and closures",
+        "concept": "A closure is what MDN's own docs describe as 'a function bundled together with references to its surrounding state' — when a function is defined inside another function, it 'remembers' the variables from that outer scope even after the outer function has finished running. This is what powers common patterns like private counters and callback functions that carry context with them, and it's a genuinely essential concept for understanding React's hooks later in this path.",
+        "analogy": "A closure is like a backpack a function carries with it wherever it goes, packed with whatever variables existed in its birthplace — even long after that birthplace (the outer function call) has finished and is gone, the function can still reach into its backpack and use what's there.",
+        "examples": [
+          {
+            "code": "function makeCounter() {\n  let count = 0;             // 'count' lives in the closure's backpack\n  return function () {\n    count += 1;\n    return count;\n  };\n}\n\nconst counter1 = makeCounter();\nconsole.log(counter1());   // 1\nconsole.log(counter1());   // 2\nconsole.log(counter1());   // 3\n\nconst counter2 = makeCounter();   // a completely separate closure/backpack\nconsole.log(counter2());   // 1 -- starts fresh, independent of counter1",
+            "note": "Each call to makeCounter() creates a brand-new 'count' variable and a brand-new closure over it -- counter1 and counter2 are completely independent, each with their own private count that persists between calls, exactly matching MDN's description of a closure remembering its surrounding state."
+          },
+          {
+            "code": "// Arrow functions -- a shorter function syntax, commonly used in modern JS\nconst square = (x) => x * x;\nconst add = (a, b) => a + b;\n\nconsole.log(square(5));     // 25\nconsole.log(add(3, 4));      // 7\n\n// Arrow functions are especially common as short callbacks\nconst nums = [1, 2, 3, 4];\nconst doubled = nums.map((n) => n * 2);\nconsole.log(doubled);        // [2, 4, 6, 8]",
+            "note": "Arrow functions are a concise syntax widely used for short functions and callbacks (like the argument to .map() here) -- functionally similar to a regular function for most everyday purposes, though they also behave differently with 'this' in ways covered later when relevant."
+          }
+        ],
+        "mistakes": [
+          "Assuming all closures created from the same outer function SHARE state — each call to the outer function creates a fresh, independent closure (as counter1 vs counter2 shows).",
+          "Confusing closures with a vague 'magic' concept — it's the specific, well-defined behavior of a function remembering the scope it was defined in.",
+          "Overusing closures where a simpler approach (like a class or plain object) would be clearer — closures are powerful but not always the most readable choice."
+        ],
+        "handsOn": "Run the counter example and confirm counter1 and counter2 behave independently. Then write your own closure-based function — e.g. a function that returns a function which multiplies its argument by a fixed number set when the outer function was called.",
+        "doneWhen": "You can explain what a closure is in your own words and have written one that demonstrates a function 'remembering' state from its outer scope.",
+        "checks": [
+          {
+            "q": "In the makeCounter example, why does counter2() start at 1 instead of continuing from counter1's count?",
+            "a": "Each call to makeCounter() creates a brand-new 'count' variable and a brand-new closure over it — counter1 and counter2 are entirely independent closures, each with their own private state, not sharing anything."
+          }
+        ],
+        "keyTakeaways": [
+          "A closure is a function bundled with references to the scope it was defined in.",
+          "Each call to an outer function creates a fresh, independent closure — they don't share state.",
+          "Closures power common patterns like private state and callbacks that carry context."
+        ],
+        "resources": [
+          {
+            "label": "MDN — Closures",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Closures",
+            "kind": "docs"
+          },
+          {
+            "label": "MDN — Arrow function expressions",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-js-array-methods",
+        "title": "Array methods — map, filter, reduce",
+        "concept": "Modern JavaScript favors transforming arrays with dedicated methods over manual for-loops: `.map()` transforms EVERY element into a new array of the same length; `.filter()` keeps only elements that pass a test, producing a shorter (or equal) array; `.reduce()` combines every element into a SINGLE final value (a sum, an object, anything). These three cover the vast majority of everyday array transformations, and chaining them (`.filter().map()`) reads like a clear pipeline of what's happening to the data.",
+        "analogy": "`.map()` is like sending every item on a conveyor belt through the same machine, one-for-one, and getting a new belt with everything transformed. `.filter()` is a sorting gate that only lets through items meeting a condition, discarding the rest. `.reduce()` is a machine that takes the whole belt and crushes it down into one final result — like weighing an entire batch into a single total.",
+        "examples": [
+          {
+            "code": "const prices = [10, 25, 8, 42, 15];\n\nconst withTax = prices.map((p) => p * 1.08);       // same length, each transformed\nconsole.log(withTax.map((p) => Math.round(p * 100) / 100));\n\nconst expensive = prices.filter((p) => p > 15);     // shorter, only matches kept\nconsole.log(expensive);\n\nconst total = prices.reduce((sum, p) => sum + p, 0);   // one final value\nconsole.log(total);",
+            "note": "map() returns 5 items (same length as prices), filter() returns only the items > 15 (a shorter array), and reduce() collapses everything into one number (the sum), starting from an initial value of 0. These three distinct SHAPES of output (same-length, filtered, single-value) are the key to knowing which method fits a given task."
+          },
+          {
+            "code": "// Chaining: filter then map reads like a clear pipeline\nconst products = [\n  { name: \"Widget\", price: 20, inStock: true },\n  { name: \"Gadget\", price: 45, inStock: false },\n  { name: \"Gizmo\", price: 15, inStock: true },\n];\n\nconst availableNames = products\n  .filter((p) => p.inStock)\n  .map((p) => p.name);\n\nconsole.log(availableNames);   // ['Widget', 'Gizmo']",
+            "note": "Chaining .filter() then .map() reads almost like a sentence: 'take the products, keep the in-stock ones, then get just their names.' This chained style is idiomatic modern JavaScript and generally considered clearer than an equivalent manual for-loop with an if-check and a push."
+          }
+        ],
+        "mistakes": [
+          "Using `.map()` when you actually want to filter (its length always matches the input) — reach for `.filter()` when you want fewer items out.",
+          "Forgetting `.reduce()`'s initial value argument (the `0` above) — omitting it changes behavior in ways that can silently produce wrong results on edge cases like an empty array.",
+          "Writing a manual for-loop with a mutable accumulator when a chained `.filter().map()` would be clearer and less error-prone."
+        ],
+        "handsOn": "Run both examples and confirm the outputs. Then, using the products array, write a chained expression that returns the TOTAL price of only the in-stock products (hint: filter, then reduce).",
+        "doneWhen": "You can correctly choose between map/filter/reduce based on the shape of output needed, and can chain them to express a multi-step transformation clearly.",
+        "checks": [
+          {
+            "q": "You need to transform every element of an array into something else, keeping the same number of elements. Which array method fits, and why not the others?",
+            "a": ".map() — it always returns a new array of the SAME length, with each element transformed. .filter() would potentially return fewer elements (based on a test), and .reduce() collapses everything into a single value, not an array of the same length."
+          }
+        ],
+        "keyTakeaways": [
+          ".map() transforms every element (same length out); .filter() keeps only matching elements (shorter or equal); .reduce() collapses everything into one value.",
+          "Chaining .filter().map() reads as a clear, idiomatic pipeline.",
+          "reduce() needs an initial value to behave correctly on edge cases like an empty array."
+        ],
+        "resources": [
+          {
+            "label": "MDN — Array.prototype.map()",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map",
+            "kind": "docs"
+          },
+          {
+            "label": "MDN — Array.prototype.reduce()",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-js-async",
+        "title": "Async JavaScript — promises and async/await",
+        "concept": "JavaScript is single-threaded but handles slow operations (network requests, timers) WITHOUT blocking everything else, using an event loop and PROMISES — an object representing a value that will be available LATER (either resolved successfully or rejected with an error). `async`/`await` is modern, cleaner syntax for working with promises: marking a function `async` lets you `await` a promise inside it, pausing that function (but not the whole program) until the promise resolves, making asynchronous code read almost like synchronous code.",
+        "analogy": "A promise is like a coat-check ticket at a restaurant: you don't wait standing at the counter for your coat (blocking); you get a ticket immediately and go sit down, and the ticket represents a coat that WILL be ready. `await` is like being told 'I'll bring your coat to your table the moment it's ready, and the waiter can serve other tables in the meantime' — everyone else's service (the rest of the program) doesn't have to stop and wait alongside you.",
+        "examples": [
+          {
+            "code": "function delay(ms, value) {\n  return new Promise((resolve) => {\n    setTimeout(() => resolve(value), ms);\n  });\n}\n\nasync function main() {\n  console.log(\"starting...\");\n  const result = await delay(100, \"done!\");   // pauses HERE, not the whole program\n  console.log(result);\n}\n\nmain();\nconsole.log(\"this logs BEFORE 'done!' -- main() didn't block the rest of the program\");",
+            "note": "Notice the console.log AFTER main() runs and prints BEFORE 'done!' -- calling an async function doesn't pause the surrounding code; only the code INSIDE that async function pauses at each await, while everything else keeps running. This is the core non-blocking behavior async/await provides."
+          },
+          {
+            "code": "async function fetchUserSafely(id) {\n  try {\n    const user = await delay(50, { id, name: `user-${id}` });\n    console.log(\"got:\", user);\n    return user;\n  } catch (error) {\n    console.log(\"failed:\", error.message);\n    return null;\n  }\n}\n\nfetchUserSafely(42);",
+            "note": "try/catch around an await is the standard, correct way to handle a promise that might REJECT (e.g. a failed network request) -- without it, an unhandled rejection can crash or silently break your program, so real async code always needs this error-handling pattern."
+          }
+        ],
+        "mistakes": [
+          "Forgetting `await` before a promise-returning call — you get the Promise OBJECT itself, not its resolved value, a very common beginner bug.",
+          "Not wrapping awaited code in try/catch — unhandled promise rejections cause real, often confusing failures in production.",
+          "Assuming `await` blocks the ENTIRE program — it only pauses execution within that specific async function; everything else keeps running."
+        ],
+        "handsOn": "Run both examples in Node and confirm the ordering of the log statements matches what's described. Then write your own async function that awaits a delayed value and logs it, and deliberately trigger an error path (e.g. reject the promise) to confirm your try/catch handles it gracefully.",
+        "doneWhen": "You can explain why await only pauses its own async function (not the whole program), and can write a basic async function with proper try/catch error handling.",
+        "checks": [
+          {
+            "q": "Why does 'this logs BEFORE done!' print before the awaited result in the delay() example?",
+            "a": "Calling main() doesn't block the rest of the program — only the code INSIDE main() pauses at the await. Everything outside that async function (like the console.log after calling main()) keeps running immediately, which is exactly the non-blocking behavior async/await is designed to provide."
+          }
+        ],
+        "keyTakeaways": [
+          "A promise represents a value that will be available later, either resolved or rejected.",
+          "async/await lets asynchronous code read like synchronous code, without blocking the rest of the program.",
+          "Always wrap awaited code in try/catch to handle promise rejections gracefully."
+        ],
+        "resources": [
+          {
+            "label": "MDN — Using promises",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises",
+            "kind": "docs"
+          },
+          {
+            "label": "MDN — async function",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-dom-basics",
+        "title": "The DOM — how JavaScript touches the page",
+        "concept": "The DOM (Document Object Model) is the browser's live, in-memory representation of an HTML page as a tree of objects — JavaScript reads and modifies this tree to change what's actually shown, using methods like `document.querySelector()` to find elements and properties like `.textContent`/`.style` to change them. Every framework you'll learn later (React included) ultimately works by manipulating the DOM under the hood — understanding it directly first makes frameworks feel like a helpful abstraction rather than magic.",
+        "analogy": "If an HTML file is a recipe, the DOM is the actual dish being cooked, sitting on the counter, that you can still poke, rearrange, and modify LIVE while it's there — changing an ingredient in the recipe file itself does nothing to a dish that's already been made; you have to reach into the actual dish (the DOM) to change what's currently on the counter.",
+        "examples": [
+          {
+            "code": "// (Illustrative -- this runs in a BROWSER, where `document` exists; not in plain Node)\n// <div id=\"greeting\">Hello</div>\n\nconst el = document.querySelector(\"#greeting\");\nconsole.log(el.textContent);      // \"Hello\"\n\nel.textContent = \"Hello, Forage!\";  // directly changes what's shown on the page\nel.style.color = \"blue\";             // directly changes the element's styling\n\nconsole.log(el.textContent);      // \"Hello, Forage!\"",
+            "note": "querySelector uses CSS-style selectors ('#greeting' targets the element with id='greeting') to find an element in the live page. Changing .textContent or .style immediately updates what the USER SEES -- no page reload needed, which is the whole point of dynamic, JavaScript-driven pages."
+          },
+          {
+            "code": "// (Illustrative browser example) -- responding to a user click\nconst button = document.querySelector(\"#myButton\");\nlet clickCount = 0;\n\nbutton.addEventListener(\"click\", () => {\n  clickCount += 1;\n  document.querySelector(\"#counter\").textContent = `Clicked ${clickCount} times`;\n});",
+            "note": "addEventListener is how JavaScript reacts to user actions (clicks, typing, etc.) -- this closure-based pattern (the arrow function 'remembers' clickCount, tying back to the closures lesson) is the fundamental building block behind every interactive web page, before any framework is introduced."
+          }
+        ],
+        "warn": "The DOM examples in this lesson are BROWSER-only (they reference `document`, which doesn't exist in a plain Node.js script) — run them in an actual HTML page's browser console or a linked script, not in Node directly.",
+        "mistakes": [
+          "Trying to run DOM code (document.querySelector, etc.) in plain Node.js — `document` only exists in a browser environment (or a browser-like testing environment).",
+          "Directly manipulating the DOM extensively in large apps without a framework — it becomes hard to keep the UI in sync with data as an app grows, which is exactly the problem React (next module) solves.",
+          "Forgetting `addEventListener` callbacks are closures — they can access variables from their surrounding scope, which is how the click counter in the example 'remembers' clickCount between clicks."
+        ],
+        "handsOn": "Create a simple HTML file with a button and a div, link a script that uses querySelector and addEventListener to update the div's text on each click (matching the second example). Open it in a real browser and confirm the click counter works.",
+        "doneWhen": "You can explain what the DOM is, use querySelector to find an element, and use addEventListener to respond to a user interaction — verified in an actual browser.",
+        "checks": [
+          {
+            "q": "Why do the DOM examples in this lesson only work in a browser, not in a plain Node.js script?",
+            "a": "The DOM (document object) is provided by the BROWSER environment — Node.js runs JavaScript outside a browser and doesn't have a page to represent, so `document` simply doesn't exist there unless you add a browser-emulation library."
+          }
+        ],
+        "keyTakeaways": [
+          "The DOM is the browser's live, in-memory tree representation of an HTML page.",
+          "JavaScript reads/modifies the DOM to change what's actually shown, without a page reload.",
+          "Frameworks like React ultimately manipulate the DOM under the hood — understanding it directly demystifies what frameworks automate."
+        ],
+        "resources": [
+          {
+            "label": "MDN — Introduction to the DOM",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Introduction",
+            "kind": "docs"
+          },
+          {
+            "label": "MDN — Document.querySelector()",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fs-react",
+    "title": "React Fundamentals",
+    "why": "Module 1 built direct DOM skills; now you'll see WHY frameworks like React exist. Manually keeping a complex UI in sync with changing data gets unmanageable fast — React lets you describe WHAT the UI should look like for a given state, and it handles updating the actual DOM efficiently.",
+    "topics": [
+      {
+        "id": "fs-react-components-props",
+        "title": "Components and props",
+        "concept": "A React component is a JavaScript function that returns JSX (HTML-like syntax embedded in JS) describing what should appear on screen. PROPS (short for 'properties') are how a parent component passes data DOWN to a child component — read-only from the child's perspective, similar to function arguments. Breaking a UI into small, focused components that each take clear props is the core organizing principle of React apps, mirroring how you'd break a large program into small, well-named functions.",
+        "analogy": "A component is like a custom, reusable stamp: you design the stamp once (the component), then use it repeatedly with different ink colors or labels (different props) to produce many similar-but-customized impressions, instead of hand-drawing every single instance from scratch.",
+        "examples": [
+          {
+            "code": "// (Illustrative JSX -- runs inside a React app, needs a build step like Next.js/Vite)\nfunction Greeting({ name, isVip }) {\n  return (\n    <p>\n      Hello, {name}!{isVip && \" You're a VIP member.\"}\n    </p>\n  );\n}\n\nfunction App() {\n  return (\n    <div>\n      <Greeting name=\"Aditi\" isVip={true} />\n      <Greeting name=\"Rahul\" isVip={false} />\n    </div>\n  );\n}",
+            "note": "Greeting is reused TWICE with different props (name, isVip), producing two different outputs from one component definition -- exactly the reusable-stamp idea. Props flow ONE WAY: from App down into Greeting; Greeting cannot modify App's data directly, only read what it's given."
+          },
+          {
+            "code": "// The underlying JS pattern -- destructuring props, which you already know from Module 1\nfunction formatGreeting({ name, isVip }) {   // same destructuring pattern as any JS function\n  return `Hello, ${name}!` + (isVip ? \" You're a VIP member.\" : \"\");\n}\n\nconsole.log(formatGreeting({ name: \"Aditi\", isVip: true }));\nconsole.log(formatGreeting({ name: \"Rahul\", isVip: false }));",
+            "note": "This plain-JS version demonstrates the exact same destructuring pattern React components use for props -- {name, isVip} pulled out of a single object argument -- proving props aren't a new concept, just a JS destructuring pattern applied to a specific object React passes in."
+          }
+        ],
+        "mistakes": [
+          "Trying to modify a prop directly inside a child component — props are read-only from the child's side; data flows down, and changes flow back up via callback functions (a later lesson).",
+          "Making components too large/monolithic — small, focused components (mirroring well-factored functions) are easier to reuse, test, and reason about.",
+          "Forgetting props are just a single object argument — the destructuring syntax `({ name, isVip })` is standard JavaScript, not special React magic."
+        ],
+        "handsOn": "Using the plain-JS formatGreeting function (runnable in Node right now), call it with 2-3 different prop objects and confirm the outputs. This proves you understand the underlying data-flow pattern before adding JSX/browser complexity on top.",
+        "doneWhen": "You can explain what props are, that they flow one-way (parent to child), and can write a function that destructures a props-like object exactly as a React component would.",
+        "checks": [
+          {
+            "q": "Can a child component directly modify a prop value it receives from its parent?",
+            "a": "No — props are read-only from the child's perspective. Data flows one way, down from parent to child; a child that needs to affect the parent's data does so via a callback function passed down as a prop, not by mutating the prop directly."
+          }
+        ],
+        "keyTakeaways": [
+          "A React component is a function returning JSX describing the UI.",
+          "Props pass data one-way, from parent to child, and are read-only in the child.",
+          "Props destructuring is standard JavaScript object destructuring, not special React syntax."
+        ],
+        "resources": [
+          {
+            "label": "React docs — Passing Props to a Component",
+            "url": "https://react.dev/learn/passing-props-to-a-component",
+            "kind": "docs"
+          },
+          {
+            "label": "React docs — Your First Component",
+            "url": "https://react.dev/learn/your-first-component",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-react-usestate",
+        "title": "State with useState",
+        "concept": "Per React's own documentation, `useState` is a Hook that lets a component 'remember' a value BETWEEN renders — it returns an array `[value, setValue]` via array destructuring, where `value` is the current state and `setValue(newValue)` updates it AND triggers React to re-render the component with the new value. Critically, state is preserved across re-renders of the SAME component instance, but resets to its initial value if the component unmounts and mounts again — and two instances of the same component have completely independent, isolated state.",
+        "analogy": "Think of useState as giving a component its own private sticky note that persists between the component's redraws — each time the component re-renders (redraws itself), it checks the same sticky note rather than starting fresh, which is why a counter can keep incrementing instead of resetting to 0 every time you interact with it. Two separate instances of the same component type each get their OWN sticky note — writing on one never affects the other.",
+        "examples": [
+          {
+            "code": "// (Illustrative JSX -- matches React's own official Counter example exactly)\nimport { useState } from \"react\";\n\nfunction Counter() {\n  const [count, setCount] = useState(0);\n\n  return (\n    <>\n      <p>Count: {count}</p>\n      <button onClick={() => setCount(count + 1)}>Increment</button>\n    </>\n  );\n}",
+            "note": "This is React's own documented pattern verbatim: useState(0) returns [count, setCount] via array destructuring. Calling setCount schedules a re-render with the new value; React remembers count between renders of the SAME component instance, which is why clicking Increment repeatedly keeps counting up instead of resetting."
+          },
+          {
+            "code": "// The underlying closure idea (Module 1, lesson 2) -- why state 'sticks' between calls\nfunction makeStateHolder(initial) {\n  let value = initial;\n  const get = () => value;\n  const set = (newValue) => { value = newValue; };\n  return [get, set];\n}\n\nconst [getCount, setCount] = makeStateHolder(0);\nconsole.log(getCount());   // 0\nsetCount(getCount() + 1);\nsetCount(getCount() + 1);\nconsole.log(getCount());   // 2 -- the closure 'remembers' value between calls",
+            "note": "This is a SIMPLIFIED illustration of the closure-based idea underlying persistent state (React's real internal implementation is more sophisticated and tied to the component tree) -- but it demonstrates concretely, with runnable code, why a closure can 'remember' a value across multiple calls, echoing the makeCounter example from Module 1."
+          }
+        ],
+        "mistakes": [
+          "Mutating state directly (e.g. array.push() on a state array) instead of calling the setter — React needs the SETTER call to know a re-render is needed; direct mutation can silently fail to update the UI.",
+          "Assuming state persists automatically across a full page reload — it doesn't; useState only persists between re-renders of a mounted component, not across page loads.",
+          "Forgetting each component INSTANCE has isolated state — rendering the same component twice creates two independent 'sticky notes', not a shared one."
+        ],
+        "handsOn": "Run the makeStateHolder example and confirm it prints 0 then 2, building real intuition for the 'remembers between calls' idea. Then, if you have a React environment available (or use an online sandbox), build the Counter component and confirm clicking Increment actually increases the displayed count.",
+        "doneWhen": "You can explain what useState returns and why state persists between renders, and have demonstrated the underlying 'remembers a value' idea with real closure-based code.",
+        "checks": [
+          {
+            "q": "If you render the same component twice on a page, and each uses useState, do they share state or have independent state?",
+            "a": "Independent state — each component INSTANCE gets its own separate state, even though they're the same component type. Changing one instance's state has no effect on the other's."
+          }
+        ],
+        "keyTakeaways": [
+          "useState returns [value, setValue] via array destructuring; calling setValue updates state and triggers a re-render.",
+          "State persists across re-renders of the same component instance, but resets on unmount/remount.",
+          "Each component instance has completely isolated state, even for the same component type."
+        ],
+        "resources": [
+          {
+            "label": "React docs — State: A Component's Memory",
+            "url": "https://react.dev/learn/state-a-components-memory",
+            "kind": "docs"
+          },
+          {
+            "label": "React docs — useState reference",
+            "url": "https://react.dev/reference/react/useState",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-react-rendering-lists",
+        "title": "Rendering lists — and why 'key' matters",
+        "concept": "Rendering a list of data in React typically uses `.map()` (Module 1!) to turn an array into an array of JSX elements — and React REQUIRES each element in a rendered list to have a unique `key` prop. Per React's own docs, keys let React 'match up' list items across re-renders when the array changes (items added, removed, or reordered) — WITHOUT stable keys, React can't reliably tell which item is which, leading to subtle bugs like component state landing on the wrong item after a reorder. React's own docs explicitly warn that using the array INDEX as a key 'often leads to subtle and confusing bugs' when the list can reorder or change.",
+        "analogy": "React's own documentation uses this exact image: imagine files on your desktop had no names, only positions ('the first file, the second file'). Delete the first file, and suddenly the second file IS the first file by position — even though nothing about that file actually changed. A stable `key` (like a person's unique ID) is the FILE NAME that lets React correctly track 'this is the same item' even as its position in the list shifts.",
+        "examples": [
+          {
+            "code": "// (Illustrative JSX -- matches React's own official docs pattern)\nfunction PeopleList({ people }) {\n  return (\n    <ul>\n      {people.map((person) => (\n        <li key={person.id}>{person.name}</li>    // GOOD: stable, unique id\n      ))}\n    </ul>\n  );\n}\n\n// BAD (per React's own docs -- avoid this when the list can reorder):\n// {people.map((person, index) => <li key={index}>{person.name}</li>)}",
+            "note": "Using person.id (a stable identifier from the DATA itself) as the key, rather than the array index, is React's own explicitly documented best practice -- the id doesn't change even if the person's position in the list changes, which is exactly the property a key needs to have."
+          },
+          {
+            "code": "// Simulating WHY index-as-key breaks on reorder/deletion (plain JS logic, runnable now)\nlet peopleV1 = [{ id: 1, name: \"Amy\" }, { id: 2, name: \"Bo\" }, { id: 3, name: \"Cy\" }];\nlet peopleV2 = [{ id: 2, name: \"Bo\" }, { id: 3, name: \"Cy\" }];   // Amy (id 1) was deleted\n\nconsole.log(\"--- using index as key ---\");\npeopleV1.forEach((p, i) => console.log(`key=${i} -> ${p.name}`));\npeopleV2.forEach((p, i) => console.log(`key=${i} -> ${p.name}`));\n// notice: Bo's key CHANGES from 1 to 0 -- React would think Bo's item was REPLACED, not just shifted\n\nconsole.log(\"--- using id as key ---\");\npeopleV1.forEach((p) => console.log(`key=${p.id} -> ${p.name}`));\npeopleV2.forEach((p) => console.log(`key=${p.id} -> ${p.name}`));\n// notice: Bo's key stays 2 in both -- React correctly recognizes it as the SAME item",
+            "note": "This demonstrates the exact bug React's docs warn about: with index-as-key, Bo's key silently shifts from 1 to 0 after Amy is deleted, so React would treat that list slot as a NEW/different item rather than recognizing Bo as the same person who just moved up -- with id-as-key, Bo's key correctly stays 2 throughout, letting React track identity correctly across the change."
+          }
+        ],
+        "mistakes": [
+          "Using the array index as key for a list that can reorder, insert, or delete — React's own docs explicitly call this out as a source of subtle bugs (e.g. component state landing on the wrong row).",
+          "Omitting `key` entirely — React falls back to using the index anyway (with the same risks) and also logs a console warning.",
+          "Using a NON-unique or unstable value (like a random number generated on every render) as a key — it must be stable across re-renders and unique among siblings to work correctly."
+        ],
+        "handsOn": "Run the plain-JS simulation and confirm Bo's index-based key shifts from 1 to 0 after a deletion, while the id-based key stays stable at 2. Then, in your own words, write one sentence explaining why that shifting index would confuse React about which list item is which.",
+        "doneWhen": "You can explain why React requires keys for lists, why index-as-key is risky for reorderable lists, and have demonstrated the underlying identity-tracking problem with real code.",
+        "checks": [
+          {
+            "q": "Why does React's documentation specifically warn against using the array index as a key for a list that can be reordered or have items removed?",
+            "a": "The index is just a POSITION, not a stable identity — when items are added, removed, or reordered, an item's index can change even though the item itself hasn't. React uses the key to match items across renders, so a shifting index makes React think an item was replaced rather than just moved, causing subtle bugs like state landing on the wrong item."
+          }
+        ],
+        "keyTakeaways": [
+          "React requires a unique, stable key when rendering a list so it can track item identity across re-renders.",
+          "React's own docs warn against using array index as key for lists that can reorder, insert, or delete.",
+          "A stable identifier from the data itself (like an id) is the correct key choice."
+        ],
+        "resources": [
+          {
+            "label": "React docs — Rendering Lists",
+            "url": "https://react.dev/learn/rendering-lists",
+            "kind": "docs"
+          },
+          {
+            "label": "React docs — keeping list items in order with key",
+            "url": "https://react.dev/learn/rendering-lists#keeping-list-items-in-order-with-key",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-react-events-forms",
+        "title": "Handling events and forms",
+        "concept": "React handles user interactions (clicks, typing) by attaching event handler FUNCTIONS directly in JSX (e.g. `onClick={handleClick}`), following the same closure-based callback pattern from Module 1's addEventListener. For form inputs, React commonly uses CONTROLLED COMPONENTS: the input's displayed value is driven by state (`value={text}`), and every keystroke calls a handler (`onChange`) that updates that state — meaning React's state is always the single source of truth for what's in the box, not the DOM itself.",
+        "analogy": "An uncontrolled input is like a whiteboard anyone can scribble on freely — you'd have to walk over and READ it to know its current content. A controlled input is like a digital display that ONLY shows whatever value you explicitly tell it to show — every time someone 'writes' on it (types), that input immediately reports the keystroke back to you, and you decide what the display shows next by updating your own record (state) first.",
+        "examples": [
+          {
+            "code": "// (Illustrative JSX -- a controlled text input, standard React pattern)\nimport { useState } from \"react\";\n\nfunction NameForm() {\n  const [name, setName] = useState(\"\");\n\n  function handleSubmit(e) {\n    e.preventDefault();          // stop the browser's default full-page-reload form submit\n    console.log(\"Submitted:\", name);\n  }\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <input\n        value={name}                              // state drives what's shown -- controlled\n        onChange={(e) => setName(e.target.value)}   // every keystroke updates state\n      />\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}",
+            "note": "The input's value is ALWAYS exactly what's in the `name` state variable -- React state is the single source of truth. e.preventDefault() stops the browser's default behavior (a full page reload on form submit), letting React handle the submission with JavaScript instead."
+          },
+          {
+            "code": "// The underlying event-handler pattern is the same closure idea from Module 1's addEventListener\nfunction simulateControlledInput() {\n  let currentValue = \"\";              // stands in for React state\n  const handleChange = (typedChar) => {\n    currentValue += typedChar;         // simulating each keystroke updating state\n    console.log(\"input now shows:\", currentValue);\n  };\n\n  for (const char of \"Hi\") {\n    handleChange(char);\n  }\n}\nsimulateControlledInput();",
+            "note": "This plain-JS simulation mirrors the controlled-input pattern: each 'keystroke' calls a handler that updates the tracked value, and the displayed value always reflects that tracked state -- the exact same closure-based callback structure as the addEventListener click-counter example from Module 1, just applied to typing instead of clicking."
+          }
+        ],
+        "mistakes": [
+          "Forgetting `e.preventDefault()` in a form's onSubmit handler — the browser's default full-page-reload behavior will fire, undoing whatever React was managing.",
+          "Setting an input's `value` from state without an `onChange` handler — the input becomes read-only/frozen, since nothing updates the state that drives its displayed value.",
+          "Confusing controlled and uncontrolled inputs — mixing patterns inconsistently (e.g. setting value but not handling onChange properly) is a very common source of React form bugs."
+        ],
+        "handsOn": "Run the simulateControlledInput example and confirm it prints the growing string after each simulated keystroke, mirroring how a controlled input's state grows with each real keystroke. Then, if you have a React environment, build the NameForm component and confirm typing updates what's shown and submitting logs the name.",
+        "doneWhen": "You can explain what a controlled component is, why e.preventDefault() is needed in form handlers, and can trace the state-update flow for a controlled input's onChange handler.",
+        "checks": [
+          {
+            "q": "In a controlled input, what determines what's currently displayed in the box — the DOM's own internal input state, or something else?",
+            "a": "React state is the single source of truth — the input's displayed value is driven by whatever the state variable currently holds (via the value prop), and onChange updates that state on every keystroke, rather than the DOM tracking its own independent value."
+          }
+        ],
+        "keyTakeaways": [
+          "React event handlers follow the same closure-based callback pattern as native addEventListener.",
+          "A controlled component's displayed value is driven entirely by React state, not the DOM's own internal state.",
+          "e.preventDefault() is needed in form onSubmit handlers to stop the browser's default full-page-reload behavior."
+        ],
+        "resources": [
+          {
+            "label": "React docs — Responding to Events",
+            "url": "https://react.dev/learn/responding-to-events",
+            "kind": "docs"
+          },
+          {
+            "label": "React docs — Reacting to Input with State",
+            "url": "https://react.dev/learn/reacting-to-input-with-state",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fs-backend-deploy",
+    "title": "Backend, Deployment & Capstone",
+    "why": "Modules 1-2 built the front-end half of full-stack development. This module builds the back-end half — a real Node.js server handling requests — then ties EVERYTHING in this path together into one deployed, working full-stack application, the capstone that proves you can ship a complete product end to end.",
+    "topics": [
+      {
+        "id": "fs-node-express-basics",
+        "title": "Node.js and Express — your first backend server",
+        "concept": "Node.js runs JavaScript OUTSIDE the browser, which is what lets JavaScript power a server. Express is the most widely-used Node web framework, providing simple ROUTING: you register a handler function for a specific HTTP method + path (e.g. `app.get('/api/users', handler)`), and Express calls it whenever a matching request arrives — a request comes in, gets matched to a handler, and a response goes out, the same client-server shape every backend framework implements, now actually built in JavaScript instead of just diagrammed.",
+        "analogy": "Express is like a receptionist with a very specific instruction sheet: 'if someone asks for X in this particular way, hand them to THIS person; if they ask for Y, hand them to THAT person.' Each `app.get(path, handler)` line is one entry on that instruction sheet, and Express's whole job is matching incoming requests to the right entry and routing them there.",
+        "examples": [
+          {
+            "code": "const express = require(\"express\");\nconst app = express();\napp.use(express.json());        // parses JSON request bodies automatically\n\napp.get(\"/api/health\", (req, res) => {\n  res.json({ status: \"ok\" });\n});\n\napp.get(\"/api/users/:id\", (req, res) => {     // :id is a URL parameter\n  res.json({ id: req.params.id, name: `User ${req.params.id}` });\n});\n\nconst server = app.listen(3999, () => console.log(\"server running\"));\n\n// Real requests against the running server (using Node's built-in fetch)\n(async () => {\n  const health = await fetch(\"http://localhost:3999/api/health\");\n  console.log(await health.json());\n\n  const user = await fetch(\"http://localhost:3999/api/users/42\");\n  console.log(await user.json());\n\n  server.close();\n})();",
+            "note": "req.params.id captures the ':id' portion of the URL -- requesting /api/users/42 makes req.params.id equal '42'. URL parameters like this are a standard REST pattern across virtually every backend framework and language -- only the exact syntax for declaring them changes."
+          },
+          {
+            "code": "const express2 = require(\"express\");\nconst app2 = express2();\napp2.use(express2.json());\n\napp2.post(\"/api/echo\", (req, res) => {\n  res.json({ youSent: req.body });    // req.body is the parsed JSON from the request\n});\n\nconst server2 = app2.listen(4000, () => console.log(\"server2 running\"));\n\n(async () => {\n  const response = await fetch(\"http://localhost:4000/api/echo\", {\n    method: \"POST\",\n    headers: { \"Content-Type\": \"application/json\" },\n    body: JSON.stringify({ message: \"hello from the client\" }),\n  });\n  console.log(await response.json());\n  server2.close();\n})();",
+            "note": "express.json() middleware parses the incoming request body into req.body automatically -- without it, req.body would be undefined. This client-sends-JSON, server-parses-it pattern is standard across virtually every backend framework; Express just doesn't validate the shape automatically the way some other frameworks do -- you check req.body's contents yourself."
+          }
+        ],
+        "mistakes": [
+          "Forgetting `app.use(express.json())` — without it, req.body is undefined for JSON POST requests, a very common first-timer bug.",
+          "Defining routes in a conflicting order where a more general route (e.g. `/api/users/new`) is shadowed by an earlier parameterized route (`/api/users/:id` matching 'new' as an id) — Express matches routes in the order they're defined.",
+          "Forgetting to send a response at all in a handler — the client's request will hang waiting indefinitely if res.json()/res.send() is never called."
+        ],
+        "handsOn": "Run both examples and confirm the responses match. Then add a new route `app.get('/api/users/:id/greeting', ...)` that returns a personalized greeting using the id param, and test it with fetch.",
+        "doneWhen": "You can set up a basic Express server with GET/POST routes, correctly use req.params and req.body, and have verified it with real HTTP requests.",
+        "checks": [
+          {
+            "q": "Without app.use(express.json()), what happens when a client sends a POST request with a JSON body?",
+            "a": "req.body will be undefined — the express.json() middleware is what parses the incoming JSON request body into a usable JavaScript object; without it, Express doesn't automatically parse the body for you."
+          }
+        ],
+        "keyTakeaways": [
+          "Express routes match an HTTP method + path to a handler function.",
+          "req.params captures URL parameters (:id); req.body holds the parsed JSON body (requires express.json() middleware).",
+          "The underlying REST concepts are identical to FastAPI's — just expressed in JavaScript/Express instead of Python."
+        ],
+        "resources": [
+          {
+            "label": "Express — Routing guide",
+            "url": "https://expressjs.com/en/guide/routing.html",
+            "kind": "docs"
+          },
+          {
+            "label": "Express — official docs",
+            "url": "https://expressjs.com/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-fullstack-connecting",
+        "title": "Connecting frontend to backend",
+        "concept": "A full-stack app is a React frontend (Module 2) making HTTP requests to a backend API (last lesson) using `fetch` — the same async/await patterns from Module 1. The critical piece that trips up beginners: CORS (Cross-Origin Resource Sharing) — by default, a browser blocks a frontend running on one origin (e.g. localhost:3000) from calling a backend on a DIFFERENT origin (e.g. localhost:4000) unless the backend explicitly allows it via CORS headers. This is a browser SECURITY feature, not a bug, and every full-stack developer hits it at least once.",
+        "analogy": "CORS is like a building's security desk checking a badge: by default, staff from Building A (your frontend's origin) aren't allowed into Building B (your backend's origin) unless Building B's security desk has explicitly pre-approved that specific building's badges. The backend has to proactively say 'yes, I'll accept requests from that origin' — the browser won't just let it happen silently.",
+        "examples": [
+          {
+            "code": "// Frontend-side fetch call (this is what a React component would do in an effect/handler)\nasync function getUsers() {\n  const response = await fetch(\"http://localhost:4001/api/users\");\n  if (!response.ok) {\n    throw new Error(`Request failed: ${response.status}`);\n  }\n  return response.json();\n}\n\n// (Illustrative usage inside a React component. useEffect is a React hook that runs\n// code after the component renders -- the empty [] means \"run once, when the\n// component first mounts.\" Here it calls getUsers() once and hands the result to\n// the setUsers state setter from Module 2's useState lesson, so the component\n// re-renders with the fetched data.)\n// useEffect(() => { getUsers().then(setUsers); }, []);\nconsole.log(\"fetch pattern matches Module 1's async/await lesson exactly\");",
+            "note": "This is the exact async/await + fetch pattern from Module 1, now applied to talking to YOUR OWN backend instead of a generic delay() example -- checking response.ok before parsing is a real-world best practice, since fetch does NOT automatically throw on HTTP error statuses like 404/500."
+          },
+          {
+            "code": "const express = require(\"express\");\nconst cors = require(\"cors\");\nconst app = express();\napp.use(cors());                 // allows requests from any origin (fine for dev/learning)\napp.use(express.json());\n\napp.get(\"/api/users\", (req, res) => {\n  res.json([{ id: 1, name: \"Amy\" }, { id: 2, name: \"Bo\" }]);\n});\n\nconst server = app.listen(4001, () => console.log(\"cors-enabled server running\"));\n\n(async () => {\n  const response = await fetch(\"http://localhost:4001/api/users\");\n  console.log(await response.json());\n  server.close();\n})();",
+            "note": "app.use(cors()) explicitly tells Express to add the response headers that permit cross-origin browser requests -- WITHOUT this line, a real browser-based frontend on a different port/origin would have the request BLOCKED by the browser itself (this Node-to-Node fetch test doesn't enforce CORS the way a real browser does, but the header is what a real browser checks)."
+          }
+        ],
+        "warn": "CORS is enforced by the BROWSER, not by Node.js scripts calling each other directly — this lesson's fetch-in-Node examples will 'work' even without CORS configured, because Node doesn't enforce it. A REAL browser-based frontend calling a cross-origin backend WILL be blocked without proper CORS headers — always test cross-origin behavior in an actual browser, not just a Node script.",
+        "mistakes": [
+          "Testing CORS-dependent behavior only in Node scripts (which don't enforce it) instead of an actual browser, and being surprised when it fails in the real app.",
+          "Not checking `response.ok` before parsing a fetch response — fetch only rejects on network failure, NOT on HTTP error statuses like 404 or 500.",
+          "Enabling `cors()` with no restrictions in a real production app without considering security — wide-open CORS is fine for learning/development, but production APIs often restrict allowed origins."
+        ],
+        "handsOn": "Run both examples. Then set up a minimal real React app (or use an existing one) on one port and a separate Express server (with and then without CORS enabled) on another port, and confirm in an ACTUAL BROWSER that the request fails without CORS and succeeds with it — this is the only way to see real CORS enforcement.",
+        "doneWhen": "You can explain what CORS is and why it exists, and have confirmed (in a real browser, not just Node) that cross-origin requests are blocked without proper CORS configuration.",
+        "checks": [
+          {
+            "q": "Why might a fetch-in-Node-script test of a CORS-restricted API 'work fine' while the same request from an actual browser-based frontend gets blocked?",
+            "a": "CORS is a BROWSER security feature, not something enforced by Node.js scripts calling each other. A Node script has no CORS enforcement at all, so it will succeed regardless of headers — only a real browser actually checks CORS headers and blocks disallowed cross-origin requests."
+          }
+        ],
+        "keyTakeaways": [
+          "A full-stack app connects a React frontend to a backend API via fetch, using async/await.",
+          "CORS is a browser security feature blocking cross-origin requests unless the backend explicitly allows them.",
+          "Always test CORS-dependent behavior in a real browser, not a Node script, since Node doesn't enforce it."
+        ],
+        "resources": [
+          {
+            "label": "MDN — Cross-Origin Resource Sharing (CORS)",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS",
+            "kind": "docs"
+          },
+          {
+            "label": "Express — cors middleware package",
+            "url": "https://expressjs.com/en/resources/middleware/cors.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "fs-deployment-basics",
+        "title": "Deploying a full-stack app",
+        "concept": "Deployment means making your app reachable on the public internet instead of only localhost. Modern platforms (Vercel, Netlify, Railway, Render) have largely automated what used to be a manual, error-prone process: connect a GitHub repo, the platform detects the framework, runs the build, and deploys — often automatically redeploying on every push to your main branch (continuous deployment). For a full-stack app, you typically need to deploy the FRONTEND (often as static/SSR assets) and decide where the BACKEND/database lives — sometimes the same platform, sometimes a dedicated backend host or managed database service like Supabase (which this very platform, Forage, uses).",
+        "analogy": "Deploying used to be like manually shipping a physical package yourself — packing it, addressing it, carrying it to the post office. Modern platforms are like a service that watches your workshop (GitHub repo) and automatically ships a fresh package the moment you finish a new version — you just keep building, and shipping happens on its own.",
+        "examples": [
+          {
+            "code": "# A typical deployment flow (conceptual, not a single runnable script)\n\"\"\"\n1. Push code to a GitHub repository\n2. Connect the repo to a hosting platform (e.g. Vercel)\n3. Platform detects the framework (e.g. Next.js) and configures the build automatically\n4. Platform runs the build command (e.g. `npm run build`)\n5. On success, the app is live at a public URL\n6. Every future push to main triggers an automatic redeploy\n\"\"\"\nprint(\"environment variables (API keys, DB URLs) are configured in the platform's\")\nprint(\"dashboard, NEVER committed to the repo -- the same secrets-hygiene rule\")\nprint(\"applies everywhere you deploy code, not just this one platform\")",
+            "note": "This is a WALKTHROUGH of the conceptual flow, not literal code to run -- the key transferable idea across almost every modern platform is: connect the repo, let the platform auto-detect and build, keep secrets OUT of the repo and in the platform's environment variable settings instead."
+          }
+        ],
+        "warn": "NEVER commit real API keys, database passwords, or other secrets directly into your repository — even a private one. Use environment variables configured in the hosting platform's dashboard (or a local `.env` file that's explicitly excluded via `.gitignore`), exactly the discipline used throughout this very Forage platform's own codebase.",
+        "mistakes": [
+          "Committing a `.env` file with real secrets to a public (or even private) GitHub repo — a very common, very costly real-world mistake.",
+          "Assuming the frontend and backend must be deployed on the same platform/service — modern architectures often mix and match (e.g. a Vercel-hosted frontend calling a Supabase-hosted backend/database, exactly like this Forage app itself).",
+          "Not testing the PRODUCTION build locally before deploying — a project that works in dev mode can sometimes fail in a production build due to different optimizations/environment assumptions."
+        ],
+        "handsOn": "Write out (in your own words) a deployment plan for your own capstone project (next lesson): which platform you'd use for the frontend, where the backend/database would live, and what secrets/environment variables it would need — without committing any real secret values anywhere.",
+        "doneWhen": "You can explain the modern connect-repo-and-auto-deploy flow, and can articulate a concrete deployment plan (frontend host, backend/database host, secrets handling) for a real project.",
+        "checks": [
+          {
+            "q": "Where should real API keys and database passwords live for a deployed app — committed in the repo, or somewhere else?",
+            "a": "In environment variables configured through the hosting platform's dashboard (or a local .env file excluded via .gitignore) — never committed directly into the repository, even a private one, since that risks real exposure of sensitive credentials."
+          }
+        ],
+        "keyTakeaways": [
+          "Modern deployment platforms auto-detect your framework and redeploy automatically on every push (continuous deployment).",
+          "Frontend and backend/database can live on different platforms — mixing services is common and normal.",
+          "Secrets (API keys, DB passwords) belong in environment variables, never committed to the repo."
+        ],
+        "resources": [
+          {
+            "label": "Vercel — Deploying documentation",
+            "url": "https://vercel.com/docs/deployments/overview",
+            "kind": "docs"
+          },
+          {
+            "label": "The Twelve-Factor App — Config (environment variables)",
+            "url": "https://12factor.net/config",
+            "kind": "reference"
+          }
+        ]
+      },
+      {
+        "id": "fs-capstone",
+        "title": "Capstone: ship a full-stack app",
+        "concept": "Your capstone: build a small but complete full-stack app combining everything in this path — a React frontend (Module 2) that fetches from and posts to your own Express backend (this module), which stores data somewhere real (even a simple in-memory array is fine for a first version, or a real database if you're ready), deployed live on the public internet. Scope it deliberately small — a to-do list, a simple notes app, a mini link-shortener — the GOAL is a complete, working, DEPLOYED loop, not an ambitious feature list you don't finish.",
+        "analogy": "This capstone is like building and actually launching a small boat, rather than perfecting blueprints for a yacht you never put in the water. A small, complete, floating boat teaches you far more — and proves far more to an interviewer — than an elaborate design that never left the drawing board.",
+        "examples": [
+          {
+            "code": "# Suggested minimal-but-complete scope for a first full-stack capstone\nscope = \"\"\"\nFrontend: React app with a form (controlled input, Module 2) and a rendered list\n          (with proper keys, Module 2) of items fetched from your API.\n\nBackend:  Express server (this module) with:\n            GET  /api/items   -> list all items\n            POST /api/items   -> add a new item\n          Data can start as a simple in-memory array -- swap for a real database later.\n\nGlue:     Frontend calls the backend via fetch (async/await, Module 1),\n          with CORS enabled on the backend for local development.\n\nDeploy:   Both pieces live on the public internet (last lesson), with secrets\n          in environment variables, not the repo.\n\"\"\"\nprint(scope)",
+            "note": "This is a WORKED SCOPE EXAMPLE, not a template to copy verbatim -- the point is the shape: small, complete, and touching every layer (frontend state/rendering, backend routes, the fetch glue between them, and real deployment) rather than a partial, ambitious build that never reaches 'done'."
+          }
+        ],
+        "mistakes": [
+          "Scoping the capstone too ambitiously and never reaching a deployed, working state — a small complete loop beats a large incomplete one, every time.",
+          "Skipping deployment and calling it 'done' when it only runs on localhost — the deployed, publicly-reachable version is the actual proof of full-stack capability.",
+          "Not testing the deployed version end-to-end after shipping — confirm the live frontend can actually talk to the live backend, not just that each deploys without error individually."
+        ],
+        "handsOn": "Build your capstone following the scope pattern above (or your own similarly-small scope), get it fully working locally first, then deploy both frontend and backend, and confirm the LIVE, deployed version works end-to-end — not just localhost.",
+        "doneWhen": "You have a small, complete, DEPLOYED full-stack app where the live frontend successfully talks to the live backend, verified by actually using it at its public URL.",
+        "checks": [],
+        "keyTakeaways": [
+          "A small, complete, deployed full-stack app is a stronger capstone than a large, ambitious, unfinished one.",
+          "The capstone should exercise every layer: frontend state/rendering, backend routes, the fetch glue, and real deployment.",
+          "Always verify the LIVE deployed version end-to-end, not just that each piece deploys without error."
+        ],
+        "resources": [
+          {
+            "label": "Vercel — Deploying documentation",
+            "url": "https://vercel.com/docs/deployments/overview",
+            "kind": "docs"
+          },
+          {
+            "label": "Common Core — Career track (interview framing)",
+            "url": "/stream/common-core",
+            "kind": "course"
+          },
+          {
+            "label": "Forage Interview — practice explaining this project live",
+            "url": "/interview",
+            "kind": "practice"
+          }
+        ]
+      }
+    ]
+  }
+]

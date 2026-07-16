@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useMemo } from "react";
 
-const COLORS = ["#7c5cff", "#c86bff", "#46e0ff", "#3fb950", "#e3a008"];
+const COLORS = ["#00e5ff", "#ff3d81", "#baff2e", "#3fb950", "#ffb020"];
 
 /** A one-shot confetti burst. Mount it (e.g. when a quiz is passed). Respects reduced-motion. */
 export function Confetti({ count = 28 }: { count?: number }) {

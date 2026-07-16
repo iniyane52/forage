@@ -1,5 +1,10 @@
 // Common Core quiz bank. [lessonSlug, prompt, [correct, ...distractors], correctIndex=0, explanation, difficulty, styleTag]
 // Correct answer authored at index 0; the app shuffles options per attempt so position is irrelevant.
+//
+// NOTE (content-first remodel): the LIVE quiz set in the DB is thinned to ONE sharpest question
+// per lesson (code-output preferred, then higher difficulty, then lowest sort). This file keeps
+// the fuller authored bank for reference; the DB is the source of truth. To reproduce the live
+// set after a fresh re-seed, re-run the documented trim (keep row_number()=1 per lesson).
 module.exports = [
 // --- Engineering Mindset ---
 ["cc-think","A good engineer is best described as someone who…",["can methodically find answers and break problems down","has memorised every possible answer","never needs to look anything up","writes code fastest"],0,"Engineering is problem-solving, not memorisation — looking things up is normal and expected.",1,"conceptual"],

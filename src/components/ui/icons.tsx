@@ -23,6 +23,7 @@ import {
   HelpCircle,
   PenLine,
   LogOut,
+  ChevronLeft,
   ChevronRight,
   ArrowLeft,
   ArrowRight,
@@ -34,6 +35,12 @@ import {
   FileText,
   GraduationCap as GradCap2,
   BookMarked,
+  Mic,
+  MicOff,
+  Volume2,
+  MessageSquare,
+  Send,
+  Shuffle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -49,6 +56,7 @@ export const streamIcon: Record<string, LucideIcon> = {
   "cloud-devops": Cloud,
   cybersecurity: ShieldCheck,
   foundations: Terminal,
+  interview: Mic,
 };
 
 export {
@@ -75,6 +83,7 @@ export {
   HelpCircle,
   PenLine,
   LogOut,
+  ChevronLeft,
   ChevronRight,
   ArrowLeft,
   ArrowRight,
@@ -85,6 +94,12 @@ export {
   ExternalLink,
   FileText,
   BookMarked,
+  Mic,
+  MicOff,
+  Volume2,
+  MessageSquare,
+  Send,
+  Shuffle,
 };
 
 // Resource kind → icon
@@ -94,4 +109,7 @@ export const resourceIcon: Record<string, LI> = {
   course: GradCap2,
   book: BookMarked,
   practice: Terminal,
+  video: Volume2,
+  reference: Globe,
+  community: MessageSquare,
 };

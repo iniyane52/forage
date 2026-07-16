@@ -1,0 +1,479 @@
+[
+  {
+    "id": "cyber-foundations",
+    "title": "Networking & Linux Security Foundations",
+    "why": "You can't secure what you don't understand. This module builds the same foundational networking and Linux knowledge every security professional needs, framed from day one around defense: knowing how systems work so you can recognize when something is wrong and know how to harden it.",
+    "topics": [
+      {
+        "id": "cyber-ethics-scope",
+        "title": "Ethics and scope — the rule that comes first",
+        "concept": "Before any technical content: security skills are powerful, and using them against systems you don't own or have EXPLICIT WRITTEN AUTHORIZATION to test is illegal in virtually every jurisdiction — the Computer Fraud and Abuse Act (US) and equivalent laws elsewhere treat unauthorized access as a crime regardless of intent. This entire path teaches DEFENSIVE understanding and AUTHORIZED testing practice (your own local lab, sanctioned CTF/Capture-The-Flag competitions, or a real engagement with a signed authorization). Every concept from here forward is taught for that purpose — understanding a vulnerability class to defend against it, never to exploit systems you don't have permission to touch.",
+        "analogy": "A locksmith learns how locks work, including their weaknesses, specifically so they can help people secure their homes — practicing lockpicking on YOUR OWN lock, or a client's lock with their explicit permission, is a legitimate skill. Picking a stranger's lock without permission, even 'just to see if it works,' is a crime regardless of how curious or well-intentioned you are. Security skills follow the exact same line.",
+        "examples": [
+          {
+            "code": "# The authorization checklist before ANY security testing, always\nauthorization_checklist = [\n    \"Do I own this system, OR\",\n    \"Do I have EXPLICIT WRITTEN permission from the owner, OR\",\n    \"Is this a sanctioned platform built for practice (e.g. a CTF, a designated training lab)?\",\n    \"If none of the above are true: STOP. Testing this system is not authorized.\",\n]\nfor item in authorization_checklist:\n    print(item)",
+            "note": "This is the mental checklist every security professional runs before touching ANY system, every single time -- 'I was just curious' or 'I didn't cause any real damage' are not legal defenses for unauthorized access in essentially any jurisdiction."
+          }
+        ],
+        "warn": "This module and the rest of this path deliberately do NOT provide exploit payloads, real attack scripts targeting live systems, or step-by-step 'how to break into X' instructions. All hands-on practice should happen against your own local machine, your own deliberately-vulnerable practice environments (like OWASP's own training platforms, referenced in later lessons), or sanctioned CTF competitions — never against a system you don't have explicit permission to test.",
+        "mistakes": [
+          "Assuming 'no real harm done' or 'I told them afterward' makes unauthorized access legal — it generally does not, under laws like the CFAA.",
+          "Testing against a live production system 'just to check' without explicit written authorization — even well-intentioned bug-hunting on systems you don't own can constitute a real crime.",
+          "Treating this path's defensive framing as a limitation rather than the actual professional standard — real, employed security professionals overwhelmingly work defensively and under strict authorization; that IS the job, not a watered-down version of it."
+        ],
+        "handsOn": "Write down, in your own words, the three legitimate contexts where security testing is authorized (your own systems, explicit written permission, sanctioned practice platforms). Then identify one platform (research this yourself — e.g. a well-known CTF platform or an intentionally-vulnerable training app) you could practice on legally once you have hands-on skills later in this path.",
+        "doneWhen": "You can clearly state the authorization boundary for security testing and name at least one legitimate, sanctioned practice context.",
+        "checks": [
+          {
+            "q": "Is it legal to test a website's security 'just to see if it's vulnerable' if you don't own it and haven't been given permission?",
+            "a": "No — unauthorized access or testing, even without malicious intent or actual damage, is generally illegal under laws like the Computer Fraud and Abuse Act (US) and equivalent laws elsewhere. Authorization must be explicit (ownership, written permission, or a sanctioned practice platform) before any testing."
+          }
+        ],
+        "keyTakeaways": [
+          "Security testing requires explicit authorization: ownership, written permission, or a sanctioned practice platform.",
+          "Unauthorized access is illegal regardless of intent or whether damage occurred.",
+          "This entire path teaches defensive understanding and authorized practice — the actual professional standard."
+        ],
+        "resources": [
+          {
+            "label": "OWASP — Testing Guide (scope and authorization)",
+            "url": "https://owasp.org/www-project-web-security-testing-guide/",
+            "kind": "docs"
+          },
+          {
+            "label": "TryHackMe — legal, sanctioned practice platform",
+            "url": "https://tryhackme.com/",
+            "kind": "practice"
+          }
+        ]
+      },
+      {
+        "id": "cyber-networking-basics",
+        "title": "How networks actually work",
+        "concept": "Every network connection follows the same basic pattern: an IP ADDRESS identifies a machine (like a street address), and a PORT identifies a specific SERVICE on that machine (like an apartment number) — port 80/443 for web traffic, port 22 for SSH remote access, port 53 for DNS. Understanding what's normally running on which ports is foundational to BOTH offense and defense — a defender who doesn't know their own system's normal open ports can't recognize an abnormal one.",
+        "analogy": "If an IP address is a building's street address, ports are the individual apartment numbers within it — mail (network traffic) addressed to '192.168.1.10, apartment 22' goes specifically to the SSH service, not the whole building. A security-conscious building manager knows exactly which apartments are supposed to be occupied (which ports SHOULD be open) — so an unexpected new occupant (an unexpectedly open port) immediately stands out as worth investigating.",
+        "examples": [
+          {
+            "code": "# Common, well-known ports (memorize these -- they come up constantly in security work)\nwell_known_ports = {\n    20: \"FTP (data)\", 21: \"FTP (control)\",\n    22: \"SSH (secure remote login)\",\n    23: \"Telnet (INSECURE remote login -- avoid)\",\n    25: \"SMTP (email sending)\",\n    53: \"DNS (domain name resolution)\",\n    80: \"HTTP (unencrypted web)\",\n    443: \"HTTPS (encrypted web)\",\n    3306: \"MySQL database\",\n    5432: \"PostgreSQL database\",\n}\nfor port, service in sorted(well_known_ports.items()):\n    print(f\"port {port:>5}: {service}\")",
+            "note": "This is a reference table worth genuinely memorizing -- recognizing that port 23 (Telnet) being open on a modern system is an immediate red flag (it transmits credentials in PLAIN TEXT, unlike SSH's port 22) is a real, practical security-awareness skill, not just trivia."
+          },
+          {
+            "code": "import socket\n\ndef check_port(host, port, timeout=1):\n    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    sock.settimeout(timeout)\n    result = sock.connect_ex((host, port))   # 0 means the port is open/reachable\n    sock.close()\n    return result == 0\n\n# Checking YOUR OWN localhost -- always authorized, since it's your own machine\nfor port in [22, 80, 443, 3306, 9999]:\n    status = \"open\" if check_port(\"127.0.0.1\", port) else \"closed\"\n    print(f\"localhost:{port} -- {status}\")",
+            "note": "This checks ports on 127.0.0.1 (localhost) -- YOUR OWN machine, always a legitimate target for this kind of check. connect_ex returning 0 means the connection succeeded (port open); a non-zero value means it failed (closed/filtered). This exact technique, run against someone else's system without authorization, is a form of network scanning that requires permission -- the ethics lesson's boundary applies here directly."
+          }
+        ],
+        "mistakes": [
+          "Running the port-check example (or any network scanning tool) against a host you don't own or have permission to test — even a 'harmless' check is scanning, and scanning without authorization can itself be a violation.",
+          "Confusing an IP address (identifies the MACHINE) with a port (identifies the SERVICE on that machine) — a very common beginner mix-up.",
+          "Assuming an open port is automatically a vulnerability — many open ports are intentional and necessary (e.g. 443 for a real website); the concern is UNEXPECTED or misconfigured open ports, not open ports in general."
+        ],
+        "handsOn": "Run the port-check example against your own localhost (127.0.0.1) and confirm the results match what you know is actually running on your machine. Memorize the well-known ports table — you'll need this vocabulary throughout the rest of the path.",
+        "doneWhen": "You can explain the IP-address-vs-port distinction, name at least 5 well-known ports and their services, and have safely checked your own localhost's port status.",
+        "checks": [
+          {
+            "q": "Why is port 23 (Telnet) considered a security red flag on a modern system, while port 22 (SSH) is standard and expected?",
+            "a": "Telnet transmits data — including login credentials — in PLAIN TEXT over the network, meaning anyone intercepting the traffic can read them directly. SSH encrypts the connection, protecting credentials and data in transit, which is why SSH replaced Telnet as the standard for secure remote access."
+          }
+        ],
+        "keyTakeaways": [
+          "An IP address identifies a machine; a port identifies a specific service on that machine.",
+          "Knowing which ports SHOULD be open on your own systems is foundational to recognizing abnormal activity.",
+          "Scanning ports on a system you don't own or have permission to test is a form of unauthorized activity — only test your own systems or authorized targets."
+        ],
+        "resources": [
+          {
+            "label": "IANA — Service Name and Transport Protocol Port Number Registry",
+            "url": "https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml",
+            "kind": "reference"
+          },
+          {
+            "label": "Cloudflare Learning — What is a computer port?",
+            "url": "https://www.cloudflare.com/learning/network-layer/what-is-a-computer-port/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-linux-permissions",
+        "title": "Linux file permissions and hardening basics",
+        "concept": "Linux security starts with its permission model: every file has three permission sets (owner/group/other), each controlling READ, WRITE, and EXECUTE access, commonly shown as a string like `-rwxr-xr--` or a number like `754`. The PRINCIPLE OF LEAST PRIVILEGE — giving a file, process, or user only the access it genuinely needs, nothing more — is the foundational hardening idea underneath almost every Linux security practice, from file permissions to service accounts to firewall rules.",
+        "analogy": "Linux file permissions are like a building with three tiers of keys: your OWN office key (owner), a shared department key (group), and a general lobby key anyone in the building might have (other). The principle of least privilege says: don't hand out master keys to everyone just because it's convenient — give each person exactly the access their actual job requires, so a stolen or compromised key (or account) only opens what it was ever supposed to.",
+        "examples": [
+          {
+            "code": "import os\nimport stat\n\n# Create a test file in a safe temp location and inspect its permissions\ntest_path = os.path.join(os.path.dirname(__file__), \"perm_test.txt\") if \"__file__\" in dir() else \"perm_test.txt\"\nwith open(test_path, \"w\") as f:\n    f.write(\"test\")\n\nmode = os.stat(test_path).st_mode\nprint(\"permission string:\", stat.filemode(mode))\nprint(\"octal:\", oct(mode)[-3:])\n\nos.chmod(test_path, 0o600)   # owner read/write ONLY -- no group/other access\nprint(\"after chmod 600:\", stat.filemode(os.stat(test_path).st_mode))\n\nos.remove(test_path)",
+            "note": "chmod 0o600 grants read+write to the OWNER only, with zero permissions for group or other -- exactly the least-privilege pattern for a sensitive file (like one containing credentials or private keys), which is why files like SSH private keys are REQUIRED to have restrictive permissions or SSH itself will refuse to use them."
+          },
+          {
+            "code": "# The permission digits, decoded (this is worth memorizing)\npermission_bits = {\n    7: \"rwx (read+write+execute)\",\n    6: \"rw- (read+write)\",\n    5: \"r-x (read+execute)\",\n    4: \"r-- (read only)\",\n    0: \"--- (no access)\",\n}\nprint(\"chmod 754 means:\")\nprint(\"  owner:\", permission_bits[7])\nprint(\"  group:\", permission_bits[5])\nprint(\"  other:\", permission_bits[4])",
+            "note": "Each digit in a chmod number (like 754) independently sets owner/group/other permissions using the same 3-bit encoding (4=read, 2=write, 1=execute, summed) -- 7=4+2+1=rwx, 5=4+1=r-x, 4=read-only. This decoding is genuinely useful to have memorized rather than looked up every time."
+          }
+        ],
+        "warn": "Run these examples on a REAL Linux system (WSL, a Linux VM, or a Linux server) — Windows' NTFS filesystem does NOT implement true Unix permission bits, so os.chmod() on native Windows silently has no real effect (the file stays fully readable/writable by everyone regardless of the chmod value). This is a genuine, verified platform difference, not a hypothetical caveat — always verify Linux-permission code on an actual Linux environment. Also: only create/modify files you own in a safe location — never run permission-modifying commands (chmod, chown) on system files you don't understand, especially with elevated privileges (sudo).",
+        "mistakes": [
+          "Using overly permissive settings (like 777, granting everyone full access) 'to make an error go away' instead of diagnosing the real permission need — a very common, genuinely dangerous shortcut.",
+          "Confusing read/write/execute on a DIRECTORY (execute means 'can enter/traverse it', not 'can run it as a program') with the same bits on a FILE (execute means 'can run it as a program').",
+          "Running chmod/chown with sudo on system files without understanding the consequence — this can break the system or create real security holes."
+        ],
+        "handsOn": "Run both examples, confirm the permission string and octal notation match, and confirm chmod 600 correctly restricts access. Then create a few test files with different chmod values (644, 700, 755) and predict each one's permission string BEFORE checking it.",
+        "doneWhen": "You can read and set Linux file permissions in both string and octal notation, and can explain the principle of least privilege in your own words.",
+        "checks": [
+          {
+            "q": "What does chmod 600 grant, and why is it the correct choice for a sensitive file like an SSH private key?",
+            "a": "chmod 600 grants read+write to the file's OWNER only, with zero access for group or other users — exactly the least-privilege setting needed for sensitive files, since anyone else with any access to the file could read the private key otherwise."
+          }
+        ],
+        "keyTakeaways": [
+          "Linux permissions control read/write/execute access separately for owner, group, and other.",
+          "The principle of least privilege — granting only necessary access — underlies almost all Linux security hardening.",
+          "Overly permissive settings (like 777) as a quick fix for permission errors are a common, genuinely dangerous shortcut."
+        ],
+        "resources": [
+          {
+            "label": "Linux man pages — chmod(1)",
+            "url": "https://man7.org/linux/man-pages/man1/chmod.1.html",
+            "kind": "docs"
+          },
+          {
+            "label": "DigitalOcean — An Introduction to Linux Permissions",
+            "url": "https://www.digitalocean.com/community/tutorials/an-introduction-to-linux-permissions",
+            "kind": "reference"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cyber-websec",
+    "title": "Web Security Fundamentals",
+    "why": "Most real-world breaches exploit a small set of well-understood web vulnerability classes. Understanding HOW they work — conceptually, defensively — is what lets you actually prevent them in code you write or review, which is the daily reality of application security work.",
+    "topics": [
+      {
+        "id": "cyber-sql-injection",
+        "title": "SQL injection — and the fix that actually works",
+        "concept": "Per OWASP's own documentation, SQL injection happens when untrusted user input is used to build a database query, and the database can't tell the difference between INTENDED COMMAND STRUCTURE and DATA — so attacker-supplied text can alter the query's actual logic. OWASP's primary, leading defense is PARAMETERIZED QUERIES (prepared statements): instead of building a query by concatenating strings, you pass user input as separate, clearly-marked DATA parameters — the database engine then guarantees that data is only ever treated as data, never as executable query structure, no matter what characters it contains.",
+        "analogy": "Building a SQL query by string concatenation is like handwriting a form letter where you literally paste in whatever the recipient tells you to paste — if they write instructions instead of a name, your 'form letter' might now say something you never intended. A parameterized query is like a form with clearly labeled fill-in-the-blank fields: no matter what someone writes in the 'name' blank, it can never accidentally become a new instruction elsewhere in the letter — the structure and the data are kept genuinely separate.",
+        "examples": [
+          {
+            "code": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE users (username TEXT, password TEXT)\")\nconn.execute(\"INSERT INTO users VALUES ('alice', 'secret123')\")\nconn.commit()\n\n# VULNERABLE pattern: building the query via string concatenation/f-string\ndef vulnerable_login(username):\n    query = f\"SELECT * FROM users WHERE username = '{username}'\"\n    return query   # returning the QUERY STRING itself, to inspect it -- not executing it\n\nnormal_input = vulnerable_login(\"alice\")\nprint(\"normal input produces:\", normal_input)\n\nmalicious_input = vulnerable_login(\"alice' OR '1'='1\")\nprint(\"malicious input produces:\", malicious_input)\nprint(\"notice: the query's LOGIC has been altered -- '1'='1' is always true,\")\nprint(\"which would match EVERY row, not just alice's\")",
+            "note": "This deliberately only PRINTS the constructed query string (never executes it) to safely illustrate the exact mechanism OWASP describes: attacker-supplied text becomes part of the query's LOGIC, not just its data, because string concatenation gives the database no way to distinguish the two."
+          },
+          {
+            "code": "# The FIX: parameterized queries -- the '?' placeholder keeps data as data, always\ndef safe_login(username):\n    cursor = conn.execute(\"SELECT * FROM users WHERE username = ?\", (username,))\n    return cursor.fetchall()\n\nprint(\"normal input:\", safe_login(\"alice\"))\nprint(\"malicious input:\", safe_login(\"alice' OR '1'='1\"))\nprint(\"the malicious string is treated as a LITERAL username to search for --\")\nprint(\"since no username actually equals that literal text, it correctly returns nothing\")\n\nconn.close()",
+            "note": "With a parameterized query, the SAME malicious input that broke the vulnerable version is now safely treated as pure DATA -- SQLite searches for a username that is LITERALLY \"alice' OR '1'='1\", finds no match, and correctly returns an empty result. This is OWASP's documented, primary, most effective defense against SQL injection."
+          }
+        ],
+        "warn": "Never test SQL injection payloads (even conceptual ones like this lesson's) against a real, live application you don't own or have explicit authorization to test. These examples run entirely against a local, in-memory SQLite database created for this lesson — genuinely safe because nothing outside this script is touched.",
+        "mistakes": [
+          "Trying to 'sanitize' user input by manually stripping or escaping specific characters (like quotes) instead of using parameterized queries — manual escaping is fragile and historically has been repeatedly bypassed; parameterization is the actual robust fix.",
+          "Using string formatting/concatenation ANYWHERE in a SQL query that includes user input, even 'just this one time' — the vulnerability doesn't require malicious intent from the developer, just one unguarded query.",
+          "Assuming an ORM (object-relational mapper) automatically prevents all injection — most modern ORMs DO parameterize queries safely by default, but writing raw SQL fragments within an ORM can still reintroduce the vulnerability."
+        ],
+        "handsOn": "Run both examples and confirm the vulnerable version's query string is altered by the malicious input, while the parameterized version correctly treats it as harmless literal data. Then find a piece of code (yours or an open-source example) that builds a SQL query via string formatting and rewrite it using parameterized queries.",
+        "doneWhen": "You can explain what SQL injection is conceptually, why parameterized queries fix it, and have demonstrated both the vulnerable pattern and the fix safely against a local database.",
+        "checks": [
+          {
+            "q": "Why do parameterized queries prevent SQL injection, when simply escaping special characters in user input does not reliably?",
+            "a": "Parameterized queries keep the query's STRUCTURE and the user-supplied DATA completely separate at the database engine level — the data is never interpreted as part of the query's logic, no matter what characters it contains. Manual character-escaping tries to neutralize dangerous characters after the fact, which has repeatedly proven fragile and bypassable across different contexts and encodings."
+          }
+        ],
+        "keyTakeaways": [
+          "SQL injection happens when untrusted input alters a query's structure because the database can't distinguish command from data.",
+          "Parameterized queries (prepared statements) are OWASP's primary, most reliable defense — they keep data as data, always.",
+          "Manual character-escaping is a fragile, historically-bypassed defense compared to parameterization."
+        ],
+        "resources": [
+          {
+            "label": "OWASP — SQL Injection",
+            "url": "https://owasp.org/www-community/attacks/SQL_Injection",
+            "kind": "docs"
+          },
+          {
+            "label": "OWASP — SQL Injection Prevention Cheat Sheet",
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-xss",
+        "title": "Cross-site scripting (XSS) — and output encoding",
+        "concept": "Per OWASP's documentation, XSS happens when malicious script gets injected into a trusted website and the victim's browser executes it, believing it came from that trusted source — commonly used to steal session cookies or perform actions as the victim. OWASP describes three types: REFLECTED (the malicious input round-trips through a single request, often via a crafted link), STORED (the malicious script is saved on the server — e.g. in a comment field — and served to every visitor who views it), and DOM-based (a purely client-side JavaScript vulnerability). OWASP's primary defenses: OUTPUT ENCODING (converting special characters so they display as TEXT rather than execute as code) and input validation.",
+        "analogy": "A web page that inserts user input directly into the HTML without encoding is like a whiteboard where anyone can write not just messages, but also literal STICKY NOTES THAT CONTROL THE BUILDING'S INTERCOM SYSTEM — if the board can't tell the difference between 'a message to display' and 'a command to execute,' a malicious 'message' becomes a real action. Output encoding is like converting every submitted note into a photograph of handwriting first — no matter what someone wrote, it can only ever be DISPLAYED as an image of text, never accidentally trigger the intercom.",
+        "examples": [
+          {
+            "code": "# VULNERABLE pattern: directly inserting user input into HTML (illustrative string, not rendered)\nuser_comment = \"<script>alert('this would run in a real browser')</script>\"\nvulnerable_html = f\"<div class='comment'>{user_comment}</div>\"\nprint(vulnerable_html)\nprint(\"if a real browser rendered this HTML, the <script> tag would EXECUTE,\")\nprint(\"not just display as text -- this is the core XSS mechanism OWASP describes\")",
+            "note": "This only builds and PRINTS a string -- it is never rendered in an actual browser, keeping this example completely safe. The point is illustrating the exact mechanism: unescaped user input inserted directly into HTML lets a script tag become genuinely executable code in a real page, not just displayed text."
+          },
+          {
+            "code": "import html\n\n# The FIX: output encoding -- convert special characters to their safe HTML entity form\nsafe_html = f\"<div class='comment'>{html.escape(user_comment)}</div>\"\nprint(safe_html)\nprint(\"the < and > characters are now &lt; and &gt; -- a browser displays this\")\nprint(\"as the LITERAL TEXT of the script tag, not as an executable script\")",
+            "note": "Python's built-in html.escape() converts dangerous characters (<, >, &, quotes) into their HTML-entity equivalents -- exactly OWASP's documented output-encoding defense. A browser rendering this encoded version would show the user's comment as harmless, literal, displayed TEXT (including the literal characters '<script>'), never executing it as code."
+          }
+        ],
+        "warn": "Never inject test XSS payloads into a real, live website you don't own or have explicit authorization to test — even a 'harmless' alert() payload against an unauthorized target is a genuine violation. These examples only build Python strings and never touch a real browser or live site.",
+        "mistakes": [
+          "Encoding output in only SOME places where user input is displayed, missing others — XSS defenses need to be applied consistently everywhere untrusted data reaches the page, not just the obvious spots.",
+          "Relying purely on input validation (blocking specific characters at input time) instead of output encoding — OWASP recommends BOTH, but output encoding at the point of display is the more reliable, defense-in-depth layer.",
+          "Confusing STORED XSS's severity — since the malicious script is saved and served to every future visitor, it's generally considered more dangerous than reflected XSS, which requires tricking one specific victim into clicking a crafted link."
+        ],
+        "handsOn": "Run both examples and confirm the encoded version's special characters are converted to their safe entity form. Then take a piece of code (yours or an example) that inserts a variable into an HTML string, and add html.escape() (or your language/framework's equivalent) around the user-supplied part.",
+        "doneWhen": "You can explain what XSS is, distinguish reflected/stored/DOM-based XSS conceptually, and have demonstrated output encoding as a defense with real code.",
+        "checks": [
+          {
+            "q": "Why does converting < and > to &lt; and &gt; (output encoding) prevent a malicious <script> tag from executing in a browser?",
+            "a": "A browser interprets &lt; and &gt; as the literal characters '<' and '>' to DISPLAY, not as HTML tag delimiters — so an encoded <script> tag renders as visible text reading '<script>...' rather than being parsed and executed as an actual script element."
+          }
+        ],
+        "keyTakeaways": [
+          "XSS happens when malicious script is injected into a trusted page and the victim's browser executes it as if it were legitimate.",
+          "Reflected, stored, and DOM-based XSS differ in how the malicious script reaches the victim's browser.",
+          "Output encoding (converting special characters to safe entities) is OWASP's primary defense, applied consistently everywhere untrusted data is displayed."
+        ],
+        "resources": [
+          {
+            "label": "OWASP — Cross Site Scripting (XSS)",
+            "url": "https://owasp.org/www-community/attacks/xss/",
+            "kind": "docs"
+          },
+          {
+            "label": "OWASP — XSS Prevention Cheat Sheet",
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-auth-secrets",
+        "title": "Authentication basics and secrets hygiene",
+        "concept": "Passwords should NEVER be stored in plain text — a breach of a plaintext password database exposes every user's real password immediately. Instead, passwords are stored as a HASH (a one-way transformation) using a purpose-built, SLOW password-hashing algorithm (like bcrypt or Argon2) — deliberately slow to make brute-force guessing computationally expensive, unlike a fast general-purpose hash (like MD5 or plain SHA-256), which is a common and serious mistake. Separately, SECRETS (API keys, database passwords) must never be committed to source control — exactly the discipline this very Forage platform follows, now framed as a security fundamental rather than just a deployment best practice.",
+        "analogy": "Storing plaintext passwords is like a hotel keeping a paper list of every guest's actual door key taped to the front desk — anyone who breaches the desk instantly has every key. Password HASHING is like the hotel instead keeping a record that can verify 'yes, this matches the key we issued' without ever storing a literal copy of the key itself — even if that verification record leaks, it doesn't hand over anyone's actual key. Using a SLOW hashing algorithm is like making each verification check take a full second on purpose — trivial for one genuine login attempt, but brutally expensive for someone trying millions of guesses.",
+        "examples": [
+          {
+            "code": "import hashlib\nimport time\n\n# Why a FAST hash (like plain SHA-256) is a bad choice for passwords\npassword = \"hunter2\"\nstart = time.perf_counter()\nfor _ in range(100_000):\n    hashlib.sha256(password.encode()).hexdigest()\nelapsed = time.perf_counter() - start\nprint(f\"100,000 SHA-256 hashes took {elapsed*1000:.1f} ms\")\nprint(\"this speed is exactly what makes fast hashes BAD for passwords --\")\nprint(\"an attacker with a stolen hash database can try millions of guesses per second\")",
+            "note": "SHA-256 is a fine, fast, general-purpose hash for things like file integrity checks -- but that SAME speed is a liability for passwords, since it lets an attacker brute-force guess passwords against a stolen hash database extremely quickly. This measured speed is the concrete, numeric reason purpose-built slow password hashes exist."
+          },
+          {
+            "code": "# bcrypt is DELIBERATELY slow -- a genuine security feature, not a performance bug\n# (illustrative pattern -- the 'bcrypt' package would need installing to actually run this)\nbcrypt_example = \"\"\"\nimport bcrypt\n\nhashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt())\n# Verifying a login attempt:\nis_correct = bcrypt.checkpw(attempted_password.encode(), hashed)\n\"\"\"\nprint(bcrypt_example)\nprint(\"bcrypt.gensalt() also adds a random SALT per password, so even two users\")\nprint(\"with the IDENTICAL password get completely different stored hashes --\")\nprint(\"defeating precomputed 'rainbow table' lookup attacks\")",
+            "note": "This is a WORKED PATTERN illustrating the correct real-world API shape (not executed here, since it needs the bcrypt package installed) -- the two properties that matter are DELIBERATE SLOWNESS (unlike SHA-256's speed) and per-password SALTING, both purpose-built defenses against different attack strategies (brute-force and precomputed lookup tables, respectively)."
+          }
+        ],
+        "warn": "Never store real passwords, API keys, or other credentials in plain text in code, databases, or version control — even in a 'private' repository or a project you consider low-stakes. This applies to every project you ever build, not just ones explicitly labeled as security-sensitive.",
+        "mistakes": [
+          "Using a fast, general-purpose hash (MD5, plain SHA-1/SHA-256) for passwords instead of a purpose-built slow algorithm (bcrypt, Argon2, scrypt) — a genuinely common and serious real-world mistake.",
+          "Storing passwords without a per-password salt — without one, identical passwords produce identical hashes, letting an attacker use precomputed lookup tables to crack many accounts at once.",
+          "Committing a .env file or hardcoded API key/database password to a git repository, even briefly — once committed, it typically remains in the repository's history even after being 'removed' in a later commit."
+        ],
+        "handsOn": "Run the SHA-256 timing example and note how fast 100,000 hashes complete — that speed is precisely the vulnerability. Then research (via the bcrypt documentation linked below) what a 'work factor' or 'cost parameter' controls in bcrypt, and explain in one sentence why it's tunable over time.",
+        "doneWhen": "You can explain why passwords need slow, purpose-built hashing (not fast general-purpose hashes), what a salt defends against, and can state the secrets-in-source-control rule.",
+        "checks": [
+          {
+            "q": "Why is a fast hash algorithm like SHA-256 a poor choice for storing passwords, even though it's a legitimate, secure hash function for other uses?",
+            "a": "SHA-256's speed, while fine for things like file integrity checks, becomes a liability for passwords — an attacker with a stolen hash database can compute millions of guesses per second against it. Purpose-built password hashes (bcrypt, Argon2) are deliberately slow, making large-scale guessing computationally expensive."
+          }
+        ],
+        "keyTakeaways": [
+          "Passwords must be hashed with a slow, purpose-built algorithm (bcrypt/Argon2), never stored in plain text or hashed with a fast general-purpose hash.",
+          "A per-password salt defeats precomputed lookup-table attacks by ensuring identical passwords produce different hashes.",
+          "Secrets (API keys, DB passwords) must never be committed to source control, in any repository, regardless of perceived stakes."
+        ],
+        "resources": [
+          {
+            "label": "OWASP — Password Storage Cheat Sheet",
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html",
+            "kind": "docs"
+          },
+          {
+            "label": "bcrypt — Python package documentation",
+            "url": "https://pypi.org/project/bcrypt/",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cyber-secops",
+    "title": "Security Operations & Capstone",
+    "why": "Understanding vulnerabilities (Module 2) is half the job — the other half is actually watching for and responding to real incidents. This module covers the SOC (Security Operations Center) fundamentals: monitoring, log analysis, and incident response — then a capstone where you harden and document a real system, tying the whole path together.",
+    "topics": [
+      {
+        "id": "cyber-log-analysis",
+        "title": "Security monitoring and log analysis basics",
+        "concept": "A SOC (Security Operations Center) team's core daily work is watching LOGS — records of events (logins, requests, errors) generated by systems — for signs of malicious activity, framed by knowing what NORMAL looks like well enough to spot ABNORMAL. A single failed login is normal (someone mistyped their password); dozens of failed logins for the same account in seconds is a classic sign of a BRUTE-FORCE attempt. This pattern-recognition skill, applied to real log data, is genuinely foundational security-analyst work.",
+        "analogy": "A security analyst reading logs is like a security guard reviewing a building's entry logbook: one person badging in at an odd hour might be a night-shift worker (normal); the same badge attempting entry 40 times in one minute is either a malfunctioning badge or someone trying to force their way in (abnormal, worth investigating). The skill isn't reading the log — it's knowing what pattern SHOULD be there so a deviation actually stands out.",
+        "examples": [
+          {
+            "code": "import random\nfrom collections import Counter\nfrom datetime import datetime, timedelta\n\nrandom.seed(0)\n\n# Simulate a realistic mix of login attempts: mostly normal, one brute-force burst\nusers = [\"alice\", \"bob\", \"carol\", \"dave\"]\nlogs = []\nbase_time = datetime(2026, 1, 1, 9, 0, 0)\n\nfor _ in range(50):   # normal, spread-out logins throughout the day\n    user = random.choice(users)\n    minute_offset = random.randint(0, 480)\n    success = random.random() > 0.05   # occasional genuine typo\n    logs.append((base_time + timedelta(minutes=minute_offset), user, success))\n\nfor i in range(30):   # a burst: 30 failed attempts on ONE account within 2 minutes\n    logs.append((base_time + timedelta(hours=3, seconds=i*4), \"carol\", False))\n\nlogs.sort()\nprint(f\"total log entries: {len(logs)}\")",
+            "note": "This generates realistic-shaped SAMPLE log data (never real user data) to practice pattern detection safely -- notice the deliberate structure: mostly normal scattered logins, plus one obvious brute-force-shaped burst against 'carol' within a tight 2-minute window."
+          },
+          {
+            "code": "# Detecting the anomaly: count FAILED logins per user within a rolling short window\nfailed_by_user = Counter(user for _, user, success in logs if not success)\nprint(\"failed login counts by user:\", dict(failed_by_user))\n\n# A simple, real detection rule: flag any user with >10 failures\nfor user, count in failed_by_user.items():\n    if count > 10:\n        print(f\"ALERT: {user} has {count} failed login attempts -- possible brute-force\")",
+            "note": "Counting failures per user surfaces the anomaly clearly: carol's ~30 failures (from the deliberate burst) stand out dramatically against the other users' occasional random typos, which stay in the low single digits. This exact 'count events per key, flag outliers past a threshold' pattern is the actual foundation of a huge amount of real security monitoring."
+          }
+        ],
+        "warn": "This lesson generates and analyzes entirely synthetic, randomly-generated sample data — never real user credentials or log data from a system you don't have explicit authorization to access. Real production log analysis requires proper authorization and, typically, the organization's own SIEM (Security Information and Event Management) tooling.",
+        "mistakes": [
+          "Setting a detection threshold too low (e.g. flagging after 2 failures) — this creates alert fatigue from ordinary typos, causing analysts to start ignoring alerts entirely.",
+          "Setting a detection threshold too high — missing genuine attacks by requiring an unrealistic number of failures before flagging.",
+          "Analyzing logs without a rolling TIME WINDOW — 10 failures spread across a full year is very different from 10 failures in 2 minutes, and a naive total-count approach conflates the two."
+        ],
+        "handsOn": "Run both examples and confirm carol's failure count clearly stands out. Then adjust the detection threshold and observe how it changes what gets flagged — write one sentence about the tradeoff between a threshold that's too sensitive (alert fatigue) versus too lax (missed attacks).",
+        "doneWhen": "You can explain what a SOC analyst watches for in logs, and have implemented a basic anomaly-detection rule (count-based) against sample data.",
+        "checks": [
+          {
+            "q": "Why is a simple 'count failed logins per user' detection rule not complete without also considering a TIME WINDOW?",
+            "a": "10 failed logins spread across an entire year is normal background noise (occasional typos over time), while 10 failed logins within 2 minutes is a strong brute-force signal. Without a time window, a naive total count treats both patterns identically, missing the actual signal that matters."
+          }
+        ],
+        "keyTakeaways": [
+          "SOC work centers on recognizing abnormal patterns in logs against a baseline of what's normal.",
+          "A count-based detection rule (e.g. failed logins per user) is a foundational, genuinely useful pattern.",
+          "Detection thresholds must balance sensitivity (catching real attacks) against alert fatigue (too many false positives)."
+        ],
+        "resources": [
+          {
+            "label": "NIST — Computer Security Incident Handling Guide (SP 800-61)",
+            "url": "https://csrc.nist.gov/pubs/sp/800/61/r2/final",
+            "kind": "docs"
+          },
+          {
+            "label": "OWASP — Logging Cheat Sheet",
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-incident-response",
+        "title": "Incident response — the basic process",
+        "concept": "When a real security incident is detected, response follows a structured process — commonly summarized (per NIST's own incident handling guide) as PREPARATION (having a plan before anything happens), DETECTION & ANALYSIS (confirming it's real and understanding scope), CONTAINMENT (stopping it from getting worse — e.g. isolating an affected system), ERADICATION & RECOVERY (removing the threat and restoring normal operation), and POST-INCIDENT REVIEW (what happened, what worked, what to improve). Skipping straight to 'fix it' without containment or a review afterward is a common, costly mistake — you can make things worse, or the same incident can recur.",
+        "analogy": "Incident response is like a hospital's emergency protocol, not just a doctor's individual judgment call in the moment: STABILIZE the patient first (containment) before attempting a full diagnosis and cure (eradication), and every case gets reviewed afterward (post-incident review) so the team gets better at handling the next one — skipping straight to 'just fix it' without stabilizing first, or never reviewing afterward, are both real, costly mistakes hospitals (and security teams) learned NOT to make.",
+        "examples": [
+          {
+            "code": "incident_response_phases = [\n    (\"Preparation\", \"Have a plan, contacts, and tools ready BEFORE an incident happens\"),\n    (\"Detection & Analysis\", \"Confirm it's real, understand scope -- what's affected, how bad\"),\n    (\"Containment\", \"Stop it from spreading/getting worse -- e.g. isolate the affected system\"),\n    (\"Eradication & Recovery\", \"Remove the actual threat, restore normal, verified-clean operation\"),\n    (\"Post-Incident Review\", \"What happened, what worked, what to improve for next time\"),\n]\nfor phase, description in incident_response_phases:\n    print(f\"{phase}: {description}\")",
+            "note": "This is the standard structure per NIST's own Computer Security Incident Handling Guide (SP 800-61) -- worth memorizing as an ordered sequence, since the ORDER matters: containment before full eradication prevents the incident from spreading further while you're still working the problem."
+          },
+          {
+            "code": "# Illustrating WHY skipping containment is a real, common mistake\nmistake_scenario = \"\"\"\nWRONG order: detect malware -> immediately try to remove it -> discover it had\nalready spread to 3 other systems while you were focused on the first one\n\nRIGHT order: detect malware -> CONTAIN (isolate the affected system from the\nnetwork) -> THEN investigate and remove it, now that it can't spread further\n\"\"\"\nprint(mistake_scenario)",
+            "note": "This is a WORKED SCENARIO illustrating the concept, not runnable code -- the key lesson: containment isn't optional busywork before the 'real fix' -- it's what prevents an incident from getting meaningfully worse while you're still investigating and responding to it."
+          }
+        ],
+        "mistakes": [
+          "Jumping straight to eradication/fixing without containing first — the incident can continue spreading or causing damage while you're focused on the immediate symptom.",
+          "Skipping the post-incident review because 'the problem is fixed now' — without it, the same class of incident is more likely to recur, and the team never improves its response process.",
+          "Having no PREPARATION (no plan, no defined roles, no practiced process) before an incident happens — improvising a response in the moment, under pressure, is far more error-prone than following a rehearsed plan."
+        ],
+        "handsOn": "Run the phases example and memorize the five-phase order. Then write a short (3-4 sentence) hypothetical incident scenario of your own and walk through what would happen at each of the five phases.",
+        "doneWhen": "You can name the five incident response phases in order and explain why containment must happen before eradication.",
+        "checks": [
+          {
+            "q": "Why should containment happen before eradication in incident response, rather than jumping straight to removing the threat?",
+            "a": "Without containing the incident first (e.g. isolating an affected system from the network), the threat can continue spreading or causing damage while you're still investigating and working on removal — containment stops the bleeding before you attempt the full fix."
+          }
+        ],
+        "keyTakeaways": [
+          "Incident response follows a structured process: preparation, detection & analysis, containment, eradication & recovery, post-incident review.",
+          "Containment must happen before eradication to prevent an incident from spreading further during response.",
+          "Post-incident review is essential for improving future response and preventing recurrence — not an optional step."
+        ],
+        "resources": [
+          {
+            "label": "NIST — Computer Security Incident Handling Guide (SP 800-61)",
+            "url": "https://csrc.nist.gov/pubs/sp/800/61/r2/final",
+            "kind": "docs"
+          },
+          {
+            "label": "SANS — Incident Handler's Handbook",
+            "url": "https://www.sans.org/white-papers/33901/",
+            "kind": "reference"
+          }
+        ]
+      },
+      {
+        "id": "cyber-practice-lab",
+        "title": "Setting up a legal, authorized practice lab",
+        "concept": "Hands-on security practice requires a genuinely authorized target — this lesson sets up exactly that. Two standard, legitimate options: (1) a LOCAL virtual machine environment you fully control (e.g. VirtualBox/VMware running an intentionally-vulnerable practice app like OWASP's own Juice Shop or WebGoat, designed specifically to be practiced on), and (2) SANCTIONED PLATFORMS like TryHackMe or HackTheBox, which provide legally-authorized practice targets as their entire business model. Both give you real, hands-on experience without ever touching a system you don't have explicit permission to test — resolving the tension between 'I need to practice on something real' and Module 1's authorization rule.",
+        "analogy": "A flight simulator lets a pilot practice genuinely difficult, high-stakes scenarios (engine failure, severe weather) without ever risking a real plane or real passengers — the practice is realistic and valuable precisely BECAUSE it's built for that purpose. OWASP Juice Shop and sanctioned CTF platforms play the same role for security skills: deliberately, legally vulnerable environments built specifically so you can practice for real, without the legal and ethical problems of testing an unauthorized live target.",
+        "examples": [
+          {
+            "code": "# Legitimate, sanctioned practice options -- a reference, not something to run\nlegitimate_practice_options = [\n    (\"OWASP Juice Shop\", \"An intentionally-vulnerable web app, built specifically for practicing web security -- run it locally, fully authorized since you're running your own copy\"),\n    (\"OWASP WebGoat\", \"A deliberately-insecure teaching application covering many vulnerability classes hands-on\"),\n    (\"TryHackMe\", \"A guided, beginner-friendly platform with sanctioned practice targets and structured learning paths\"),\n    (\"HackTheBox\", \"A more advanced platform with sanctioned practice machines, popular among working security professionals\"),\n]\nfor name, description in legitimate_practice_options:\n    print(f\"{name}: {description}\")",
+            "note": "Every option listed here is EXPLICITLY built and sanctioned for security practice -- using them is fully authorized by design, resolving the tension between wanting real hands-on practice and Module 1's hard rule about never testing unauthorized systems."
+          }
+        ],
+        "warn": "Running a vulnerable practice app like Juice Shop or WebGoat LOCALLY on your own machine (not exposed to the public internet) is safe and fully authorized — but never deploy an intentionally-vulnerable application to a publicly-reachable server, since that would expose a genuinely insecure app to anyone on the internet, including real attackers.",
+        "mistakes": [
+          "Deploying an intentionally-vulnerable practice app (like Juice Shop) to a public-facing server — this creates a REAL, exploitable target for anyone on the internet, not just you.",
+          "Assuming 'sanctioned platform' means anything goes — most platforms (TryHackMe, HackTheBox) still have their own rules about what's in-scope; read and follow them.",
+          "Skipping local practice environments in favor of jumping straight to advanced platforms — building fundamentals hands-on with something like Juice Shop first makes advanced platforms far more approachable."
+        ],
+        "handsOn": "Research (using the resources below) how to run OWASP Juice Shop locally — it has an official, simple setup via Docker. Set it up on your own machine and confirm you can access it locally, without exposing it to the public internet.",
+        "doneWhen": "You have a legally-authorized local practice environment running, and can name at least two sanctioned platforms for further hands-on practice.",
+        "checks": [],
+        "keyTakeaways": [
+          "Intentionally-vulnerable practice apps (OWASP Juice Shop, WebGoat) provide fully authorized, realistic hands-on practice.",
+          "Sanctioned platforms (TryHackMe, HackTheBox) exist specifically to provide legal practice targets.",
+          "Never expose an intentionally-vulnerable app to the public internet — run it locally only."
+        ],
+        "resources": [
+          {
+            "label": "OWASP Juice Shop — official project",
+            "url": "https://owasp.org/www-project-juice-shop/",
+            "kind": "practice"
+          },
+          {
+            "label": "OWASP WebGoat — official project",
+            "url": "https://owasp.org/www-project-webgoat/",
+            "kind": "practice"
+          },
+          {
+            "label": "TryHackMe",
+            "url": "https://tryhackme.com/",
+            "kind": "practice"
+          }
+        ]
+      },
+      {
+        "id": "cyber-capstone",
+        "title": "Capstone: harden and document a system you own",
+        "concept": "Your capstone: pick a system you genuinely own (your own laptop, a personal VM, or a practice app from the last lesson) and produce a real security assessment — identify what's currently exposed (open ports from Module 1), check for common misconfigurations (overly-permissive file permissions, plaintext secrets), apply concrete hardening fixes, and write it up as a professional security report: findings, risk level, and remediation steps. This is the deliverable that demonstrates you can actually DO defensive security work, not just describe vulnerability classes abstractly.",
+        "analogy": "This capstone is a home safety inspection you conduct on your OWN house: check the locks (permissions), the windows (open ports/services), whether anything valuable is left in plain sight (plaintext secrets) — then write up a clear report of what you found and fixed. It's the same fundamental work a professional security assessor does, just scoped to a system you're fully authorized to examine.",
+        "examples": [
+          {
+            "code": "# A capstone security-report skeleton (worked example structure)\nreport_skeleton = \"\"\"\nSECURITY ASSESSMENT: [system name -- your own laptop/VM/practice app]\nDate: [date]\nScope: [exactly what was examined -- be specific and honest about what you did NOT check too]\n\nFINDINGS:\n1. [Finding] -- Risk: [Low/Medium/High] -- [why it matters]\n   Remediation: [the specific fix applied or recommended]\n\n2. [Finding] -- Risk: [...] -- [...]\n   Remediation: [...]\n\nSUMMARY: [overall security posture in 1-2 sentences, plain language --\n           lead with the conclusion, then let the findings support it]\n\"\"\"\nprint(report_skeleton)",
+            "note": "This is a WORKED STRUCTURE, not a template to fill mechanically -- notice it explicitly asks for the scope's HONEST boundaries (what you did NOT check), which is standard professional practice: a real security report is precise about its own limits, not just its findings."
+          }
+        ],
+        "warn": "Every check in this capstone must be against a system you genuinely OWN or have explicit authorization to assess — reusing Module 1's authorization checklist here is not optional. Your own laptop, your own VM, or a practice app you're running locally are all fully authorized; anything else is not.",
+        "mistakes": [
+          "Writing findings without a clear, honest risk level and concrete remediation step — 'this could theoretically be bad' isn't actionable; a real finding states WHY it matters and WHAT to do about it.",
+          "Only checking for issues without actually fixing anything you can — a capstone that identifies problems but applies zero real hardening is only half the job.",
+          "Overstating findings' severity for dramatic effect, or understating them to make the report look cleaner — an honest, calibrated risk assessment is the actual professional skill being demonstrated."
+        ],
+        "handsOn": "Run a real assessment against a system you own: check open ports (Module 1), file permissions on any sensitive files, and whether any secrets are stored in plain text anywhere on the system. Apply at least one concrete hardening fix, and write the full report following the skeleton above.",
+        "doneWhen": "You have a complete, honest security assessment report for a system you own, with at least one real finding, a calibrated risk level, and an applied or recommended remediation.",
+        "checks": [],
+        "keyTakeaways": [
+          "A real security assessment states findings with a calibrated risk level and a concrete, actionable remediation — not vague concern.",
+          "Honesty about scope (what was and wasn't checked) is standard professional practice.",
+          "The capstone demonstrates DOING defensive security work, not just describing vulnerability classes abstractly."
+        ],
+        "resources": [
+          {
+            "label": "OWASP — Web Security Testing Guide",
+            "url": "https://owasp.org/www-project-web-security-testing-guide/",
+            "kind": "docs"
+          },
+          {
+            "label": "Common Core — Career track (interview framing)",
+            "url": "/stream/common-core",
+            "kind": "course"
+          },
+          {
+            "label": "Forage Interview — practice presenting this assessment live",
+            "url": "/interview",
+            "kind": "practice"
+          }
+        ]
+      }
+    ]
+  }
+]

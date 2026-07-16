@@ -1,0 +1,619 @@
+[
+  {
+    "id": "data-stats",
+    "title": "Statistics Foundations",
+    "why": "Every data science task — from a simple report to a trained ML model — rests on statistical reasoning. This module builds that foundation from zero: describing data, understanding distributions, telling correlation from causation, and testing whether a pattern is real or just noise.",
+    "topics": [
+      {
+        "id": "data-mean-median-std",
+        "title": "Mean, median, and standard deviation",
+        "concept": "The MEAN (average) sums all values and divides by the count — but it's sensitive to outliers, which can pull it far from what's 'typical.' The MEDIAN (the middle value when sorted) is robust to outliers, making it a better summary for skewed data (like income or house prices, where a few extreme values would distort the mean). STANDARD DEVIATION measures how SPREAD OUT values are around the mean — a small std means values cluster tightly; a large std means they're spread widely.",
+        "analogy": "Imagine 9 people earning $50,000 each and one CEO earning $10,000,000. The MEAN salary gets dragged way up by that one outlier, making it look like everyone's doing great. The MEDIAN — the middle value — stays at $50,000, correctly reflecting what a 'typical' person actually earns. This is exactly why median household income, not mean, is the standard reported figure.",
+        "examples": [
+          {
+            "code": "import numpy as np\n\nsalaries = np.array([50_000]*9 + [10_000_000])\nprint(\"mean:  \", np.mean(salaries))\nprint(\"median:\", np.median(salaries))",
+            "note": "The mean is dragged dramatically upward by the single outlier (the $10M salary), while the median stays at $50,000 -- correctly representing the typical value in this dataset. This is the textbook demonstration of why median is preferred for skewed data."
+          },
+          {
+            "code": "tight = np.array([48, 50, 49, 51, 50, 49])       # values clustered close together\nspread = np.array([10, 90, 30, 70, 50, 20])      # same-ish mean, much more spread out\n\nprint(\"tight  -- mean:\", np.mean(tight), \" std:\", round(np.std(tight), 2))\nprint(\"spread -- mean:\", np.mean(spread), \"std:\", round(np.std(spread), 2))",
+            "note": "Both datasets have a similar mean (~49-45), but the standard deviation is dramatically different -- tight's std is small (values cluster near the mean), spread's std is large (values are scattered widely). Two datasets can share a mean while telling very different stories, which is exactly why std matters alongside mean."
+          }
+        ],
+        "mistakes": [
+          "Reporting only the mean for skewed data (income, prices, response times) — a single mean number can badly misrepresent what's 'typical' when outliers are present.",
+          "Assuming two datasets are similar just because their means match — very different spreads (std) can hide behind the same average.",
+          "Confusing standard deviation with variance — variance is std squared; std is in the SAME units as the original data, which is why it's usually the more interpretable number."
+        ],
+        "handsOn": "Compute mean, median, and std for the salaries example and confirm the numbers shown. Then create your own small dataset with one extreme outlier, compute mean vs median, and write one sentence about which better represents the 'typical' value and why.",
+        "doneWhen": "You can compute mean/median/std with NumPy, explain why median is more robust to outliers than mean, and interpret what standard deviation tells you about spread.",
+        "checks": [
+          {
+            "q": "Why is median often reported instead of mean for something like household income?",
+            "a": "Income distributions are often skewed by a small number of very high earners, which can pull the mean far above what's 'typical.' The median (the middle value) is robust to those outliers and better represents a typical household's income."
+          }
+        ],
+        "keyTakeaways": [
+          "Mean is sensitive to outliers; median is robust to them.",
+          "Standard deviation measures spread around the mean — small std means tightly clustered, large std means widely spread.",
+          "Two datasets can share a similar mean while having very different standard deviations."
+        ],
+        "resources": [
+          {
+            "label": "NumPy — numpy.std documentation",
+            "url": "https://numpy.org/doc/stable/reference/generated/numpy.std.html",
+            "kind": "docs"
+          },
+          {
+            "label": "Khan Academy — Statistics and probability",
+            "url": "https://www.khanacademy.org/math/statistics-probability",
+            "kind": "course"
+          }
+        ]
+      },
+      {
+        "id": "data-distributions",
+        "title": "Distributions — the shape of your data",
+        "concept": "A distribution describes how values in a dataset are spread across their possible range. The NORMAL DISTRIBUTION (bell curve) is the most famous — symmetric, with most values clustered near the mean and fewer further away — and it shows up constantly in real data (heights, measurement errors, many natural processes) due to the Central Limit Theorem. A SKEWED distribution isn't symmetric — a long tail on one side (like income, which has a long tail of very high earners) pulls the mean away from the median, exactly why the last lesson's mean/median gap happens.",
+        "analogy": "A normal distribution looks like a single, symmetric hill — most people/values live near the peak (the average), and progressively fewer live further out on either side, evenly. A right-skewed distribution looks like a hill with a long, gentle ramp trailing off to the right — most values cluster on the left near a lower typical value, but a thin tail of unusually large values stretches far to the right, dragging the mean toward that tail.",
+        "examples": [
+          {
+            "code": "import numpy as np\n\nnp.random.seed(0)\nnormal_data = np.random.normal(loc=100, scale=15, size=10_000)   # a real normal distribution\n\nprint(\"mean:  \", round(np.mean(normal_data), 1))\nprint(\"median:\", round(np.median(normal_data), 1))\nprint(\"these are close for a symmetric distribution\")\n\n# The empirical rule: ~68% of values fall within 1 std of the mean for a normal distribution\nwithin_1_std = np.mean(np.abs(normal_data - 100) <= 15)\nprint(f\"fraction within 1 std: {within_1_std:.3f}  (expected ~0.68)\")",
+            "note": "For a TRUE normal distribution, mean and median are nearly identical (both near 100 here), confirming symmetry. The empirical rule -- ~68% of values fall within 1 standard deviation of the mean -- is a well-known, checkable property of the normal distribution, and the measured fraction should land close to 0.68."
+          },
+          {
+            "code": "np.random.seed(0)\nskewed_data = np.random.lognormal(mean=3, sigma=1, size=10_000)   # a right-skewed distribution\n\nprint(\"mean:  \", round(np.mean(skewed_data), 1))\nprint(\"median:\", round(np.median(skewed_data), 1))\nprint(\"mean > median here -- the long right tail pulls the mean upward\")",
+            "note": "For a right-skewed distribution (like income, generated here via a log-normal distribution), the mean is noticeably HIGHER than the median -- directly demonstrating the mean/median gap from the last lesson, now tied to the actual SHAPE of the underlying distribution rather than just one artificial outlier."
+          }
+        ],
+        "mistakes": [
+          "Assuming all real-world data is normally distributed — many real datasets (income, city populations, word frequencies) are meaningfully skewed, and treating them as normal leads to wrong conclusions.",
+          "Not visually checking a distribution's shape (histogram) before choosing summary statistics — the right summary depends on the shape.",
+          "Confusing 'normal distribution' (a specific, well-defined bell-curve shape) with 'a distribution that looks reasonably typical' — it has precise mathematical properties, not just a vague resemblance."
+        ],
+        "handsOn": "Run both examples and confirm the mean/median relationship differs between the normal and skewed datasets. Then generate your own skewed dataset (adjust the lognormal parameters) and confirm the mean/median gap grows or shrinks as you increase or decrease the skew parameter.",
+        "doneWhen": "You can describe what a normal distribution and a skewed distribution look like, and can identify skew from the relationship between mean and median.",
+        "checks": [
+          {
+            "q": "In a right-skewed distribution (like income), is the mean typically higher or lower than the median, and why?",
+            "a": "Higher — a right-skewed distribution has a long tail of unusually large values on the right side, which pulls the mean upward, while the median (the middle value) stays closer to where most of the data actually clusters."
+          }
+        ],
+        "keyTakeaways": [
+          "The normal distribution is symmetric, with mean ≈ median and ~68% of values within 1 std of the mean.",
+          "A right-skewed distribution has mean > median, due to a long tail of large values pulling the mean up.",
+          "Not all real-world data is normally distributed — check the shape before choosing summary statistics."
+        ],
+        "resources": [
+          {
+            "label": "NumPy — Random sampling (normal, lognormal distributions)",
+            "url": "https://numpy.org/doc/stable/reference/random/generator.html",
+            "kind": "docs"
+          },
+          {
+            "label": "Khan Academy — Statistics and probability",
+            "url": "https://www.khanacademy.org/math/statistics-probability",
+            "kind": "course"
+          }
+        ]
+      },
+      {
+        "id": "data-correlation-causation",
+        "title": "Correlation vs. causation",
+        "concept": "Correlation measures how strongly two variables move TOGETHER — a correlation coefficient near +1 means they rise together, near -1 means one rises as the other falls, near 0 means no linear relationship. CRITICALLY, correlation never proves CAUSATION — two variables can be correlated because one causes the other, because a THIRD variable causes both (a confounder), or purely by coincidence. This is one of the most important and most commonly violated ideas in data science, and confusing the two leads to genuinely bad real-world decisions.",
+        "analogy": "Ice cream sales and drowning deaths are strongly correlated — both rise in summer. Nobody believes ice cream causes drowning; the real explanation is a CONFOUNDING variable (hot weather) that independently drives both more swimming (more drowning risk) and more ice cream purchases. Spotting the pattern is easy; correctly explaining WHY it exists is the actual skill.",
+        "examples": [
+          {
+            "code": "import numpy as np\n\nnp.random.seed(0)\nhot_weather = np.random.normal(75, 10, 200)              # the confounder\nice_cream_sales = hot_weather * 3 + np.random.normal(0, 5, 200)\ndrowning_incidents = hot_weather * 0.1 + np.random.normal(0, 1, 200)\n\ncorr = np.corrcoef(ice_cream_sales, drowning_incidents)[0, 1]\nprint(f\"correlation(ice cream, drownings): {corr:.3f}\")\nprint(\"strongly correlated -- but ice cream does NOT cause drowning\")\nprint(\"both are driven by the confounding variable: hot weather\")",
+            "note": "np.corrcoef computes the Pearson correlation coefficient. Even though this simulated data has NO direct causal link between ice cream and drownings, they show a strong positive correlation purely because both are driven by the same underlying confounder (hot_weather) -- a concrete, numeric demonstration of the correlation-causation trap."
+          },
+          {
+            "code": "# Controlling for the confounder reveals how much of the correlation it was driving\nfrom scipy import stats\n\n# Partial correlation intuition: after removing weather's effect from each variable,\n# what's left over should correlate much LESS if weather was the true common cause\nresidual_ice_cream = ice_cream_sales - (hot_weather * 3)\nresidual_drowning = drowning_incidents - (hot_weather * 0.1)\n\nresidual_corr = np.corrcoef(residual_ice_cream, residual_drowning)[0, 1]\nprint(f\"correlation after removing weather's effect: {residual_corr:.3f}\")\nprint(\"dropped substantially -- confirming weather was driving much of the original correlation\")",
+            "note": "After mathematically removing each variable's dependence on hot_weather (the confounder), the remaining correlation drops substantially (from ~0.70 down to roughly 0.18 with this data) -- concrete evidence that most of the original correlation was driven by the shared cause, not a direct relationship between ice cream and drowning. It doesn't vanish completely here because the residuals still share some finite-sample noise structure, but the size of the drop is the meaningful signal."
+          }
+        ],
+        "mistakes": [
+          "Concluding 'A causes B' from a correlation alone — always ask whether a confounder could explain the relationship, or whether the causation could run the other direction.",
+          "Ignoring correlation as 'useless' because it's not causation — correlation is still a legitimate, useful signal for prediction; the mistake is only in over-interpreting it as proof of a causal mechanism.",
+          "Forgetting correlation only captures LINEAR relationships — two variables can have a strong non-linear relationship with a correlation coefficient near 0."
+        ],
+        "handsOn": "Run both examples and confirm the strong initial correlation and the much-weaker residual correlation after removing weather's effect. Then think of one real-world correlated pair you've heard of (in the news, at work, anywhere) and identify a plausible confounding variable that could explain it instead of direct causation.",
+        "doneWhen": "You can compute a correlation coefficient, explain why correlation doesn't prove causation, and identify a plausible confounder for a correlated pair.",
+        "checks": [
+          {
+            "q": "Ice cream sales and drowning incidents are strongly correlated. What's the most likely explanation, and what statistical concept does it illustrate?",
+            "a": "A confounding variable — hot weather independently increases both ice cream sales and swimming (and thus drowning risk). This illustrates that correlation does not imply causation; a third variable can drive both correlated variables without either causing the other."
+          }
+        ],
+        "keyTakeaways": [
+          "Correlation measures how strongly two variables move together, ranging from -1 to +1.",
+          "Correlation never proves causation — a confounding variable can drive both correlated variables independently.",
+          "Correlation only captures linear relationships; a strong non-linear relationship can show a near-zero coefficient."
+        ],
+        "resources": [
+          {
+            "label": "NumPy — numpy.corrcoef documentation",
+            "url": "https://numpy.org/doc/stable/reference/generated/numpy.corrcoef.html",
+            "kind": "docs"
+          },
+          {
+            "label": "Tyler Vigen — Spurious Correlations (illustrative examples)",
+            "url": "https://www.tylervigen.com/spurious-correlations",
+            "kind": "reference"
+          }
+        ]
+      },
+      {
+        "id": "data-hypothesis-testing",
+        "title": "Hypothesis testing — is this difference real?",
+        "concept": "Hypothesis testing answers: 'is an observed difference between groups likely REAL, or could it just be random noise?' The NULL HYPOTHESIS assumes there's no real difference; a statistical test (like a t-test, comparing two group means) computes a P-VALUE — the probability of seeing a difference this large (or larger) purely by chance IF the null hypothesis were true. A small p-value (conventionally < 0.05) suggests the observed difference is unlikely to be pure chance, so you REJECT the null hypothesis. Crucially, a small p-value doesn't prove a large or important effect — it just suggests the difference probably isn't zero.",
+        "analogy": "Hypothesis testing is like a courtroom: the null hypothesis ('no real difference') is presumed true, like a defendant presumed innocent, until the evidence (your data) makes that presumption hard to sustain. A small p-value is like overwhelming evidence — it doesn't PROVE guilt with certainty, but it makes 'innocent by pure chance' hard to believe.",
+        "examples": [
+          {
+            "code": "import numpy as np\nfrom scipy import stats\n\nnp.random.seed(0)\n# Group A: control; Group B: got a real treatment effect\ngroup_a = np.random.normal(50, 10, 100)\ngroup_b = np.random.normal(55, 10, 100)   # a genuine +5 effect\n\nt_stat, p_value = stats.ttest_ind(group_a, group_b)\nprint(f\"group A mean: {group_a.mean():.2f}\")\nprint(f\"group B mean: {group_b.mean():.2f}\")\nprint(f\"t-statistic: {t_stat:.3f}, p-value: {p_value:.4f}\")\nprint(\"p < 0.05 -- likely a REAL difference, not just noise\")",
+            "note": "scipy.stats.ttest_ind runs an independent two-sample t-test. With a genuine +5 effect built into how group_b was generated and 100 samples per group, the p-value should come out well under 0.05, correctly signaling that this difference is unlikely to be pure chance."
+          },
+          {
+            "code": "# Two groups with NO real difference -- what does the p-value show?\nnp.random.seed(1)\ngroup_c = np.random.normal(50, 10, 100)\ngroup_d = np.random.normal(50, 10, 100)   # SAME true mean -- no real effect\n\nt_stat2, p_value2 = stats.ttest_ind(group_c, group_d)\nprint(f\"group C mean: {group_c.mean():.2f}\")\nprint(f\"group D mean: {group_d.mean():.2f}\")\nprint(f\"p-value: {p_value2:.4f}\")\nprint(\"p >= 0.05 (typically) -- consistent with no real difference, just sampling noise\")",
+            "note": "With both groups drawn from the SAME true distribution (no real effect), the p-value should typically land well above 0.05, correctly failing to reject the null hypothesis -- exactly the behavior a properly-functioning statistical test should show when there's genuinely nothing there."
+          }
+        ],
+        "warn": "A p-value below 0.05 is a CONVENTION, not a magic law of nature — and a 'statistically significant' small effect isn't automatically practically important. Always look at the actual SIZE of the difference (effect size) alongside the p-value, not the p-value in isolation.",
+        "mistakes": [
+          "Treating p < 0.05 as proof of a large or important effect — statistical significance and practical significance are different things; check effect size too.",
+          "Running many tests and only reporting the ones that happened to come out significant ('p-hacking') — this dramatically inflates the chance of a false positive.",
+          "Misinterpreting the p-value as 'the probability the null hypothesis is true' — it's actually the probability of seeing data this extreme IF the null hypothesis were true, a subtly different and often-confused idea."
+        ],
+        "handsOn": "Run both examples and confirm the first (real effect) shows a small p-value while the second (no real effect) shows a large one. Then rerun the second example with a different random seed a few times and observe that the p-value varies — sometimes even dipping below 0.05 purely by chance, which is exactly the false-positive risk hypothesis testing accepts at some rate.",
+        "doneWhen": "You can run a t-test with SciPy, correctly interpret a p-value, and explain why statistical significance isn't the same as practical importance.",
+        "checks": [
+          {
+            "q": "A study reports p = 0.03 for a new drug's effect. Does this prove the drug has a large, important effect?",
+            "a": "No — a small p-value suggests the observed difference is unlikely to be pure chance, but says nothing about the SIZE of the effect. A statistically significant result could still correspond to a tiny, practically unimportant difference — effect size must be checked separately."
+          }
+        ],
+        "keyTakeaways": [
+          "A hypothesis test's p-value estimates the probability of seeing this data (or more extreme) if there were truly no effect.",
+          "A small p-value (conventionally < 0.05) suggests a real difference, but doesn't measure how LARGE or important that difference is.",
+          "Statistical significance and practical significance are different — always check effect size alongside the p-value."
+        ],
+        "resources": [
+          {
+            "label": "SciPy — scipy.stats.ttest_ind documentation",
+            "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html",
+            "kind": "docs"
+          },
+          {
+            "label": "Khan Academy — Significance tests (hypothesis testing)",
+            "url": "https://www.khanacademy.org/math/statistics-probability/significance-tests-one-sample",
+            "kind": "course"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data-sql-pandas",
+    "title": "SQL & Pandas Deep-Dive",
+    "why": "Module 1's AI-adjacent pandas lesson covered the basics. Real data science work lives in two tools daily: SQL to pull data out of a database, and pandas to transform, join, and aggregate it once it's in Python. This module goes deep on both, with SQL JOINs and pandas' equivalent merge/groupby operations — the actual daily toolkit of a working data scientist.",
+    "topics": [
+      {
+        "id": "data-sql-select-where",
+        "title": "SQL SELECT, WHERE, and ORDER BY",
+        "concept": "SQL (Structured Query Language) is how you ask a relational database for data. `SELECT columns FROM table` chooses what to retrieve; `WHERE condition` filters which ROWS come back; `ORDER BY column` sorts the result. This is the same querying that powers this very app's Postgres database — every lesson you've read has been fetched with SQL under the hood.",
+        "analogy": "Think of a database table as a spreadsheet. SELECT picks which COLUMNS you want to see (not necessarily all of them). WHERE is a filter that hides rows that don't match a condition, like a spreadsheet's filter feature. ORDER BY re-sorts the visible rows by a chosen column, like clicking a column header to sort.",
+        "examples": [
+          {
+            "code": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE students (name TEXT, score INTEGER, subject TEXT)\")\nconn.executemany(\"INSERT INTO students VALUES (?, ?, ?)\", [\n    (\"Amy\", 85, \"Math\"), (\"Bo\", 72, \"Math\"), (\"Cy\", 91, \"Science\"), (\"Dee\", 68, \"Science\"),\n])\nconn.commit()\n\nresult = conn.execute(\"SELECT name, score FROM students WHERE score > 70 ORDER BY score DESC\")\nfor row in result.fetchall():\n    print(row)",
+            "note": "WHERE score > 70 filters out Dee (68); ORDER BY score DESC sorts the remaining rows from highest to lowest score. This runs against a real SQLite database (created fresh in memory for this example) -- the same core SQL clauses work identically against the PostgreSQL database this app itself runs on."
+          },
+          {
+            "code": "result2 = conn.execute(\"SELECT subject, COUNT(*) as num_students FROM students GROUP BY subject\")\nfor row in result2.fetchall():\n    print(row)\n\nconn.close()",
+            "note": "A preview of GROUP BY (covered in depth in a later lesson): it collapses rows sharing the same 'subject' value into one row each, with COUNT(*) counting how many original rows fell into each group -- 2 Math students, 2 Science students."
+          }
+        ],
+        "mistakes": [
+          "Forgetting that WHERE filters happen BEFORE any grouping/aggregation — it operates on individual rows, not on grouped results (that's what HAVING is for, covered later).",
+          "Assuming column order in SELECT determines anything about the underlying table — SELECT only controls what's returned and in what order, not the table's actual structure.",
+          "Writing ORDER BY without DESC when you want highest-first — the default is ascending (ASC), which is easy to forget."
+        ],
+        "handsOn": "Run both examples against the sample students table. Then write your own query selecting names and subjects for students scoring below 80, sorted by name alphabetically.",
+        "doneWhen": "You can write a SELECT query with WHERE filtering and ORDER BY sorting, and correctly predict which rows will be included and in what order.",
+        "checks": [
+          {
+            "q": "In `SELECT name, score FROM students WHERE score > 70 ORDER BY score DESC`, in what order do the WHERE filter and ORDER BY sort logically apply?",
+            "a": "WHERE filters rows first (keeping only those with score > 70), and ORDER BY then sorts the remaining filtered rows — filtering happens before sorting, not after."
+          }
+        ],
+        "keyTakeaways": [
+          "SELECT chooses columns; WHERE filters rows; ORDER BY sorts the result.",
+          "WHERE filters happen on individual rows, before any grouping.",
+          "The default sort order is ascending (ASC) unless DESC is specified."
+        ],
+        "resources": [
+          {
+            "label": "PostgreSQL — SELECT documentation",
+            "url": "https://www.postgresql.org/docs/current/sql-select.html",
+            "kind": "docs"
+          },
+          {
+            "label": "Mode — SQL Tutorial",
+            "url": "https://mode.com/sql-tutorial/",
+            "kind": "course"
+          }
+        ]
+      },
+      {
+        "id": "data-sql-joins",
+        "title": "SQL JOINs — combining tables",
+        "concept": "Real databases split data across multiple related tables (e.g. `students` and `enrollments`) rather than one giant flat table — a JOIN combines rows from two tables based on a matching column. `INNER JOIN` keeps only rows that match in BOTH tables; `LEFT JOIN` keeps ALL rows from the left table, filling in NULLs where there's no match on the right — the distinction matters enormously for whether 'missing' data silently disappears from your results or stays visible.",
+        "analogy": "An INNER JOIN is like a group photo that only includes people who show up to BOTH of two separate events — if someone only attended one event, they're left out entirely. A LEFT JOIN is like a photo of everyone who attended the FIRST event, with a blank space next to anyone who didn't ALSO attend the second — nobody from the first event is dropped, even if they have no match.",
+        "examples": [
+          {
+            "code": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE students (id INTEGER, name TEXT)\")\nconn.execute(\"CREATE TABLE enrollments (student_id INTEGER, course TEXT)\")\nconn.executemany(\"INSERT INTO students VALUES (?, ?)\", [(1, \"Amy\"), (2, \"Bo\"), (3, \"Cy\")])\nconn.executemany(\"INSERT INTO enrollments VALUES (?, ?)\", [(1, \"Math\"), (1, \"Science\"), (2, \"Math\")])\n# note: Cy (id 3) has NO enrollment rows\nconn.commit()\n\nprint(\"--- INNER JOIN ---\")\nfor row in conn.execute(\"\"\"\n    SELECT students.name, enrollments.course FROM students\n    INNER JOIN enrollments ON students.id = enrollments.student_id\n\"\"\").fetchall():\n    print(row)",
+            "note": "INNER JOIN only returns students who have a matching enrollment row -- Cy (no enrollments) is completely ABSENT from these results, even though Cy exists in the students table. This silent disappearance is exactly the behavior to watch for."
+          },
+          {
+            "code": "print(\"--- LEFT JOIN ---\")\nfor row in conn.execute(\"\"\"\n    SELECT students.name, enrollments.course FROM students\n    LEFT JOIN enrollments ON students.id = enrollments.student_id\n\"\"\").fetchall():\n    print(row)\n\nconn.close()",
+            "note": "LEFT JOIN keeps Cy in the results with course=None (NULL), since students is the LEFT table and Cy simply has no matching enrollment -- this is the key practical difference: LEFT JOIN preserves every row from the left table regardless of whether a match exists."
+          }
+        ],
+        "warn": "Using INNER JOIN by default without thinking about it can silently drop real data (like Cy having no enrollments) from your analysis without any error or warning — always consider whether 'no match' should mean 'exclude this row' (INNER) or 'keep it with a blank' (LEFT) for your specific question.",
+        "mistakes": [
+          "Defaulting to INNER JOIN without considering whether unmatched rows should actually be preserved — a common source of silently incomplete analysis.",
+          "Forgetting the ON clause, which specifies HOW rows should match between tables — without it (or with a wrong condition), you can accidentally get a cartesian product (every row matched with every row) or wrong matches.",
+          "Confusing LEFT and RIGHT JOIN direction — LEFT JOIN keeps everything from the table named FIRST/before the JOIN keyword; RIGHT JOIN keeps everything from the table named after."
+        ],
+        "handsOn": "Run both examples and confirm Cy is missing from the INNER JOIN results but present (with course=None) in the LEFT JOIN results. Then write your own query: add a 4th student with no enrollments, and confirm the same pattern holds for them.",
+        "doneWhen": "You can write both INNER JOIN and LEFT JOIN queries, and correctly predict which rows will be included/excluded/null-filled in each case.",
+        "checks": [
+          {
+            "q": "A student has no matching rows in the enrollments table. Will they appear in an INNER JOIN result, a LEFT JOIN result, or both?",
+            "a": "Only in the LEFT JOIN result (with NULL/None for the enrollment columns) — INNER JOIN only returns rows that have a match in BOTH tables, so a student with zero enrollments is completely excluded from INNER JOIN results."
+          }
+        ],
+        "keyTakeaways": [
+          "INNER JOIN keeps only rows with a match in both tables; LEFT JOIN keeps all rows from the left table, filling unmatched columns with NULL.",
+          "Defaulting to INNER JOIN can silently drop real data from analysis without any warning.",
+          "The ON clause specifies how rows match between tables — critical to get right."
+        ],
+        "resources": [
+          {
+            "label": "PostgreSQL — Joins between tables",
+            "url": "https://www.postgresql.org/docs/current/tutorial-join.html",
+            "kind": "docs"
+          },
+          {
+            "label": "Mode — SQL JOINs tutorial",
+            "url": "https://mode.com/sql-tutorial/sql-joins/",
+            "kind": "course"
+          }
+        ]
+      },
+      {
+        "id": "data-sql-groupby-agg",
+        "title": "GROUP BY and aggregate functions",
+        "concept": "GROUP BY collapses rows sharing the same value in a chosen column into one row per unique value, combined with an AGGREGATE FUNCTION (COUNT, SUM, AVG, MIN, MAX) that computes one number per group. A crucial, commonly-missed rule: `HAVING` filters GROUPS after aggregation (e.g. 'only subjects with more than 5 students'), while `WHERE` filters individual ROWS before grouping — using WHERE where you mean HAVING is a very common SQL bug.",
+        "analogy": "GROUP BY is like sorting a pile of mixed receipts into separate labeled envelopes by store name, then writing one summary number (like the total spent) on the OUTSIDE of each envelope — you no longer see the individual receipts, just one aggregated number per envelope (group). HAVING is deciding AFTER labeling and totaling which envelopes are even worth keeping (e.g. 'only keep envelopes with more than $100 total'); WHERE would have been deciding which individual RECEIPTS to include before they ever got sorted into envelopes.",
+        "examples": [
+          {
+            "code": "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE sales (product TEXT, amount INTEGER)\")\nconn.executemany(\"INSERT INTO sales VALUES (?, ?)\", [\n    (\"Widget\", 20), (\"Widget\", 15), (\"Gadget\", 50), (\"Gadget\", 45), (\"Gadget\", 60), (\"Gizmo\", 10),\n])\nconn.commit()\n\nfor row in conn.execute(\"\"\"\n    SELECT product, COUNT(*) as num_sales, SUM(amount) as total, AVG(amount) as avg_amount\n    FROM sales GROUP BY product\n\"\"\").fetchall():\n    print(row)",
+            "note": "Each product gets collapsed into ONE row with COUNT(*) (how many sale rows), SUM(amount) (total revenue), and AVG(amount) (average sale) computed across all rows in that group -- Gadget's 3 rows (50,45,60) become one row: count=3, total=155, avg=51.67."
+          },
+          {
+            "code": "print(\"--- with HAVING (filters GROUPS, after aggregation) ---\")\nfor row in conn.execute(\"\"\"\n    SELECT product, SUM(amount) as total FROM sales\n    GROUP BY product HAVING SUM(amount) > 40\n\"\"\").fetchall():\n    print(row)\n\nconn.close()",
+            "note": "HAVING SUM(amount) > 40 filters OUT Widget (total 35), keeping only groups whose AGGREGATED total exceeds 40 -- notice this couldn't be done with WHERE, since WHERE only sees individual rows and has no concept of a group's total before grouping happens."
+          }
+        ],
+        "mistakes": [
+          "Using WHERE to filter on an aggregated value (like a group's total) — WHERE only sees individual rows, before grouping; use HAVING for conditions on the aggregated result.",
+          "Selecting a non-aggregated, non-grouped column alongside GROUP BY — most databases either error or give an arbitrary value, since it's ambiguous which row's value to show for a collapsed group.",
+          "Forgetting COUNT(*) counts ROWS (including nulls in any column), while COUNT(column_name) only counts non-null values in that specific column — a subtle but real difference."
+        ],
+        "handsOn": "Run both examples and confirm the aggregated numbers per product. Then write your own query that groups sales by product and uses HAVING to find products with an average sale amount (AVG) above 20.",
+        "doneWhen": "You can write a GROUP BY query with aggregate functions, and correctly choose HAVING (not WHERE) to filter on an aggregated value.",
+        "checks": [
+          {
+            "q": "Why can't you use WHERE to filter for 'only groups where the SUM of a column exceeds 40'?",
+            "a": "WHERE filters individual rows BEFORE any grouping happens, so it has no access to a group's aggregated total. HAVING filters groups AFTER aggregation, which is what's needed to filter based on a computed value like SUM."
+          }
+        ],
+        "keyTakeaways": [
+          "GROUP BY collapses rows sharing a value into one row per group, paired with aggregate functions (COUNT/SUM/AVG/MIN/MAX).",
+          "WHERE filters individual rows before grouping; HAVING filters groups after aggregation.",
+          "COUNT(*) counts all rows; COUNT(column) counts only non-null values in that column."
+        ],
+        "resources": [
+          {
+            "label": "PostgreSQL — Aggregate functions",
+            "url": "https://www.postgresql.org/docs/current/tutorial-agg.html",
+            "kind": "docs"
+          },
+          {
+            "label": "Mode — SQL GROUP BY tutorial",
+            "url": "https://mode.com/sql-tutorial/sql-group-by/",
+            "kind": "course"
+          }
+        ]
+      },
+      {
+        "id": "data-pandas-merge",
+        "title": "Pandas merge — SQL JOINs in Python",
+        "concept": "Pandas' `.merge()` is the direct equivalent of a SQL JOIN, for when your data is already loaded as DataFrames rather than sitting in a database. `pd.merge(df1, df2, on='key_column', how='inner')` mirrors INNER JOIN; `how='left'` mirrors LEFT JOIN — same semantics as the SQL lesson, just expressed in pandas' API. Knowing both means you can work with data whether it's already in Python or still needs to be pulled from a database first.",
+        "analogy": "If SQL JOIN is combining two spreadsheets while they're still stored in a filing cabinet (the database), pandas merge is doing the exact same combining after you've already pulled both spreadsheets out onto your desk (loaded into Python) — same operation, different moment in the workflow.",
+        "examples": [
+          {
+            "code": "import pandas as pd\n\nstudents = pd.DataFrame({\"id\": [1, 2, 3], \"name\": [\"Amy\", \"Bo\", \"Cy\"]})\nenrollments = pd.DataFrame({\n    \"student_id\": [1, 1, 2],\n    \"course\": [\"Math\", \"Science\", \"Math\"],\n})\n\ninner = pd.merge(students, enrollments, left_on=\"id\", right_on=\"student_id\", how=\"inner\")\nprint(\"--- inner merge ---\")\nprint(inner[[\"name\", \"course\"]])\n\nleft = pd.merge(students, enrollments, left_on=\"id\", right_on=\"student_id\", how=\"left\")\nprint(\"--- left merge ---\")\nprint(left[[\"name\", \"course\"]])",
+            "note": "This produces EXACTLY the same result pattern as the SQL INNER/LEFT JOIN lesson: the inner merge drops Cy entirely (no matching enrollment), while the left merge keeps Cy with course=NaN (pandas' equivalent of SQL's NULL) -- confirming the two tools express the identical relational concept."
+          },
+          {
+            "code": "# left_on/right_on are needed when the join-key column names DIFFER between DataFrames;\n# if they matched, you'd use the simpler `on=\"shared_column_name\"` instead\nprint(inner.columns.tolist())   # both id AND student_id appear -- since the column names differed",
+            "note": "When join keys have different names across the two DataFrames (id vs student_id here), pandas keeps BOTH columns in the result by default -- worth knowing so you're not surprised by an extra column, and can drop it afterward if you don't need it."
+          }
+        ],
+        "mistakes": [
+          "Forgetting pandas' default merge is `how='inner'` — silently dropping unmatched rows exactly like SQL's default INNER JOIN risk, just in a different tool.",
+          "Using `on=` when the join-key columns have different names in the two DataFrames — you need `left_on=`/`right_on=` in that case, not a single `on=`.",
+          "Not checking for duplicate join keys before merging — a duplicate key on either side can silently multiply rows in the result (a many-to-many merge), producing more rows than either input DataFrame had."
+        ],
+        "handsOn": "Run both examples and confirm the inner vs left merge behavior matches the SQL JOIN lesson's pattern exactly. Then add a student with no enrollments and a course with no matching student_id, and re-run both merges to confirm you correctly predict which rows appear where.",
+        "doneWhen": "You can perform both inner and left merges in pandas, correctly using left_on/right_on when column names differ, and can predict which rows survive each merge type.",
+        "checks": [
+          {
+            "q": "In pandas, what is the default value of the `how` parameter in .merge(), and what does that mean for unmatched rows?",
+            "a": "The default is 'inner' — meaning only rows with a match in BOTH DataFrames are kept, exactly mirroring SQL's default risk of silently dropping unmatched data unless you explicitly specify how='left' (or another join type)."
+          }
+        ],
+        "keyTakeaways": [
+          "pandas .merge() is the direct equivalent of SQL JOIN, with how='inner'/'left' mirroring INNER/LEFT JOIN.",
+          "Use left_on/right_on when join-key column names differ between DataFrames.",
+          "pandas' default merge is 'inner', carrying the same silent-data-drop risk as SQL's default."
+        ],
+        "resources": [
+          {
+            "label": "pandas — merge, join, and concatenate",
+            "url": "https://pandas.pydata.org/docs/user_guide/merging.html",
+            "kind": "docs"
+          },
+          {
+            "label": "pandas — pandas.merge() API reference",
+            "url": "https://pandas.pydata.org/docs/reference/api/pandas.merge.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-pandas-groupby-pivot",
+        "title": "Pandas groupby and pivot tables",
+        "concept": "Pandas' `.groupby()` mirrors SQL's GROUP BY: `df.groupby('column').agg(...)` collapses rows sharing a value and computes aggregates, same semantics as the SQL lesson. `.pivot_table()` goes further — it reshapes data so one column's unique values become NEW COLUMNS, which is extremely useful for turning 'long' data (one row per observation) into a 'wide' summary table (one row per group, one column per category) that's often exactly what a stakeholder wants to see.",
+        "analogy": "groupby is the same envelope-sorting idea from the SQL GROUP BY lesson, now in pandas. A pivot table is like taking that sorted, summarized data and laying it out as a proper cross-tab report — rows for one category, columns for another, with the aggregated numbers filling the grid — the kind of summary table you'd hand directly to a manager.",
+        "examples": [
+          {
+            "code": "import pandas as pd\n\nsales = pd.DataFrame({\n    \"product\": [\"Widget\", \"Widget\", \"Gadget\", \"Gadget\", \"Gadget\", \"Gizmo\"],\n    \"region\": [\"East\", \"West\", \"East\", \"West\", \"East\", \"West\"],\n    \"amount\": [20, 15, 50, 45, 60, 10],\n})\n\ngrouped = sales.groupby(\"product\").agg(\n    num_sales=(\"amount\", \"count\"),\n    total=(\"amount\", \"sum\"),\n    avg_amount=(\"amount\", \"mean\"),\n)\nprint(grouped)",
+            "note": "This is the EXACT pandas equivalent of the SQL GROUP BY + aggregate functions lesson -- same three aggregates (count, sum, mean/avg), same collapsing-by-product behavior, just expressed through pandas' .agg() with named output columns."
+          },
+          {
+            "code": "pivot = sales.pivot_table(values=\"amount\", index=\"product\", columns=\"region\", aggfunc=\"sum\", fill_value=0)\nprint(pivot)",
+            "note": "pivot_table reshapes the data: 'product' becomes the ROW index, 'region' values become actual COLUMN headers (East/West), and each cell holds the summed amount for that product-region combination -- fill_value=0 handles product-region combinations with no sales (instead of showing NaN), producing exactly the kind of clean cross-tab summary table a stakeholder would want to see."
+          }
+        ],
+        "mistakes": [
+          "Reaching for a manual loop to compute per-group statistics instead of groupby/agg — pandas' built-in aggregation is both clearer and faster.",
+          "Forgetting `fill_value=0` (or an appropriate default) in pivot_table when some category combinations have no data — without it, those cells show NaN, which can look like an error rather than 'genuinely zero.'",
+          "Using pivot_table when a simple groupby would do — pivot_table's row-to-column reshaping is specifically valuable when you need a wide cross-tab layout, not for every aggregation task."
+        ],
+        "handsOn": "Run both examples and confirm the grouped and pivoted outputs. Then add a new region ('South') with a couple of sales rows and re-run the pivot_table, confirming a new column appears with the correct values.",
+        "doneWhen": "You can use groupby with named aggregations and build a pivot table that reshapes long data into a wide cross-tab summary.",
+        "checks": [
+          {
+            "q": "What does pivot_table's `columns` parameter do differently from groupby, in terms of how the output is shaped?",
+            "a": "It takes the unique values of the specified column and turns each one into its OWN column in the output (a wide format), whereas groupby alone keeps everything in a single long, row-per-group structure — pivot_table is specifically for reshaping into a cross-tab layout."
+          }
+        ],
+        "keyTakeaways": [
+          "pandas groupby().agg() mirrors SQL's GROUP BY with aggregate functions.",
+          "pivot_table reshapes long data into a wide cross-tab, turning one column's values into new columns.",
+          "fill_value handles missing category combinations cleanly instead of leaving NaN."
+        ],
+        "resources": [
+          {
+            "label": "pandas — Group by: split-apply-combine",
+            "url": "https://pandas.pydata.org/docs/user_guide/groupby.html",
+            "kind": "docs"
+          },
+          {
+            "label": "pandas — Reshaping and pivot tables",
+            "url": "https://pandas.pydata.org/docs/user_guide/reshaping.html",
+            "kind": "docs"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data-ml-storytelling",
+    "title": "ML for Analysts, Storytelling & Capstone",
+    "why": "Modules 1-2 gave you the statistical and data-wrangling foundation. This module adds two final pieces: knowing WHEN a simple statistical answer beats a machine learning model (a genuine analyst judgment call), and turning findings into a story a non-technical stakeholder actually acts on — then a capstone tying the whole path together.",
+    "topics": [
+      {
+        "id": "data-ml-vs-stats",
+        "title": "When to reach for ML — and when not to",
+        "concept": "Not every data question needs machine learning. If you need to explain WHY something happens with a clear, interpretable relationship (e.g. 'each additional year of experience predicts $2,000 more salary'), a simple statistical model (like linear regression, Module 1's correlation ideas extended) is often both sufficient AND more honest about its own limits than a complex ML model would be. Reach for ML specifically when the relationship is genuinely complex/non-linear AND prediction accuracy matters more than interpretability — this lesson focuses on that judgment call; the next lesson covers actually fitting a model.",
+        "analogy": "Using a complex ML model to answer 'does more marketing spend correlate with more sales' is like hiring a forensic accountant to check if a store's total register matches its receipts — technically capable, but a much simpler tool (a straightforward correlation or basic regression) already answers the question clearly, and answers it in a way you can actually EXPLAIN to your manager in one sentence.",
+        "examples": [
+          {
+            "code": "import numpy as np\nfrom scipy import stats\nfrom sklearn.linear_model import LinearRegression\n\nnp.random.seed(0)\nexperience = np.random.uniform(0, 15, 200)\nsalary = 40000 + experience * 2500 + np.random.normal(0, 5000, 200)\n\n# A simple, interpretable answer: correlation + linear regression\ncorr = np.corrcoef(experience, salary)[0, 1]\nmodel = LinearRegression().fit(experience.reshape(-1, 1), salary)\nprint(f\"correlation: {corr:.3f}\")\nprint(f\"each extra year of experience predicts +${model.coef_[0]:,.0f} salary\")\nprint(\"this ONE sentence is a complete, honest, explainable answer\")",
+            "note": "A strong linear correlation (this data was designed with a real linear relationship) means a simple linear regression genuinely captures the pattern well -- and its single coefficient translates directly into a plain-English business sentence, something a complex model's internals rarely offer as cleanly."
+          },
+          {
+            "code": "# When the relationship is NOT simple/linear, a linear model genuinely underperforms\nnp.random.seed(0)\nx_nonlinear = np.random.uniform(-3, 3, 200)\ny_nonlinear = x_nonlinear**2 * 10 + np.random.normal(0, 3, 200)   # a real U-shaped pattern\n\nlinear_corr = np.corrcoef(x_nonlinear, y_nonlinear)[0, 1]\nprint(f\"linear correlation on U-shaped data: {linear_corr:.3f}\")\nprint(\"a near-zero correlation here does NOT mean 'no relationship' --\")\nprint(\"it means no LINEAR relationship; a U-shape needs a different tool (e.g. a tree-based model)\")",
+            "note": "This demonstrates a genuine limitation of relying purely on linear correlation: a clear, strong U-shaped relationship can still show a correlation coefficient near 0, because correlation only measures LINEAR association -- exactly the moment where reaching for a more flexible model (or at minimum, a different statistical approach) becomes the right call, not a linear one."
+          }
+        ],
+        "mistakes": [
+          "Reaching for a complex model by default, when a simple, interpretable statistic would answer the actual business question just as well (and more transparently).",
+          "Concluding 'no relationship' from a low correlation without checking whether the TRUE relationship might be non-linear (as the U-shaped example shows).",
+          "Optimizing purely for prediction accuracy when the actual stakeholder need is understanding WHY — the two goals sometimes call for different tools."
+        ],
+        "handsOn": "Run both examples and confirm the linear case gives a clean, high correlation and interpretable coefficient, while the U-shaped case gives a near-zero correlation despite an obviously real relationship. Write one sentence describing a real business question where a simple stat would be the RIGHT choice, and one where you'd genuinely want ML instead.",
+        "doneWhen": "You can articulate when a simple statistical approach is the better choice versus when ML is genuinely warranted, and have demonstrated correlation's blind spot for non-linear relationships with real code.",
+        "checks": [
+          {
+            "q": "A dataset shows a near-zero linear correlation between two variables. Does this prove there's no meaningful relationship between them?",
+            "a": "No — correlation only measures LINEAR association. A strong non-linear relationship (like a U-shape) can produce a near-zero correlation coefficient while a real, meaningful relationship clearly exists — always visualize the data (or consider non-linear methods) before concluding 'no relationship.'"
+          }
+        ],
+        "keyTakeaways": [
+          "A simple, interpretable statistic is often the RIGHT choice when explainability matters more than squeezing out extra predictive accuracy.",
+          "Reach for ML when the relationship is genuinely complex/non-linear and raw predictive accuracy is the priority.",
+          "Low correlation doesn't mean 'no relationship' — it means no LINEAR relationship; non-linear patterns can hide from correlation entirely."
+        ],
+        "resources": [
+          {
+            "label": "scikit-learn — Choosing the right estimator (map)",
+            "url": "https://scikit-learn.org/stable/machine_learning_map.html",
+            "kind": "docs"
+          },
+          {
+            "label": "scikit-learn — LinearRegression docs",
+            "url": "https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-ml-tabular-business",
+        "title": "A minimal ML model for business data",
+        "concept": "When ML genuinely IS the right call (last lesson), a data scientist's most common task is a straightforward tabular prediction: given some business features (customer attributes, transaction details), predict an outcome (will they churn? is this transaction fraudulent?). This lesson applies the standard classical-ML pattern (fit/predict/evaluate) to a realistic BUSINESS framing — customer churn prediction — with an emphasis on connecting the model's output back to a business DECISION, not just a raw accuracy number.",
+        "analogy": "A churn model is like a doctor's risk assessment: the point isn't the raw probability number itself, but what ACTION it triggers — a high-risk patient (or high-churn-risk customer) gets proactive outreach before it's too late. The model is only useful insofar as its output changes what someone actually DOES.",
+        "examples": [
+          {
+            "code": "import numpy as np\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.metrics import classification_report\n\nnp.random.seed(0)\nn = 500\nmonths_active = np.random.uniform(1, 36, n)\nsupport_tickets = np.random.poisson(2, n)\nmonthly_spend = np.random.uniform(10, 200, n)\n\n# Churn risk rises with more support tickets and shorter tenure, falls with higher spend\nchurn_score = -0.15*months_active + 0.8*support_tickets - 0.01*monthly_spend + np.random.normal(0, 2, n)\nchurned = (churn_score > np.percentile(churn_score, 75)).astype(int)   # top 25% = churned\n\nX = np.column_stack([months_active, support_tickets, monthly_spend])\nXtr, Xte, ytr, yte = train_test_split(X, churned, test_size=0.3, random_state=42, stratify=churned)\n\nmodel = LogisticRegression().fit(Xtr, ytr)\nprint(classification_report(yte, model.predict(Xte), target_names=[\"stayed\", \"churned\"]))",
+            "note": "This is the standard classification pattern -- fit/predict/evaluate -- framed around a genuine business scenario: predicting customer churn from tenure, support tickets, and spend. classification_report gives precision/recall per class, connecting straight back to Module 1's evaluation concepts."
+          },
+          {
+            "code": "# Connecting the model back to a BUSINESS decision, not just a metric\nrisk_scores = model.predict_proba(Xte)[:, 1]      # probability of churning\nhigh_risk_threshold = 0.5\nhigh_risk_customers = (risk_scores > high_risk_threshold).sum()\nprint(f\"{high_risk_customers} of {len(Xte)} test customers flagged as high churn risk\")\nprint(\"business action: proactively reach out to these customers with a retention offer\")\nprint(\"this connects the model's OUTPUT directly to a concrete business DECISION\")",
+            "note": "The model's raw probability output only becomes useful once it's tied to an actual action (outreach to high-risk customers) -- this is the analyst's real job: not just building a model, but connecting its predictions to a concrete business decision that changes what someone does."
+          }
+        ],
+        "mistakes": [
+          "Stopping at a model's accuracy/precision numbers without connecting the prediction to a real business action — a model nobody acts on has zero business value regardless of its metrics.",
+          "Choosing a threshold (like 0.5) without considering the actual COST of false positives vs false negatives for the business (e.g. an unnecessary retention offer vs a missed at-risk customer) — the right threshold often isn't the default.",
+          "Building a churn/prediction model without first checking whether a simpler analysis (like the last lesson's correlation approach) would already answer the real question."
+        ],
+        "handsOn": "Run both examples and confirm the classification report and business-framed output. Then adjust high_risk_threshold to 0.3 and 0.7, and observe how the number of flagged customers changes — write one sentence about which threshold you'd recommend and why, considering the real-world cost of a false positive (unnecessary offer) versus a false negative (missed at-risk customer).",
+        "doneWhen": "You can apply a classification model to a business scenario, connect its output to a concrete decision, and reason about threshold tradeoffs in business terms.",
+        "checks": [
+          {
+            "q": "Why is a churn prediction model's raw accuracy number not the actual measure of its business value?",
+            "a": "A model's value comes from the ACTIONS its predictions enable (e.g. proactive outreach to at-risk customers) — a highly accurate model that nobody acts on has no business value, while connecting predictions to a concrete decision is what actually matters."
+          }
+        ],
+        "keyTakeaways": [
+          "A business ML model's value comes from the decisions/actions its predictions enable, not the raw metric alone.",
+          "The classification threshold should reflect the real business cost of false positives vs false negatives, not just default to 0.5.",
+          "Always check whether a simpler statistical approach would already answer the real business question before reaching for ML."
+        ],
+        "resources": [
+          {
+            "label": "scikit-learn — classification_report documentation",
+            "url": "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.classification_report.html",
+            "kind": "docs"
+          },
+          {
+            "label": "AI Engineer path — Model Evaluation module (deeper metrics coverage)",
+            "url": "/learn/aiml-confusion-matrix",
+            "kind": "course"
+          }
+        ]
+      },
+      {
+        "id": "data-storytelling",
+        "title": "Data storytelling — communicating to non-technical stakeholders",
+        "concept": "The best analysis is worthless if it doesn't change a decision — and most stakeholders are NOT data scientists. Effective data storytelling means leading with the SO-WHAT (the recommendation/insight), not the methodology; using ONE clear chart per point rather than a dense dashboard; and translating statistical language into plain business language ('customers with 3+ support tickets are twice as likely to churn' beats 'the coefficient on support_tickets was statistically significant at p<0.05').",
+        "analogy": "Presenting raw statistical output to a business stakeholder is like handing someone a car's full diagnostic computer log when they just asked 'is my car safe to drive to work tomorrow?' — technically all the information is there, but it answers a different question than the one being asked. Good data storytelling translates the diagnostic log into 'yes, safe to drive; the brake pads will need replacing within a month' — the actual decision-relevant answer.",
+        "examples": [
+          {
+            "code": "# BAD: leads with methodology, uses statistical jargon\nbad_summary = \"\"\"\nWe ran a logistic regression with 3 features (months_active, support_tickets,\nmonthly_spend). The coefficient on support_tickets was 0.8 with p < 0.001.\nThe model achieved 78% precision and 71% recall on the held-out test set.\n\"\"\"\n\n# GOOD: leads with the decision-relevant insight, plain language\ngood_summary = \"\"\"\nCustomers who contact support 3+ times are roughly twice as likely to churn.\nRecommendation: flag customers after their 3rd support ticket for a retention\ncall. Based on our model, this would catch about 100 of the ~125 customers\nwho are likely to churn each month.\n\"\"\"\nprint(bad_summary)\nprint(good_summary)",
+            "note": "Same underlying analysis, two very different presentations -- the GOOD version leads with the actionable insight and a concrete recommendation in plain language, saving the methodology (available on request) for anyone who wants to dig deeper. This is the difference between a report that gets read and acted on, versus one that gets skimmed and shelved."
+          },
+          {
+            "code": "# One clear chart beats a dense dashboard -- illustrating the PRINCIPLE, not literal plotting code\nchart_principle = \"\"\"\nInstead of: a 12-panel dashboard with every possible metric\nDo: ONE bar chart showing churn rate by support-ticket-count bucket,\n    with the key threshold (3+ tickets) visually highlighted\n\nEach chart should answer ONE question clearly, titled with the INSIGHT\n(e.g. 'Churn risk doubles after 3 support tickets'), not a generic label\nlike 'Churn Rate by Support Tickets' that makes the reader do the work\nof finding the point themselves.\n\"\"\"\nprint(chart_principle)",
+            "note": "This is a WORKED PRINCIPLE, not literal runnable plotting code -- the key idea (titling a chart with the INSIGHT rather than a generic description) is a small change that measurably improves how well a chart communicates on its own, without requiring the viewer to interpret it themselves."
+          }
+        ],
+        "mistakes": [
+          "Leading a report/presentation with methodology (what model, what test) instead of the actual finding and recommendation — most stakeholders care about the SO-WHAT, not the HOW.",
+          "Using statistical jargon (p-values, coefficients, precision/recall) with a non-technical audience without translating it into a plain business statement first.",
+          "Presenting many charts/metrics at once instead of the ONE chart that best supports the specific decision being made — more information isn't automatically more persuasive or useful."
+        ],
+        "handsOn": "Take a finding from any earlier lesson in this module (or your own past analysis) and write BOTH a 'bad' technical-jargon version and a 'good' plain-language, recommendation-led version, following the pattern above.",
+        "doneWhen": "You can translate a technical finding into a plain-language, recommendation-led summary that a non-technical stakeholder could act on immediately.",
+        "checks": [
+          {
+            "q": "Why should a data analysis summary for a non-technical stakeholder lead with the recommendation rather than the methodology?",
+            "a": "Most stakeholders care about what decision or action the finding supports (the 'so-what'), not the technical details of how it was derived — leading with methodology risks losing the actual point, while methodology can always be provided for anyone who wants to dig deeper."
+          }
+        ],
+        "keyTakeaways": [
+          "Lead with the recommendation/insight (the 'so-what'), not the methodology.",
+          "Translate statistical language into plain business language for non-technical audiences.",
+          "One clear, insight-titled chart per point beats a dense dashboard of many metrics."
+        ],
+        "resources": [
+          {
+            "label": "Storytelling with Data — book & blog (Cole Nussbaumer Knaflic)",
+            "url": "https://www.storytellingwithdata.com/",
+            "kind": "book"
+          },
+          {
+            "label": "Harvard Business Review — Data Storytelling framework",
+            "url": "https://hbr.org/2018/07/how-to-tell-a-story-with-data",
+            "kind": "reference"
+          }
+        ]
+      },
+      {
+        "id": "data-capstone",
+        "title": "Capstone: end-to-end analysis and write-up",
+        "concept": "Your capstone: pick a real, publicly available dataset (Kaggle, government open data, or one relevant to your interests) and run a genuine end-to-end analysis: explore the data (Module 1's stats), pull/join/aggregate as needed (Module 2's SQL/pandas), check correlations and consider whether a simple stat or ML model fits (this module's lessons 1-2), and produce a stakeholder-facing write-up (this module's lesson 3) — a one-page summary with a clear recommendation, not a code notebook dump.",
+        "analogy": "This capstone is the difference between a chef's messy kitchen prep (all the real work, but not what's served) and the actual finished plate that goes out to the table. Both matter, but only the finished plate — the clear, decision-ready write-up — is what an interviewer or stakeholder actually evaluates you on.",
+        "examples": [
+          {
+            "code": "# A worked skeleton for the capstone's final write-up structure\nwriteup_skeleton = \"\"\"\n1. THE QUESTION (1-2 sentences)\n   What business/real-world question does this analysis answer?\n\n2. THE FINDING (2-3 sentences, plain language, Module 3.3's storytelling lesson)\n   What did you discover? Lead with the insight, not the method.\n\n3. THE RECOMMENDATION (1-2 sentences)\n   What should someone DO based on this finding?\n\n4. THE EVIDENCE (a few key numbers/one clear chart)\n   The minimum supporting detail needed to trust the finding.\n\n5. METHODOLOGY (available but NOT leading -- for anyone who wants to dig in)\n   What data, what approach (simple stats vs ML, and why you chose it), what\n   you'd improve with more time or data.\n\"\"\"\nprint(writeup_skeleton)",
+            "note": "This is a WORKED STRUCTURE, not a template to fill in mechanically -- the ordering itself is the point: finding and recommendation FIRST (what a reader actually needs), methodology LAST (for those who want it), mirroring exactly the storytelling lesson's core principle applied to a real deliverable."
+          }
+        ],
+        "mistakes": [
+          "Submitting a raw notebook as the 'deliverable' instead of a clear write-up — the analysis work and the COMMUNICATION of it are both real skills, and only the second one is directly visible to most evaluators.",
+          "Picking a dataset with no genuine question worth answering — a strong capstone starts from a real question, not from 'I found a dataset and did some things to it.'",
+          "Skipping the 'what I'd improve' honesty in methodology — acknowledging real limitations is a sign of genuine analytical maturity, not weakness."
+        ],
+        "handsOn": "Choose a real dataset and question, run the full analysis pipeline (explore, wrangle, test correlation/simple-stats-vs-ML judgment, evaluate), and write the final one-page summary following the skeleton above. Then rehearse presenting your finding and recommendation out loud in under 2 minutes, without reading from notes.",
+        "doneWhen": "You have a complete end-to-end analysis with a clear, recommendation-led one-page write-up, and can present the finding fluently in under 2 minutes.",
+        "checks": [],
+        "keyTakeaways": [
+          "A capstone's deliverable is a clear, decision-ready write-up, not a raw notebook.",
+          "Lead the write-up with the finding and recommendation; methodology comes last, for those who want it.",
+          "A strong capstone starts from a genuine question, not from 'I found a dataset and did some things.'"
+        ],
+        "resources": [
+          {
+            "label": "Kaggle — Datasets",
+            "url": "https://www.kaggle.com/datasets",
+            "kind": "practice"
+          },
+          {
+            "label": "Common Core — Career track (interview framing)",
+            "url": "/stream/common-core",
+            "kind": "course"
+          },
+          {
+            "label": "Forage Interview — practice presenting this analysis live",
+            "url": "/interview",
+            "kind": "practice"
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -56,7 +56,7 @@ export function MarkDoneButton({
         )}
       </AnimatePresence>
       {!done && (
-        <span className="text-xs text-[#9aa7b4] hidden sm:inline">
+        <span className="text-xs text-[#7d99a3] hidden sm:inline">
           Only when you did the task AND can explain it.
         </span>
       )}
@@ -85,7 +85,7 @@ export function NotesBox({ lessonId, initial }: { lessonId: string; initial: str
   return (
     <div>
       <div className="flex items-center justify-end -mt-6 mb-1">
-        <span className="text-[10px] text-[#9aa7b4]">
+        <span className="text-[10px] text-[#7d99a3]">
           {saved === "saving" ? "saving..." : saved === "saved" ? "saved ✓" : ""}
         </span>
       </div>
@@ -93,7 +93,7 @@ export function NotesBox({ lessonId, initial }: { lessonId: string; initial: str
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Write what you'd tell a friend about this topic..."
-        className="w-full min-h-24 bg-black/30 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-[#7c5cff] resize-y transition-colors"
+        className="w-full min-h-24 bg-black/30 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-[#00e5ff] resize-y transition-colors"
       />
     </div>
   );
@@ -119,7 +119,7 @@ export function CheckReveal({ q, a }: { q: string; a: string }) {
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="overflow-hidden"
           >
-            <p className="px-4 py-2.5 text-sm text-[#9aa7b4] border-t border-white/[0.06]">
+            <p className="px-4 py-2.5 text-sm text-[#7d99a3] border-t border-white/[0.06]">
               <span className="text-[#3fb950] font-bold mr-1">A</span>
               {a}
             </p>

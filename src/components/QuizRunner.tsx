@@ -111,7 +111,7 @@ export function QuizRunner({
               cy="60"
               r="52"
               fill="none"
-              stroke={result.passed ? "#3fb950" : "#e3a008"}
+              stroke={result.passed ? "#3fb950" : "#ffb020"}
               strokeWidth="10"
               strokeLinecap="round"
               strokeDasharray={circ}
@@ -127,7 +127,7 @@ export function QuizRunner({
           </div>
         </div>
         <h2 className="text-xl font-bold flex items-center justify-center gap-2" style={{ fontFamily: "var(--font-display)" }}>
-          {result.passed && <Trophy size={22} className="text-[#e3a008]" />}
+          {result.passed && <Trophy size={22} className="text-[#ffb020]" />}
           {result.passed ? "Passed!" : "Not yet — 80% to pass"}
         </h2>
         {xpTotal > 0 && (
@@ -135,7 +135,7 @@ export function QuizRunner({
             <Sparkles size={16} /> +{xpTotal} XP earned this run
           </p>
         )}
-        <p className="text-sm text-[#9aa7b4] mt-3 max-w-md mx-auto">
+        <p className="text-sm text-[#7d99a3] mt-3 max-w-md mx-auto">
           {result.passed
             ? "Solid. Retake anytime — the options reshuffle every run."
             : "Reread the weak spots and try again. Wrong answers showed you why."}
@@ -152,7 +152,7 @@ export function QuizRunner({
           </button>
           <Link
             href={`/learn/${lessonSlug}`}
-            className="px-4 py-2 rounded-xl bg-[#7c5cff] text-white text-sm font-semibold hover:bg-[#6a4ff0] transition-colors"
+            className="px-4 py-2 rounded-xl bg-[#00e5ff] text-[#05070a] text-sm font-semibold hover:bg-[#33ebff] transition-colors"
           >
             Back to lesson
           </Link>
@@ -163,22 +163,22 @@ export function QuizRunner({
 
   return (
     <div>
-      <div className="flex items-center justify-between text-xs text-[#9aa7b4] mb-3">
+      <div className="flex items-center justify-between text-xs text-[#7d99a3] mb-3">
         <span>
           Question {i + 1} of {questions.length}
         </span>
         <span className="flex gap-2">
           <span className="px-2 py-0.5 rounded bg-white/[0.05]">{q.style_tag}</span>
-          <span className="px-2 py-0.5 rounded bg-white/[0.05] text-[#e3a008]">
+          <span className="px-2 py-0.5 rounded bg-white/[0.05] text-[#ffb020]">
             {"★".repeat(q.difficulty)}
-            <span className="text-[#9aa7b4]">{"★".repeat(3 - q.difficulty)}</span>
+            <span className="text-[#7d99a3]">{"★".repeat(3 - q.difficulty)}</span>
           </span>
         </span>
       </div>
 
       <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden mb-6">
         <motion.div
-          className="h-full bg-gradient-to-r from-[#7c5cff] to-[#3fb950]"
+          className="h-full bg-gradient-to-r from-[#00e5ff] to-[#3fb950]"
           animate={{ width: `${(i / questions.length) * 100}%` }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         />
@@ -200,7 +200,7 @@ export function QuizRunner({
             {order.map((origIdx, displayIdx) => {
               const isCorrect = feedback && origIdx === feedback.correct_index;
               const isWrongPick = feedback && chosen === displayIdx && !isCorrect;
-              let cls = "border-white/[0.08] bg-white/[0.03] hover:border-[#7c5cff]/60 hover:bg-white/[0.05]";
+              let cls = "border-white/[0.08] bg-white/[0.03] hover:border-[#00e5ff]/60 hover:bg-white/[0.05]";
               if (feedback) {
                 if (isCorrect) cls = "border-[#3fb950]/60 bg-[#3fb950]/10";
                 else if (isWrongPick) cls = "border-[#f85149]/60 bg-[#f85149]/10";
@@ -214,7 +214,7 @@ export function QuizRunner({
                   whileTap={reduce || feedback ? undefined : { scale: 0.98 }}
                   className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-colors flex items-start gap-2.5 ${cls}`}
                 >
-                  <span className="font-mono text-[#9aa7b4] shrink-0">
+                  <span className="font-mono text-[#7d99a3] shrink-0">
                     {String.fromCharCode(65 + displayIdx)}.
                   </span>
                   <span className="whitespace-pre-wrap flex-1">{q.options[origIdx]}</span>
@@ -233,7 +233,7 @@ export function QuizRunner({
                 className={`mt-5 rounded-xl border px-4 py-3 text-sm ${
                   feedback.is_correct
                     ? "border-[#3fb950]/40 bg-[#3fb950]/10"
-                    : "border-[#e3a008]/40 bg-[#e3a008]/10"
+                    : "border-[#ffb020]/40 bg-[#ffb020]/10"
                 }`}
               >
                 <p className="font-bold mb-1 flex items-center gap-1.5">
@@ -244,7 +244,7 @@ export function QuizRunner({
                     </>
                   ) : (
                     <>
-                      <XCircle size={16} className="text-[#e3a008]" />
+                      <XCircle size={16} className="text-[#ffb020]" />
                       Not quite.
                     </>
                   )}
@@ -258,7 +258,7 @@ export function QuizRunner({
             <button
               onClick={next}
               disabled={busy}
-              className="mt-5 px-5 py-2.5 rounded-xl bg-[#7c5cff] text-white text-sm font-semibold hover:bg-[#6a4ff0] transition-colors"
+              className="mt-5 px-5 py-2.5 rounded-xl bg-[#00e5ff] text-[#05070a] text-sm font-semibold hover:bg-[#33ebff] transition-colors"
             >
               {i + 1 < questions.length ? "Next question →" : "Finish quiz"}
             </button>

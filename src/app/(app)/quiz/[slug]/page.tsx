@@ -37,7 +37,7 @@ export default async function QuizPage({
 
   return (
     <div className="max-w-2xl mx-auto">
-      <p className="text-xs text-[#9aa7b4] mb-1">
+      <p className="text-xs text-[#7d99a3] mb-1">
         <Link href={`/learn/${slug}`} className="hover:text-white">
           ← {row.title}
         </Link>
@@ -51,7 +51,7 @@ export default async function QuizPage({
         />
       ) : (
         <div className="rounded-xl border border-[#2a323d] bg-[#161b22] p-8 text-center">
-          <p className="text-sm text-[#9aa7b4]">
+          <p className="text-sm text-[#7d99a3]">
             Questions for this lesson are being authored — coming soon.
           </p>
         </div>

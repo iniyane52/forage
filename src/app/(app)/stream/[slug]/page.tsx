@@ -28,28 +28,28 @@ export default async function StreamPage({
     const Icon = streamIcon[stream.slug] ?? streamIcon.foundations;
     return (
       <div className="max-w-lg mx-auto text-center py-12">
-        <span className="w-14 h-14 rounded-2xl grid place-items-center bg-[#7c5cff]/15 text-[#a78bfa] mx-auto">
+        <span className="w-14 h-14 rounded-2xl grid place-items-center bg-[#00e5ff]/15 text-[#6ff9ff] mx-auto">
           <Icon size={28} />
         </span>
         <h1 className="text-2xl font-bold mt-4" style={{ fontFamily: "var(--font-display)" }}>
           {stream.title}
         </h1>
-        <p className="text-sm text-[#a79fc0] mt-2">{stream.blurb}</p>
+        <p className="text-sm text-[#7d99a3] mt-2">{stream.blurb}</p>
         <div className="glass rounded-2xl p-6 mt-6 text-left">
           <p className="text-sm flex items-center gap-2 font-semibold">
-            <Lock size={16} className="text-[#c86bff]" /> This is a Pro career path
+            <Lock size={16} className="text-[#ff3d81]" /> This is a Pro career path
           </p>
-          <p className="text-sm text-[#a79fc0] mt-2">
+          <p className="text-sm text-[#7d99a3] mt-2">
             Finish the free Common Core first, then unlock any career path with Pro.
           </p>
           <Link
             href="/pricing"
-            className="inline-block mt-4 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#7c5cff] to-[#c86bff] text-white text-sm font-semibold"
+            className="inline-block mt-4 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#00e5ff] to-[#ff3d81] text-[#05070a] text-sm font-semibold"
           >
             See Pro plans
           </Link>
         </div>
-        <Link href="/dashboard" className="inline-block mt-6 text-sm text-[#a79fc0] hover:text-white">
+        <Link href="/dashboard" className="inline-block mt-6 text-sm text-[#7d99a3] hover:text-white">
           ← Back to dashboard
         </Link>
       </div>
@@ -73,7 +73,7 @@ export default async function StreamPage({
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-xs text-[#9aa7b4]">
+        <p className="text-xs text-[#7d99a3]">
           <Link href="/dashboard" className="hover:text-white transition-colors">
             Dashboard
           </Link>{" "}
@@ -83,12 +83,12 @@ export default async function StreamPage({
           className="text-2xl font-bold mt-1 flex items-center gap-2.5"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          <span className="w-9 h-9 rounded-xl grid place-items-center bg-[#7c5cff]/15 text-[#7c5cff]">
+          <span className="w-9 h-9 rounded-xl grid place-items-center bg-[#00e5ff]/15 text-[#00e5ff]">
             <Icon size={20} />
           </span>
           {stream.title}
         </h1>
-        <p className="text-sm text-[#9aa7b4] mt-1">{stream.tagline}</p>
+        <p className="text-sm text-[#7d99a3] mt-1">{stream.tagline}</p>
       </div>
 
       <Stagger className="space-y-6">
@@ -105,12 +105,12 @@ export default async function StreamPage({
                   <h2 className="text-lg font-bold" style={{ fontFamily: "var(--font-display)" }}>
                     {m.title}
                   </h2>
-                  <span className="text-xs text-[#9aa7b4]">
+                  <span className="text-xs text-[#7d99a3]">
                     {doneCount}/{lessons.length} done
                   </span>
                 </div>
                 <AnimatedBar pct={pct} className="mt-2 h-1.5" />
-                <p className="text-xs text-[#9aa7b4] mt-2">{m.why}</p>
+                <p className="text-xs text-[#7d99a3] mt-2">{m.why}</p>
                 <ul className="mt-4 divide-y divide-white/[0.06]">
                   {lessons.map((l, i) => {
                     const r = quizPassed.get(l.id);
@@ -122,7 +122,7 @@ export default async function StreamPage({
                             className={`w-6 h-6 rounded-full grid place-items-center text-[10px] shrink-0 ${
                               isDone
                                 ? "text-[#3fb950]"
-                                : "border border-white/10 text-[#9aa7b4]"
+                                : "border border-white/10 text-[#7d99a3]"
                             }`}
                           >
                             {isDone ? <CheckCircle2 size={20} /> : i + 1}
@@ -137,7 +137,7 @@ export default async function StreamPage({
                           )}
                           <ChevronRight
                             size={15}
-                            className="text-[#9aa7b4] opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+                            className="text-[#7d99a3] opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
                           />
                         </Link>
                       </li>

@@ -14,7 +14,7 @@ export function SignOutButton() {
         router.refresh();
       }}
       aria-label="Sign out"
-      className="text-[#9aa7b4] hover:text-white p-1.5 rounded-lg hover:bg-white/[0.05] transition-colors"
+      className="text-[#7d99a3] hover:text-white p-1.5 rounded-lg hover:bg-white/[0.05] transition-colors"
     >
       <LogOut size={16} />
     </button>

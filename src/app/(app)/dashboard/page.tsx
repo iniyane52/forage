@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Stagger, StaggerItem, AnimatedBar, FadeUp } from "@/components/ui/motion";
-import { streamIcon, Lock, ArrowRight, ChevronRight, GraduationCap } from "@/components/ui/icons";
+import { Stagger, StaggerItem, AnimatedBar, FadeUp, ProgressRing } from "@/components/ui/motion";
+import { ArrowRight, ChevronRight, GraduationCap, Mic, Sparkles } from "@/components/ui/icons";
+import { PathTile } from "@/components/ui/PathTile";
 
 type StreamRow = {
   id: string;
@@ -65,50 +66,61 @@ export default async function Dashboard() {
       {/* Common Core — the free foundation, featured */}
       {core && (
         <FadeUp>
-          <div className="glass rounded-2xl p-6 relative overflow-hidden">
-            <div className="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-[#7c5cff]/15 blur-3xl pointer-events-none" />
-            <div className="flex items-center gap-2 mb-1">
-              <GraduationCap size={18} className="text-[#c86bff]" />
-              <span className="text-xs font-bold uppercase tracking-widest text-[#c86bff]">
-                Common Core · Free
-              </span>
-            </div>
-            <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
-              {coreComplete ? "Common Core complete" : "Start with the Common Core"}
-            </h1>
-            <p className="text-sm text-[#a79fc0] mt-1 max-w-xl">{core.blurb}</p>
-            {coreStat.total > 0 ? (
-              <div className="mt-4 max-w-md">
-                <AnimatedBar pct={corePct} />
-                <p className="text-xs text-[#a79fc0] mt-1.5">
-                  {coreStat.done} of {coreStat.total} lessons · {corePct}%
-                </p>
+          <div className="glass rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+            <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full bg-[#baff2e]/12 blur-[100px] pointer-events-none" />
+            <div className="flex items-start justify-between gap-6 flex-wrap">
+              <div className="flex-1 min-w-[240px]">
+                <div className="flex items-center gap-2 mb-1">
+                  <GraduationCap size={18} className="text-[#baff2e]" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#baff2e]">
+                    Common Core · Free
+                  </span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
+                  {coreComplete ? "Common Core complete" : "Start with the Common Core"}
+                </h1>
+                <p className="text-sm text-[#7d99a3] mt-1 max-w-xl">{core.blurb}</p>
+                {coreStat.total > 0 ? (
+                  <div className="mt-4 max-w-md">
+                    <AnimatedBar pct={corePct} />
+                    <p className="text-xs text-[#7d99a3] mt-1.5">
+                      {coreStat.done} of {coreStat.total} lessons · {corePct}%
+                    </p>
+                  </div>
+                ) : (
+                  <p className="mt-3 text-xs text-[#ffb020]">Lessons are being added — check back soon.</p>
+                )}
+                <div className="mt-4 flex gap-3 flex-wrap">
+                  {nextCore ? (
+                    <Link
+                      href={`/learn/${nextCore.slug}`}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#00e5ff] text-[#05070a] text-sm font-semibold hover:bg-[#33ebff] transition-colors"
+                    >
+                      {coreStat.done > 0 ? "Continue" : "Begin"} <ArrowRight size={16} />
+                    </Link>
+                  ) : coreComplete ? (
+                    <Link
+                      href="#paths"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#00e5ff] to-[#baff2e] text-[#05070a] text-sm font-semibold"
+                    >
+                      Choose your career path <ArrowRight size={16} />
+                    </Link>
+                  ) : null}
+                  <Link
+                    href="/stream/common-core"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl glass glass-hover text-sm"
+                  >
+                    View all modules
+                  </Link>
+                </div>
               </div>
-            ) : (
-              <p className="mt-3 text-xs text-[#e3a008]">Lessons are being added — check back soon.</p>
-            )}
-            <div className="mt-4 flex gap-3 flex-wrap">
-              {nextCore ? (
-                <Link
-                  href={`/learn/${nextCore.slug}`}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#7c5cff] text-white text-sm font-semibold hover:bg-[#6a4ff0] transition-colors"
-                >
-                  {coreStat.done > 0 ? "Continue" : "Begin"} <ArrowRight size={16} />
-                </Link>
-              ) : coreComplete ? (
-                <Link
-                  href="#paths"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#7c5cff] to-[#c86bff] text-white text-sm font-semibold"
-                >
-                  Choose your career path <ArrowRight size={16} />
-                </Link>
-              ) : null}
-              <Link
-                href="/stream/common-core"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl glass glass-hover text-sm"
-              >
-                View all modules
-              </Link>
+              {coreStat.total > 0 && (
+                <ProgressRing pct={corePct} size={88} strokeWidth={7} className="shrink-0">
+                  <span className="text-lg font-bold" style={{ fontFamily: "var(--font-display)" }}>
+                    {corePct}%
+                  </span>
+                </ProgressRing>
+              )}
             </div>
           </div>
         </FadeUp>
@@ -121,58 +133,71 @@ export default async function Dashboard() {
             Career Paths
           </h2>
           {!isPro && (
-            <Link href="/pricing" className="text-sm text-[#c86bff] hover:text-[#e0a3ff]">
+            <Link href="/pricing" className="text-sm text-[#ff3d81] hover:text-[#ff6ba0]">
               Unlock all paths →
             </Link>
           )}
         </div>
-        <Stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {paths.map((s) => {
             const st = perStream.get(s.id) ?? { total: 0, done: 0 };
-            const pct = st.total ? Math.round((st.done / st.total) * 100) : 0;
-            const Icon = streamIcon[s.slug] ?? streamIcon.foundations;
             const locked = !isPro;
             return (
               <StaggerItem key={s.id}>
-                <Link
+                <PathTile
+                  slug={s.slug}
+                  title={s.title}
+                  tagline={s.tagline}
                   href={locked ? "/pricing" : `/stream/${s.slug}`}
-                  className="group block glass glass-hover rounded-2xl p-5 h-full relative"
-                >
-                  {locked && (
-                    <span className="absolute top-4 right-4 text-[#a79fc0]">
-                      <Lock size={16} />
-                    </span>
-                  )}
-                  <span className="shrink-0 w-11 h-11 rounded-xl grid place-items-center bg-[#7c5cff]/15 text-[#a78bfa]">
-                    <Icon size={22} />
-                  </span>
-                  <h3 className="font-bold mt-3 flex items-center gap-1">
-                    {s.title}
-                    <ChevronRight
-                      size={15}
-                      className="text-[#a79fc0] opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
-                    />
-                  </h3>
-                  <p className="text-xs text-[#a79fc0] mt-1">{s.tagline}</p>
-                  {!locked && st.total > 0 && (
-                    <div className="mt-3">
-                      <AnimatedBar pct={pct} className="h-1.5" />
-                      <p className="text-[11px] text-[#a79fc0] mt-1">
-                        {st.done}/{st.total} · {pct}%
-                      </p>
-                    </div>
-                  )}
-                  {locked && (
-                    <p className="mt-3 text-[11px] font-semibold text-[#c86bff]">
-                      Unlock with Pro
-                    </p>
-                  )}
-                </Link>
+                  doneCount={st.done}
+                  totalCount={st.total}
+                  locked={locked}
+                />
               </StaggerItem>
             );
           })}
         </Stagger>
       </section>
+
+      {/* Forage Interview */}
+      <FadeUp>
+        <Link
+          href="/interview"
+          className="group block glass glass-hover rounded-2xl p-5 relative overflow-hidden"
+        >
+          <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full bg-[#3d8fff]/15 blur-3xl pointer-events-none" />
+          <div className="flex items-center gap-4">
+            <span className="shrink-0 w-11 h-11 rounded-xl grid place-items-center bg-[#3d8fff]/15 text-[#5ba3ff]">
+              <Mic size={22} />
+            </span>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold flex items-center gap-1.5">
+                Forage Interview
+                <ChevronRight
+                  size={15}
+                  className="text-[#7d99a3] opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+                />
+              </h3>
+              <p className="text-xs text-[#7d99a3] mt-0.5">
+                A live, voice-first AI mock interview for your target role.
+              </p>
+            </div>
+            <span
+              className={`shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 ${
+                isPro ? "bg-[#3fb950]/15 text-[#3fb950]" : "bg-[#ffb020]/15 text-[#ffb020]"
+              }`}
+            >
+              {isPro ? (
+                <>
+                  <Sparkles size={12} /> Unlimited
+                </>
+              ) : (
+                "3-min trial"
+              )}
+            </span>
+          </div>
+        </Link>
+      </FadeUp>
     </div>
   );
 }

@@ -31,7 +31,7 @@ export function NavProgress() {
       style={{ opacity: visible ? 1 : 0, transition: "opacity 200ms ease" }}
     >
       <div
-        className="h-full bg-gradient-to-r from-[#7c5cff] via-[#c86bff] to-[#46e0ff]"
+        className="h-full bg-gradient-to-r from-[#00e5ff] via-[#ff3d81] to-[#baff2e]"
         style={{
           width: visible ? "100%" : "0%",
           transition: visible ? "width 380ms ease-out" : "none",

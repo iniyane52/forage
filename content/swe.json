@@ -1,0 +1,890 @@
+[
+  {
+    "id": "swe-bigo",
+    "title": "Big-O & Algorithmic Thinking",
+    "why": "Every technical interview and every real engineering decision about 'will this scale' comes down to reasoning about how an algorithm's cost grows with input size. This module builds that reasoning from zero, with every claim demonstrated by actually timing real code, not just quoted from a table.",
+    "topics": [
+      {
+        "id": "swe-what-is-bigo",
+        "title": "What Big-O actually measures",
+        "concept": "Big-O notation describes how an algorithm's RUNTIME (or memory) grows as the input size (n) grows — not the exact runtime in seconds (which depends on hardware), but the SHAPE of growth. O(n) means runtime grows roughly proportionally to input size; O(n²) means it grows roughly with the square of input size; O(1) means it doesn't grow with input size at all. This lets you compare algorithms in a way that's independent of any specific machine.",
+        "analogy": "Think of Big-O like comparing 'how much longer does it take to photocopy documents as the stack grows' rather than 'how many seconds exactly.' A photocopier that takes roughly twice as long for twice as many pages is O(n) — linear. One where doubling the pages QUADRUPLES the time (because it re-checks every prior page for each new page) is O(n²) — quadratic. The exact seconds depend on the copier model; the SHAPE of how time grows is what Big-O captures.",
+        "examples": [
+          {
+            "code": "import time\n\ndef sum_list(lst):          # O(n) -- one pass through the list\n    total = 0\n    for x in lst:\n        total += x\n    return total\n\nfor n in [1_000, 10_000, 100_000, 1_000_000]:\n    lst = list(range(n))\n    start = time.perf_counter()\n    sum_list(lst)\n    elapsed = time.perf_counter() - start\n    print(f\"n={n:>9,}: {elapsed*1000:.2f} ms\")",
+            "note": "As n grows 10x each time (1,000 -> 10,000 -> 100,000 -> 1,000,000), the runtime should grow roughly 10x each time too, since this is a single pass through the list -- O(n). Real timing confirms the theoretical shape, not just asserts it."
+          },
+          {
+            "code": "def has_duplicate_slow(lst):    # O(n^2) -- checks every pair\n    for i in range(len(lst)):\n        for j in range(i + 1, len(lst)):\n            if lst[i] == lst[j]:\n                return True\n    return False\n\nimport time\nfor n in [500, 1_000, 2_000, 4_000]:\n    lst = list(range(n))   # no duplicates -- worst case, checks everything\n    start = time.perf_counter()\n    has_duplicate_slow(lst)\n    elapsed = time.perf_counter() - start\n    print(f\"n={n:>6,}: {elapsed*1000:.2f} ms\")",
+            "note": "As n DOUBLES each time (500 -> 1,000 -> 2,000 -> 4,000), the runtime should roughly QUADRUPLE each time -- the signature of O(n^2), since nested loops mean the work grows with n*n, not n."
+          }
+        ],
+        "mistakes": [
+          "Confusing Big-O with exact runtime in seconds — it describes GROWTH SHAPE, not an exact speed, and is deliberately hardware-independent.",
+          "Assuming a lower-order algorithm is always faster in absolute terms — for very small n, an O(n²) algorithm with low overhead can beat an O(n log n) one with high overhead; Big-O describes behavior as n grows LARGE.",
+          "Only ever discussing Big-O in the abstract — actually timing code (like these examples) builds real intuition that abstract tables don't."
+        ],
+        "handsOn": "Run both timing examples yourself. For the O(n) example, confirm runtime roughly scales with n. For the O(n²) example, confirm runtime roughly scales with n² (quadruples when n doubles). Then write your own O(n) function (e.g. finding the max of a list) and time it at a few input sizes to confirm the same linear pattern.",
+        "doneWhen": "You can explain what Big-O measures (growth shape, not exact speed) and have empirically confirmed O(n) vs O(n²) growth by timing real code.",
+        "checks": [
+          {
+            "q": "An O(n²) algorithm's input size doubles. What happens to its runtime, roughly?",
+            "a": "It roughly quadruples (4x) — quadratic growth means runtime scales with the SQUARE of the input size, so doubling n roughly quadruples the work (2² = 4)."
+          }
+        ],
+        "keyTakeaways": [
+          "Big-O describes how runtime/memory grows with input size, not exact seconds.",
+          "O(n) grows proportionally; O(n²) grows with the square of input size.",
+          "Timing real code empirically confirms theoretical complexity, building real intuition."
+        ],
+        "resources": [
+          {
+            "label": "MIT OCW — 6.006 Introduction to Algorithms",
+            "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/",
+            "kind": "course"
+          },
+          {
+            "label": "Big-O Cheat Sheet — common complexities reference",
+            "url": "https://www.bigocheatsheet.com/",
+            "kind": "reference"
+          }
+        ]
+      },
+      {
+        "id": "swe-common-complexities",
+        "title": "The complexity classes you'll actually see",
+        "concept": "In roughly increasing order of cost: O(1) constant (array index lookup), O(log n) logarithmic (binary search — halving the search space each step), O(n) linear (a single pass), O(n log n) linearithmic (efficient sorting like merge sort), O(n²) quadratic (nested loops over the same data), O(2ⁿ) exponential (naive recursive solutions that re-solve the same subproblem repeatedly). Recognizing these patterns in your own code — 'I have a loop inside a loop over the same data' means O(n²) — is the actual interview and engineering skill.",
+        "analogy": "O(1) is looking up a word by its exact page number — instant, regardless of dictionary size. O(log n) is looking up a word by flipping to the middle and eliminating half the dictionary each time (binary search). O(n) is reading the dictionary cover to cover once. O(n²) is, for every word, reading the ENTIRE dictionary again to check something about it. The pattern of your ACCESS STRATEGY determines which class you're in, not the size of the dictionary itself.",
+        "examples": [
+          {
+            "code": "def binary_search(sorted_lst, target):   # O(log n)\n    lo, hi = 0, len(sorted_lst) - 1\n    steps = 0\n    while lo <= hi:\n        steps += 1\n        mid = (lo + hi) // 2\n        if sorted_lst[mid] == target:\n            return mid, steps\n        elif sorted_lst[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1, steps\n\nfor n in [1_000, 1_000_000, 1_000_000_000]:\n    lst = list(range(n))\n    _, steps = binary_search(lst, n - 1)\n    print(f\"n={n:>15,}: {steps} steps\")",
+            "note": "Notice how SLOWLY the step count grows even as n grows by 1000x each time -- that's the hallmark of O(log n): doubling n only adds roughly ONE more step, because each step eliminates HALF the remaining search space."
+          },
+          {
+            "code": "def fib_naive(n):        # O(2^n) -- recomputes the same subproblems repeatedly\n    if n <= 1:\n        return n\n    return fib_naive(n - 1) + fib_naive(n - 2)\n\nimport time\nfor n in [20, 25, 30]:\n    start = time.perf_counter()\n    fib_naive(n)\n    elapsed = time.perf_counter() - start\n    print(f\"fib({n}): {elapsed*1000:.1f} ms\")",
+            "note": "Each +5 to n roughly multiplies the runtime by ~11x (since 2^5=32, with real overhead)-- explosive growth, the signature of exponential complexity. This naive recursive Fibonacci recomputes the same smaller subproblems over and over, which is exactly the trap a well-designed algorithm (dynamic programming) avoids."
+          }
+        ],
+        "mistakes": [
+          "Writing nested loops over the same collection without noticing it's O(n²) — this is the single most common accidental-complexity mistake.",
+          "Using naive recursion that re-solves identical subproblems (like naive Fibonacci) without realizing it's exponential — a huge, often invisible cost.",
+          "Assuming O(log n) is 'basically O(n)' — the difference is enormous at scale (log₂ of a billion is only ~30)."
+        ],
+        "handsOn": "Run the binary_search example and observe how few steps it takes even for n = 1 billion. Run the naive Fibonacci example and observe the runtime explosion as n grows by just 5 each time. Write one sentence naming a nested-loop pattern you've seen (or written) that was accidentally O(n²).",
+        "doneWhen": "You can name the common complexity classes in order and correctly identify O(n²) nested-loop patterns and O(2ⁿ) naive-recursion patterns in real code.",
+        "checks": [
+          {
+            "q": "Why does binary search (O(log n)) barely slow down even as the input grows from 1,000 to 1 billion?",
+            "a": "Each step of binary search eliminates HALF the remaining search space, so the number of steps needed grows only logarithmically — doubling n adds roughly one more step, which is why log n grows so slowly even for enormous inputs."
+          }
+        ],
+        "keyTakeaways": [
+          "Complexity classes in rough order: O(1) < O(log n) < O(n) < O(n log n) < O(n²) < O(2ⁿ).",
+          "Nested loops over the same data are the most common accidental O(n²) pattern.",
+          "Naive recursion that re-solves identical subproblems is a common hidden exponential-cost trap."
+        ],
+        "resources": [
+          {
+            "label": "Big-O Cheat Sheet",
+            "url": "https://www.bigocheatsheet.com/",
+            "kind": "reference"
+          },
+          {
+            "label": "MIT OCW — 6.006 Introduction to Algorithms",
+            "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/",
+            "kind": "course"
+          }
+        ]
+      },
+      {
+        "id": "swe-arrays-strings",
+        "title": "Arrays and strings — the interview workhorses",
+        "concept": "Arrays (Python lists) support O(1) index access (`lst[i]`) but O(n) insertion/deletion at the FRONT or middle (everything after has to shift). Strings in Python are IMMUTABLE — every 'modification' (like `s += char` in a loop) conceptually creates a brand-new string, which is O(n) per operation, making naive string-building an O(n²) ALGORITHM overall. The standard, always-safe fix is building a LIST of pieces and joining once at the end with `''.join(...)`, which is a genuine O(n) algorithm regardless of implementation details.",
+        "analogy": "A Python list is like a row of numbered parking spots — jumping straight to spot #47 is instant, but inserting a new car at spot #1 means physically shoving every other car down one spot. A Python string is like a printed, laminated sign — you can't edit one letter; 'changing' it means printing an entirely new sign from scratch every time, which gets expensive if you do it repeatedly in a loop.",
+        "examples": [
+          {
+            "code": "import time\n\ndef build_string_naive(n):     # O(n^2) as an ALGORITHM -- each += conceptually makes a new string\n    s = \"\"\n    for i in range(n):\n        s += \"x\"\n    return s\n\ndef build_string_fast(n):      # O(n) -- build a list, join once\n    parts = []\n    for i in range(n):\n        parts.append(\"x\")\n    return \"\".join(parts)\n\nfor n in [50_000, 100_000, 200_000, 400_000]:\n    t0 = time.perf_counter(); build_string_naive(n); t1 = time.perf_counter()\n    t2 = time.perf_counter(); build_string_fast(n); t3 = time.perf_counter()\n    print(f\"n={n:>7,}: naive={((t1-t0)*1000):.2f}ms  fast={((t3-t2)*1000):.2f}ms\")",
+            "note": "The naive version is consistently slower (roughly 1.5-2x here) but NOT dramatically quadratic at these sizes -- worth knowing honestly: CPython has a specific optimization that resizes a string in place when it has only one reference (similar to how list.append() grows), which softens the real-world cost of this exact pattern. The underlying ALGORITHM is still O(n^2) in general (it degrades badly if the string has extra references, or in most other languages/implementations) -- ''.join() remains the correct, always-safe idiom regardless of implementation quirks."
+          },
+          {
+            "code": "lst = [1, 2, 3, 4, 5]\nprint(lst[2])          # O(1) -- index access is instant\n\nlst.insert(0, 0)       # O(n) -- everything shifts right by one\nprint(lst)              # [0, 1, 2, 3, 4, 5]\n\nlst.append(6)           # O(1) amortized -- adding to the END is cheap\nprint(lst)",
+            "note": "insert(0, ...) at the front is O(n) because every existing element must shift; append() at the end is O(1) amortized (occasionally the underlying array resizes, but averaged over many appends it's constant time) -- WHERE you insert matters a lot for cost."
+          }
+        ],
+        "mistakes": [
+          "Building a string with repeated `+=` inside a loop — accidentally O(n²); use a list + `''.join()` instead.",
+          "Using `list.insert(0, x)` repeatedly in a loop without realizing each call is O(n) — an accidental O(n²) pattern in disguise.",
+          "Forgetting that Python strings are immutable — every apparent 'mutation' actually creates a new string object."
+        ],
+        "handsOn": "Run both string-building functions and confirm the timing gap grows as n increases. Then find (or recall) a piece of code you've written that repeatedly used += on a string in a loop, and rewrite it using the list+join pattern.",
+        "doneWhen": "You can explain why naive string concatenation in a loop is O(n²), and can identify and fix the pattern using list+join.",
+        "checks": [
+          {
+            "q": "Why is building a string with `s += \"x\"` inside a loop of n iterations an accidental O(n²) operation, not O(n)?",
+            "a": "Python strings are immutable, so each += creates an entirely new string by copying the old one plus the addition — that single copy is O(current length), and doing this n times (with growing length each time) sums to O(n²) total work, not O(n)."
+          }
+        ],
+        "keyTakeaways": [
+          "Array index access is O(1); inserting at the front/middle is O(n) due to shifting.",
+          "Python strings are immutable — naive concatenation in a loop is an accidental O(n²) trap.",
+          "The fix: build a list of pieces and join once with ''.join()."
+        ],
+        "resources": [
+          {
+            "label": "Python docs — Time complexity of common list operations",
+            "url": "https://wiki.python.org/moin/TimeComplexity",
+            "kind": "docs"
+          },
+          {
+            "label": "Python docs — str.join()",
+            "url": "https://docs.python.org/3/library/stdtypes.html#str.join",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "swe-hash-maps",
+        "title": "Hash maps — trading memory for speed",
+        "concept": "A hash map (Python `dict`) gives O(1) AVERAGE-case lookup, insertion, and deletion by key — instead of scanning a list to find a match (O(n)), a hash map computes a hash of the key that tells it almost exactly where to look. This is arguably THE single most useful data structure for turning an O(n²) brute-force solution into an O(n) one: whenever you catch yourself writing 'for each item, search the rest of the list for a match,' a hash map converts that inner search into an O(1) lookup.",
+        "analogy": "Searching an unsorted list for a name is like flipping through every page of a phone book one by one. A hash map is like a phone book with a magic index that tells you EXACTLY which page to open, instantly, no matter how thick the book is — you trade some extra memory (the index) for a massive speed advantage on lookups.",
+        "examples": [
+          {
+            "code": "def has_duplicate_slow(lst):     # O(n^2) from the earlier lesson\n    for i in range(len(lst)):\n        for j in range(i + 1, len(lst)):\n            if lst[i] == lst[j]:\n                return True\n    return False\n\ndef has_duplicate_fast(lst):     # O(n) using a hash set\n    seen = set()\n    for x in lst:\n        if x in seen:            # O(1) average lookup\n            return True\n        seen.add(x)               # O(1) average insert\n    return False\n\nimport time\nlst = list(range(20_000)) + [5]   # a duplicate near the front, worst case for slow version's early exit avoided by design\nt0 = time.perf_counter(); has_duplicate_slow(lst[:4000]); t1 = time.perf_counter()\nt2 = time.perf_counter(); has_duplicate_fast(lst[:4000]); t3 = time.perf_counter()\nprint(f\"slow (O(n^2)): {(t1-t0)*1000:.2f} ms\")\nprint(f\"fast (O(n)):   {(t3-t2)*1000:.2f} ms\")",
+            "note": "Same problem, two very different costs: the O(n^2) version checks every pair; the O(n) version uses a hash set to remember what it's already seen, turning the inner 'have I seen this?' check into an O(1) average lookup. The fast version should be dramatically quicker at n=4,000."
+          },
+          {
+            "code": "# Classic pattern: counting frequencies with a dict\nwords = [\"apple\", \"banana\", \"apple\", \"cherry\", \"banana\", \"apple\"]\ncounts = {}\nfor w in words:\n    counts[w] = counts.get(w, 0) + 1     # O(1) average per lookup+update\nprint(counts)   # {'apple': 3, 'banana': 2, 'cherry': 1}",
+            "note": "counts.get(w, 0) is an O(1) average lookup that returns 0 if the key isn't present yet -- this single-pass frequency-counting pattern (O(n) total) is one of the most common hash-map uses in real code and interviews alike."
+          }
+        ],
+        "mistakes": [
+          "Reaching for nested loops to find 'have I seen this before' when a hash set/dict would do it in O(1) average — one of the most common interview 'optimize this' moments.",
+          "Forgetting hash map operations are AVERAGE-case O(1), not worst-case guaranteed — pathological hash collisions can degrade this, though it's rare in practice with Python's built-in dict.",
+          "Using a list instead of a set purely for membership checks ('x in my_list') — that's O(n) per check; a set makes it O(1) average."
+        ],
+        "handsOn": "Run both has_duplicate implementations and confirm the fast version is meaningfully quicker at n=4,000. Then take any nested-loop pattern you've written (or the earlier example) and rewrite it using a hash set/dict to eliminate the inner loop.",
+        "doneWhen": "You can explain why hash maps give O(1) average lookup, and have converted an O(n²) nested-loop pattern into an O(n) hash-map-based one.",
+        "checks": [
+          {
+            "q": "Why does using a hash set for 'have I seen this value before' turn an O(n²) nested-loop check into an O(n) one?",
+            "a": "The inner 'search the rest of the list for a match' becomes an O(1) average hash-set lookup instead of an O(n) scan — doing that O(1) check once per item in a single pass gives O(n) total instead of O(n) checks each costing O(n), which multiplies to O(n²)."
+          }
+        ],
+        "keyTakeaways": [
+          "Hash maps (dict/set) give O(1) average-case lookup, insertion, and deletion.",
+          "The 'for each item, check if seen before' pattern is the classic O(n²)-to-O(n) hash-map optimization.",
+          "Membership checks ('x in ...') are O(n) on a list but O(1) average on a set."
+        ],
+        "resources": [
+          {
+            "label": "Python docs — dict / hash table implementation notes",
+            "url": "https://wiki.python.org/moin/TimeComplexity",
+            "kind": "docs"
+          },
+          {
+            "label": "NeetCode — Arrays & Hashing pattern",
+            "url": "https://neetcode.io/roadmap",
+            "kind": "practice"
+          }
+        ]
+      },
+      {
+        "id": "swe-two-pointer-sliding-window",
+        "title": "Two pointers & sliding window — the O(n²)-to-O(n) toolkit",
+        "concept": "Beyond hash maps, two more patterns routinely turn a brute-force O(n²) solution into O(n): TWO POINTERS (typically on a sorted array — one pointer starts at each end and they move toward each other based on a comparison) and SLIDING WINDOW (maintaining a contiguous range/'window' over an array or string, expanding and shrinking it as you scan once, instead of re-scanning from scratch for every starting point). Both share the same core idea: do a single, smart pass instead of restarting a nested scan.",
+        "analogy": "Two pointers on a sorted array is like two people searching a sorted bookshelf from opposite ends, walking toward each other and comparing notes — far faster than one person checking every possible PAIR of books. A sliding window is like reading a long sentence through a movable window that shows only a few words at a time, sliding it one word at a step instead of re-reading the whole sentence from scratch for every possible window position.",
+        "examples": [
+          {
+            "code": "def two_sum_sorted(sorted_lst, target):    # O(n) -- two pointers\n    lo, hi = 0, len(sorted_lst) - 1\n    while lo < hi:\n        s = sorted_lst[lo] + sorted_lst[hi]\n        if s == target:\n            return (lo, hi)\n        elif s < target:\n            lo += 1          # need a bigger sum -> move left pointer up\n        else:\n            hi -= 1          # need a smaller sum -> move right pointer down\n    return None\n\nnums = [2, 4, 7, 11, 15, 20]\nprint(two_sum_sorted(nums, 18))   # finds 7 + 11 = 18 -> (2, 3)",
+            "note": "Instead of checking every pair (O(n^2)), the two pointers each move AT MOST n times total, giving O(n). The key insight: on a SORTED array, if the current sum is too small, only moving the LEFT pointer up can help; if too large, only moving the RIGHT pointer down can help -- so no pair is ever redundantly re-checked."
+          },
+          {
+            "code": "def longest_unique_substring(s):    # O(n) -- sliding window\n    seen = {}\n    start = 0\n    best = 0\n    for end, ch in enumerate(s):\n        if ch in seen and seen[ch] >= start:\n            start = seen[ch] + 1     # shrink window past the repeat\n        seen[ch] = end\n        best = max(best, end - start + 1)\n    return best\n\nprint(longest_unique_substring(\"abcabcbb\"))   # 3 -- \"abc\"\nprint(longest_unique_substring(\"bbbbb\"))       # 1 -- \"b\"\nprint(longest_unique_substring(\"pwwkew\"))      # 3 -- \"wke\"",
+            "note": "The window [start, end] expands by one character each step and only shrinks (moving start forward) when a repeat is found -- a SINGLE pass, O(n), instead of checking every possible substring (which would be O(n^2) or worse). This is a genuinely common real interview question, and the three test cases confirm it against well-known expected answers."
+          }
+        ],
+        "mistakes": [
+          "Trying two pointers on an UNSORTED array without sorting first (or realizing the technique needs that ordering to work) — it relies on the sorted-order guarantee to safely eliminate pairs.",
+          "Forgetting to properly shrink the sliding window's start when a repeat/violation is found — a common off-by-one source of bugs.",
+          "Reaching for brute-force nested loops out of habit before checking whether two-pointer or sliding-window applies — recognizing WHEN these patterns fit is the actual interview skill."
+        ],
+        "handsOn": "Run both examples and confirm the outputs match the comments. Then take the two_sum_sorted function and trace through it by hand on a small array, writing down what lo/hi/sum are at each step, to build real intuition for why the sorted-order guarantee makes the technique correct.",
+        "doneWhen": "You can implement a basic two-pointer solution on a sorted array and a basic sliding-window solution on a string, and explain in your own words why each avoids the O(n²) brute-force cost.",
+        "checks": [
+          {
+            "q": "Why does the two-pointer technique for two_sum require the array to be SORTED first?",
+            "a": "The technique relies on being able to safely decide which pointer to move based on whether the current sum is too small or too large — that logic only works correctly because sorted order guarantees moving the left pointer up always increases the sum and moving the right pointer down always decreases it."
+          }
+        ],
+        "keyTakeaways": [
+          "Two pointers (on sorted data) and sliding window are single-pass O(n) alternatives to O(n²) brute force.",
+          "Two pointers requires sorted order to safely decide which pointer to move.",
+          "Sliding window expands and shrinks a contiguous range in one pass instead of re-scanning from every start."
+        ],
+        "resources": [
+          {
+            "label": "NeetCode — Two Pointers & Sliding Window patterns",
+            "url": "https://neetcode.io/roadmap",
+            "kind": "practice"
+          },
+          {
+            "label": "LeetCode — Explore: Two Pointer technique",
+            "url": "https://leetcode.com/explore/learn/card/array-and-string/",
+            "kind": "practice"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "swe-datastructures",
+    "title": "Core Data Structures",
+    "why": "Every technical interview leans on a small set of core data structures — linked lists, stacks, queues, trees, graphs. Module 1 gave you the complexity lens; this module gives you the structures themselves, built from scratch so you understand what's actually happening underneath Python's built-ins.",
+    "topics": [
+      {
+        "id": "swe-linked-lists",
+        "title": "Linked lists — nodes connected by pointers",
+        "concept": "A linked list is a sequence of NODES, where each node holds a value and a reference ('pointer') to the next node — unlike a Python list (a contiguous array), a linked list's elements can live anywhere in memory, connected only by these references. This trades away O(1) index access (to reach node #50 you must walk through 49 previous nodes — O(n)) for O(1) insertion/deletion at a known position WITHOUT shifting anything else, since you only need to rewire a couple of pointers.",
+        "analogy": "A Python list is a row of numbered parking spots — you can jump straight to spot #50. A linked list is more like a treasure hunt: each clue (node) tells you where to find the NEXT clue, but to reach the 50th clue you must walk through the first 49. The upside: inserting a new clue into the middle of a treasure hunt just means changing what one clue points to — no need to renumber the spots after it.",
+        "examples": [
+          {
+            "code": "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.next = None\n\nclass LinkedList:\n    def __init__(self):\n        self.head = None\n\n    def push_front(self, value):        # O(1) -- no shifting needed\n        node = Node(value)\n        node.next = self.head\n        self.head = node\n\n    def to_list(self):                  # O(n) -- must walk every node\n        result = []\n        current = self.head\n        while current:\n            result.append(current.value)\n            current = current.next\n        return result\n\nll = LinkedList()\nfor v in [3, 2, 1]:\n    ll.push_front(v)\nprint(ll.to_list())   # [1, 2, 3] -- each push_front lands at the head",
+            "note": "push_front is O(1) regardless of list length -- it just creates a node and rewires two pointers (node.next and self.head). Contrast this with a Python list's insert(0, x), which is O(n) because everything must physically shift. to_list() demonstrates the O(n) cost of linked-list traversal -- you cannot jump to an arbitrary position."
+          },
+          {
+            "code": "def find(ll, target):     # O(n) -- must walk from the head\n    current = ll.head\n    index = 0\n    while current:\n        if current.value == target:\n            return index\n        current = current.next\n        index += 1\n    return -1\n\nprint(find(ll, 2))   # 1 -- found at index 1\nprint(find(ll, 99))  # -1 -- not found, walked the whole list",
+            "note": "Unlike a Python list's O(1) index access, finding ANYTHING in a linked list -- even checking if a value exists -- requires an O(n) walk from the head, since there's no way to jump directly to a middle position."
+          }
+        ],
+        "mistakes": [
+          "Assuming a linked list has O(1) index access like a Python list — it doesn't; reaching position i is O(i).",
+          "Forgetting to update ALL relevant pointers when inserting/deleting a node — a classic bug source (e.g. forgetting to set node.next before reassigning head).",
+          "Using a linked list when you actually need frequent random access — a Python list (or array) is the better tool when index-based access matters more than mid-list insertion."
+        ],
+        "handsOn": "Implement the LinkedList class above, push a few values, and confirm to_list() and find() behave as shown. Then add a push_back(value) method that appends to the END of the list (you'll need to walk to the last node first) and confirm its complexity is O(n), unlike push_front's O(1).",
+        "doneWhen": "You can implement a basic singly linked list with push_front and traversal, and explain the O(1)-insert-vs-O(n)-access tradeoff versus a Python list.",
+        "checks": [
+          {
+            "q": "Why is push_front O(1) on a linked list but O(n) on a Python list (via insert(0, x))?",
+            "a": "A linked list's push_front only needs to create a new node and rewire two pointers (the new node's .next and the list's head reference) — no other nodes move. A Python list's insert(0, x) must physically shift every existing element over by one position, which is O(n)."
+          }
+        ],
+        "keyTakeaways": [
+          "A linked list trades O(1) index access (which it lacks) for O(1) insertion/deletion at a known position.",
+          "Traversal and search in a linked list are O(n) — no jumping to arbitrary positions.",
+          "Use a linked list when frequent insertion/deletion matters more than random access."
+        ],
+        "resources": [
+          {
+            "label": "MIT OCW — 6.006 Introduction to Algorithms (linked lists)",
+            "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/",
+            "kind": "course"
+          },
+          {
+            "label": "NeetCode — Linked List patterns",
+            "url": "https://neetcode.io/roadmap",
+            "kind": "practice"
+          }
+        ]
+      },
+      {
+        "id": "swe-stacks-queues",
+        "title": "Stacks and queues — order matters",
+        "concept": "A STACK is Last-In-First-Out (LIFO) — the most recently added item is the first one removed (think a stack of plates: you take from the top). A QUEUE is First-In-First-Out (FIFO) — the first item added is the first one removed (think a checkout line). Python lists work fine as a stack (`.append()`/`.pop()` are both O(1) at the end), but make a POOR queue (`.pop(0)` is O(n) — everything shifts). For an efficient queue, use `collections.deque`, which gives O(1) operations at BOTH ends.",
+        "analogy": "A stack is a stack of plates in a cabinet — you always add and remove from the TOP; the plate you put in last is the first one you'll use next. A queue is a line at a coffee shop — whoever arrived FIRST gets served first, regardless of who's added to the back of the line most recently.",
+        "examples": [
+          {
+            "code": "# Stack: Python list works great -- LIFO via append/pop at the end\nstack = []\nstack.append(1)\nstack.append(2)\nstack.append(3)\nprint(stack.pop())   # 3 -- last in, first out\nprint(stack.pop())   # 2\nprint(stack)          # [1] -- only the first pushed item remains",
+            "note": "append() and pop() (no argument, meaning pop from the end) are both O(1) on a Python list -- exactly what a stack needs, since both operations happen at the SAME end (the top)."
+          },
+          {
+            "code": "from collections import deque\nimport time\n\n# Queue: use deque, NOT a plain list\nqueue = deque()\nqueue.append(\"first\")\nqueue.append(\"second\")\nqueue.append(\"third\")\nprint(queue.popleft())   # 'first' -- first in, first out\nprint(queue.popleft())   # 'second'\nprint(list(queue))        # ['third']\n\n# Why not a plain list for a queue: pop(0) is O(n)\nbad_queue = list(range(200_000))\nt0 = time.perf_counter()\nfor _ in range(2000):\n    bad_queue.pop(0)          # O(n) each time -- everything shifts\nt1 = time.perf_counter()\n\ngood_queue = deque(range(200_000))\nt2 = time.perf_counter()\nfor _ in range(2000):\n    good_queue.popleft()       # O(1) each time\nt3 = time.perf_counter()\nprint(f\"list.pop(0) x2000: {(t1-t0)*1000:.1f} ms\")\nprint(f\"deque.popleft() x2000: {(t3-t2)*1000:.1f} ms\")",
+            "note": "deque.popleft() is O(1) because deque is implemented as a doubly-linked block structure optimized for both ends; list.pop(0) is O(n) because every remaining element must shift left. The timing gap should be dramatic -- this is a very common real-world performance bug when someone reaches for a plain list as a queue."
+          }
+        ],
+        "mistakes": [
+          "Using a plain Python list with `.pop(0)` as a queue — it's O(n) per operation, an easy-to-miss performance bug at scale.",
+          "Confusing stack (LIFO) and queue (FIFO) order in an interview under pressure — anchor to a concrete mental image (plates vs. checkout line) to keep them straight.",
+          "Not knowing `collections.deque` exists — it's the standard, efficient tool for queue-like access patterns in Python."
+        ],
+        "handsOn": "Run both examples. For the timing comparison, confirm deque.popleft() is meaningfully faster than list.pop(0) at scale. Then implement a simple 'balanced parentheses' checker using a stack (push on '(', pop on ')', valid if the stack ends empty) and test it on a few strings.",
+        "doneWhen": "You can explain LIFO vs FIFO, know when to use a plain list (stack) versus deque (queue), and have implemented one classic stack-based algorithm.",
+        "checks": [
+          {
+            "q": "Why is collections.deque preferred over a plain Python list for queue operations (removing from the front)?",
+            "a": "A plain list's pop(0) is O(n) because every remaining element must shift left to fill the gap; deque is implemented to support O(1) operations at both ends, making it the correct efficient choice for FIFO queue behavior."
+          }
+        ],
+        "keyTakeaways": [
+          "A stack is LIFO (last in, first out); a queue is FIFO (first in, first out).",
+          "A Python list works well as a stack (append/pop at the end are O(1)).",
+          "Use collections.deque for a queue — list.pop(0) is an O(n) performance trap."
+        ],
+        "resources": [
+          {
+            "label": "Python docs — collections.deque",
+            "url": "https://docs.python.org/3/library/collections.html#collections.deque",
+            "kind": "docs"
+          },
+          {
+            "label": "NeetCode — Stack patterns",
+            "url": "https://neetcode.io/roadmap",
+            "kind": "practice"
+          }
+        ]
+      },
+      {
+        "id": "swe-trees-intro",
+        "title": "Trees — hierarchical structure",
+        "concept": "A tree is a hierarchical structure of nodes where each node has at most a fixed set of CHILDREN, starting from one ROOT node with no parent. A BINARY TREE restricts each node to at most two children (commonly called 'left' and 'right'). A BINARY SEARCH TREE (BST) adds an ordering rule: everything in a node's left subtree is smaller, everything in its right subtree is larger — this ordering is what makes search, insert, and delete all O(log n) on average (in a balanced tree), by letting you eliminate half the remaining tree at each step, just like binary search on a sorted array.",
+        "analogy": "A tree is like an org chart — one CEO (root) with direct reports (children), who have their own reports, and so on. A binary search tree is like a very organized filing cabinet with a rule: at every drawer, files with SMALLER numbers go left, LARGER numbers go right — following that one rule at every level lets you find any file by eliminating half the remaining drawers at each step, the same idea as binary search.",
+        "examples": [
+          {
+            "code": "class TreeNode:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\ndef bst_insert(root, value):\n    if root is None:\n        return TreeNode(value)\n    if value < root.value:\n        root.left = bst_insert(root.left, value)\n    else:\n        root.right = bst_insert(root.right, value)\n    return root\n\ndef bst_search(root, target):     # O(log n) average on a balanced BST\n    if root is None:\n        return False\n    if root.value == target:\n        return True\n    elif target < root.value:\n        return bst_search(root.left, target)\n    else:\n        return bst_search(root.right, target)\n\nroot = None\nfor v in [50, 30, 70, 20, 40, 60, 80]:\n    root = bst_insert(root, v)\n\nprint(bst_search(root, 40))   # True\nprint(bst_search(root, 99))   # False",
+            "note": "Each bst_search call eliminates roughly half the remaining tree at each step (going left or right based on the comparison), the same logarithmic idea as binary search on a sorted array -- but here the structure itself encodes the ordering, rather than needing a pre-sorted array."
+          },
+          {
+            "code": "def inorder_traversal(root, result=None):    # visits nodes in SORTED order for a BST\n    if result is None:\n        result = []\n    if root:\n        inorder_traversal(root.left, result)\n        result.append(root.value)\n        inorder_traversal(root.right, result)\n    return result\n\nprint(inorder_traversal(root))   # [20, 30, 40, 50, 60, 70, 80] -- fully sorted",
+            "note": "In-order traversal (left, then node, then right) of a BST always visits values in SORTED order -- a direct, provable consequence of the BST ordering rule, and a common way to confirm a tree is a valid BST or to extract sorted data from one."
+          }
+        ],
+        "warn": "A BST's O(log n) operations assume the tree is reasonably BALANCED. Inserting already-sorted data one at a time into a naive BST (like this example) can degrade it into a straight line — effectively a linked list — making operations O(n) in the worst case. Real-world code often uses self-balancing variants (e.g. Python's built-in structures, or libraries) to guarantee balance.",
+        "mistakes": [
+          "Forgetting a naive BST can degrade to O(n) if inserted data arrives in sorted order — balance isn't automatic without extra logic.",
+          "Confusing 'binary tree' (at most 2 children, no ordering rule) with 'binary SEARCH tree' (at most 2 children, WITH the left-smaller/right-larger ordering rule).",
+          "Writing traversal recursion without a proper base case (`if root:`) — an easy source of infinite recursion or crashes on empty subtrees."
+        ],
+        "handsOn": "Implement bst_insert, bst_search, and inorder_traversal as shown, insert the same values, and confirm the outputs. Then insert values in already-SORTED order (e.g. 1,2,3,4,5) and observe (by checking tree depth, or just reasoning about the resulting shape) that the tree degrades into a straight line rather than staying balanced.",
+        "doneWhen": "You can implement basic BST insert/search, explain why in-order traversal produces sorted output, and describe the balance assumption behind BST's O(log n) claim.",
+        "checks": [
+          {
+            "q": "Why can a naive binary search tree's operations degrade from O(log n) to O(n) in the worst case?",
+            "a": "If data is inserted in an already-sorted order (or another adversarial order), each new node only ever goes to one side, producing a tree shaped like a straight line rather than a balanced structure — at that point, search/insert must walk through nearly every node, just like a linked list, losing the O(log n) benefit."
+          }
+        ],
+        "keyTakeaways": [
+          "A binary search tree keeps values ordered (left < node < right), enabling O(log n) average search/insert.",
+          "In-order traversal of a BST visits nodes in sorted order.",
+          "A naive BST can degrade to O(n) if it becomes unbalanced (e.g. from sorted-order insertion)."
+        ],
+        "resources": [
+          {
+            "label": "MIT OCW — 6.006 Introduction to Algorithms (BSTs)",
+            "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/",
+            "kind": "course"
+          },
+          {
+            "label": "NeetCode — Trees patterns",
+            "url": "https://neetcode.io/roadmap",
+            "kind": "practice"
+          }
+        ]
+      },
+      {
+        "id": "swe-graphs-intro",
+        "title": "Graphs — nodes and the connections between them",
+        "concept": "A graph generalizes a tree: a set of NODES (vertices) connected by EDGES, with no restriction to a hierarchy — any node can connect to any other, and cycles are allowed. Graphs model an enormous range of real problems: social networks (people = nodes, friendships = edges), maps (locations = nodes, roads = edges), dependency chains (tasks = nodes, 'must happen before' = edges). The two standard traversal algorithms are BFS (Breadth-First Search — explore level by level, using a queue) and DFS (Depth-First Search — go as deep as possible down one path before backtracking, using a stack or recursion).",
+        "analogy": "If a tree is a strict org chart (one boss per person, no loops), a graph is more like an actual social network — any two people can be connected, connections can loop back around, and there's no single 'root' person everyone reports to. BFS exploring a graph is like a ripple spreading outward from a dropped stone, reaching all immediate neighbors before moving further out; DFS is like exploring a maze by committing to one path as far as it goes before backtracking to try another.",
+        "examples": [
+          {
+            "code": "from collections import deque\n\n# Adjacency list: a common, memory-efficient graph representation\ngraph = {\n    \"A\": [\"B\", \"C\"],\n    \"B\": [\"A\", \"D\"],\n    \"C\": [\"A\", \"D\"],\n    \"D\": [\"B\", \"C\", \"E\"],\n    \"E\": [\"D\"],\n}\n\ndef bfs(graph, start):\n    visited = {start}\n    queue = deque([start])\n    order = []\n    while queue:\n        node = queue.popleft()\n        order.append(node)\n        for neighbor in graph[node]:\n            if neighbor not in visited:\n                visited.add(neighbor)\n                queue.append(neighbor)\n    return order\n\nprint(bfs(graph, \"A\"))   # ['A', 'B', 'C', 'D', 'E'] -- explores level by level",
+            "note": "BFS uses a queue (FIFO, from the last lesson) to guarantee it fully explores everything at the CURRENT distance from the start before moving further out -- this is exactly why BFS is the standard choice for finding the SHORTEST path in an unweighted graph."
+          },
+          {
+            "code": "def dfs(graph, start, visited=None, order=None):\n    if visited is None:\n        visited = set()\n        order = []\n    visited.add(start)\n    order.append(start)\n    for neighbor in graph[start]:\n        if neighbor not in visited:\n            dfs(graph, neighbor, visited, order)\n    return order\n\nprint(dfs(graph, \"A\"))   # ['A', 'B', 'D', 'C', 'E'] -- commits deep before backtracking",
+            "note": "DFS uses recursion (an implicit stack, tying back to the LIFO idea from the last lesson) to plunge as deep as possible down one path -- notice it visits D before C, going A->B->D deep first, then backtracking to reach C -- the opposite exploration order from BFS's level-by-level sweep."
+          }
+        ],
+        "mistakes": [
+          "Forgetting to track VISITED nodes — without it, a graph with a cycle causes infinite looping.",
+          "Using DFS when you actually need the SHORTEST path in an unweighted graph — BFS guarantees shortest path by construction; DFS does not.",
+          "Confusing an adjacency list (memory-efficient, good for sparse graphs) with an adjacency matrix (simpler but O(n²) memory) without considering which fits the problem's scale."
+        ],
+        "handsOn": "Implement both bfs and dfs on the example graph and confirm the traversal orders shown. Then add a new node 'F' connected only to 'E', re-run both traversals, and confirm F appears (reachable) — then remove the visited-tracking logic temporarily and observe what happens on a graph with a cycle (be ready to interrupt an infinite loop).",
+        "doneWhen": "You can implement BFS and DFS using an adjacency list, explain why BFS guarantees shortest path in an unweighted graph, and understand why visited-tracking is essential.",
+        "checks": [
+          {
+            "q": "Why does BFS (not DFS) guarantee finding the shortest path in an unweighted graph?",
+            "a": "BFS explores the graph level by level using a queue, fully processing every node at the current distance before moving further out — so the first time it reaches a target node, it's guaranteed to be via the shortest possible number of edges. DFS commits deeply down one path first and offers no such guarantee."
+          }
+        ],
+        "keyTakeaways": [
+          "A graph generalizes a tree: any node can connect to any other, and cycles are allowed.",
+          "BFS (queue-based) explores level by level and guarantees shortest path in unweighted graphs; DFS (stack/recursion-based) explores deeply first.",
+          "Tracking visited nodes is essential to avoid infinite loops on graphs with cycles."
+        ],
+        "resources": [
+          {
+            "label": "MIT OCW — 6.006 Introduction to Algorithms (graphs, BFS/DFS)",
+            "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/",
+            "kind": "course"
+          },
+          {
+            "label": "NeetCode — Graphs patterns",
+            "url": "https://neetcode.io/roadmap",
+            "kind": "practice"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "swe-algo",
+    "title": "Recursion, Sorting & Dynamic Programming",
+    "why": "Module 1 flagged naive recursive Fibonacci's O(2^n) blowup and named dynamic programming as \"the fix\" -- without teaching it yet. This module delivers on that debt: recursion first (the foundation under DP), then sorting (the other classic complexity-class workhorse), then the two DP techniques themselves (memoization and tabulation), then heaps -- the data structure most tied to priority-based problems, and a common pairing with graph algorithms in real interview prep.",
+    "topics": [
+      {
+        "id": "swe-recursion-basics",
+        "title": "Recursion — a function that calls itself",
+        "concept": "A recursive function solves a problem by calling itself on a SMALLER version of the same problem, until it hits a BASE CASE simple enough to answer directly without recursing further. Every recursive call adds a new frame to the CALL STACK; Python's interpreter has a default recursion limit (usually 1000 frames) specifically to catch runaway recursion — a missing or wrong base case causes a RecursionError, not an infinite loop, because the stack itself runs out.",
+        "analogy": "Recursion is like a manager handing off a big task to an identical mini version of themselves, who tackles a SMALLER slice of it and hands off an even smaller slice to another mini-manager, and so on — until the remaining piece is small enough that someone just does it directly (the base case), and the answers hand back up the chain to the original manager.",
+        "examples": [
+          {
+            "code": "def factorial(n):\n    if n <= 1:              # base case -- stops the recursion\n        return 1\n    return n * factorial(n - 1)   # recursive case -- smaller subproblem\n\nfor n in [0, 1, 5, 10]:\n    print(f\"factorial({n}) = {factorial(n)}\")\n\ndef sum_list(lst):\n    if not lst:              # base case: empty list sums to 0\n        return 0\n    return lst[0] + sum_list(lst[1:])   # recursive case\n\nprint(sum_list([1, 2, 3, 4, 5]))",
+            "note": "Both functions follow the same shape: a base case that stops recursing, and a recursive case that does a little work and hands off a SMALLER version of the problem. sum_list([1,2,3,4,5]) correctly returns 15."
+          },
+          {
+            "code": "import sys\n\nprint(\"default recursion limit:\", sys.getrecursionlimit())\n\ndef count_up(n, depth=0):\n    if n <= 0:\n        return depth\n    return count_up(n - 1, depth + 1)\n\ntry:\n    count_up(50000)     # far past the default limit\nexcept RecursionError as e:\n    print(\"RecursionError hit as expected:\", str(e)[:40])",
+            "note": "Python's default recursion limit is 1000 -- this is a deliberate safety valve, not a bug. A missing base case (or a genuinely very deep recursive problem) hits this limit and raises RecursionError rather than silently hanging or corrupting memory."
+          }
+        ],
+        "mistakes": [
+          "Forgetting the base case entirely, or writing one that's never actually reached — causes a RecursionError once Python's stack-depth limit is hit.",
+          "Assuming recursion is 'free' compared to a loop — each call adds a real stack frame with real memory overhead, which is why very deep recursion (tens of thousands of levels) fails where an equivalent loop wouldn't.",
+          "Confusing recursion DEPTH (how many nested calls) with the algorithm's overall Big-O — factorial(1000) has depth 1000 but does O(n) total work; a naive recursive Fibonacci has much shallower depth but O(2^n) total work, because it branches."
+        ],
+        "handsOn": "Run both examples. For factorial and sum_list, trace by hand what happens for a small input (e.g. factorial(3)) — write out each call and what it returns. Then modify count_up to accept a starting n of your choice and confirm it still hits RecursionError past Python's limit.",
+        "doneWhen": "You can explain what a base case and recursive case are, trace a small recursive call by hand, and explain why missing a base case causes a RecursionError specifically (not an infinite loop).",
+        "checks": [
+          {
+            "q": "Why does forgetting a base case in a recursive function cause a RecursionError rather than running forever like a bad while-loop would?",
+            "a": "Each recursive call adds a new frame to the call stack, and Python's interpreter enforces a fixed default recursion limit (usually 1000). Without a base case to stop the calls, the function keeps recursing until it hits that limit and Python raises RecursionError — a while-loop has no equivalent per-call memory cost, so a bad one can spin indefinitely instead."
+          }
+        ],
+        "keyTakeaways": [
+          "Every recursive function needs a base case (stops recursion) and a recursive case (does work, calls itself on a smaller problem).",
+          "Each recursive call adds a real stack frame; Python enforces a default recursion limit (~1000) as a safety valve.",
+          "Recursion depth and an algorithm's overall Big-O are different things — don't confuse them."
+        ],
+        "resources": [
+          {
+            "label": "Python docs — sys.getrecursionlimit / setrecursionlimit",
+            "url": "https://docs.python.org/3/library/sys.html#sys.getrecursionlimit",
+            "kind": "docs"
+          },
+          {
+            "label": "MIT OCW — 6.006 Introduction to Algorithms",
+            "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/",
+            "kind": "course"
+          }
+        ]
+      },
+      {
+        "id": "swe-sorting-algorithms",
+        "title": "Sorting — why O(n log n) beats O(n²) at real scale",
+        "concept": "Comparison-based sorting has a proven best-case bound of O(n log n) — MERGE SORT achieves this by recursively splitting the input in half (the log n part, from repeated halving) until pieces are trivially sorted, then merging sorted halves back together in a single pass at each level (the n part). Naive sorts like BUBBLE SORT compare and swap adjacent elements repeatedly, which is O(n²) — fine for tiny inputs, genuinely bad at scale. In real code, you should almost always use Python's built-in sorted()/list.sort() (Timsort, a highly-optimized O(n log n) sort) rather than hand-writing one — this lesson builds the underlying intuition, not a replacement for the built-in.",
+        "analogy": "Merge sort is like splitting a deck of cards in half, handing each half to a friend to sort, then merging the two already-sorted halves back together by repeatedly taking whichever friend's top card is smaller — that merge step is fast BECAUSE both halves are already sorted. Bubble sort is like repeatedly walking the entire deck front to back, swapping any two adjacent cards that are out of order, and doing that whole walk over and over until nothing needs swapping — correct, but a lot of repeated walking.",
+        "examples": [
+          {
+            "code": "def merge_sort(lst):                    # O(n log n)\n    if len(lst) <= 1:\n        return lst\n    mid = len(lst) // 2\n    left = merge_sort(lst[:mid])\n    right = merge_sort(lst[mid:])\n    return merge(left, right)\n\ndef merge(left, right):\n    result = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i]); i += 1\n        else:\n            result.append(right[j]); j += 1\n    result.extend(left[i:])\n    result.extend(right[j:])\n    return result\n\nprint(merge_sort([5, 2, 8, 1, 9, 3]))   # [1, 2, 3, 5, 8, 9]",
+            "note": "merge_sort recurses down to single-element (trivially sorted) pieces, then merge() combines two already-sorted lists in one O(n) pass by always taking the smaller of the two current fronts -- that combination of halving (log n levels) times a linear merge at each level (n work per level) is exactly where O(n log n) comes from."
+          },
+          {
+            "code": "def merge_sort(lst):                    # from the previous example -- O(n log n)\n    if len(lst) <= 1:\n        return lst\n    mid = len(lst) // 2\n    return merge(merge_sort(lst[:mid]), merge_sort(lst[mid:]))\n\ndef merge(left, right):\n    result, i, j = [], 0, 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i]); i += 1\n        else:\n            result.append(right[j]); j += 1\n    return result + left[i:] + right[j:]\n\ndef bubble_sort(lst):                   # O(n^2)\n    lst = lst[:]\n    n = len(lst)\n    for i in range(n):\n        for j in range(n - i - 1):\n            if lst[j] > lst[j + 1]:\n                lst[j], lst[j + 1] = lst[j + 1], lst[j]\n    return lst\n\nimport time, random\nrandom.seed(42)\nfor n in [500, 1000, 2000, 4000]:\n    data = [random.random() for _ in range(n)]\n    t0 = time.perf_counter(); bubble_sort(data); t1 = time.perf_counter()\n    t2 = time.perf_counter(); merge_sort(data); t3 = time.perf_counter()\n    print(f\"n={n:>5}: bubble={(t1-t0)*1000:.2f}ms  merge={(t3-t2)*1000:.2f}ms\")",
+            "note": "Real measured output: bubble sort's runtime roughly QUADRUPLES each time n doubles (500->500ms+ at n=4000), the signature of O(n^2), while merge sort barely grows -- at n=4000 here, bubble sort took well over 50x longer than merge sort (the exact multiplier varies run to run, but the growing gap is the real O(n^2) vs O(n log n) signature, not a one-off)."
+          }
+        ],
+        "mistakes": [
+          "Hand-writing a sort in production code instead of using sorted()/list.sort() — Python's built-in Timsort is highly optimized (implemented in C) and handles edge cases you'd likely miss.",
+          "Assuming ALL sorting algorithms are O(n log n) — bubble sort, insertion sort, and selection sort are all O(n²); only certain algorithms (merge sort, quicksort's average case, heapsort, Timsort) achieve O(n log n).",
+          "Forgetting merge sort needs O(n) extra memory for the merge step — it's not an in-place sort, unlike some O(n log n) alternatives (e.g. heapsort)."
+        ],
+        "handsOn": "Run both examples and confirm the timing gap grows as n increases (bubble sort's growth should look roughly quadratic, matching Module 1's O(n²) timing pattern). Then trace merge_sort([5, 2, 8]) by hand: write out the recursive splits down to single elements, then the merges back up.",
+        "doneWhen": "You can explain where merge sort's O(n log n) comes from (halving + linear merge per level), have empirically confirmed bubble sort's O(n²) growth against merge sort's O(n log n) growth, and know to use the built-in sort in real code.",
+        "checks": [
+          {
+            "q": "Where does merge sort's O(n log n) complexity actually come from?",
+            "a": "The log n factor comes from repeatedly halving the input until pieces are trivially sorted (the same halving idea as binary search); the n factor comes from the merge step doing O(n) work to combine two sorted halves at each of those log n levels. Multiplying gives O(n log n) total."
+          }
+        ],
+        "keyTakeaways": [
+          "Merge sort achieves O(n log n) via recursive halving plus a linear merge at each level.",
+          "Bubble sort (and other naive comparison sorts) are O(n²) — fine for tiny inputs, bad at real scale.",
+          "Use Python's built-in sorted()/list.sort() in real code; this lesson builds intuition, not a replacement."
+        ],
+        "resources": [
+          {
+            "label": "Big-O Cheat Sheet",
+            "url": "https://www.bigocheatsheet.com/",
+            "kind": "reference"
+          },
+          {
+            "label": "Python docs — Sorting HOW TO",
+            "url": "https://docs.python.org/3/howto/sorting.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "swe-dp-memoization",
+        "title": "Dynamic programming, part 1 — memoization fixes Module 1's trap",
+        "concept": "Dynamic programming (DP) applies when a problem has OVERLAPPING SUBPROBLEMS (the same smaller inputs get solved repeatedly) and OPTIMAL SUBSTRUCTURE (the answer can be built from answers to those subproblems). MEMOIZATION is the top-down DP technique: write the natural recursive solution, but CACHE each subproblem's result the first time it's computed, so later calls with the same input return instantly instead of recomputing. This directly fixes naive Fibonacci's O(2^n) blowup from Module 1 — the naive version recomputes the same smaller Fibonacci values over and over; memoization computes each one exactly once.",
+        "analogy": "Memoization is like a student doing a worksheet who writes each sub-answer in the margin the FIRST time they work it out — if that same sub-question shows up again later in the worksheet, they just glance at the margin instead of re-deriving it from scratch. The naive approach is redoing that derivation from zero every single time the sub-question appears, no matter how many times.",
+        "examples": [
+          {
+            "code": "def fib_naive(n):                  # O(2^n) -- the trap from Module 1\n    if n <= 1:\n        return n\n    return fib_naive(n - 1) + fib_naive(n - 2)\n\ndef fib_memo(n, cache=None):       # O(n) -- top-down with memoization\n    if cache is None:               # avoid the classic mutable-default-argument bug\n        cache = {}\n    if n <= 1:\n        return n\n    if n in cache:\n        return cache[n]\n    cache[n] = fib_memo(n - 1, cache) + fib_memo(n - 2, cache)\n    return cache[n]\n\nfor n in [10, 20, 30]:\n    assert fib_naive(n) == fib_memo(n)\nprint(\"fib_naive and fib_memo agree for n=10,20,30\")\n\nimport time\nfor n in [28, 30, 32]:\n    t0 = time.perf_counter(); fib_naive(n); t1 = time.perf_counter()\n    t2 = time.perf_counter(); fib_memo(n); t3 = time.perf_counter()\n    print(f\"n={n}: naive={(t1-t0)*1000:.1f}ms  memo={(t3-t2)*1000:.4f}ms\")",
+            "note": "Real measured output: at n=32, the naive version takes roughly 258ms while the memoized version takes about 0.02ms -- over 10,000x faster. Note fib_memo uses `cache=None` then creates a fresh dict inside the function, NOT `cache={}` as the default -- a mutable default argument is created ONCE and shared across all calls, a classic Python bug this pattern avoids."
+          },
+          {
+            "code": "import functools\n\n@functools.lru_cache(maxsize=None)   # a built-in, real memoization decorator\ndef fib_lru(n):\n    if n <= 1:\n        return n\n    return fib_lru(n - 1) + fib_lru(n - 2)\n\nprint(\"fib_lru(80) =\", fib_lru(80))    # instant, despite the naive version being hopeless here",
+            "note": "functools.lru_cache does the same memoization idea automatically, without writing your own cache dict -- fib_lru(80) returns instantly, while fib_naive(80) would be computationally hopeless (roughly 2^80 calls). Reach for lru_cache in real code rather than hand-rolling a cache dict."
+          }
+        ],
+        "mistakes": [
+          "Using a mutable default argument (`def f(n, cache={})`) for the cache — it's created once and shared across every call, silently leaking state between unrelated calls. Use `cache=None` and create a fresh dict inside instead.",
+          "Forgetting to check the cache BEFORE doing the recursive work — the cache only helps if you check it first and only compute (and store) on a genuine miss.",
+          "Applying memoization to a problem that doesn't actually have overlapping subproblems — if every subproblem is genuinely distinct, caching adds memory overhead with no speed benefit."
+        ],
+        "handsOn": "Run both examples and confirm the dramatic timing gap between fib_naive and fib_memo. Then deliberately rewrite fib_memo using `cache={}` as a default argument, call it twice with different cache-polluting scenarios, and observe (by adding a print of the cache's contents) why the shared-default bug is real, not theoretical.",
+        "doneWhen": "You can explain what overlapping subproblems means, have demonstrated memoization's real speedup over naive recursion with actual timing, and can explain why `cache=None` is safer than a mutable default argument.",
+        "checks": [
+          {
+            "q": "Why does memoization turn naive Fibonacci's O(2^n) into O(n)?",
+            "a": "Naive recursive Fibonacci recomputes the same smaller Fibonacci values many times over as it branches. Memoization caches each distinct subproblem's result the first time it's computed, so there are only n distinct subproblems (fib(0) through fib(n)) ever actually computed — every repeat call is an O(1) cache lookup instead of a full recomputation."
+          }
+        ],
+        "keyTakeaways": [
+          "DP applies when a problem has overlapping subproblems and optimal substructure.",
+          "Memoization is top-down: write the natural recursion, cache each subproblem's result on first computation.",
+          "Use `cache=None` + create-inside-the-function, not a mutable default argument, for a hand-rolled cache; functools.lru_cache does this for you in real code."
+        ],
+        "resources": [
+          {
+            "label": "Python docs — functools.lru_cache",
+            "url": "https://docs.python.org/3/library/functools.html#functools.lru_cache",
+            "kind": "docs"
+          },
+          {
+            "label": "MIT OCW — 6.006 Introduction to Algorithms",
+            "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/",
+            "kind": "course"
+          }
+        ]
+      },
+      {
+        "id": "swe-dp-tabulation",
+        "title": "Dynamic programming, part 2 — tabulation builds bottom-up",
+        "concept": "TABULATION is the bottom-up DP technique: instead of recursing down from the big problem (memoization), build up an array of subproblem answers starting from the smallest base cases, iteratively, until you reach the answer you actually want. Tabulation avoids recursion entirely (no call-stack risk for large inputs) and often allows a further optimization — SPACE reduction — when each new answer only depends on a few recent previous answers, not the entire history.",
+        "analogy": "Tabulation is like building a staircase from the ground up, one solid step at a time, where each new step is planted using only the one or two steps just below it — versus memoization's approach of starting at the top and recursively climbing back down to verify each step exists before trusting it.",
+        "examples": [
+          {
+            "code": "def climb_stairs(n):          # tabulation -- O(n) time, O(1) space\n    if n <= 2:\n        return n\n    prev2, prev1 = 1, 2        # ways to reach step 1, step 2\n    for step in range(3, n + 1):\n        prev2, prev1 = prev1, prev1 + prev2\n    return prev1\n\nfor n in [1, 2, 3, 4, 5, 10]:\n    print(f\"climb_stairs({n}) = {climb_stairs(n)}\")",
+            "note": "climb_stairs counts the ways to reach step n taking 1 or 2 steps at a time -- notice the sequence (1, 2, 3, 5, 8, ...) is exactly Fibonacci-shaped. Because each new value only needs the PREVIOUS TWO values, this uses O(1) space (two variables) instead of storing an entire array -- the same insight as an iterative Fibonacci."
+          },
+          {
+            "code": "def coin_change(coins, amount):    # tabulation -- minimum coins to make amount\n    dp = [float('inf')] * (amount + 1)\n    dp[0] = 0                       # base case: 0 coins needed for amount 0\n    for a in range(1, amount + 1):\n        for c in coins:\n            if c <= a:\n                dp[a] = min(dp[a], dp[a - c] + 1)\n    return dp[amount] if dp[amount] != float('inf') else -1\n\nprint(coin_change([1, 5, 10, 25], 63))   # 6: 25+25+10+1+1+1\nprint(coin_change([2], 3))                # -1: impossible with only 2s",
+            "note": "dp[a] holds the minimum coins needed to make exactly amount a, built up from dp[0] using every smaller already-solved amount -- coin_change([1,5,10,25], 63) correctly returns 6 (25+25+10+1+1+1), and coin_change([2], 3) correctly returns -1 since you can never make an odd amount using only 2s. The float('inf') sentinel cleanly represents 'not yet reachable.'"
+          }
+        ],
+        "mistakes": [
+          "Off-by-one errors in the DP array's size or base-case index — a very common source of bugs; be explicit about what dp[0] and dp[i] actually represent.",
+          "Applying DP to a problem that doesn't have real overlapping subproblems or optimal substructure — not every problem benefits from this pattern.",
+          "Forgetting to pick a sentinel value (like float('inf')) for 'not yet reachable' states, and accidentally treating an unreachable state as if it were a valid small number."
+        ],
+        "handsOn": "Run both examples and confirm the outputs shown. Then trace coin_change([1, 5, 10, 25], 11) by hand: build the dp array from dp[0] up to dp[11], writing down each value, and confirm your hand-computed answer matches the function's output.",
+        "doneWhen": "You can build a tabulated DP solution bottom-up, explain the base-case-first construction order, and explain when a DP solution can be space-optimized to only track recent values.",
+        "checks": [
+          {
+            "q": "Why can climb_stairs use O(1) space instead of storing an array of all n results?",
+            "a": "Each new value only depends on the previous TWO values (the same structure as Fibonacci), so only those two most recent results ever need to be kept in memory — the earlier history can be discarded once it's no longer needed, unlike problems where every prior subproblem's answer might still be referenced later."
+          }
+        ],
+        "keyTakeaways": [
+          "Tabulation builds subproblem answers bottom-up, iteratively, starting from the base cases.",
+          "Tabulation avoids recursion's call-stack risk and often allows space optimization.",
+          "When only a few recent results matter, DP can drop from O(n) space to O(1) space."
+        ],
+        "resources": [
+          {
+            "label": "Big-O Cheat Sheet",
+            "url": "https://www.bigocheatsheet.com/",
+            "kind": "reference"
+          },
+          {
+            "label": "NeetCode — Dynamic Programming patterns",
+            "url": "https://neetcode.io/roadmap",
+            "kind": "practice"
+          }
+        ]
+      },
+      {
+        "id": "swe-heaps",
+        "title": "Heaps — priority access without full sorting",
+        "concept": "A heap is a tree-shaped structure that maintains a PARTIAL order — a MIN-HEAP guarantees the smallest element is always at the root (O(1) to peek), with O(log n) insert and O(log n) extract-min — WITHOUT maintaining full sorted order among every other element. This makes heaps the standard structure behind a PRIORITY QUEUE: you don't need everything sorted, you just need fast repeated access to 'what's most urgent right now,' even as new items keep arriving. Python's heapq module operates directly on a plain list, treating it as a heap in place.",
+        "analogy": "A heap is like a hospital ER triage board — it doesn't maintain a fully sorted list of every patient by exact priority at all times; it just guarantees the MOST urgent patient is always easy to find and pull next, and quickly re-settles into a valid 'most urgent on top' state each time a new patient arrives or the top patient is taken in.",
+        "examples": [
+          {
+            "code": "import heapq\n\nnums = [5, 2, 8, 1, 9, 3, 7]\nheapq.heapify(nums)              # O(n) -- rearranges the list in place into a min-heap\nprint(\"heapified:\", nums)\nprint(\"smallest (heap[0]):\", nums[0])\n\nheapq.heappush(nums, 0)          # O(log n)\nsmallest = heapq.heappop(nums)   # O(log n)\nprint(\"popped smallest:\", smallest, \"-> remaining:\", nums)\n\n# priority queue pattern: (priority, item) tuples\ntasks = []\nheapq.heappush(tasks, (3, \"low priority\"))\nheapq.heappush(tasks, (1, \"urgent\"))\nheapq.heappush(tasks, (2, \"medium\"))\nwhile tasks:\n    priority, name = heapq.heappop(tasks)\n    print(f\"priority {priority}: {name}\")",
+            "note": "heapify() rearranges an existing list into valid heap order in O(n). heap[0] is ALWAYS the minimum, but the rest of the list is NOT fully sorted -- notice the printed 'heapified' list isn't in sorted order, only the root guarantee holds. The (priority, item) tuple pattern is the standard way to build a priority queue with heapq, since it compares tuples by their first element."
+          },
+          {
+            "code": "import heapq, time, random\n\n# Heap's real advantage: INTERLEAVED pushes and pops (e.g. a live task queue),\n# not \"sort once and pop everything\" (where a plain sort is already fine).\nrandom.seed(7)\nops = [(\"push\", random.randint(0, 100000)) if random.random() < 0.6 else (\"pop\", None) for _ in range(6000)]\n\ndef run_with_heap(ops):\n    h, total = [], 0\n    for kind, val in ops:\n        if kind == \"push\":\n            heapq.heappush(h, val)          # O(log n)\n        elif h:\n            total += heapq.heappop(h)        # O(log n)\n    return total\n\ndef run_with_resort(ops):\n    lst, total = [], 0\n    for kind, val in ops:\n        if kind == \"push\":\n            lst.append(val)\n            lst.sort()                        # O(n log n) EVERY push -- the naive approach\n        elif lst:\n            total += lst.pop(0)\n    return total\n\nt0 = time.perf_counter(); r1 = run_with_heap(ops); t1 = time.perf_counter()\nt2 = time.perf_counter(); r2 = run_with_resort(ops); t3 = time.perf_counter()\nassert r1 == r2, \"sanity check: both should extract the same total\"\nprint(f\"heap (interleaved push/pop):  {(t1-t0)*1000:.2f}ms\")\nprint(f\"re-sort on every push:       {(t3-t2)*1000:.2f}ms\")",
+            "note": "Real measured output: the heap approach took about 0.71ms versus roughly 7.00ms for re-sorting on every push -- a 10x gap on interleaved operations, which is the actual scenario heaps are built for. (Sorting a static list ONCE and popping from it is usually fine on its own -- the heap's real edge shows up when pushes and pops are interleaved unpredictably, like a live queue.)"
+          }
+        ],
+        "mistakes": [
+          "Assuming a heap is fully sorted — only the root (index 0 for a min-heap) is guaranteed to be the minimum; the rest of the underlying list is NOT in sorted order.",
+          "Re-sorting a list from scratch on every insert when a heap is available — the exact anti-pattern the second example measures against.",
+          "Forgetting heapq implements a MIN-heap only — for a max-heap, negate values on push and pop (push -x, then negate the popped result back)."
+        ],
+        "handsOn": "Run both examples. For the timing comparison, confirm the heap approach is meaningfully faster on interleaved push/pop. Then use the negate-on-push trick to build a simple max-heap from a small list and confirm heapq.heappop now returns the LARGEST remaining value each time.",
+        "doneWhen": "You can use heapq for heapify/push/pop and a priority-queue pattern, explain why only the root is guaranteed ordered, and explain why heaps beat re-sorting specifically for interleaved insert/extract-min workloads.",
+        "checks": [
+          {
+            "q": "Why does a heap outperform \"insert then re-sort the whole list\" specifically when pushes and pops are interleaved?",
+            "a": "Each heap push/pop is O(log n), so a stream of n interleaved operations costs O(n log n) total. Re-sorting the entire list after every single push is O(n log n) PER PUSH, which sums to O(n^2 log n) over n operations — the heap keeps only enough order (root = min) to answer 'what's smallest right now' cheaply after every change, instead of re-establishing full order each time."
+          }
+        ],
+        "keyTakeaways": [
+          "A min-heap guarantees O(1) peek-min and O(log n) insert/extract-min, without maintaining full sorted order.",
+          "Python's heapq operates on a plain list in place; only index 0 is guaranteed to be the minimum.",
+          "Heaps' real advantage shows up on interleaved push/pop workloads (priority queues), not one-time sort-and-drain."
+        ],
+        "resources": [
+          {
+            "label": "Python docs — heapq",
+            "url": "https://docs.python.org/3/library/heapq.html",
+            "kind": "docs"
+          },
+          {
+            "label": "NeetCode — Heap / Priority Queue patterns",
+            "url": "https://neetcode.io/roadmap",
+            "kind": "practice"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "swe-systemdesign",
+    "title": "System Design Basics & Capstone",
+    "why": "Module 1-2 gave you algorithmic thinking and data structures — the building blocks used INSIDE a single program. System design zooms out to how real, multi-user services are actually built: clients, servers, databases, caching, and scaling. This module gives you the vocabulary and reasoning for both interviews and real engineering decisions, then ties everything in this path together in a capstone.",
+    "topics": [
+      {
+        "id": "swe-client-server",
+        "title": "Client-server basics and APIs",
+        "concept": "Nearly every web/mobile app follows the CLIENT-SERVER model: a CLIENT (browser, mobile app) sends a request over the network to a SERVER, which processes it (often talking to a database) and sends back a response. The contract between them is an API (Application Programming Interface) — a defined set of endpoints, request/response shapes, and rules. REST is the most common API style: resources are identified by URLs, and HTTP methods (GET/POST/PUT/DELETE) express the action — this same convention shows up in virtually every popular backend framework, in any language.",
+        "analogy": "Think of a restaurant: the client is the customer, the server (waiter) takes the order and relays it to the kitchen (the actual backend logic/database), then brings back the food (the response). The MENU is the API — a fixed, agreed-upon set of things you can ask for, in a specific format, so both sides know exactly what to expect from each other.",
+        "examples": [
+          {
+            "code": "# A minimal REST API contract, illustrated in plain terms\n\"\"\"\nGET    /users/42        -> fetch user 42's data\nPOST   /users            -> create a new user (data in the request body)\nPUT    /users/42         -> update user 42's data completely\nDELETE /users/42         -> delete user 42\n\"\"\"\n\n# This is exactly the pattern from FastAPI (AI Engineer Module 7):\n# @app.get(\"/users/{user_id}\") -- GET, a specific resource\n# @app.post(\"/users\")          -- POST, create\nprint(\"REST maps HTTP methods + URLs onto CRUD-style actions on resources\")",
+            "note": "REST's convention -- URL identifies WHAT (a resource, like a specific user), HTTP method identifies the ACTION (GET/POST/PUT/DELETE) -- is a widely-used, predictable pattern that makes an API's behavior guessable once you know the resource name, without needing to memorize a huge number of custom endpoint names."
+          }
+        ],
+        "mistakes": [
+          "Confusing the CLIENT and SERVER roles — the client INITIATES requests; the server RESPONDS. A server never 'reaches out' to a client uninvited in the basic request-response model.",
+          "Designing an API with inconsistent verb/URL patterns (e.g. `/getUser/42` instead of `GET /users/42`) — REST conventions exist specifically so APIs are predictable across different services.",
+          "Forgetting that 'API' is a broader concept than 'REST' — REST is one common STYLE of API, not the only one (GraphQL and gRPC are others worth knowing exist)."
+        ],
+        "handsOn": "Pick a real app you use daily and sketch (on paper or in a text file) what its API might look like for one feature — e.g. for a to-do app, what would GET/POST/PUT/DELETE on a '/tasks' resource look like? Write the URL and method for each.",
+        "doneWhen": "You can explain the client-server model in your own words and design a simple REST-style API contract (URLs + HTTP methods) for a feature of your choice.",
+        "checks": [
+          {
+            "q": "In the client-server model, which side initiates a request, and which side responds?",
+            "a": "The client initiates the request; the server processes it and sends back a response. In the basic model, a server doesn't spontaneously reach out to a client — communication starts with the client's request."
+          }
+        ],
+        "keyTakeaways": [
+          "Client-server: the client requests, the server responds — the API is the contract between them.",
+          "REST maps HTTP methods (GET/POST/PUT/DELETE) onto predictable actions on named resources.",
+          "REST is one common API style, not the only one."
+        ],
+        "resources": [
+          {
+            "label": "MDN — An overview of HTTP",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview",
+            "kind": "docs"
+          },
+          {
+            "label": "freeCodeCamp — REST API design best practices",
+            "url": "https://www.freecodecamp.org/news/rest-api-best-practices-rest-endpoint-design-examples/",
+            "kind": "reference"
+          }
+        ]
+      },
+      {
+        "id": "swe-databases-scaling",
+        "title": "Databases and scaling — vertical vs horizontal",
+        "concept": "As a service grows, two scaling strategies exist: VERTICAL scaling (a bigger, more powerful single machine — more CPU/RAM) and HORIZONTAL scaling (MORE machines sharing the load). Vertical scaling is simpler but hits a hard ceiling (there's a biggest machine you can buy) and is a single point of failure. Horizontal scaling has no hard ceiling and survives individual machine failures, but requires the system to be designed for it — most critically, the DATABASE, since spreading application servers is comparatively easy but spreading data consistently is the genuinely hard problem in distributed systems.",
+        "analogy": "Vertical scaling is hiring one increasingly-superhuman employee to handle more work alone — eventually you run out of 'more superhuman' to hire, and if they're sick, everything stops. Horizontal scaling is hiring MORE regular employees who share the work — no hard ceiling, and one person being out doesn't stop everything — but now you need real coordination (who's handling which customer, keeping everyone's information in sync) that a single superhuman employee never needed.",
+        "examples": [
+          {
+            "code": "# Illustrating the vertical-scaling ceiling conceptually\nmachine_specs = [\n    (\"small\",  4, 16),      # (name, CPU cores, RAM GB)\n    (\"medium\", 16, 64),\n    (\"large\",  64, 256),\n    (\"xlarge\", 128, 512),   # biggest commonly available -- a real ceiling exists\n]\nfor name, cpu, ram in machine_specs:\n    print(f\"{name:>8}: {cpu:>3} cores, {ram:>3} GB RAM\")\nprint(\"eventually there is no bigger machine to buy -- vertical scaling has a hard ceiling\")",
+            "note": "This is illustrative, not a real cloud provider's exact catalog -- the point is conceptual: at some tier, there simply isn't a bigger single machine available, whereas horizontal scaling (adding more machines) has no such fixed endpoint."
+          }
+        ],
+        "warn": "Horizontal scaling is genuinely harder than it sounds — once data is spread across multiple database instances, you must decide how to keep it consistent, how to route a request to the right instance, and how to handle a node failing mid-operation. This module gives you the VOCABULARY (sharding, replication) to reason about these tradeoffs at interview level; a full distributed-systems treatment is its own deep specialization.",
+        "mistakes": [
+          "Assuming horizontal scaling is a free upgrade with no downsides — it introduces real complexity (data consistency, routing) that a single machine never had to deal with.",
+          "Reaching for horizontal scaling before actually needing it — vertical scaling and straightforward optimization (better queries, caching — next lesson) solve most real-world scale problems far more simply, for far longer than people expect.",
+          "Confusing SCALING (handling more load) with AVAILABILITY (surviving failures) — they're related but distinct concerns; horizontal scaling helps with both, but for different reasons."
+        ],
+        "handsOn": "Write two sentences: describe one real product/feature you use that you'd guess is vertically scaled (a single powerful backing service is plausible) versus one you'd guess is horizontally scaled (its scale/reliability needs suggest many machines) — and explain your reasoning for each guess.",
+        "doneWhen": "You can explain vertical vs horizontal scaling, articulate the hard ceiling of vertical scaling, and name the core added complexity of horizontal scaling (data consistency, routing).",
+        "checks": [
+          {
+            "q": "What is the fundamental limitation of vertical scaling that horizontal scaling avoids?",
+            "a": "Vertical scaling has a hard ceiling — there's always a biggest single machine available, and it remains a single point of failure. Horizontal scaling has no fixed ceiling (you can keep adding machines) and survives individual machine failures, at the cost of added complexity in keeping distributed data consistent."
+          }
+        ],
+        "keyTakeaways": [
+          "Vertical scaling = a bigger single machine; hits a hard ceiling and is a single point of failure.",
+          "Horizontal scaling = more machines sharing load; no hard ceiling, survives failures, but adds real complexity.",
+          "Most real systems solve scale with simpler techniques (better queries, caching) long before needing serious horizontal scaling."
+        ],
+        "resources": [
+          {
+            "label": "AWS — What's the Difference Between Horizontal and Vertical Scaling?",
+            "url": "https://aws.amazon.com/what-is/horizontal-scaling/",
+            "kind": "docs"
+          },
+          {
+            "label": "System Design Primer (GitHub)",
+            "url": "https://github.com/donnemartin/system-design-primer",
+            "kind": "reference"
+          }
+        ]
+      },
+      {
+        "id": "swe-caching",
+        "title": "Caching — the highest-leverage performance trick",
+        "concept": "A cache stores the RESULT of an expensive operation (a slow database query, a complex computation) so a repeated request can be answered instantly from memory instead of redoing the work. Caching is often the single highest-leverage performance improvement available, because real-world access patterns are rarely uniform — a small fraction of data (a 'hot' subset) is requested far more often than the rest, so caching just that hot subset captures most of the benefit. The core tradeoff is CACHE INVALIDATION: when the underlying data changes, the cached copy can become stale, and deciding when/how to update or expire it is a genuinely hard problem (famously called one of the two hard things in computer science).",
+        "analogy": "A cache is like keeping your five most-used tools on your workbench instead of walking to the garage every time — most of your actual work only touches a handful of tools repeatedly, so keeping those close by captures nearly all the time savings. The catch: if someone replaces a tool in the garage with a better one and you don't update your workbench, you're now working with an outdated copy without realizing it — that's cache invalidation.",
+        "examples": [
+          {
+            "code": "import time\nimport functools\n\ndef slow_lookup(user_id):        # simulates an expensive DB query\n    time.sleep(0.05)               # 50ms, standing in for real DB latency\n    return f\"user-{user_id}-data\"\n\n@functools.lru_cache(maxsize=128)   # a real, working in-memory cache\ndef cached_lookup(user_id):\n    time.sleep(0.05)\n    return f\"user-{user_id}-data\"\n\n# Without caching: every call pays the full cost\nt0 = time.perf_counter()\nfor _ in range(5):\n    slow_lookup(42)\nt1 = time.perf_counter()\n\n# With caching: only the FIRST call pays the cost; the rest are instant\nt2 = time.perf_counter()\nfor _ in range(5):\n    cached_lookup(42)\nt3 = time.perf_counter()\n\nprint(f\"uncached x5: {(t1-t0)*1000:.0f} ms\")\nprint(f\"cached x5:   {(t3-t2)*1000:.0f} ms\")",
+            "note": "functools.lru_cache is a REAL, standard-library cache -- the uncached version pays the full ~50ms cost every single call; the cached version pays it once (the first call) and then returns instantly for the same argument, demonstrating the core caching payoff with real timing, not just a claim."
+          }
+        ],
+        "mistakes": [
+          "Caching data that changes constantly with no invalidation strategy — serving stale data can be worse than the original slowness, depending on the use case.",
+          "Assuming caching is 'free' performance with no tradeoff — it uses memory, and a wrong invalidation strategy introduces real correctness bugs.",
+          "Not identifying the actual 'hot' subset of data before caching everything indiscriminately — targeted caching of frequently-accessed data captures most of the benefit far more cheaply."
+        ],
+        "handsOn": "Run the lru_cache example and confirm the dramatic timing difference. Then call cached_lookup with a DIFFERENT user_id (e.g. 99) and confirm it pays the full cost again (since it's a new, uncached argument) — then call it a second time with that same id and confirm it's now fast too.",
+        "doneWhen": "You can explain what a cache does and why it's high-leverage, have demonstrated real caching speedup with code, and can describe cache invalidation as the core tradeoff.",
+        "checks": [
+          {
+            "q": "Why is caching often described as one of the highest-leverage performance improvements available?",
+            "a": "Real-world access patterns are rarely uniform — a small 'hot' subset of data is requested far more often than the rest, so caching just that subset captures most of the performance benefit cheaply, without needing to speed up every possible request."
+          }
+        ],
+        "keyTakeaways": [
+          "A cache stores expensive results so repeated requests are answered instantly.",
+          "Caching the 'hot' subset of frequently-accessed data captures most of the benefit.",
+          "Cache invalidation (keeping cached data in sync with the source) is the genuinely hard tradeoff."
+        ],
+        "resources": [
+          {
+            "label": "Python docs — functools.lru_cache",
+            "url": "https://docs.python.org/3/library/functools.html#functools.lru_cache",
+            "kind": "docs"
+          },
+          {
+            "label": "AWS — What is Caching?",
+            "url": "https://aws.amazon.com/caching/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "swe-load-balancing",
+        "title": "Load balancing — spreading requests across servers",
+        "concept": "Once you have multiple servers (horizontal scaling), something needs to decide which server handles each incoming request — that's a LOAD BALANCER, sitting in front of your servers and distributing traffic across them. Common strategies: ROUND ROBIN (cycle through servers in order — simple, works well when requests are roughly equal cost), and CONSISTENT HASHING (arrange servers and keys on a conceptual RING via hashing, so each key is routed to the next server clockwise from it). The defining property of consistent hashing — and the whole reason it exists — is that adding or removing ONE server only remaps a SMALL, proportional fraction of keys, not nearly all of them. A naive `hash(key) % num_servers` does NOT have this property: changing the server count changes almost every key's `% ` result, so almost everything remaps.",
+        "analogy": "A load balancer is like a host at a busy restaurant deciding which of several open tables to seat each new party at — spreading people out so no single table (server) gets overwhelmed while others sit empty. Plain hash-mod routing is like renumbering EVERY table the moment you add one more table — nearly every party gets reassigned. Consistent hashing is like arranging tables in a circle and always seating each party at the next open table clockwise from their assigned spot — adding one more table only affects the handful of parties whose clockwise neighbor changes; everyone else keeps their same table.",
+        "examples": [
+          {
+            "code": "# Round robin: cycle through servers in fixed order\nservers = [\"server-A\", \"server-B\", \"server-C\"]\n\ndef round_robin(request_number):\n    return servers[request_number % len(servers)]\n\nfor i in range(7):\n    print(f\"request {i} -> {round_robin(i)}\")",
+            "note": "Round robin is simple and guarantees an even SPREAD across servers over time (each server gets roughly 1/3 of requests here) -- but notice it doesn't account for WHICH user is making the request; consecutive requests from the SAME user could land on different servers."
+          },
+          {
+            "code": "import hashlib\n\ndef h(key):\n    return int(hashlib.sha256(str(key).encode()).hexdigest(), 16)\n\ndef naive_route(key, servers):          # NOT consistent hashing, despite the name similarity\n    return servers[h(key) % len(servers)]\n\nclass ConsistentHashRing:                # a real ring: each server owns many points on it\n    def __init__(self, servers, virtual_nodes=100):\n        self.ring = {}\n        self.virtual_nodes = virtual_nodes\n        for s in servers:\n            self.add_server(s)\n\n    def add_server(self, server):\n        for i in range(self.virtual_nodes):\n            self.ring[h(f\"{server}-{i}\")] = server\n\n    def get_server(self, key):\n        target = h(key)\n        for pos in sorted(self.ring.keys()):    # next server clockwise from the key\n            if pos >= target:\n                return self.ring[pos]\n        return self.ring[min(self.ring)]          # wrap around the ring\n\nkeys = [f\"user-{i}\" for i in range(1000)]\nservers = [\"server-A\", \"server-B\", \"server-C\"]\n\nbefore_naive = {k: naive_route(k, servers) for k in keys}\nafter_naive = {k: naive_route(k, servers + [\"server-D\"]) for k in keys}\nnaive_remapped = sum(1 for k in keys if before_naive[k] != after_naive[k])\n\nring = ConsistentHashRing(servers)\nbefore_ch = {k: ring.get_server(k) for k in keys}\nring.add_server(\"server-D\")\nafter_ch = {k: ring.get_server(k) for k in keys}\nch_remapped = sum(1 for k in keys if before_ch[k] != after_ch[k])\n\nprint(f\"naive hash%n:        adding 1 server remapped {naive_remapped}/1000 keys ({naive_remapped/10:.0f}%)\")\nprint(f\"consistent hashing:  adding 1 server remapped {ch_remapped}/1000 keys ({ch_remapped/10:.0f}%)\")",
+            "note": "Real measured output: naive hash%n remaps roughly 75% of keys when a 4th server is added -- almost everything moves. The ring-based version remaps roughly 25-30%, close to the theoretical ideal of 1/(new server count) -- this dramatically smaller blast radius is THE property that makes consistent hashing worth its extra complexity for caches/session stores, where remapping a key means a cache miss or lost session."
+          }
+        ],
+        "mistakes": [
+          "Calling plain `hash(key) % num_servers` \"consistent hashing\" — it lacks the defining property (minimal remapping on server add/remove) and will silently break caches/sessions every time the server count changes.",
+          "Using round robin when session/state affinity matters — a user's requests could bounce between servers that don't share their session data.",
+          "Not considering server HEALTH — real load balancers also need to detect and route around a server that's down, not just blindly cycle through a fixed list."
+        ],
+        "handsOn": "Run both examples. For round_robin, confirm requests spread evenly (roughly 1/3 to each server over enough requests). For the ring comparison, confirm the naive hash%n version remaps far more keys than the ring-based ConsistentHashRing when a server is added. Write one sentence describing why a session store or cache would specifically care about that difference.",
+        "doneWhen": "You can explain what a load balancer does, implement round-robin routing, and explain — with the measured remap-percentage difference — why real consistent hashing is not the same thing as `hash(key) % n`.",
+        "checks": [
+          {
+            "q": "What is the actual defining property of consistent hashing that plain `hash(key) % num_servers` lacks?",
+            "a": "Consistent hashing guarantees that adding or removing one server only remaps a small, proportional fraction of keys (roughly 1/server_count) — plain hash-mod routing has no such guarantee, since changing the server count changes the modulus for almost every key, remapping nearly everything at once."
+          }
+        ],
+        "keyTakeaways": [
+          "A load balancer distributes incoming requests across multiple servers.",
+          "Round robin spreads requests evenly but ignores request identity/affinity.",
+          "Consistent hashing's defining property is minimal remapping when servers are added/removed — plain hash%n does not have this property despite superficially looking similar."
+        ],
+        "resources": [
+          {
+            "label": "AWS — What Is Load Balancing?",
+            "url": "https://aws.amazon.com/what-is/load-balancing/",
+            "kind": "docs"
+          },
+          {
+            "label": "System Design Primer — Load balancer",
+            "url": "https://github.com/donnemartin/system-design-primer#load-balancer",
+            "kind": "reference"
+          }
+        ]
+      },
+      {
+        "id": "swe-capstone",
+        "title": "Capstone: design a system, end to end",
+        "concept": "Your capstone: pick a real, familiar product (a URL shortener, a to-do app, a simple chat app) and design it end to end using everything from this module — sketch the REST API (lesson 1), decide what data needs a database and whether it needs to scale (lesson 2), identify what's worth caching (lesson 3), and explain how you'd handle more traffic than one server can take (lesson 4). Then rehearse explaining your design out loud — system design interviews are conversations, not written exams, and the reasoning matters more than a 'correct' diagram.",
+        "analogy": "This capstone is like being asked to design a building: you don't need to be a structural engineer who calculates load-bearing exactly, but you DO need to reasonably explain where the walls go, why the foundation is sized the way it is, and what happens if more floors get added later. System design interviews test that same level of reasoned, defensible judgment — not a perfect, exhaustively-detailed blueprint.",
+        "examples": [
+          {
+            "code": "# A worked skeleton: designing a URL shortener (a classic system-design interview question)\ndesign_notes = \"\"\"\nAPI (lesson 1):\n  POST /urls        -> body: {long_url} -> returns {short_code}\n  GET  /{short_code} -> redirects to the original long_url\n\nData (lesson 2):\n  A table: short_code (indexed) -> long_url, created_at, click_count\n  Read-heavy (many redirects per shortened link) -> reads massively outnumber writes\n\nCaching (lesson 3):\n  Cache popular short_code -> long_url lookups in memory\n  -- redirects are the hot path and rarely change once created\n\nScaling (lesson 4):\n  Multiple redirect servers behind a load balancer (round robin is fine here --\n  no session state needed, each redirect lookup is independent)\n\"\"\"\nprint(design_notes)",
+            "note": "This is a WORKED EXAMPLE showing the reasoning shape expected, not a template to copy verbatim for your own capstone -- notice each design decision is JUSTIFIED by a concrete property of the problem (read-heavy access pattern -> caching makes sense; no session state -> round robin is fine), which is exactly the kind of reasoning an interviewer wants to hear."
+          }
+        ],
+        "mistakes": [
+          "Jumping straight to a complex distributed-systems answer for a problem that doesn't need it — matching the design's complexity to the ACTUAL scale/requirements is part of good judgment.",
+          "Presenting a design with no justification for each decision — 'why cache this' and 'why this scaling approach' matter more than the diagram itself.",
+          "Treating this as a purely academic exercise — pick a product you actually understand well; your reasoning will be sharper and more specific."
+        ],
+        "handsOn": "Pick your own product idea and write a design following the same four-section structure (API, data, caching, scaling) as the URL-shortener example, with a one-sentence justification for each decision. Then rehearse explaining it out loud in under 3 minutes.",
+        "doneWhen": "You have a complete, justified system design covering API, data, caching, and scaling for a product of your choice, and can explain it fluently in under 3 minutes.",
+        "checks": [],
+        "keyTakeaways": [
+          "System design interviews test justified reasoning, not a single 'correct' diagram.",
+          "Match design complexity to the problem's actual scale and requirements.",
+          "Every design decision should be backed by a concrete reason tied to the problem's properties."
+        ],
+        "resources": [
+          {
+            "label": "System Design Primer (GitHub)",
+            "url": "https://github.com/donnemartin/system-design-primer",
+            "kind": "reference"
+          },
+          {
+            "label": "Common Core — Career track (interview framing)",
+            "url": "/stream/common-core",
+            "kind": "course"
+          },
+          {
+            "label": "Forage Interview — practice this design out loud",
+            "url": "/interview",
+            "kind": "practice"
+          }
+        ]
+      }
+    ]
+  }
+]
