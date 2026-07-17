@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { Sparkles, Loader2, XCircle } from "@/components/ui/icons";
@@ -38,6 +38,15 @@ export function TutorDrawer({
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [unavailable, setUnavailable] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   function copyClaudePrompt() {
     const text = `I'm learning "${lessonTitle}" on Forage. I've read the lesson and tried the hands-on task but I'm stuck. Give me a hint, not the full answer -- ask what I've tried first, then nudge me one step.`;
@@ -91,16 +100,21 @@ export function TutorDrawer({
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-full bg-gradient-to-r from-[#00e5ff] to-[#ff3d81] text-[#05070a] text-sm font-semibold shadow-lg shadow-[#00e5ff]/25 hover:scale-105 transition-transform"
-      >
-        <Sparkles size={16} /> Ask the Tutor
-      </button>
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-full bg-gradient-to-r from-[#00e5ff] to-[#ff3d81] text-[#05070a] text-sm font-semibold shadow-lg shadow-[#00e5ff]/25 hover:scale-105 transition-transform"
+        >
+          <Sparkles size={16} /> Ask the Tutor
+        </button>
+      )}
 
       <AnimatePresence>
         {open && (
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Forage Tutor chat"
             initial={{ opacity: 0, y: 24, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.97 }}
@@ -111,7 +125,11 @@ export function TutorDrawer({
               <p className="text-sm font-bold flex items-center gap-1.5">
                 <Sparkles size={15} className="text-[#ff3d81]" /> Forage Tutor
               </p>
-              <button onClick={() => setOpen(false)} className="text-[#7d99a3] hover:text-white">
+              <button
+                onClick={() => setOpen(false)}
+                aria-label="Close tutor"
+                className="text-[#7d99a3] hover:text-white"
+              >
                 <XCircle size={18} />
               </button>
             </div>
@@ -142,7 +160,11 @@ export function TutorDrawer({
               )}
             </div>
 
-            {notice && <p className="text-xs text-[#ffb020] px-4 pb-1">{notice}</p>}
+            {notice && (
+              <p role="status" className="text-xs text-[#ffb020] px-4 pb-1">
+                {notice}
+              </p>
+            )}
 
             {unavailable ? (
               <div className="p-4 border-t border-white/[0.08]">
@@ -168,6 +190,7 @@ export function TutorDrawer({
                 <button
                   onClick={send}
                   disabled={busy || !input.trim()}
+                  aria-label="Send message"
                   className="px-3 py-2 rounded-xl bg-[#00e5ff] text-[#05070a] text-sm font-semibold disabled:opacity-50"
                 >
                   →

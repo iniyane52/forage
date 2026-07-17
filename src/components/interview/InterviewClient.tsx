@@ -125,6 +125,13 @@ export function InterviewClient({
     };
   }, []);
 
+  const [lastVoiceError, setLastVoiceError] = useState<string | null>(null);
+  if (voice.error && voice.error !== lastVoiceError) {
+    setLastVoiceError(voice.error);
+    setNoticeKind("error");
+    setNotice(voice.error);
+  }
+
   useEffect(() => {
     if (phase !== "live" || secondsLeft <= 0) return;
     const t = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
@@ -139,19 +146,27 @@ export function InterviewClient({
   }, [secondsLeft, phase]);
 
   async function callEdge(body: Record<string, unknown>) {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/interview`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.access_token ?? ""}`,
-      },
-      body: JSON.stringify(body),
-    });
-    const data = await res.json();
-    return { ok: res.ok, status: res.status, data };
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/interview`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token ?? ""}`,
+        },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok, status: res.status, data };
+    } catch {
+      return {
+        ok: false,
+        status: 0,
+        data: { message: "Network error — check your connection and try again." },
+      };
+    }
   }
 
   async function start(overrideRole?: string, overrideFocus?: Focus) {
@@ -394,7 +409,10 @@ export function InterviewClient({
         </AnimatePresence>
 
         {notice && (
-          <p className={`text-xs mt-3 text-center ${noticeKind === "error" ? "text-[#f85149]" : "text-[#ffb020]"}`}>
+          <p
+            role="alert"
+            className={`text-xs mt-3 text-center ${noticeKind === "error" ? "text-[#f85149]" : "text-[#ffb020]"}`}
+          >
             {notice}
           </p>
         )}
@@ -508,6 +526,7 @@ export function InterviewClient({
 
       {notice && (
         <div
+          role="alert"
           className={`text-sm rounded-xl px-4 py-3 mb-4 ${
             noticeKind === "error"
               ? "border border-[#f85149]/40 bg-[#f85149]/10 text-[#f85149]"

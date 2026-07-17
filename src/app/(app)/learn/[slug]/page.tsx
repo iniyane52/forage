@@ -34,12 +34,12 @@ function Label({
   icon: LucideIcon;
 }) {
   return (
-    <p
+    <h2
       className="text-xs font-bold uppercase tracking-widest mt-8 mb-2 flex items-center gap-1.5"
       style={{ color }}
     >
       <Icon size={14} /> {children}
-    </p>
+    </h2>
   );
 }
 
@@ -274,7 +274,7 @@ export default async function LessonPage({
                   href={`/quiz/${slug}`}
                   className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#00e5ff] text-[#05070a] hover:bg-[#33ebff] transition-colors"
                 >
-                  Take the quiz ({questionCount} questions) →
+                  Take the quiz ({questionCount} question{questionCount === 1 ? "" : "s"}) →
                 </Link>
               ) : (
                 <span

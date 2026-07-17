@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/SignOutButton";
+import { MobileNav } from "@/components/MobileNav";
 import { CountUp } from "@/components/ui/motion";
 import { Flame, Sparkles } from "@/components/ui/icons";
 
@@ -41,6 +42,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 Profile
               </Link>
             </nav>
+            <MobileNav />
             <div className="ml-auto flex items-center gap-2 text-sm">
               <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] text-[#00e5ff] font-semibold text-xs">
                 Lv {profile?.level ?? 1}

@@ -13,14 +13,19 @@ export default function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    setBusy(true);
     setMessage(null);
+    if (mode === "signup" && password !== confirmPassword) {
+      setMessage("Passwords don't match.");
+      return;
+    }
+    setBusy(true);
     if (mode === "signin") {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setMessage(error.message);
@@ -59,7 +64,11 @@ export default function AuthPage() {
             {(["signin", "signup"] as const).map((m) => (
               <button
                 key={m}
-                onClick={() => setMode(m)}
+                onClick={() => {
+                  setMode(m);
+                  setMessage(null);
+                  setConfirmPassword("");
+                }}
                 className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
                   mode === m ? "bg-[#00e5ff] text-[#05070a]" : "text-[#7d99a3] hover:text-white"
                 }`}
@@ -99,6 +108,18 @@ export default function AuthPage() {
                 {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+            {mode === "signup" && (
+              <input
+                type={showPw ? "text" : "password"}
+                required
+                minLength={6}
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm password"
+                className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#00e5ff] transition-colors"
+              />
+            )}
             <button
               disabled={busy}
               className="w-full py-3 rounded-xl bg-gradient-to-r from-[#00e5ff] to-[#3fb950] font-semibold text-[#05070a] disabled:opacity-50 flex items-center justify-center gap-2 transition-opacity"
@@ -109,7 +130,7 @@ export default function AuthPage() {
           </form>
 
           {message && (
-            <p className="mt-4 text-sm text-[#ffb020] flex items-start gap-2">
+            <p role="alert" className="mt-4 text-sm text-[#ffb020] flex items-start gap-2">
               <AlertTriangle size={16} className="mt-0.5 shrink-0" />
               <span>{message}</span>
             </p>

@@ -422,12 +422,22 @@ described in more detail under "Architecture decisions" above.
   times this session (a classifier blocked attempts to reset an `auth.users` password hash
   and to set a secret via raw SQL) — don't try to route around it via a different tool if
   it happens again.
-- **Claude cannot sign in to the app itself.** There's no credential Claude has (and
-  shouldn't try to obtain) to click through authenticated flows live. Live verification of
-  anything behind auth (interview sessions, Pro-tier UI, quiz-taking) has to be done by
-  asking the user to test it and report back, or by careful code-level/DB-level
-  verification instead. Don't claim something is "verified live" if it only means "the
-  code compiles and the DB rows look right."
+- **Claude cannot sign in to the app itself**, with one narrow, explicit exception (see
+  below). Absent that exception, there's no credential Claude has (and shouldn't try to
+  obtain) to click through authenticated flows live. Live verification of anything behind
+  auth (interview sessions, Pro-tier UI, quiz-taking) has to be done by asking the user to
+  test it and report back, or by careful code-level/DB-level verification instead. Don't
+  claim something is "verified live" if it only means "the code compiles and the DB rows
+  look right."
+  - **Exception, automated QA only**: with the Playwright MCP browser tool configured
+    (`.mcp.json`, `playwright` entry), Claude may sign into the app using credentials for
+    a **dedicated test/QA account** (never the project owner's real account) that the
+    user supplies **in chat, at the time of testing** — never written to any file, env
+    var, or committed anywhere. Scoped strictly to automated UX/QA verification (browsing
+    pages, clicking through flows, checking console/network output); it does not extend
+    to production data changes, payments, or any destructive action inside the
+    authenticated app without separately asking first. The no-secrets-in-files rule below
+    is unaffected by this exception — it still applies in full.
 - **`git status` will surprise you** — as of this writing there are ~9 days of uncommitted
   work spanning nearly the entire codebase (everything from the neon redesign through the
   new SWE module). Check `git status`/`git log -1` before assuming recent work is

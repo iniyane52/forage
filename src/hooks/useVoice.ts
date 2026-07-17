@@ -55,11 +55,20 @@ function getSupportServerSnapshot(): boolean {
   return false;
 }
 
+function mapRecognitionError(code?: string): string {
+  if (code === "not-allowed" || code === "permission-denied" || code === "NotAllowedError") {
+    return "Microphone access was blocked — check your browser's site permissions, or just type your answer.";
+  }
+  if (code === "no-speech") return "Didn't catch that — try again, or type your answer.";
+  return "Voice input stopped unexpectedly — you can keep typing.";
+}
+
 export function useVoice() {
   const supported = useSyncExternalStore(subscribeToSupport, getSupportSnapshot, getSupportServerSnapshot);
   const [listening, setListening] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [transcript, setTranscript] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const recRef = useRef<SpeechRecognitionLike | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -110,10 +119,12 @@ export function useVoice() {
       };
       mediaRecorderRef.current = rec;
       setTranscript("");
+      setError(null);
       setListening(true);
       rec.start();
-    } catch {
+    } catch (err) {
       setListening(false);
+      setError(mapRecognitionError((err as { name?: string })?.name));
     }
   }, [transcribeBlob]);
 
@@ -140,9 +151,14 @@ export function useVoice() {
           if (final.trim()) onFinalRef.current?.(final.trim());
         };
         rec.onend = () => setListening(false);
-        rec.onerror = () => setListening(false);
+        rec.onerror = (event: unknown) => {
+          const e = event as { error?: string };
+          setListening(false);
+          setError(mapRecognitionError(e.error));
+        };
         recRef.current = rec;
         setTranscript("");
+        setError(null);
         setListening(true);
         rec.start();
         return;
@@ -236,5 +252,5 @@ export function useVoice() {
     setSpeaking(false);
   }, []);
 
-  return { supported, listening, speaking, transcript, start, stop, speak, cancelSpeech };
+  return { supported, listening, speaking, transcript, error, start, stop, speak, cancelSpeech };
 }

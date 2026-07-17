@@ -18,12 +18,18 @@ export function MarkDoneButton({
   const [done, setDone] = useState(initiallyDone);
   const [busy, setBusy] = useState(false);
   const [reward, setReward] = useState<string | null>(null);
+  const [rewardIsError, setRewardIsError] = useState(false);
 
   async function markDone() {
     setBusy(true);
     const { data, error } = await supabase.rpc("mark_lesson_done", { p_lesson_id: lessonId });
     setBusy(false);
-    if (error) return setReward(error.message);
+    if (error) {
+      setRewardIsError(true);
+      setReward(error.message);
+      return;
+    }
+    setRewardIsError(false);
     setDone(true);
     const xp = (data as { xp_awarded?: number })?.xp_awarded ?? 0;
     if (xp > 0) setReward(`+${xp} XP`);
@@ -47,9 +53,10 @@ export function MarkDoneButton({
       <AnimatePresence>
         {reward && (
           <motion.span
+            role={rewardIsError ? "alert" : undefined}
             initial={{ opacity: 0, scale: 0.8, y: 6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="text-sm text-[#3fb950] font-bold"
+            className={`text-sm font-bold ${rewardIsError ? "text-[#f85149]" : "text-[#3fb950]"}`}
           >
             {reward}
           </motion.span>
@@ -67,7 +74,7 @@ export function MarkDoneButton({
 export function NotesBox({ lessonId, initial }: { lessonId: string; initial: string }) {
   const supabase = createClient();
   const [value, setValue] = useState(initial);
-  const [saved, setSaved] = useState<"idle" | "saving" | "saved">("idle");
+  const [saved, setSaved] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
@@ -77,16 +84,25 @@ export function NotesBox({ lessonId, initial }: { lessonId: string; initial: str
     setSaved("saving");
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(async () => {
-      await supabase.rpc("save_note", { p_lesson_id: lessonId, p_notes: v });
-      setSaved("saved");
+      const { error } = await supabase.rpc("save_note", { p_lesson_id: lessonId, p_notes: v });
+      setSaved(error ? "error" : "saved");
     }, 800);
   }
 
   return (
     <div>
       <div className="flex items-center justify-end -mt-6 mb-1">
-        <span className="text-[10px] text-[#7d99a3]">
-          {saved === "saving" ? "saving..." : saved === "saved" ? "saved ✓" : ""}
+        <span
+          role={saved === "error" ? "alert" : undefined}
+          className={`text-[10px] ${saved === "error" ? "text-[#f85149]" : "text-[#7d99a3]"}`}
+        >
+          {saved === "saving"
+            ? "saving..."
+            : saved === "saved"
+            ? "saved ✓"
+            : saved === "error"
+            ? "couldn't save — check your connection"
+            : ""}
         </span>
       </div>
       <textarea

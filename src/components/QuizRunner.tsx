@@ -60,6 +60,7 @@ export function QuizRunner({
   const [xpTotal, setXpTotal] = useState(0);
   const [result, setResult] = useState<{ score: number; passed: boolean } | null>(null);
   const [attempt, setAttempt] = useState(0); // bumped on retake so options reshuffle
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const q = questions[i];
   const order = seededShuffle(q.options.length, q.id + ":" + attempt);
@@ -69,12 +70,17 @@ export function QuizRunner({
     const originalIdx = order[displayIdx];
     setChosen(displayIdx);
     setBusy(true);
+    setErrorMsg(null);
     const { data, error } = await supabase.rpc("submit_answer", {
       p_question_id: q.id,
       p_chosen: originalIdx,
     });
     setBusy(false);
-    if (error) return;
+    if (error) {
+      setChosen(null);
+      setErrorMsg("Couldn't submit that answer — check your connection and try again.");
+      return;
+    }
     const fb = data as Feedback;
     setFeedback(fb);
     if (fb.xp_awarded > 0) setXpTotal((x) => x + fb.xp_awarded);
@@ -87,8 +93,13 @@ export function QuizRunner({
       setFeedback(null);
     } else {
       setBusy(true);
-      const { data } = await supabase.rpc("finish_quiz", { p_lesson_id: lessonId });
+      setErrorMsg(null);
+      const { data, error } = await supabase.rpc("finish_quiz", { p_lesson_id: lessonId });
       setBusy(false);
+      if (error) {
+        setErrorMsg("Couldn't finish the quiz — check your connection and try again.");
+        return;
+      }
       setResult(data as { score: number; passed: boolean });
       router.refresh();
     }
@@ -128,7 +139,7 @@ export function QuizRunner({
         </div>
         <h2 className="text-xl font-bold flex items-center justify-center gap-2" style={{ fontFamily: "var(--font-display)" }}>
           {result.passed && <Trophy size={22} className="text-[#ffb020]" />}
-          {result.passed ? "Passed!" : "Not yet — 80% to pass"}
+          {result.passed ? "Passed!" : questions.length === 1 ? "Not yet — try again" : "Not yet — 80% to pass"}
         </h2>
         {xpTotal > 0 && (
           <p className="text-[#3fb950] font-semibold mt-2 flex items-center justify-center gap-1">
@@ -169,9 +180,11 @@ export function QuizRunner({
         </span>
         <span className="flex gap-2">
           <span className="px-2 py-0.5 rounded bg-white/[0.05]">{q.style_tag}</span>
-          <span className="px-2 py-0.5 rounded bg-white/[0.05] text-[#ffb020]">
-            {"★".repeat(q.difficulty)}
-            <span className="text-[#7d99a3]">{"★".repeat(3 - q.difficulty)}</span>
+          <span className="px-2 py-0.5 rounded bg-white/[0.05] text-[#ffb020]" aria-label={`Difficulty ${q.difficulty} of 3`}>
+            <span aria-hidden="true">
+              {"★".repeat(q.difficulty)}
+              <span className="text-[#7d99a3]">{"★".repeat(3 - q.difficulty)}</span>
+            </span>
           </span>
         </span>
       </div>
@@ -253,6 +266,12 @@ export function QuizRunner({
               </motion.div>
             )}
           </AnimatePresence>
+
+          {errorMsg && (
+            <p role="alert" className="mt-4 text-sm text-[#f85149]">
+              {errorMsg}
+            </p>
+          )}
 
           {feedback && (
             <button

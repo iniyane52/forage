@@ -41,6 +41,8 @@ import {
   MessageSquare,
   Send,
   Shuffle,
+  Menu,
+  X,
   type LucideIcon,
 } from "lucide-react";
 
@@ -100,6 +102,8 @@ export {
   MessageSquare,
   Send,
   Shuffle,
+  Menu,
+  X,
 };
 
 // Resource kind → icon
