@@ -1,6 +1,9 @@
 "use client";
 
+import { useRef } from "react";
 import { useReducedMotion } from "framer-motion";
+import { useGSAP } from "@gsap/react";
+import { gsap, ScrollTrigger } from "@/components/ui/gsapMotion";
 import { streamIcon } from "@/components/ui/icons";
 import { pathMeta } from "@/lib/pathMeta";
 
@@ -33,9 +36,48 @@ function Segment({ slug, title }: { slug: string; title: string }) {
  * tags (from pathMeta.ts, not invented) scroll continuously alongside its name and
  * accent color -- answers "what does this actually teach" at a glance, which a
  * name-only chip never could.
+ *
+ * The scroll itself is a GSAP tween (not the old CSS keyframe) so its speed can react
+ * to the user's own scroll velocity -- the ticker visibly quickens as you scroll past
+ * it, clamped so it never gets nauseating.
  */
 export function TechTicker() {
   const reduce = useReducedMotion();
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const tweenRef = useRef<gsap.core.Tween | null>(null);
+
+  useGSAP(
+    () => {
+      if (reduce || !trackRef.current || !sectionRef.current) return;
+
+      const tween = gsap.to(trackRef.current, {
+        xPercent: -50,
+        duration: 20,
+        ease: "none",
+        repeat: -1,
+      });
+      tweenRef.current = tween;
+
+      const trigger = ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: "top bottom",
+        end: "bottom top",
+        onUpdate: (self) => {
+          const speed = Math.min(2.2, 1 + Math.abs(self.getVelocity()) / 2500);
+          tween.timeScale(speed);
+        },
+        onLeaveBack: () => tween.timeScale(1),
+        onLeave: () => tween.timeScale(1),
+      });
+
+      return () => {
+        tween.kill();
+        trigger.kill();
+      };
+    },
+    { scope: sectionRef, dependencies: [reduce] }
+  );
 
   if (reduce) {
     return (
@@ -49,13 +91,19 @@ export function TechTicker() {
 
   return (
     <div
+      ref={sectionRef}
       className="relative overflow-hidden border-y border-white/[0.06] py-3"
       style={{
         maskImage: "linear-gradient(90deg, transparent, black 6%, black 94%, transparent)",
         WebkitMaskImage: "linear-gradient(90deg, transparent, black 6%, black 94%, transparent)",
       }}
     >
-      <div className="flex w-max marquee-track">
+      <div
+        ref={trackRef}
+        className="flex w-max"
+        onMouseEnter={() => tweenRef.current?.pause()}
+        onMouseLeave={() => tweenRef.current?.play()}
+      >
         {[0, 1].map((copy) => (
           <div key={copy} className="flex items-center" aria-hidden={copy === 1}>
             {PATHS.map((p) => (

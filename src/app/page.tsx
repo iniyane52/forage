@@ -3,6 +3,7 @@ import { FadeUp, ScrollParallax, Stagger, StaggerItem } from "@/components/ui/mo
 import { ScrollHero } from "@/components/ui/ScrollHero";
 import { ScrollProgressBar } from "@/components/ui/ScrollProgressBar";
 import { DashboardMockup } from "@/components/landing/DashboardMockup";
+import { HeroHeadline } from "@/components/landing/HeroHeadline";
 import { TechTicker } from "@/components/landing/TechTicker";
 import { PathGrid } from "@/components/landing/PathGrid";
 import { ValuePropsCarousel } from "@/components/landing/ValuePropsCarousel";
@@ -108,9 +109,7 @@ export default function LandingPage() {
                 <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[#ff3d81] glass rounded-full px-3 py-1.5 mb-6">
                   <Sparkles size={13} /> Free Common Core + 6 career paths
                 </p>
-                <h1 className="display text-4xl sm:text-6xl md:text-7xl mb-5">
-                  Learn it. <span className="gradient-word">Prove it.</span> Get hired.
-                </h1>
+                <HeroHeadline />
                 <p className="lead max-w-2xl mx-auto">
                   Forage teaches industry skills from absolute zero to hiring standard —
                   real lessons, FAANG-caliber quizzes, a grounded AI tutor, and live voice

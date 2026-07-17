@@ -171,19 +171,6 @@ body::after {
 }
 .loader-sweep { animation: loaderSweep 1.1s ease-in-out infinite; }
 
-/* Infinite marquee: the track holds two identical copies of the content
-   side by side; translating by exactly -50% loops seamlessly. */
-@keyframes marqueeScroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-.marquee-track {
-  animation: marqueeScroll 22s linear infinite;
-}
-.marquee-track:hover {
-  animation-play-state: paused;
-}
-
 /* Hidden scrollbar for horizontally-scrolling components that want a
    clean edge-to-edge look (more specific than the global thin-scrollbar
    rule below, so it overrides per-element, not globally). */
