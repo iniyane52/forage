@@ -251,6 +251,9 @@ export function InterviewClient({
     voice.cancelSpeech();
     voice.stop();
     setBusy(true);
+    // Carry along whatever the candidate had typed but not yet submitted -- ending the
+    // session used to silently discard an in-progress draft with no warning.
+    const draft = answerDraft.trim();
     const { ok, data } = await callEdge({
       action: "turn",
       sessionId,
@@ -258,8 +261,10 @@ export function InterviewClient({
       focus,
       history,
       end: true,
+      ...(draft ? { answer: draft } : {}),
     });
     setBusy(false);
+    setAnswerDraft("");
     if (ok) setFeedback(data.feedback);
     setPhase("feedback");
   }

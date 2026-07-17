@@ -319,8 +319,9 @@ Deno.serve(async (req: Request) => {
       }
 
       // Ending now, either because the user asked to end or the server-tracked time ran out.
-      // If they had an in-progress answer, record it before generating the report.
-      if (!end && answer) {
+      // If they had an in-progress answer, record it before generating the report -- this
+      // applies to an explicit end too (the client now forwards any unsubmitted draft).
+      if (answer) {
         await supabase.rpc("append_interview_turn", { p_session_id: sessionId, p_turn: { role: "candidate", text: answer } });
         contents.push({ role: "user", parts: [{ text: answer }] });
       }

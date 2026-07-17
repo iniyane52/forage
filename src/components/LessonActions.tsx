@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { CheckCircle2, HelpCircle } from "@/components/ui/icons";
+import { CheckCircle2, HelpCircle, Medal } from "@/components/ui/icons";
+import { Confetti } from "@/components/ui/Confetti";
 
 export function MarkDoneButton({
   lessonId,
@@ -19,6 +20,7 @@ export function MarkDoneButton({
   const [busy, setBusy] = useState(false);
   const [reward, setReward] = useState<string | null>(null);
   const [rewardIsError, setRewardIsError] = useState(false);
+  const [badgesEarned, setBadgesEarned] = useState<string[]>([]);
 
   async function markDone() {
     setBusy(true);
@@ -31,13 +33,15 @@ export function MarkDoneButton({
     }
     setRewardIsError(false);
     setDone(true);
-    const xp = (data as { xp_awarded?: number })?.xp_awarded ?? 0;
-    if (xp > 0) setReward(`+${xp} XP`);
+    const result = data as { xp_awarded?: number; badges_awarded?: string[] };
+    if (result?.xp_awarded) setReward(`+${result.xp_awarded} XP`);
+    setBadgesEarned(result?.badges_awarded ?? []);
     router.refresh();
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="relative flex items-center gap-3 flex-wrap">
+      {badgesEarned.length > 0 && <Confetti />}
       <button
         onClick={markDone}
         disabled={done || busy}
@@ -61,6 +65,17 @@ export function MarkDoneButton({
             {reward}
           </motion.span>
         )}
+        {badgesEarned.map((title, i) => (
+          <motion.span
+            key={title}
+            initial={{ opacity: 0, scale: 0.8, y: 6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: 0.1 + i * 0.1 }}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#ffb020] bg-[#ffb020]/10 border border-[#ffb020]/30 rounded-full px-2.5 py-1"
+          >
+            <Medal size={13} /> Badge earned: {title}
+          </motion.span>
+        ))}
       </AnimatePresence>
       {!done && (
         <span className="text-xs text-[#7d99a3] hidden sm:inline">

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { CheckCircle2, XCircle, Trophy, Sparkles } from "@/components/ui/icons";
+import { CheckCircle2, XCircle, Trophy, Sparkles, Medal } from "@/components/ui/icons";
 import { Confetti } from "@/components/ui/Confetti";
 
 export type PublicQuestion = {
@@ -58,7 +58,7 @@ export function QuizRunner({
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [busy, setBusy] = useState(false);
   const [xpTotal, setXpTotal] = useState(0);
-  const [result, setResult] = useState<{ score: number; passed: boolean } | null>(null);
+  const [result, setResult] = useState<{ score: number; passed: boolean; badgesAwarded: string[] } | null>(null);
   const [attempt, setAttempt] = useState(0); // bumped on retake so options reshuffle
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -100,7 +100,8 @@ export function QuizRunner({
         setErrorMsg("Couldn't finish the quiz — check your connection and try again.");
         return;
       }
-      setResult(data as { score: number; passed: boolean });
+      const r = data as { score: number; passed: boolean; badges_awarded?: string[] };
+      setResult({ score: r.score, passed: r.passed, badgesAwarded: r.badges_awarded ?? [] });
       router.refresh();
     }
   }
@@ -145,6 +146,18 @@ export function QuizRunner({
           <p className="text-[#3fb950] font-semibold mt-2 flex items-center justify-center gap-1">
             <Sparkles size={16} /> +{xpTotal} XP earned this run
           </p>
+        )}
+        {result.badgesAwarded.length > 0 && (
+          <div className="flex flex-wrap gap-2 justify-center mt-3">
+            {result.badgesAwarded.map((title) => (
+              <span
+                key={title}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#ffb020] bg-[#ffb020]/10 border border-[#ffb020]/30 rounded-full px-2.5 py-1"
+              >
+                <Medal size={13} /> Badge earned: {title}
+              </span>
+            ))}
+          </div>
         )}
         <p className="text-sm text-[#7d99a3] mt-3 max-w-md mx-auto">
           {result.passed
