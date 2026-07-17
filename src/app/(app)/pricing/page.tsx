@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { CheckCircle2, Sparkles, Loader2, Mic } from "@/components/ui/icons";
+import { CheckCircle2, Sparkles, Loader2, Mic, AlertTriangle } from "@/components/ui/icons";
 
 const freePerks = [
   "The full Common Core (6 modules)",
@@ -27,15 +27,19 @@ export default function PricingPage() {
   const router = useRouter();
   const supabase = createClient();
   const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
   async function upgrade() {
     setBusy(true);
+    setMessage(null);
     const { error } = await supabase.rpc("grant_pro");
     setBusy(false);
-    if (!error) {
-      router.push("/dashboard");
-      router.refresh();
+    if (error) {
+      setMessage("Couldn't unlock Pro — check your connection and try again.");
+      return;
     }
+    router.push("/dashboard");
+    router.refresh();
   }
 
   return (
@@ -105,6 +109,12 @@ export default function PricingPage() {
           <p className="text-[11px] text-center text-[#7d99a3] mt-2">
             Preview access — payments arrive with launch.
           </p>
+          {message && (
+            <p role="alert" className="mt-3 text-xs text-[#f85149] flex items-start gap-2">
+              <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+              <span>{message}</span>
+            </p>
+          )}
         </div>
       </div>
     </div>

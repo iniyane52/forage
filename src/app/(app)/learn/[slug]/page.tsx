@@ -77,7 +77,10 @@ export default async function LessonPage({
     if (profile?.plan !== "pro") redirect("/pricing");
   }
 
-  const [{ data: progress }, { count: questionCount }] = await Promise.all([
+  const [
+    { data: progress, error: progressError },
+    { count: questionCount, error: countError },
+  ] = await Promise.all([
     supabase
       .from("lesson_progress")
       .select("status, notes")
@@ -89,6 +92,10 @@ export default async function LessonPage({
       .select("id", { count: "exact", head: true })
       .eq("lesson_id", row.id),
   ]);
+
+  if (progressError || countError) {
+    throw new Error("Couldn't load this lesson. Please try again.");
+  }
 
   return (
     <FadeUp>

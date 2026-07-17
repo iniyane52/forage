@@ -90,9 +90,9 @@ foundary/
 │   ├── stream1.json             #   Cloud & DevOps, 53 lessons / 7 modules
 │   ├── aiml.json                #   AI Engineer, 48 lessons / 10 modules
 │   ├── swe.json                 #   Software Engineer, 19 lessons / 4 modules
-│   ├── fullstack.json           #   Full-Stack Developer, 13 lessons / 3 modules
-│   ├── data.json                #   Data Scientist, 13 lessons / 3 modules
-│   ├── cyber.json                #   Cybersecurity, 10 lessons / 3 modules
+│   ├── fullstack.json           #   Full-Stack Developer, 36 lessons / 8 modules
+│   ├── data.json                #   Data Scientist, 34 lessons / 8 modules
+│   ├── cyber.json                #   Cybersecurity, 30 lessons / 8 modules
 │   ├── cc_questions.js          #   OLDER quiz-bank format, NOT imported by app code —
 │   │                              reference/archive only; DB quiz_questions is the
 │   │                              source of truth for live quizzes
@@ -252,15 +252,14 @@ Roughly in the order they'd likely matter for actually launching this as a real 
    **no real billing integration at all**. Given the `.co.in` domain, Razorpay is likely
    the more natural fit than Stripe, but that's a decision for whoever picks this up, not
    already decided.
-2. **Content breadth for 3 of the 4 newer Pro paths.** Full-Stack Developer, Data
-   Scientist, and Cybersecurity are still 3 modules / 10-13 lessons each, versus AI
-   Engineer (10 modules/48 lessons) and Cloud & DevOps (7 modules/53 lessons). Software
-   Engineer was recently brought up to 4 modules/19 lessons by adding a dedicated
-   Recursion/Sorting/DP/Heaps module — the same kind of gap-filling (identify what a real
-   "basics to advanced" path is missing, author it with the full rigor pipeline) likely
-   applies to the other three.
-3. **Deployment.** Nothing is deployed yet — this has only run via `npm run dev` locally.
-   No production environment, no production Supabase branch/config decisions made yet.
+2. ~~**Content breadth for 3 of the 4 newer Pro paths.**~~ **Done.** Full-Stack Developer,
+   Data Scientist, and Cybersecurity were each expanded from 3 modules/10-13 lessons to
+   8 modules apiece (36/34/30 lessons respectively), matching the depth of AI Engineer
+   (10 modules/48 lessons) and Cloud & DevOps (7 modules/53 lessons) — see exact counts
+   in the Database Schema section below.
+3. ~~**Deployment.**~~ **Done.** Live at `forage-b6qp.vercel.app` (Vercel, auto-deploys
+   `main`). No custom domain yet (`forage.co.in` not purchased) and no preview/production
+   split by design — a single environment.
 4. Stale task-tracker entries referencing superseded early-phase plans exist in this
    session's task list but don't affect the codebase — no code action needed, just noise
    if you're looking at task history for context.
@@ -352,9 +351,9 @@ re-verify, these will drift as content is added):
 | Cloud & DevOps | 7 | 53 | 26 |
 | AI Engineer | 10 | 48 | 45 |
 | Software Engineer | 4 | 19 | 18 |
-| Full-Stack Developer | 3 | 13 | 12 |
-| Data Scientist | 3 | 13 | 12 |
-| Cybersecurity | 3 | 10 | 8 |
+| Full-Stack Developer | 8 | 36 | 35 |
+| Data Scientist | 8 | 34 | 33 |
+| Cybersecurity | 8 | 30 | 28 |
 
 **Postgres functions** (all `SECURITY DEFINER`, check `auth.uid()` internally, callable via
 `supabase.rpc(...)` from the client — this is the app's substitute for API routes, see
@@ -460,18 +459,19 @@ described in more detail under "Architecture decisions" above.
 
 ## Suggested next steps
 
-Roughly in priority order for someone picking this up fresh:
+Roughly in priority order for someone picking this up fresh — most of the earlier list
+here (get work into git, content breadth for the 3 thin paths, deployment, the RLS/RPC
+security pass) is now **done**; what's left:
 
-1. **Get the uncommitted work into git and pushed** (this is an active, explicit request
-   from the project owner as of this writing — check `git status`, confirm nothing under
-   `C:\claude\foundry` was ever touched, then commit and push once a remote is set).
-2. Decide on and build real payment/checkout (see Remaining TODOs #1) — this is the single
-   biggest thing standing between this project and being a real, launchable SaaS.
-3. Bring Full-Stack Developer, Data Scientist, and Cybersecurity up toward the same
-   breadth as AI Engineer/Cloud & DevOps, following the same content pipeline discipline
-   used for the recent SWE DSA module addition.
-4. Plan and execute an actual deployment (Vercel is the natural fit for Next.js; decide
-   on production Supabase config/secrets at that point).
-5. A pre-launch security pass on the RLS-and-RPC advisor warnings listed under Database
-   Schema — likely all fine by design, but worth deliberately confirming before real users
-   and real payments are involved.
+1. **Decide on and build real payment/checkout** (see Remaining TODOs #1) — this is the
+   single biggest thing standing between this project and being a real, launchable SaaS.
+   Deferred multiple times by the project owner so far; not yet started.
+2. **Enable Leaked Password Protection** in the Supabase Auth dashboard (Authentication →
+   Providers/Policies) — the one remaining item from the security pass, a manual toggle
+   with no MCP tool access, so it needs a human to click it.
+3. A live Playwright/QA audit (this session) fixed a batch of real UX/accessibility bugs
+   (interview network-failure handling, mobile nav reachability, aria-live gaps, quiz/
+   lesson error-swallowing, etc.) — see git log for `Fix UX/QA/accessibility gaps...` for
+   the full list. A couple of lower-priority items from that audit were explicitly left
+   for later: none blocking, listed in that commit's message.
+4. A custom domain (`forage.co.in`) is not yet purchased — optional, no urgency.

@@ -29,11 +29,15 @@ export default async function QuizPage({
     .maybeSingle();
   if (progress?.status !== "done") redirect(`/learn/${slug}`);
 
-  const { data: questions } = await supabase
+  const { data: questions, error: questionsError } = await supabase
     .from("quiz_questions_public")
     .select("id, prompt, options, difficulty, style_tag, sort")
     .eq("lesson_id", row.id)
     .order("sort");
+
+  if (questionsError) {
+    throw new Error("Couldn't load this quiz. Please try again.");
+  }
 
   return (
     <div className="max-w-2xl mx-auto">

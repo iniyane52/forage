@@ -56,7 +56,11 @@ export default async function StreamPage({
     );
   }
 
-  const [{ data: modules }, { data: progress }, { data: results }] = await Promise.all([
+  const [
+    { data: modules, error: modulesError },
+    { data: progress, error: progressError },
+    { data: results, error: resultsError },
+  ] = await Promise.all([
     supabase
       .from("modules")
       .select("id, slug, title, why, sort, lessons(id, slug, title, sort)")
@@ -65,6 +69,10 @@ export default async function StreamPage({
     supabase.from("lesson_progress").select("lesson_id, status").eq("user_id", user!.id),
     supabase.from("quiz_results").select("lesson_id, passed, best_score").eq("user_id", user!.id),
   ]);
+
+  if (modulesError || progressError || resultsError) {
+    throw new Error("Couldn't load this career path. Please try again.");
+  }
 
   const done = new Set((progress ?? []).filter((p) => p.status === "done").map((p) => p.lesson_id));
   const quizPassed = new Map((results ?? []).map((r) => [r.lesson_id, r]));

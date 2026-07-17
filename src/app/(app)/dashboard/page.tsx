@@ -28,13 +28,21 @@ export default async function Dashboard() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: profile }, { data: streams }, { data: lessons }, { data: progress }] =
-    await Promise.all([
-      supabase.from("profiles").select("plan").eq("user_id", user!.id).single(),
-      supabase.from("streams").select("*").order("sort"),
-      supabase.from("lessons").select("id, slug, title, sort, modules(sort, stream_id, streams(slug))"),
-      supabase.from("lesson_progress").select("lesson_id, status").eq("user_id", user!.id),
-    ]);
+  const [
+    { data: profile, error: profileError },
+    { data: streams, error: streamsError },
+    { data: lessons, error: lessonsError },
+    { data: progress, error: progressError },
+  ] = await Promise.all([
+    supabase.from("profiles").select("plan").eq("user_id", user!.id).single(),
+    supabase.from("streams").select("*").order("sort"),
+    supabase.from("lessons").select("id, slug, title, sort, modules(sort, stream_id, streams(slug))"),
+    supabase.from("lesson_progress").select("lesson_id, status").eq("user_id", user!.id),
+  ]);
+
+  if (profileError || streamsError || lessonsError || progressError) {
+    throw new Error("Couldn't load your dashboard. Please try again.");
+  }
 
   const isPro = profile?.plan === "pro";
   const doneIds = new Set((progress ?? []).filter((p) => p.status === "done").map((p) => p.lesson_id));
