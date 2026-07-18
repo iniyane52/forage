@@ -34,35 +34,31 @@ export function HeroHeadline() {
       const leadSplit = new SplitText(leadRef.current, { type: "words,chars" });
       const tailSplit = new SplitText(tailRef.current, { type: "words,chars" });
 
-      // A bit of overshoot (back.out) instead of a plain ease-out -- more energy on
-      // the very first thing a visitor sees, without adding any ongoing cost (this is
-      // still a one-shot mount reveal, just a punchier curve).
-      const tl = gsap.timeline();
-      tl.from(leadSplit.chars, {
+      // Each char gets its own randomized rotateY/z on top of the shared rotateX --
+      // chars visibly tumble in from depth at slightly different angles instead of
+      // rising in lockstep, a cheap (pure compositor transform, no WebGL) way to read
+      // as real 3D kinetic type. Steeper rotateX (-90 vs the previous -70) plus a
+      // slightly deeper perspective (set on the root <h1> below) push the effect
+      // further without changing the underlying mechanism.
+      const tumbleVars = {
         opacity: 0,
         yPercent: 70,
-        rotateX: -70,
-        stagger: 0.02,
-        duration: 0.7,
-        ease: "back.out(1.6)",
-      })
+        rotateX: -90,
+        rotateY: () => gsap.utils.random(-25, 25),
+        z: () => gsap.utils.random(-60, 20),
+        stagger: { each: 0.02, from: "random" as const },
+        duration: 0.8,
+        ease: "back.out(1.7)",
+      };
+
+      const tl = gsap.timeline();
+      tl.from(leadSplit.chars, tumbleVars)
         .from(
           gradientRef.current,
           { opacity: 0, scale: 0.8, duration: 0.5, ease: "back.out(2.2)" },
           "<0.1"
         )
-        .from(
-          tailSplit.chars,
-          {
-            opacity: 0,
-            yPercent: 70,
-            rotateX: -70,
-            stagger: 0.02,
-            duration: 0.7,
-            ease: "back.out(1.6)",
-          },
-          "<0.15"
-        );
+        .from(tailSplit.chars, tumbleVars, "<0.15");
 
       return () => {
         leadSplit.revert();
@@ -75,8 +71,8 @@ export function HeroHeadline() {
   return (
     <h1
       ref={rootRef}
-      className="display text-4xl sm:text-6xl md:text-7xl mb-5"
-      style={{ perspective: 400 }}
+      className="display font-hero text-4xl sm:text-6xl md:text-7xl mb-5"
+      style={{ perspective: 650 }}
     >
       <span ref={leadRef}>Learn it. </span>
       <span ref={gradientRef} className="gradient-word inline-block">

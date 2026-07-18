@@ -15,6 +15,7 @@
   --font-sans: var(--font-body);
   --font-mono: var(--font-mono-face);
   --font-display: var(--font-display-face);
+  --font-hero: var(--font-hero-face);
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-2xl: 20px;
@@ -28,6 +29,7 @@ html {
   --font-sans: var(--font-body);
   --font-mono: var(--font-mono-face);
   --font-display: var(--font-display-face);
+  --font-hero: var(--font-hero-face);
   --color-primary: #00e5ff;
   --color-secondary: #baff2e;
   --color-accent: #ff3d81;
@@ -46,11 +48,18 @@ body {
   overflow-x: hidden;
 }
 
-/* ---- Liquid aurora backdrop (OPTICORE-style fluid gradient blobs) ---- */
-body::before,
-body::after {
+/* ---- Liquid aurora backdrop (OPTICORE-style fluid gradient blobs) ----
+   Scoped to .aurora-zone (the hero section wrapper in page.tsx), not `body`: these
+   were originally `position: fixed`, which pins them to the viewport corners forever
+   -- by the time a user scrolls to e.g. the career-path grid, the exact same blobs are
+   still sitting there tinting unrelated cards, disconnected from the hero they were
+   designed for. `position: absolute` on a `.aurora-zone` (itself `position: relative`,
+   sized to just the hero) anchors them to that section only, so they scroll away
+   naturally with the hero instead of bleeding through content further down the page. */
+.aurora-zone::before,
+.aurora-zone::after {
   content: "";
-  position: fixed;
+  position: absolute;
   z-index: -1;
   border-radius: 50%;
   filter: blur(110px);
@@ -58,7 +67,7 @@ body::after {
   pointer-events: none;
   will-change: transform;
 }
-body::before {
+.aurora-zone::before {
   width: 60vw;
   height: 60vw;
   top: -18vw;
@@ -67,7 +76,7 @@ body::before {
     radial-gradient(circle at 70% 60%, #ff3d81, transparent 55%);
   animation: drift1 26s ease-in-out infinite alternate;
 }
-body::after {
+.aurora-zone::after {
   width: 55vw;
   height: 55vw;
   bottom: -20vw;
@@ -89,7 +98,7 @@ body::after {
   to { background-position: 22px 22px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  body::before, body::after { animation: none; }
+  .aurora-zone::before, .aurora-zone::after { animation: none; }
 }
 
 /* ---- Glass surfaces ---- */
@@ -151,6 +160,12 @@ body::after {
   letter-spacing: -0.02em;
   line-height: 1.02;
 }
+/* Bolder/chunkier than .display -- reserved for the hero headline only, layered on
+   top of .display (keeps its letter-spacing/line-height, swaps the typeface itself). */
+.font-hero {
+  font-family: var(--font-hero-face), sans-serif;
+  font-weight: 800;
+}
 .lead {
   font-size: 1.15rem;
   line-height: 1.65;
@@ -191,10 +206,18 @@ body::after {
 }
 
 /* Page entrance — CSS-only so it always resolves to visible, even if
-   remounted mid-flight by a router.refresh(). */
+   remounted mid-flight by a router.refresh().
+   Uses the standalone `translate` property, not `transform: translateY(...)`:
+   `animation-fill-mode: both` permanently locks in the `to` keyframe's computed
+   value even after the animation finishes, and ANY non-`none` `transform` on an
+   element -- even a resolved no-op like translateY(0) -- establishes a new
+   containing block for every `position: fixed` descendant anywhere on the page
+   (a real, confirmed regression: it silently broke ScrollHero's GSAP ScrollTrigger
+   pin, which relies on true fixed positioning). `translate` is a separate CSS
+   property from `transform` and does not trigger that behavior. */
 @keyframes pageEnter {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; translate: 0 8px; }
+  to { opacity: 1; translate: 0 0; }
 }
 .page-enter {
   animation: pageEnter 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -216,8 +239,8 @@ body::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body::before,
-  body::after { animation: none !important; }
+  .aurora-zone::before,
+  .aurora-zone::after { animation: none !important; }
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;

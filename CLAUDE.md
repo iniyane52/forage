@@ -53,8 +53,13 @@ real, load-bearing quality bar; don't relax it when adding content.
 - **Language**: TypeScript (strict), ESLint 9 flat config (`eslint.config.mjs`)
 - **Styling**: Tailwind CSS v4 (`@theme inline` in `globals.css` — see the "Architecture
   decisions" note below on a real bug this causes)
-- **Motion**: Framer Motion 12.x — all primitives centralized in
-  `src/components/ui/motion.tsx`, all gated by `useReducedMotion()`
+- **Motion**: Framer Motion 12.x for FadeUp/Stagger/HoverTilt/CountUp/ScrollParallax/
+  HeadingReveal (centralized in `src/components/ui/motion.tsx`), plus GSAP 3.x +
+  ScrollTrigger + SplitText (`gsap`, `@gsap/react`, centralized in
+  `src/components/ui/gsapMotion.tsx`) for character-level SplitText and scrub-tied-to-
+  scroll-velocity choreography — the two things Framer can't do structurally. Never
+  animate the same element with both. All animation, in either library, is gated by
+  `useReducedMotion()`.
 - **Icons**: lucide-react (re-exported through `src/components/ui/icons.tsx` — see RSC
   note below on why icons are never passed as props across the server/client boundary)
 - **Backend**: Supabase — Postgres (with RLS), Auth, and Edge Functions (Deno). Project
@@ -70,8 +75,10 @@ real, load-bearing quality bar; don't relax it when adding content.
   also uses the same `LLM_API_KEY` secret (confirm it's still pointed at a working
   provider before relying on Tutor — it predates the Groq migration and was not
   independently re-verified after that switch).
-- **Fonts**: Chakra Petch (display), Inter (body), JetBrains Mono (mono) — via
-  `next/font/google` in `src/app/layout.tsx`.
+- **Fonts**: Chakra Petch (display), Inter (body), JetBrains Mono (mono), Unbounded
+  (hero headline only — bolder/chunkier, layered via a `.font-hero` utility on top of
+  `.display`, not a site-wide type-system change) — all via `next/font/google` in
+  `src/app/layout.tsx`.
 - **Package manager**: npm (`package-lock.json` present, no yarn/pnpm lockfile).
 - **No traditional Next.js API routes** — there is no `src/app/api/` directory. All
   server communication is Supabase client SDK calls (from Server or Client Components),
@@ -103,6 +110,9 @@ foundary/
 │   ├── app/
 │   │   ├── page.tsx              # landing page (public, marketing)
 │   │   ├── layout.tsx             # root layout: fonts, scroll-restoration fix, NavProgress
+│   │   ├── template.tsx           # root-level, site-wide page-enter transition (fade+
+│   │   │                            slide, pure CSS) -- covers every route in one place,
+│   │   │                            not scoped per route-group (see Architecture decisions)
 │   │   ├── globals.css            # Tailwind v4 theme tokens, custom keyframes
 │   │   ├── auth/page.tsx          # sign in / sign up (Supabase Auth)
 │   │   └── (app)/                 # authenticated app shell (route group)
@@ -115,18 +125,24 @@ foundary/
 │   │       ├── pricing/           #   Free/Pro plan comparison + upgrade (see known gaps)
 │   │       └── profile/           #   user profile/settings
 │   ├── components/
-│   │   ├── ui/                    # design-system primitives: motion.tsx, icons.tsx,
-│   │   │                            PathTile.tsx, ScrollHero.tsx, ScrollProgressBar.tsx,
+│   │   ├── ui/                    # design-system primitives: motion.tsx, gsapMotion.tsx
+│   │   │                            (GSAP/ScrollTrigger/SplitText setup), icons.tsx,
+│   │   │                            PathTile.tsx, ScrollHero.tsx (static hero layout, no
+│   │   │                            pin/tilt -- see Known bugs), ScrollProgressBar.tsx,
 │   │   │                            NavProgress.tsx, Confetti.tsx
 │   │   ├── landing/                # landing-page-only components: TechTicker,
 │   │   │                            PathGrid, SkillConstellation, TerminalHeading,
 │   │   │                            StatCallout, HowItWorksTimeline, ValuePropsCarousel,
-│   │   │                            DashboardMockup
+│   │   │                            DashboardMockup, HeroHeadline
 │   │   ├── interview/              # InterviewClient.tsx (main state machine), VoiceOrb
 │   │   ├── QuizRunner.tsx, LessonActions.tsx, TutorDrawer.tsx, SignOutButton.tsx
 │   ├── hooks/
-│   │   └── useVoice.ts             # voice capture/playback: native SpeechRecognition +
-│   │                                MediaRecorder/Whisper fallback; native/Orpheus TTS
+│   │   ├── useVoice.ts             # voice capture/playback: native SpeechRecognition +
+│   │   │                            MediaRecorder/Whisper fallback; native/Orpheus TTS
+│   │   └── useMounted.ts           # SSR-hydration-safe "has the client mounted yet" gate
+│   │                                (useSyncExternalStore) -- see Architecture decisions
+│   │                                on why this matters for any component branching its
+│   │                                returned JSX on useReducedMotion()
 │   ├── lib/
 │   │   ├── content.ts               # loads all content/*.json, flattens into a single
 │   │   │                             array for prev/next lesson navigation (array ORDER
@@ -198,6 +214,44 @@ foundary/
   page*. Fixed by computing the horizontal offset manually and calling `track.scrollBy()`
   directly on the track element, never `card.scrollIntoView()`. If you see other carousels
   built with `scrollIntoView`, audit them for the same issue.
+- **Branching a component's top-level return on `useReducedMotion()` directly is a real
+  hydration-mismatch trap.** SSR has no `matchMedia`, so the server always renders one
+  branch (effectively `reduce === false`), but a client whose OS already prefers reduced
+  motion can report `true` on its very first paint — if the two branches render
+  structurally different trees (different root tag, different child count), React throws
+  a real hydration-mismatch error and regenerates the subtree client-side, which can also
+  cascade into breaking a Framer Motion `useScroll` ref binding on the same page. Found and
+  fixed in five components this session (`ScrollProgressBar.tsx`, `SkillConstellation.tsx`,
+  `TechTicker.tsx`, `TerminalHeading.tsx`, `ValuePropsCarousel.tsx`) via
+  `src/hooks/useMounted.ts` (a `useSyncExternalStore`-based "has the client mounted"
+  gate — server snapshot `false`, client snapshot `true`) — gate as `if (!mounted ||
+  reduce) return <staticBranch/>`, never just `if (reduce)`. Components in
+  `src/components/ui/motion.tsx` (`Stagger`/`StaggerItem`/`HoverTilt`/`ScrollParallax`)
+  are *not* affected despite the same-looking pattern, because both of their branches
+  render the identical underlying `<div>` tag (a Framer `motion.div` SSRs to a plain
+  `div`) — the mismatch only bites when the two branches produce genuinely different DOM
+  shapes. If you add a new component with this pattern, use `useMounted()` from the start.
+- **A CSS `transform` on *any* ancestor — even one resolved to a numeric no-op like
+  `translate(0,0)` — establishes a new containing block for every `position: fixed`
+  (and `position: absolute`) descendant anywhere below it, silently breaking real
+  viewport-relative fixed positioning.** This bit us for real: the page-transition
+  CSS (`@keyframes pageEnter`, `animation-fill-mode: both`) used `transform:
+  translateY(...)`, and `both` permanently locks in the `to` keyframe's *computed*
+  transform value even after the animation finishes — so every page, forever, had an
+  ancestor with a non-`none` `transform`. Fixed by using the standalone `translate` CSS
+  property instead of `transform: translateY(...)` in that keyframe (`translate` does
+  not trigger this containing-block behavior, unlike `transform`). If you ever add a
+  `transform`-based CSS animation with `fill-mode: both`/`forwards` on a wide-scoped
+  ancestor (a layout wrapper, a page template, anything most of the app renders inside
+  of), prefer the standalone `translate`/`rotate`/`scale` properties over `transform`
+  for exactly this reason.
+- **GSAP `ScrollTrigger` measures each trigger's start/end pixel positions once, at
+  creation time** — if a web font (this project's `next/font/google` fonts, especially
+  the heavy Unbounded weights added for the hero) is still swapping in and shifting
+  layout after that moment, the trigger's measurements go stale and it never
+  self-corrects. Fixed globally in `src/components/ui/gsapMotion.tsx` via
+  `document.fonts.ready.then(() => ScrollTrigger.refresh())`, which re-measures every
+  ScrollTrigger on the page once fonts are confirmed loaded, not just one component's.
 
 ## Features completed
 
@@ -224,13 +278,26 @@ foundary/
   - Server-enforced duration cap and trial-usage (can't be bypassed via client tampering).
   - Best-effort abandoned-session cleanup on tab hide (45s grace period before ending, to
     avoid killing a session on a brief tab switch) or page close.
-- **Landing page**: scroll-driven hero (`ScrollHero.tsx`, pinned/tilt effect), continuous
-  scroll-parallax on every section below it, a real-content tech-skill ticker
-  (`TechTicker.tsx`, not just path names), a dense per-path skill grid (`PathGrid.tsx`,
-  real accent colors/skill tags/difficulty per path, not a plain list), ambient drifting
-  skill-icon background art (`SkillConstellation.tsx`), terminal-style kinetic section
-  headings (`TerminalHeading.tsx`), a connected/animated "how it works" timeline
-  (`HowItWorksTimeline.tsx`), flanking animated stat counters (`StatCallout.tsx`).
+- **Landing page**: a bold kinetic-typography hero (`HeroHeadline.tsx` — GSAP SplitText
+  char-tumble entrance, Unbounded font) inside a static (no pin/tilt — see Known bugs)
+  `ScrollHero.tsx` layout, continuous scroll-parallax on every section below it, a
+  real-content tech-skill ticker (`TechTicker.tsx`, not just path names), a dense
+  per-path skill grid (`PathGrid.tsx`, real accent colors/skill tags/difficulty per
+  path, not a plain list), ambient drifting skill-icon background art
+  (`SkillConstellation.tsx`), terminal-style kinetic section headings
+  (`TerminalHeading.tsx`), a connected/animated "how it works" timeline
+  (`HowItWorksTimeline.tsx`), flanking animated stat counters (`StatCallout.tsx`), and
+  an ambient "aurora" background glow scoped to just the hero section (`.aurora-zone`
+  in `globals.css` — it used to be `position: fixed` on `<body>`, which pinned it to
+  viewport corners forever and made it bleed through unrelated cards deep in the page;
+  now scoped so it scrolls away naturally after the hero).
+- **Site-wide page transitions**: a root `src/app/template.tsx` applies a brief
+  (320ms), pure-CSS fade + slide-up on every navigation anywhere in the app — landing →
+  auth → the whole `(app)` group. Deliberately CSS-only (not Framer/JS-driven): a
+  `template.tsx` re-mounts on every navigation including `router.refresh()` calls
+  (used by quiz/lesson actions), and a JS-driven animation can get interrupted
+  mid-flight and stuck invisible; `animation-fill-mode: both` always resolves to
+  visible regardless of timing.
 - **Gamification**: XP, levels, daily streaks (`touch_streak()`), badges.
 - **Deep-tech-neon visual identity**: dark palette, distinct neon accent per stream (see
   `src/lib/pathMeta.ts`), Chakra Petch/Inter/JetBrains Mono type system, glass-morphism
@@ -263,7 +330,10 @@ Roughly in the order they'd likely matter for actually launching this as a real 
 4. Stale task-tracker entries referencing superseded early-phase plans exist in this
    session's task list but don't affect the codebase — no code action needed, just noise
    if you're looking at task history for context.
-5. Minor nice-to-haves flagged during the last content audit but explicitly not actioned
+5. **`ScrollHero.tsx`'s pin/tilt effect is disabled** (renders a static layout instead)
+   — see "Known bugs" above for the full debugging history and why it needs a
+   dedicated, isolated session rather than another incremental attempt.
+6. Minor nice-to-haves flagged during the last content audit but explicitly not actioned
    (low priority, listed for completeness): templated-feeling Module-3 "why" phrasing
    repeated near-verbatim across the newer paths; a methodology nitpick in
    `data-correlation-causation`'s partial-correlation demo; `cyber-incident-response`
@@ -292,7 +362,15 @@ Roughly in the order they'd likely matter for actually launching this as a real 
   (`FadeUp`, `Stagger`/`StaggerItem`, `ScrollParallax`, `HoverTilt`, `CountUp`,
   `ProgressRing`, `AnimatedBar`, `DotGridBackdrop`, `HeadingReveal`) rather than writing
   bespoke Framer Motion in a component, unless the effect is genuinely one-off. All of them
-  already handle `useReducedMotion()` — don't skip that gate on new motion code.
+  already handle `useReducedMotion()` — don't skip that gate on new motion code. For
+  GSAP/ScrollTrigger work, use `src/components/ui/gsapMotion.tsx`'s exported `gsap`/
+  `ScrollTrigger`/`SplitText` (already plugin-registered, client-guarded).
+- **Never branch a component's top-level return on `useReducedMotion()` alone** if the
+  two branches produce structurally different DOM (different root tag, different child
+  count) — gate on `useMounted()` (from `src/hooks/useMounted.ts`) first:
+  `if (!mounted || reduce) return <staticBranch/>`. See the hydration-mismatch entry
+  under "Architecture decisions" for why — this is a real bug class that hit five
+  components this session.
 - **JSON content files** (`content/*.json`) should be edited carefully — they're large,
   hand-authored files. Validate with `node -e "JSON.parse(require('fs').readFileSync('content/X.json','utf8'))"`
   after every edit. For structural changes (inserting a new module/lesson), a small Node
@@ -393,7 +471,8 @@ client-server communication is one of:
 ## Important dependencies
 
 - `@supabase/ssr` + `@supabase/supabase-js` — all DB/auth access
-- `framer-motion` — all animation (see Coding Conventions on using the shared primitives)
+- `framer-motion` + `gsap`/`@gsap/react` — all animation (see Coding Conventions and
+  the Motion tech-stack entry for the split between the two)
 - `lucide-react` — all icons, re-exported through `src/components/ui/icons.tsx`
 - `next` 16.2.10 — **breaking changes vs. your training data**, see `AGENTS.md`
 - No testing framework is currently installed (no Jest/Vitest/Playwright) — there is no
@@ -403,12 +482,45 @@ client-server communication is one of:
 
 ## Known bugs
 
-None known/open as of this writing. Real bugs found and fixed this session (documented
-here so they aren't accidentally reintroduced): the `ResizeObserver`/`scrollIntoView`
-page-jump bug in `ValuePropsCarousel.tsx`, a horizontal-scroll leak from the landing
-page's CSS marquee, and a proxy/middleware gap where `/interview` wasn't in the protected
--routes list (unauthenticated visits could crash instead of redirecting to `/auth`) — all
-described in more detail under "Architecture decisions" above.
+**One real, currently-open bug**: `ScrollHero.tsx`'s original pin/tilt effect (header+
+card stay near the top of the viewport while a card rotates/scales as the user scrolls
+past) does not work and is currently disabled — the component renders a plain static
+layout instead. Two implementations were tried this session and both had real,
+unresolved bugs:
+1. CSS `position: sticky` never engaged at all — confirmed via direct
+   `getBoundingClientRect()` measurements across scroll depths showing the "pinned"
+   wrapper just scrolling away 1:1 with the page. Root-causing it turned up no fix
+   after ruling out every known CSS disqualifier (overflow-auto-promotion on every
+   ancestor, transform/filter/perspective/contain/isolation on every ancestor up to
+   `<html>`).
+2. GSAP ScrollTrigger's `pin` (tried as the replacement) surfaced and fixed three real,
+   separate bugs along the way (see the transform/containing-block and font-loading-
+   timing entries under "Architecture decisions" above, plus a duplicate-ScrollTrigger-
+   instance bug from combining `gsap.matchMedia()` with `useGSAP`'s dependency-triggered
+   re-runs). But even after all three fixes, the pinned content still ended up
+   rendering off-screen partway through the scroll range — the trigger's own start/end
+   detection measured correctly (confirmed via `onRefresh` logging), but the pinned
+   element's own captured baseline position did not, most likely due to other
+   ScrollTrigger-driven components on the same landing page (`PathGrid`,
+   `SkillConstellation`, `TechTicker`, `TerminalHeading`) triggering their own refresh
+   cascades that corrupt ScrollHero's baseline. This needs a dedicated, isolated
+   debugging session (e.g. testing `ScrollHero` alone on a blank page, without the
+   other components, to conclusively prove or disprove that theory) rather than
+   further guessing. See `ScrollHero.tsx`'s own doc comment for the full history.
+
+A second, smaller lesson from that same debugging session: **testing scroll-dependent
+behavior via repeated `page.goto()` calls in one long-lived Playwright browser tab
+produced misleading, inconsistent results** (the same exact code measured differently
+across runs). Closing the tab and opening a genuinely fresh one before each test
+produced consistent, trustworthy results — do this for any future scroll/GSAP debugging
+in this project, don't trust numbers from a tab that's been navigated many times.
+
+Older bugs, already fixed and worth not reintroducing: the `ResizeObserver`/
+`scrollIntoView` page-jump bug in `ValuePropsCarousel.tsx`, a horizontal-scroll leak
+from the landing page's CSS marquee, and a proxy/middleware gap where `/interview`
+wasn't in the protected-routes list (unauthenticated visits could crash instead of
+redirecting to `/auth`) — all described in more detail under "Architecture decisions"
+above.
 
 ## Things future Claude sessions should know
 
@@ -437,10 +549,11 @@ described in more detail under "Architecture decisions" above.
     to production data changes, payments, or any destructive action inside the
     authenticated app without separately asking first. The no-secrets-in-files rule below
     is unaffected by this exception — it still applies in full.
-- **`git status` will surprise you** — as of this writing there are ~9 days of uncommitted
-  work spanning nearly the entire codebase (everything from the neon redesign through the
-  new SWE module). Check `git status`/`git log -1` before assuming recent work is
-  committed. No git remote is configured yet either.
+- **A git remote is configured** (`origin` → `github.com/iniyane52/forage.git`) and
+  `main` auto-deploys to Vercel on push — check `git status`/`git log -1` before
+  assuming recent work is committed, but don't assume "no remote" as an older version
+  of this file once claimed; that was corrected once uncommitted work was pushed
+  earlier in this project's history.
 - **This Claude Browser pane's `document.hidden` can report `true` even when you've just
   called `tabs_select` to front the tab** — this breaks anything gated on Page Visibility
   (e.g. `requestAnimationFrame`-based animations like `CountUp` won't run). Don't conclude
@@ -475,3 +588,14 @@ security pass) is now **done**; what's left:
    the full list. A couple of lower-priority items from that audit were explicitly left
    for later: none blocking, listed in that commit's message.
 4. A custom domain (`forage.co.in`) is not yet purchased — optional, no urgency.
+5. **Debug and fix `ScrollHero.tsx`'s pin/tilt effect** in a dedicated session — see
+   "Known bugs" for the full history of what's already been ruled out (both a CSS
+   `position: sticky` attempt and a GSAP ScrollTrigger `pin` attempt failed after
+   fixing three real, separate bugs along the way). Start by isolating `ScrollHero` on
+   a blank test page without the landing page's other ScrollTrigger-driven components,
+   to confirm or rule out cross-component refresh-cascade interference.
+6. Google OAuth: the "Continue with Google" button and `/auth/callback` route exist and
+   are wired correctly, but the Google Cloud OAuth credentials and the Supabase
+   dashboard provider toggle are the user's own tasks (external credentials, can't be
+   done on their behalf) — confirm these are done before assuming Google sign-in works
+   end-to-end.

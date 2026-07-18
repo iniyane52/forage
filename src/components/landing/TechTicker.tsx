@@ -6,6 +6,7 @@ import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger } from "@/components/ui/gsapMotion";
 import { streamIcon } from "@/components/ui/icons";
 import { pathMeta } from "@/lib/pathMeta";
+import { useMounted } from "@/hooks/useMounted";
 
 const PATHS = [
   { slug: "aiml", title: "AI Engineer" },
@@ -43,6 +44,7 @@ function Segment({ slug, title }: { slug: string; title: string }) {
  */
 export function TechTicker() {
   const reduce = useReducedMotion();
+  const mounted = useMounted();
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const tweenRef = useRef<gsap.core.Tween | null>(null);
@@ -85,7 +87,11 @@ export function TechTicker() {
     { scope: sectionRef, dependencies: [reduce] }
   );
 
-  if (reduce) {
+  // Gating on `mounted` first (not just `reduce`) avoids a real hydration mismatch:
+  // SSR always renders the marquee (no matchMedia on the server), so a client that
+  // already prefers reduced motion could disagree with the server on the very first
+  // paint -- same fix as ScrollProgressBar.tsx/SkillConstellation.tsx.
+  if (!mounted || reduce) {
     return (
       <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 px-4 py-3">
         {PATHS.map((p) => (

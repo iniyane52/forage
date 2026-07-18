@@ -1,14 +1,19 @@
 "use client";
 
 import { motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
+import { useMounted } from "@/hooks/useMounted";
 
 /** Thin fixed top bar that fills left-to-right as the user scrolls the whole page. */
 export function ScrollProgressBar() {
   const reduce = useReducedMotion();
+  const mounted = useMounted();
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 260, damping: 34, mass: 0.5, restDelta: 0.001 });
 
-  if (reduce) return null;
+  // Gating on `mounted` first (not just `reduce`) avoids a real hydration mismatch:
+  // SSR always renders the bar (no matchMedia on the server), so a client that already
+  // prefers reduced motion could disagree with the server on the very first paint.
+  if (!mounted || reduce) return null;
 
   return (
     <motion.div

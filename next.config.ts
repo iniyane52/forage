@@ -32,6 +32,9 @@ const CSP = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  // Dev-only floating badge (bottom-left "N" circle) -- never shown in production
+  // regardless, but it kept coming up during local preview/testing, so just turn it off.
+  devIndicators: false,
   async headers() {
     return [
       {

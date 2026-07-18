@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Chakra_Petch } from "next/font/google";
+import { Inter, JetBrains_Mono, Chakra_Petch, Unbounded } from "next/font/google";
 import { NavProgress } from "@/components/ui/NavProgress";
 import "./globals.css";
 
@@ -9,6 +9,14 @@ const chakraPetch = Chakra_Petch({
   variable: "--font-display-face",
   subsets: ["latin"],
   weight: ["500", "600", "700"],
+});
+// Bolder, chunkier than Chakra Petch -- reserved for the hero headline only, to give
+// it a distinct, more Gen-Z-coded punch without changing the type system anywhere
+// else on the site.
+const unbounded = Unbounded({
+  variable: "--font-hero-face",
+  subsets: ["latin"],
+  weight: ["800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -23,7 +31,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jetbrainsMono.variable} ${chakraPetch.variable} h-full antialiased overflow-x-hidden`}
+      className={`${inter.variable} ${jetbrainsMono.variable} ${chakraPetch.variable} ${unbounded.variable} h-full antialiased overflow-x-hidden`}
     >
       <body className="min-h-full flex flex-col overflow-x-hidden">
         {/* Browsers restore the previous scroll position on reload/back-forward-cache

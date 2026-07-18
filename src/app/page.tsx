@@ -103,7 +103,9 @@ export default function LandingPage() {
       </header>
 
       <main className="flex-1">
-        {/* Hero */}
+        {/* Hero -- aurora-zone scopes the ambient background glow to just this section
+            (see globals.css) so it doesn't bleed through cards further down the page. */}
+        <div className="relative aurora-zone">
         <ScrollHero
           className="pt-16 sm:pt-24 pb-16 sm:pb-24"
           header={
@@ -133,13 +135,14 @@ export default function LandingPage() {
                   </a>
                 </div>
                 <p className="text-xs text-[#7d99a3] mt-4">
-                  No credit card required. The Common Core stays free.
+                  180 lessons across 7 tracks — start studying today.
                 </p>
               </FadeUp>
             </div>
           }
           card={<DashboardMockup />}
         />
+        </div>
 
         {/* Tech ticker — real skill tags per path, not just names */}
         <section className="py-2">

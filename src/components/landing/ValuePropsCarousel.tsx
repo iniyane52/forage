@@ -5,6 +5,7 @@ import { useReducedMotion } from "framer-motion";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "@/components/ui/gsapMotion";
 import { ChevronLeft, ChevronRight } from "@/components/ui/icons";
+import { useMounted } from "@/hooks/useMounted";
 
 // `icon` is a pre-rendered element (e.g. `<BookOpen size={20} />`), not a
 // component reference — Next.js can't pass raw component types from a
@@ -21,6 +22,7 @@ export type ValueProp = { icon: React.ReactNode; title: string; body: string; co
  */
 export function ValuePropsCarousel({ items }: { items: ValueProp[] }) {
   const reduce = useReducedMotion();
+  const mounted = useMounted();
   const trackRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const wrapperRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -153,7 +155,11 @@ export function ValuePropsCarousel({ items }: { items: ValueProp[] }) {
     centerCard(clamped, behavior);
   }
 
-  if (reduce) {
+  // Gating on `mounted` first (not just `reduce`) avoids a real hydration mismatch:
+  // SSR always renders the carousel (no matchMedia on the server), so a client that
+  // already prefers reduced motion could disagree with the server on the very first
+  // paint -- same fix as ScrollProgressBar.tsx/TechTicker.tsx/TerminalHeading.tsx.
+  if (!mounted || reduce) {
     return (
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {items.map((v) => (

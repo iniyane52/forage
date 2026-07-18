@@ -6,6 +6,7 @@ import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger } from "@/components/ui/gsapMotion";
 import { streamIcon } from "@/components/ui/icons";
 import { pathMeta } from "@/lib/pathMeta";
+import { useMounted } from "@/hooks/useMounted";
 
 const LAYOUTS = {
   a: [
@@ -39,6 +40,7 @@ const LAYOUTS = {
  */
 export function SkillConstellation({ variant = "a" }: { variant?: "a" | "b" }) {
   const reduce = useReducedMotion();
+  const mounted = useMounted();
   const containerRef = useRef<HTMLDivElement>(null);
   const iconRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
@@ -74,7 +76,11 @@ export function SkillConstellation({ variant = "a" }: { variant?: "a" | "b" }) {
     { scope: containerRef, dependencies: [reduce, variant] }
   );
 
-  if (reduce) return null;
+  // Gating on `mounted` first (not just `reduce`) avoids a real hydration mismatch:
+  // SSR always renders the icons (no matchMedia on the server), so a client that
+  // already prefers reduced motion could disagree with the server on the very first
+  // paint -- the same fix applied to ScrollProgressBar.tsx.
+  if (!mounted || reduce) return null;
 
   return (
     <div ref={containerRef} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden -z-10">

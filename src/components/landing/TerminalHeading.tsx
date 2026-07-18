@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useGSAP } from "@gsap/react";
 import { gsap, SplitText } from "@/components/ui/gsapMotion";
+import { useMounted } from "@/hooks/useMounted";
 
 /**
  * A bolder, distinct typographic register for the mid-page section transitions --
@@ -18,6 +19,7 @@ import { gsap, SplitText } from "@/components/ui/gsapMotion";
  */
 export function TerminalHeading({ text, className = "" }: { text: string; className?: string }) {
   const reduce = useReducedMotion();
+  const mounted = useMounted();
   const textRef = useRef<HTMLSpanElement>(null);
 
   useGSAP(
@@ -25,7 +27,7 @@ export function TerminalHeading({ text, className = "" }: { text: string; classN
       if (reduce || !textRef.current) return;
 
       const split = new SplitText(textRef.current, { type: "words,chars" });
-      gsap.set(split.chars, { opacity: 0 });
+      gsap.set(split.chars, { opacity: 0, rotateX: -25, z: -20 });
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -35,14 +37,21 @@ export function TerminalHeading({ text, className = "" }: { text: string; classN
           scrub: 0.5,
         },
       });
-      tl.to(split.chars, { opacity: 1, stagger: { each: 0.03, from: "start" } });
+      // rotateX/z alongside the existing opacity reveal -- a light, CSS-only echo of the
+      // hero's 3D kinetic-type idea (chars tilting in from depth) at near-zero marginal
+      // cost, deliberately not a second WebGL canvas.
+      tl.to(split.chars, { opacity: 1, rotateX: 0, z: 0, stagger: { each: 0.03, from: "start" } });
 
       return () => split.revert();
     },
     { scope: textRef, dependencies: [reduce, text] }
   );
 
-  if (reduce) {
+  // Gating on `mounted` first (not just `reduce`) avoids a real hydration mismatch:
+  // SSR always renders the animated <h2> (no matchMedia on the server), so a client
+  // that already prefers reduced motion could disagree with the server on the very
+  // first paint -- same fix as ScrollProgressBar.tsx/TechTicker.tsx.
+  if (!mounted || reduce) {
     return (
       <h2 className={`font-mono font-bold ${className}`}>
         <span className="text-[#00e5ff]">{">"}</span> {text}
@@ -51,7 +60,7 @@ export function TerminalHeading({ text, className = "" }: { text: string; classN
   }
 
   return (
-    <h2 className={`font-mono font-bold ${className}`}>
+    <h2 className={`font-mono font-bold ${className}`} style={{ perspective: 400 }}>
       <span className="text-[#00e5ff] mr-2">{">"}</span>
       <span ref={textRef}>{text}</span>
       <motion.span
