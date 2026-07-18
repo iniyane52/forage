@@ -128,7 +128,7 @@ export function ScrollHero({
               boxShadow:
                 "0 25px 80px -20px rgba(124,92,255,0.45), 0 45px 120px -40px rgba(200,107,255,0.35), inset 0 1px 0 0 rgba(255,255,255,0.08)",
             }}
-            className="glass rounded-[28px] md:rounded-[32px] overflow-hidden max-w-5xl mx-auto mt-8 md:mt-12"
+            className="glass-solid rounded-[28px] md:rounded-[32px] overflow-hidden max-w-5xl mx-auto mt-8 md:mt-12"
           >
             {card}
           </motion.div>

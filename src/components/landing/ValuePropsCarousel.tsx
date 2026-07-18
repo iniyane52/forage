@@ -64,18 +64,26 @@ export function ValuePropsCarousel({ items }: { items: ValueProp[] }) {
         ? second.left + second.width / 2 - (first.left + first.width / 2)
         : first?.width ?? 280;
 
+    // Read every card's rect first, then write styles in a separate pass -- reading a
+    // rect right after a previous card's style write forces a synchronous layout
+    // recalculation mid-loop (layout thrashing); batching reads-then-writes avoids it.
+    const rects = cards.map((el) => el?.getBoundingClientRect() ?? null);
+
     let closestIdx = 0;
     let closestDist = Infinity;
-
-    cards.forEach((el, i) => {
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      const cardCenter = r.left + r.width / 2;
-      const distance = Math.abs(cardCenter - centerX);
+    rects.forEach((r, i) => {
+      if (!r) return;
+      const distance = Math.abs(r.left + r.width / 2 - centerX);
       if (distance < closestDist) {
         closestDist = distance;
         closestIdx = i;
       }
+    });
+
+    cards.forEach((el, i) => {
+      const r = rects[i];
+      if (!el || !r) return;
+      const distance = Math.abs(r.left + r.width / 2 - centerX);
       const closeness = Math.max(0, Math.min(1, 1 - distance / step));
       const scale = 0.86 + 0.14 * closeness;
       const opacity = 0.45 + 0.55 * closeness;
@@ -184,7 +192,7 @@ export function ValuePropsCarousel({ items }: { items: ValueProp[] }) {
               ref={(el) => {
                 cardRefs.current[i] = el;
               }}
-              className="glass glass-hover rounded-2xl p-5 w-full h-full"
+              className="glass-solid glass-hover rounded-2xl p-5 w-full h-full"
             >
               <span
                 className="w-10 h-10 rounded-xl grid place-items-center mb-3"

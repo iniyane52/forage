@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useGSAP } from "@gsap/react";
-import { gsap } from "@/components/ui/gsapMotion";
+import { gsap, ScrollTrigger } from "@/components/ui/gsapMotion";
 import { streamIcon } from "@/components/ui/icons";
 import { pathMeta } from "@/lib/pathMeta";
 
@@ -42,21 +42,33 @@ export function SkillConstellation({ variant = "a" }: { variant?: "a" | "b" }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const iconRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
+  // Gated by ScrollTrigger visibility -- with two instances of this component on the
+  // page (variant "a" and "b"), all 12 tweens used to run forever from mount, even
+  // scrolled far off-screen. Only the instance actually in view now does any work.
   useGSAP(
     () => {
-      if (reduce) return;
-      iconRefs.current.forEach((el) => {
-        if (!el) return;
-        gsap.to(el, {
-          x: gsap.utils.random(-14, 14),
-          y: gsap.utils.random(-18, 10),
-          rotate: gsap.utils.random(-8, 8),
-          duration: gsap.utils.random(12, 20),
-          delay: gsap.utils.random(0, 3),
-          ease: "sine.inOut",
-          repeat: -1,
-          yoyo: true,
-        });
+      if (reduce || !containerRef.current) return;
+      const tweens = iconRefs.current
+        .filter((el): el is HTMLSpanElement => !!el)
+        .map((el) =>
+          gsap.to(el, {
+            x: gsap.utils.random(-14, 14),
+            y: gsap.utils.random(-18, 10),
+            rotate: gsap.utils.random(-8, 8),
+            duration: gsap.utils.random(12, 20),
+            delay: gsap.utils.random(0, 3),
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+            paused: true,
+          })
+        );
+
+      ScrollTrigger.create({
+        trigger: containerRef.current,
+        start: "top bottom",
+        end: "bottom top",
+        onToggle: (self) => tweens.forEach((t) => (self.isActive ? t.play() : t.pause())),
       });
     },
     { scope: containerRef, dependencies: [reduce, variant] }

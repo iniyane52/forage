@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useGSAP } from "@gsap/react";
-import { gsap, SplitText, GSAP_EASE } from "@/components/ui/gsapMotion";
+import { gsap, SplitText } from "@/components/ui/gsapMotion";
 
 /**
  * One-time character reveal on mount, not scroll-scrubbed -- ScrollHero's own
@@ -34,6 +34,9 @@ export function HeroHeadline() {
       const leadSplit = new SplitText(leadRef.current, { type: "words,chars" });
       const tailSplit = new SplitText(tailRef.current, { type: "words,chars" });
 
+      // A bit of overshoot (back.out) instead of a plain ease-out -- more energy on
+      // the very first thing a visitor sees, without adding any ongoing cost (this is
+      // still a one-shot mount reveal, just a punchier curve).
       const tl = gsap.timeline();
       tl.from(leadSplit.chars, {
         opacity: 0,
@@ -41,11 +44,11 @@ export function HeroHeadline() {
         rotateX: -70,
         stagger: 0.02,
         duration: 0.7,
-        ease: GSAP_EASE,
+        ease: "back.out(1.6)",
       })
         .from(
           gradientRef.current,
-          { opacity: 0, scale: 0.85, duration: 0.5, ease: GSAP_EASE },
+          { opacity: 0, scale: 0.8, duration: 0.5, ease: "back.out(2.2)" },
           "<0.1"
         )
         .from(
@@ -56,7 +59,7 @@ export function HeroHeadline() {
             rotateX: -70,
             stagger: 0.02,
             duration: 0.7,
-            ease: GSAP_EASE,
+            ease: "back.out(1.6)",
           },
           "<0.15"
         );

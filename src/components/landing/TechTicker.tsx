@@ -56,13 +56,19 @@ export function TechTicker() {
         duration: 20,
         ease: "none",
         repeat: -1,
+        paused: true,
       });
       tweenRef.current = tween;
 
+      // onToggle gates the tween on visibility (fires immediately at creation too,
+      // reflecting whatever's already true) -- it used to run at base speed forever
+      // once mounted, even scrolled far off-screen; onUpdate/onLeave(Back) still own
+      // the scroll-velocity speed-up separately.
       const trigger = ScrollTrigger.create({
         trigger: sectionRef.current,
         start: "top bottom",
         end: "bottom top",
+        onToggle: (self) => (self.isActive ? tween.play() : tween.pause()),
         onUpdate: (self) => {
           const speed = Math.min(2.2, 1 + Math.abs(self.getVelocity()) / 2500);
           tween.timeScale(speed);

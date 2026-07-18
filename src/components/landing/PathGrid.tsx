@@ -34,33 +34,56 @@ function PathCard({
   const level = meta ? difficultyLevel[meta.difficulty] : 1;
   const reduce = useReducedMotion();
   const cardRef = useRef<HTMLDivElement>(null);
+  const glassRef = useRef<HTMLDivElement>(null);
+  const sweepRef = useRef<HTMLDivElement>(null);
 
-  // A 3D flip-up on first scroll-entry, staggered by column -- replaces the plain
-  // Framer Stagger mount entrance. HoverTilt (still Framer, hover-only) lives on a
-  // separate nested element, so clearing GSAP's transform on completion keeps the
-  // two from ever fighting over the same inline transform.
+  // A bouncy 3D flip-up on first scroll-entry, staggered by column -- replaces the
+  // plain Framer Stagger mount entrance. HoverTilt (still Framer, hover-only) lives on
+  // a separate nested element, so clearing GSAP's transform on completion keeps the
+  // two from ever fighting over the same inline transform. backdrop-filter is
+  // dropped on the glass surface for the ~0.6s of the flip itself and restored right
+  // after -- animating transform + backdrop-filter on the same visual surface at once
+  // is one of the more expensive combinations a browser compositor can be asked to do.
   useGSAP(
     () => {
       if (reduce || !cardRef.current) return;
       const el = cardRef.current;
+      const glassEl = glassRef.current;
       gsap.set(el, { transformPerspective: 800, transformOrigin: "bottom center", rotateX: -70, opacity: 0 });
+      if (glassEl) {
+        glassEl.style.backdropFilter = "none";
+        glassEl.style.setProperty("-webkit-backdrop-filter", "none");
+      }
       gsap.to(el, {
         rotateX: 0,
         opacity: 1,
-        duration: 0.6,
+        duration: 0.65,
         delay: (index % 3) * 0.08,
-        ease: "power3.out",
+        ease: "back.out(1.7)",
         scrollTrigger: { trigger: el, start: "top 90%", once: true },
-        onComplete: () => gsap.set(el, { clearProps: "transform" }),
+        onComplete: () => {
+          gsap.set(el, { clearProps: "transform" });
+          if (glassEl) {
+            glassEl.style.backdropFilter = "";
+            glassEl.style.removeProperty("-webkit-backdrop-filter");
+          }
+        },
       });
     },
     { scope: cardRef, dependencies: [reduce, index] }
   );
 
+  function onHoverEnter() {
+    if (reduce || !sweepRef.current) return;
+    gsap.fromTo(sweepRef.current, { xPercent: -150 }, { xPercent: 150, duration: 0.7, ease: "power2.out" });
+  }
+
   return (
     <div ref={cardRef} className="h-full">
       <HoverTilt className="h-full">
         <div
+          ref={glassRef}
+          onMouseEnter={onHoverEnter}
           className="group h-full glass glass-hover rounded-2xl p-5 relative overflow-hidden"
           style={{ borderColor: `${accent}22` }}
         >
@@ -69,6 +92,15 @@ function PathCard({
             strokeWidth={1.25}
             className="absolute -right-3 -bottom-4 pointer-events-none select-none"
             style={{ color: accent, opacity: 0.08, transform: "rotate(-8deg)" }}
+          />
+          <div
+            ref={sweepRef}
+            aria-hidden="true"
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: "linear-gradient(75deg, transparent 40%, rgba(255,255,255,0.14) 50%, transparent 60%)",
+              transform: "translateX(-150%)",
+            }}
           />
           <div className="relative z-[1]">
             <span
