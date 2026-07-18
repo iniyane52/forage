@@ -1,6 +1,10 @@
 "use client";
 
-import { HoverTilt, Stagger, StaggerItem } from "@/components/ui/motion";
+import { useRef } from "react";
+import { useReducedMotion } from "framer-motion";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "@/components/ui/gsapMotion";
+import { HoverTilt } from "@/components/ui/motion";
 import { streamIcon, ChevronRight } from "@/components/ui/icons";
 import { pathMeta, difficultyLabel, difficultyLevel } from "@/lib/pathMeta";
 
@@ -13,14 +17,48 @@ const PATHS = [
   { slug: "cybersecurity", title: "Cybersecurity", tagline: "Think like an attacker, respond like a defender." },
 ];
 
-function PathCard({ slug, title, tagline }: { slug: string; title: string; tagline: string }) {
+function PathCard({
+  slug,
+  title,
+  tagline,
+  index,
+}: {
+  slug: string;
+  title: string;
+  tagline: string;
+  index: number;
+}) {
   const meta = pathMeta[slug];
   const accent = meta?.accent ?? "#00e5ff";
   const Icon = streamIcon[slug] ?? streamIcon.foundations;
   const level = meta ? difficultyLevel[meta.difficulty] : 1;
+  const reduce = useReducedMotion();
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // A 3D flip-up on first scroll-entry, staggered by column -- replaces the plain
+  // Framer Stagger mount entrance. HoverTilt (still Framer, hover-only) lives on a
+  // separate nested element, so clearing GSAP's transform on completion keeps the
+  // two from ever fighting over the same inline transform.
+  useGSAP(
+    () => {
+      if (reduce || !cardRef.current) return;
+      const el = cardRef.current;
+      gsap.set(el, { transformPerspective: 800, transformOrigin: "bottom center", rotateX: -70, opacity: 0 });
+      gsap.to(el, {
+        rotateX: 0,
+        opacity: 1,
+        duration: 0.6,
+        delay: (index % 3) * 0.08,
+        ease: "power3.out",
+        scrollTrigger: { trigger: el, start: "top 90%", once: true },
+        onComplete: () => gsap.set(el, { clearProps: "transform" }),
+      });
+    },
+    { scope: cardRef, dependencies: [reduce, index] }
+  );
 
   return (
-    <StaggerItem className="h-full">
+    <div ref={cardRef} className="h-full">
       <HoverTilt className="h-full">
         <div
           className="group h-full glass glass-hover rounded-2xl p-5 relative overflow-hidden"
@@ -81,7 +119,7 @@ function PathCard({ slug, title, tagline }: { slug: string; title: string; tagli
           </div>
         </div>
       </HoverTilt>
-    </StaggerItem>
+    </div>
   );
 }
 
@@ -89,10 +127,10 @@ function PathCard({ slug, title, tagline }: { slug: string; title: string; tagli
  * path (from pathMeta.ts), each in its own accent color, instead of a plain name list. */
 export function PathGrid() {
   return (
-    <Stagger className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
-      {PATHS.map((p) => (
-        <PathCard key={p.slug} {...p} />
+    <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+      {PATHS.map((p, i) => (
+        <PathCard key={p.slug} {...p} index={i} />
       ))}
-    </Stagger>
+    </div>
   );
 }

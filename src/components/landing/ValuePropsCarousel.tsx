@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "@/components/ui/gsapMotion";
 import { ChevronLeft, ChevronRight } from "@/components/ui/icons";
 
 // `icon` is a pre-rendered element (e.g. `<BookOpen size={20} />`), not a
@@ -21,8 +23,30 @@ export function ValuePropsCarousel({ items }: { items: ValueProp[] }) {
   const reduce = useReducedMotion();
   const trackRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const wrapperRefs = useRef<(HTMLDivElement | null)[]>([]);
   const rafRef = useRef<number | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // Entrance only, once -- applyDepth below owns transform/opacity/filter on the card
+  // element every scroll frame, so this targets a separate wrapper div instead of ever
+  // touching the same node (the two would otherwise fight over the same properties).
+  useGSAP(
+    () => {
+      if (reduce) return;
+      const wrappers = wrapperRefs.current.filter(Boolean);
+      if (!wrappers.length) return;
+      gsap.set(wrappers, { opacity: 0, y: 24 });
+      gsap.to(wrappers, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        stagger: 0.08,
+        ease: "power3.out",
+        scrollTrigger: { trigger: trackRef.current, start: "top 85%", once: true },
+      });
+    },
+    { scope: trackRef, dependencies: [reduce] }
+  );
 
   const applyDepth = useCallback(() => {
     const track = trackRef.current;
@@ -152,18 +176,25 @@ export function ValuePropsCarousel({ items }: { items: ValueProp[] }) {
           <div
             key={v.title}
             ref={(el) => {
-              cardRefs.current[i] = el;
+              wrapperRefs.current[i] = el;
             }}
-            className="glass glass-hover rounded-2xl p-5 shrink-0 snap-center w-[240px] sm:w-[280px] md:w-[300px]"
+            className="shrink-0 snap-center w-[240px] sm:w-[280px] md:w-[300px]"
           >
-            <span
-              className="w-10 h-10 rounded-xl grid place-items-center mb-3"
-              style={{ background: `${v.color}22`, color: v.color }}
+            <div
+              ref={(el) => {
+                cardRefs.current[i] = el;
+              }}
+              className="glass glass-hover rounded-2xl p-5 w-full h-full"
             >
-              {v.icon}
-            </span>
-            <h3 className="font-bold text-[15px]">{v.title}</h3>
-            <p className="text-sm text-[#7d99a3] mt-1.5 leading-relaxed line-clamp-3">{v.body}</p>
+              <span
+                className="w-10 h-10 rounded-xl grid place-items-center mb-3"
+                style={{ background: `${v.color}22`, color: v.color }}
+              >
+                {v.icon}
+              </span>
+              <h3 className="font-bold text-[15px]">{v.title}</h3>
+              <p className="text-sm text-[#7d99a3] mt-1.5 leading-relaxed line-clamp-3">{v.body}</p>
+            </div>
           </div>
         ))}
       </div>

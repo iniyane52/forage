@@ -1,25 +1,28 @@
 "use client";
 
+import { useRef } from "react";
 import { useReducedMotion } from "framer-motion";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "@/components/ui/gsapMotion";
 import { streamIcon } from "@/components/ui/icons";
 import { pathMeta } from "@/lib/pathMeta";
 
 const LAYOUTS = {
   a: [
-    { slug: "aiml", top: "6%", left: "5%", size: 46, duration: 14, delay: 0 },
-    { slug: "software-engineer", top: "68%", left: "90%", size: 38, duration: 17, delay: 1.5 },
-    { slug: "cloud-devops", top: "82%", left: "9%", size: 42, duration: 15, delay: 3 },
-    { slug: "cybersecurity", top: "10%", left: "92%", size: 34, duration: 18, delay: 0.8 },
-    { slug: "fullstack", top: "44%", left: "2%", size: 30, duration: 16, delay: 2.2 },
-    { slug: "data", top: "38%", left: "95%", size: 36, duration: 19, delay: 1 },
+    { slug: "aiml", top: "6%", left: "5%", size: 46 },
+    { slug: "software-engineer", top: "68%", left: "90%", size: 38 },
+    { slug: "cloud-devops", top: "82%", left: "9%", size: 42 },
+    { slug: "cybersecurity", top: "10%", left: "92%", size: 34 },
+    { slug: "fullstack", top: "44%", left: "2%", size: 30 },
+    { slug: "data", top: "38%", left: "95%", size: 36 },
   ],
   b: [
-    { slug: "cloud-devops", top: "12%", left: "88%", size: 40, duration: 16, delay: 0.5 },
-    { slug: "cybersecurity", top: "70%", left: "6%", size: 36, duration: 14, delay: 2 },
-    { slug: "data", top: "8%", left: "8%", size: 32, duration: 18, delay: 1.2 },
-    { slug: "aiml", top: "78%", left: "92%", size: 44, duration: 15, delay: 0 },
-    { slug: "software-engineer", top: "45%", left: "96%", size: 30, duration: 17, delay: 2.6 },
-    { slug: "fullstack", top: "40%", left: "1%", size: 34, duration: 19, delay: 1.8 },
+    { slug: "cloud-devops", top: "12%", left: "88%", size: 40 },
+    { slug: "cybersecurity", top: "70%", left: "6%", size: 36 },
+    { slug: "data", top: "8%", left: "8%", size: 32 },
+    { slug: "aiml", top: "78%", left: "92%", size: 44 },
+    { slug: "software-engineer", top: "45%", left: "96%", size: 30 },
+    { slug: "fullstack", top: "40%", left: "1%", size: 34 },
   ],
 } as const;
 
@@ -29,13 +32,40 @@ const LAYOUTS = {
  * each path's own accent color -- decoration grounded in the actual subject matter
  * (skills/paths), not arbitrary particles. Two hand-placed layouts so adjacent
  * sections don't read as a mechanically repeated pattern.
+ *
+ * Each icon gets its own randomized GSAP drift (x/y/rotate/duration/delay) rather
+ * than one shared CSS keyframe -- six icons swaying in perfect unison read as
+ * mechanical; independently randomized timing reads as organic.
  */
 export function SkillConstellation({ variant = "a" }: { variant?: "a" | "b" }) {
   const reduce = useReducedMotion();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const iconRefs = useRef<(HTMLSpanElement | null)[]>([]);
+
+  useGSAP(
+    () => {
+      if (reduce) return;
+      iconRefs.current.forEach((el) => {
+        if (!el) return;
+        gsap.to(el, {
+          x: gsap.utils.random(-14, 14),
+          y: gsap.utils.random(-18, 10),
+          rotate: gsap.utils.random(-8, 8),
+          duration: gsap.utils.random(12, 20),
+          delay: gsap.utils.random(0, 3),
+          ease: "sine.inOut",
+          repeat: -1,
+          yoyo: true,
+        });
+      });
+    },
+    { scope: containerRef, dependencies: [reduce, variant] }
+  );
+
   if (reduce) return null;
 
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden -z-10">
+    <div ref={containerRef} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden -z-10">
       {LAYOUTS[variant].map((f, i) => {
         const meta = pathMeta[f.slug];
         const Icon = streamIcon[f.slug] ?? streamIcon.foundations;
@@ -43,8 +73,11 @@ export function SkillConstellation({ variant = "a" }: { variant?: "a" | "b" }) {
         return (
           <span
             key={i}
-            className="absolute forage-float"
-            style={{ top: f.top, left: f.left, animationDuration: `${f.duration}s`, animationDelay: `${f.delay}s` }}
+            ref={(el) => {
+              iconRefs.current[i] = el;
+            }}
+            className="absolute"
+            style={{ top: f.top, left: f.left }}
           >
             <Icon size={f.size} strokeWidth={1} style={{ color: accent, opacity: 0.14 }} />
           </span>

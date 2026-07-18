@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FadeUp, ScrollParallax, Stagger, StaggerItem } from "@/components/ui/motion";
+import { FadeUp, ScrollParallax } from "@/components/ui/motion";
 import { ScrollHero } from "@/components/ui/ScrollHero";
 import { ScrollProgressBar } from "@/components/ui/ScrollProgressBar";
 import { DashboardMockup } from "@/components/landing/DashboardMockup";
@@ -11,11 +11,14 @@ import { SkillConstellation } from "@/components/landing/SkillConstellation";
 import { TerminalHeading } from "@/components/landing/TerminalHeading";
 import { StatCallout } from "@/components/landing/StatCallout";
 import { HowItWorksTimeline } from "@/components/landing/HowItWorksTimeline";
+import { InterviewSpotlight } from "@/components/landing/InterviewSpotlight";
+import { PricingCards } from "@/components/landing/PricingCards";
+import { FinalCTA } from "@/components/landing/FinalCTA";
+import { LandingFooter } from "@/components/landing/LandingFooter";
 import {
   GraduationCap,
   Sparkles,
   Mic,
-  CheckCircle2,
   ArrowRight,
   BookOpen,
   Target,
@@ -212,28 +215,7 @@ export default function LandingPage() {
         <section id="interview" className="max-w-5xl mx-auto px-4 py-10">
           <ScrollParallax>
             <FadeUp>
-              <div className="glass rounded-2xl p-8 sm:p-10 grid md:grid-cols-[1fr_auto] gap-8 items-center relative overflow-hidden">
-                <div className="absolute -left-10 -bottom-10 w-56 h-56 rounded-full bg-[#3d8fff]/15 blur-3xl pointer-events-none" />
-                <div>
-                  <h2 className="display text-2xl sm:text-3xl mb-3">Rehearse the real thing, out loud</h2>
-                  <p className="text-sm text-[#7d99a3] max-w-xl leading-relaxed">
-                    <strong className="text-[#ece9f5] font-semibold">Forage Interview</strong> is a
-                    live, voice-first mock interview for your target role. Pick behavioral,
-                    technical, or DSA — the AI interviewer asks one question at a time, follows up
-                    naturally, and closes with a feedback report: what worked, what to fix, and a
-                    stronger model answer. Free users get one 3-minute trial; Pro is unlimited.
-                  </p>
-                  <Link
-                    href="/auth"
-                    className="inline-flex items-center gap-1.5 mt-5 px-5 py-2.5 rounded-xl bg-[#3d8fff] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
-                  >
-                    Try the free trial <ArrowRight size={15} />
-                  </Link>
-                </div>
-                <div className="w-28 h-28 rounded-full glass grid place-items-center shrink-0 mx-auto">
-                  <Mic size={36} className="text-[#5ba3ff]" />
-                </div>
-              </div>
+              <InterviewSpotlight />
             </FadeUp>
           </ScrollParallax>
         </section>
@@ -244,41 +226,7 @@ export default function LandingPage() {
             <FadeUp>
               <h2 className="display text-2xl sm:text-3xl text-center mb-6">Simple, honest pricing</h2>
             </FadeUp>
-            <Stagger className="grid sm:grid-cols-2 gap-5">
-              <StaggerItem>
-                <div className="glass rounded-2xl p-6 h-full">
-                  <p className="text-xs font-bold uppercase tracking-widest text-[#7d99a3]">Free</p>
-                  <p className="text-3xl font-bold mt-1" style={{ fontFamily: "var(--font-display)" }}>₹0</p>
-                  <p className="text-xs text-[#7d99a3]">forever</p>
-                  <ul className="mt-5 space-y-2 text-sm">
-                    {["The full Common Core", "Quizzes, XP, streaks & badges", "One free 3-minute mock interview"].map((p) => (
-                      <li key={p} className="flex items-start gap-2">
-                        <CheckCircle2 size={16} className="text-[#3fb950] mt-0.5 shrink-0" />
-                        {p}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </StaggerItem>
-              <StaggerItem>
-                <div className="glass rounded-2xl p-6 border-[#00e5ff]/40 relative overflow-hidden h-full">
-                  <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-[#ff3d81]/20 blur-3xl pointer-events-none" />
-                  <p className="text-xs font-bold uppercase tracking-widest text-[#ff3d81] flex items-center gap-1">
-                    <Sparkles size={13} /> Pro
-                  </p>
-                  <p className="text-3xl font-bold mt-1" style={{ fontFamily: "var(--font-display)" }}>Coming soon</p>
-                  <p className="text-xs text-[#7d99a3]">pricing to be announced</p>
-                  <ul className="mt-5 space-y-2 text-sm">
-                    {["All 6 career paths, basics → advanced", "FAANG-caliber quizzes per lesson", "Unlimited Forage Interview sessions"].map((p) => (
-                      <li key={p} className="flex items-start gap-2">
-                        <CheckCircle2 size={16} className="text-[#ff3d81] mt-0.5 shrink-0" />
-                        {p}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </StaggerItem>
-            </Stagger>
+            <PricingCards />
             <p className="text-center text-xs text-[#7d99a3] mt-6">
               Forage never claims to guarantee placement — we build for the real hiring loop instead.
             </p>
@@ -289,31 +237,13 @@ export default function LandingPage() {
         <section className="max-w-3xl mx-auto px-4 pb-20 text-center">
           <ScrollParallax>
             <FadeUp>
-              <div className="glass rounded-2xl p-10 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#00e5ff]/10 to-[#6ff9ff]/10 pointer-events-none" />
-                <h2 className="display text-2xl sm:text-3xl mb-3">Stop preparing to prepare.</h2>
-                <p className="text-sm text-[#7d99a3] max-w-md mx-auto mb-6">
-                  Start the Common Core today — it&rsquo;s free, it takes about 10-15 hours, and it
-                  ends with you choosing a real path.
-                </p>
-                <Link
-                  href="/auth"
-                  className="inline-flex items-center gap-1.5 px-6 py-3 rounded-xl bg-gradient-to-r from-[#00e5ff] to-[#ff3d81] text-[#05070a] text-sm font-semibold hover:opacity-90 transition-opacity"
-                >
-                  Start learning free <ArrowRight size={16} />
-                </Link>
-              </div>
+              <FinalCTA />
             </FadeUp>
           </ScrollParallax>
         </section>
       </main>
 
-      <footer className="border-t border-white/[0.06] py-8">
-        <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#7d99a3]">
-          <span style={{ fontFamily: "var(--font-display)" }}>Forage<span className="text-[#00e5ff]">.</span></span>
-          <span>Built for people done preparing-as-procrastination.</span>
-        </div>
-      </footer>
+      <LandingFooter />
     </div>
   );
 }
