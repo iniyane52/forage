@@ -29,7 +29,7 @@ const LAYOUTS = {
 
 /**
  * Ambient background motion for otherwise-empty space around a section: the same
- * real stream icons used by TechTicker/PathGrid, drifting slowly at low opacity in
+ * real stream icons used by TechTicker/PathDock, drifting slowly at low opacity in
  * each path's own accent color -- decoration grounded in the actual subject matter
  * (skills/paths), not arbitrary particles. Two hand-placed layouts so adjacent
  * sections don't read as a mechanically repeated pattern.
@@ -49,7 +49,12 @@ export function SkillConstellation({ variant = "a" }: { variant?: "a" | "b" }) {
   // scrolled far off-screen. Only the instance actually in view now does any work.
   useGSAP(
     () => {
-      if (reduce || !containerRef.current) return;
+      // `mounted` must be BOTH checked here and in the dependencies: the hydration
+      // render returns null (no containerRef attached), so this effect's first run
+      // early-returns -- without `mounted` in deps it never re-runs after the real
+      // tree mounts, leaving the drift silently dead (same regression as
+      // TerminalHeading.tsx/TechTicker.tsx).
+      if (!mounted || reduce || !containerRef.current) return;
       const tweens = iconRefs.current
         .filter((el): el is HTMLSpanElement => !!el)
         .map((el) =>
@@ -73,7 +78,7 @@ export function SkillConstellation({ variant = "a" }: { variant?: "a" | "b" }) {
         onToggle: (self) => tweens.forEach((t) => (self.isActive ? t.play() : t.pause())),
       });
     },
-    { scope: containerRef, dependencies: [reduce, variant] }
+    { scope: containerRef, dependencies: [mounted, reduce, variant] }
   );
 
   // Gating on `mounted` first (not just `reduce`) avoids a real hydration mismatch:

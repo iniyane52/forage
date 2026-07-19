@@ -8,6 +8,7 @@ import {
   Globe,
   BarChart3,
 } from "@/components/ui/icons";
+import { TypingCode } from "@/components/landing/TypingCode";
 
 const PATHS = [
   { icon: BrainCircuit, title: "AI Engineer", locked: true },
@@ -86,6 +87,8 @@ export function DashboardMockup() {
           3-min trial
         </span>
       </div>
+
+      <TypingCode />
     </div>
   );
 }

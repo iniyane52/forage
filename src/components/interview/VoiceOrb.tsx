@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { Mic, Loader2, Volume2 } from "@/components/ui/icons";
+import { useMounted } from "@/hooks/useMounted";
 
 export type OrbState = "idle" | "listening" | "thinking" | "speaking";
 
@@ -14,11 +15,17 @@ const RING_COLOR: Record<OrbState, string> = {
 
 export function VoiceOrb({ state }: { state: OrbState }) {
   const reduce = useReducedMotion();
+  // Gated on `mounted` first: SSR always resolves `reduce` falsy (no `matchMedia`
+  // server-side), but a client that actually prefers reduced motion resolves it
+  // synchronously on the very first render, before hydration completes -- an entire
+  // extra pair of DOM nodes appearing/disappearing based on `reduce` alone is a real
+  // hydration mismatch risk. Same fix as ScrollHero.tsx/StatCallout.tsx.
+  const mounted = useMounted();
   const color = RING_COLOR[state];
 
   return (
     <div className="relative w-40 h-40 mx-auto grid place-items-center">
-      {!reduce && (state === "listening" || state === "speaking") && (
+      {mounted && !reduce && (state === "listening" || state === "speaking") && (
         <>
           <motion.span
             className="absolute inset-0 rounded-full"

@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion, useScroll, useTransform, type Variants } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { useMounted } from "@/hooks/useMounted";
 
 const easeOut = [0.16, 1, 0.3, 1] as const;
 
@@ -15,10 +16,19 @@ export function FadeUp({
   className?: string;
 }) {
   const reduce = useReducedMotion();
+  // Gated on `mounted` first: SSR always resolves `reduce` falsy (no `matchMedia`
+  // server-side), but a client that genuinely prefers reduced motion resolves it
+  // synchronously on its very first render, before hydration completes. Framer's
+  // `initial={false}` renders no starting inline style at all, which differs from
+  // the server's `opacity:0, transform:translateY(...)` -- a real, confirmed
+  // hydration mismatch (this primitive is used almost everywhere, so it was the
+  // single biggest source of the mismatch once the more obviously-affected
+  // components were fixed). Same fix as ScrollHero.tsx/StatCallout.tsx.
+  const mounted = useMounted();
   return (
     <motion.div
       className={className}
-      initial={reduce ? false : { opacity: 0, y: 14 }}
+      initial={!mounted || reduce ? false : { opacity: 0, y: 14 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.4, ease: easeOut, delay }}
@@ -39,7 +49,8 @@ const item: Variants = {
 
 export function Stagger({ children, className }: { children: React.ReactNode; className?: string }) {
   const reduce = useReducedMotion();
-  if (reduce) return <div className={className}>{children}</div>;
+  const mounted = useMounted();
+  if (mounted && reduce) return <div className={className}>{children}</div>;
   return (
     <motion.div
       className={className}
@@ -55,7 +66,8 @@ export function Stagger({ children, className }: { children: React.ReactNode; cl
 
 export function StaggerItem({ children, className }: { children: React.ReactNode; className?: string }) {
   const reduce = useReducedMotion();
-  if (reduce) return <div className={className}>{children}</div>;
+  const mounted = useMounted();
+  if (mounted && reduce) return <div className={className}>{children}</div>;
   return (
     <motion.div className={className} variants={item}>
       {children}
@@ -66,11 +78,12 @@ export function StaggerItem({ children, className }: { children: React.ReactNode
 /** Progress bar that grows via scaleX transform (no layout reflow). */
 export function AnimatedBar({ pct, className = "" }: { pct: number; className?: string }) {
   const reduce = useReducedMotion();
+  const mounted = useMounted();
   return (
     <div className={`h-2 rounded-full bg-white/[0.06] overflow-hidden ${className}`}>
       <motion.div
         className="h-full origin-left rounded-full bg-gradient-to-r from-[#00e5ff] to-[#3fb950]"
-        initial={reduce ? false : { scaleX: 0 }}
+        initial={!mounted || reduce ? false : { scaleX: 0 }}
         animate={{ scaleX: Math.max(0, Math.min(1, pct / 100)) }}
         transition={{ duration: 0.7, ease: easeOut }}
         style={{ width: "100%" }}
@@ -96,6 +109,7 @@ export function ProgressRing({
   children?: React.ReactNode;
 }) {
   const reduce = useReducedMotion();
+  const mounted = useMounted();
   const r = (size - strokeWidth) / 2;
   const circ = 2 * Math.PI * r;
   const clamped = Math.max(0, Math.min(100, pct));
@@ -112,7 +126,7 @@ export function ProgressRing({
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circ}
-          initial={reduce ? false : { strokeDashoffset: circ }}
+          initial={!mounted || reduce ? false : { strokeDashoffset: circ }}
           animate={{ strokeDashoffset: circ * (1 - clamped / 100) }}
           transition={{ duration: 0.9, ease: easeOut }}
         />
@@ -131,7 +145,8 @@ export function ProgressRing({
 /** Wraps a card with a subtle hover lift + tilt — for bold, graphic surfaces only. */
 export function HoverTilt({ children, className }: { children: React.ReactNode; className?: string }) {
   const reduce = useReducedMotion();
-  if (reduce) return <div className={className}>{children}</div>;
+  const mounted = useMounted();
+  if (mounted && reduce) return <div className={className}>{children}</div>;
   return (
     <motion.div
       className={className}
@@ -142,24 +157,6 @@ export function HoverTilt({ children, className }: { children: React.ReactNode; 
     >
       {children}
     </motion.div>
-  );
-}
-
-/** Decorative animated dot-grid backdrop — for bold marketing/nav surfaces only. */
-export function DotGridBackdrop({ className = "" }: { className?: string }) {
-  const reduce = useReducedMotion();
-  return (
-    <div
-      aria-hidden="true"
-      className={`pointer-events-none absolute inset-0 -z-10 opacity-[0.35] ${className}`}
-      style={{
-        backgroundImage: "radial-gradient(rgba(255,255,255,0.14) 1px, transparent 1px)",
-        backgroundSize: "22px 22px",
-        maskImage: "radial-gradient(ellipse 60% 60% at 50% 0%, black 40%, transparent 100%)",
-        WebkitMaskImage: "radial-gradient(ellipse 60% 60% at 50% 0%, black 40%, transparent 100%)",
-        animation: reduce ? undefined : "forage-dot-drift 18s ease-in-out infinite alternate",
-      }}
-    />
   );
 }
 
@@ -176,8 +173,9 @@ export function HeadingReveal({
   delay?: number;
 }) {
   const reduce = useReducedMotion();
+  const mounted = useMounted();
   const words = text.split(" ");
-  if (reduce) {
+  if (mounted && reduce) {
     const El = Tag;
     return <El className={className}>{text}</El>;
   }
@@ -224,12 +222,18 @@ export function ScrollParallax({
   fadeEdges?: boolean;
 }) {
   const reduce = useReducedMotion();
+  const mounted = useMounted();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], [yRange, -yRange]);
   const opacity = useTransform(scrollYProgress, [0, 0.15, 0.85, 1], [0.5, 1, 1, 0.5]);
 
-  if (reduce) return <div className={className}>{children}</div>;
+  // `ref` must stay attached to whatever renders, in every branch: `useScroll` above
+  // is called unconditionally (hooks can't be conditional) and its internal effect
+  // expects `ref.current` to resolve to a real node -- the earlier reduced-motion
+  // branch returned a plain `<div>` with no `ref` at all, which is exactly what threw
+  // "Target ref is defined but not hydrated" (confirmed live, reduced-motion mode).
+  if (mounted && reduce) return <div ref={ref} className={className}>{children}</div>;
   return (
     <motion.div ref={ref} className={className} style={{ y, opacity: fadeEdges ? opacity : undefined }}>
       {children}
@@ -240,20 +244,27 @@ export function ScrollParallax({
 /** Counts up to a number when it mounts. */
 export function CountUp({ value, className }: { value: number; className?: string }) {
   const reduce = useReducedMotion();
-  const [display, setDisplay] = useState(reduce ? value : 0);
-  const [synced, setSynced] = useState({ value, reduce });
+  // Gated on `mounted` first: SSR always resolves `reduce` falsy (no `matchMedia`
+  // server-side), but a client that genuinely prefers reduced motion resolves it
+  // synchronously on its very first render, before hydration completes -- seeding
+  // `display` from `reduce` directly baked the final value into that first render,
+  // a real hydration-mismatch risk (confirmed live for the same pattern in
+  // StatCallout.tsx) whenever this renders as part of a fresh SSR'd page load.
+  const mounted = useMounted();
+  const [display, setDisplay] = useState(0);
+  const [synced, setSynced] = useState({ value, reduce, mounted });
   const raf = useRef<number | null>(null);
 
   // Adjust state during render (React's sanctioned pattern) when reduced-motion
   // is discovered post-mount or `value` changes while reduced-motion is on --
   // skips the animation entirely instead of a delayed correction from an effect.
-  if (reduce && (synced.value !== value || synced.reduce !== reduce)) {
-    setSynced({ value, reduce });
+  if (mounted && reduce && (synced.value !== value || synced.reduce !== reduce || !synced.mounted)) {
+    setSynced({ value, reduce, mounted });
     setDisplay(value);
   }
 
   useEffect(() => {
-    if (reduce) return;
+    if (!mounted || reduce) return;
     const start = performance.now();
     const dur = 700;
     const tick = (now: number) => {
@@ -266,6 +277,6 @@ export function CountUp({ value, className }: { value: number; className?: strin
     return () => {
       if (raf.current) cancelAnimationFrame(raf.current);
     };
-  }, [value, reduce]);
+  }, [value, reduce, mounted]);
   return <span className={className}>{display}</span>;
 }

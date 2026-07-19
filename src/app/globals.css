@@ -21,6 +21,22 @@
   --radius-2xl: 20px;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+::selection {
+  background: rgba(0, 229, 255, 0.25);
+}
+
+/* The landing header is sticky -- without this, anchor jumps to #paths/#interview/
+   #pricing land with their headings hidden underneath it. */
+section[id] {
+  scroll-margin-top: 72px;
+}
+
 html {
   color-scheme: dark;
   /* @theme inline doesn't emit these as live runtime custom properties, so redeclare
@@ -40,7 +56,16 @@ html {
 }
 
 body {
-  background: var(--color-bg);
+  background-color: var(--color-bg);
+  /* Fine blueprint/schematic grid, always present site-wide (not just the hero) --
+     replaces a flat, empty near-black past the hero with something that reads as a
+     real technical product rather than a blank marketing page. Low enough opacity
+     to never compete with content; scrolls naturally with the page since it's a
+     plain body background-image, not a positioned/fixed element. */
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
   color: var(--color-text);
   font-family: var(--font-body), Arial, Helvetica, sans-serif;
   min-height: 100dvh;
@@ -48,57 +73,189 @@ body {
   overflow-x: hidden;
 }
 
-/* ---- Liquid aurora backdrop (OPTICORE-style fluid gradient blobs) ----
-   Scoped to .aurora-zone (the hero section wrapper in page.tsx), not `body`: these
-   were originally `position: fixed`, which pins them to the viewport corners forever
-   -- by the time a user scrolls to e.g. the career-path grid, the exact same blobs are
-   still sitting there tinting unrelated cards, disconnected from the hero they were
-   designed for. `position: absolute` on a `.aurora-zone` (itself `position: relative`,
-   sized to just the hero) anchors them to that section only, so they scroll away
-   naturally with the hero instead of bleeding through content further down the page. */
-.aurora-zone::before,
-.aurora-zone::after {
+/* ---- Hero glow ----
+   A single, static, single-color radial glow -- replaces the earlier two-blob,
+   eight-color-stop "liquid aurora" (drifting rainbow gradients), which read as
+   generic AI-gradient decoration rather than something considered. One color, no
+   animation: restrained is the more premium choice here, and it removes an
+   always-running animation for free. `position: absolute` on `.hero-glow` (itself
+   `position: relative`, sized to just the hero) keeps it scoped to that section only
+   -- never `fixed`, which would bleed into unrelated content further down the page. */
+.hero-glow::before {
   content: "";
   position: absolute;
   z-index: -1;
-  border-radius: 50%;
-  filter: blur(110px);
-  opacity: 0.4;
+  inset: -10% -5% auto -5%;
+  height: 65%;
+  background: radial-gradient(ellipse 55% 55% at 50% 0%, rgba(0, 229, 255, 0.14), transparent 70%);
   pointer-events: none;
-  will-change: transform;
 }
-.aurora-zone::before {
-  width: 60vw;
-  height: 60vw;
-  top: -18vw;
-  left: -10vw;
-  background: radial-gradient(circle at 30% 30%, #00e5ff, transparent 60%),
-    radial-gradient(circle at 70% 60%, #ff3d81, transparent 55%);
-  animation: drift1 26s ease-in-out infinite alternate;
+
+/* ---- Grid scan-line ----
+   A soft horizontal band that sweeps down the viewport on a slow loop -- the
+   "technical pulse" over the body grid. Pure CSS (one composited transform
+   animation, no JS); the global prefers-reduced-motion rule at the bottom of this
+   file already zeroes all CSS animation durations, so it needs no extra gating. */
+.grid-scan {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 34vh;
+  z-index: -10;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(0, 229, 255, 0.045) 45%,
+    rgba(0, 229, 255, 0.045) 55%,
+    transparent
+  );
+  animation: gridScan 11s linear infinite;
 }
-.aurora-zone::after {
-  width: 55vw;
-  height: 55vw;
-  bottom: -20vw;
-  right: -12vw;
-  background: radial-gradient(circle at 40% 40%, #baff2e, transparent 58%),
-    radial-gradient(circle at 65% 65%, #6ff9ff, transparent 50%);
-  animation: drift2 32s ease-in-out infinite alternate;
+@keyframes gridScan {
+  from { transform: translateY(-40vh); }
+  to { transform: translateY(110vh); }
 }
-@keyframes drift1 {
-  from { transform: translate(0, 0) scale(1); }
-  to { transform: translate(6vw, 8vw) scale(1.15); }
+
+/* ---- Heading hover sweep ----
+   One-shot gradient band that sweeps across a heading on hover (used by
+   SectionHeading.tsx). Overlay-blended band rather than background-clip:text --
+   the heading's text is SplitText-wrapped in child divs, so a clipped background
+   on the parent can't paint through them; a blended overlay works regardless of
+   DOM structure. overflow-x clip / overflow-y visible: hides the band outside the
+   heading's box horizontally while leaving vertical room for the words'
+   cursor-proximity lift (plain `overflow: hidden` would clip that lift). */
+.heading-sweep {
+  position: relative;
+  overflow-x: clip;
+  overflow-y: visible;
 }
-@keyframes drift2 {
-  from { transform: translate(0, 0) scale(1.1); }
-  to { transform: translate(-7vw, -6vw) scale(1); }
+.heading-sweep::after {
+  content: "";
+  position: absolute;
+  inset: -12px 0;
+  background: linear-gradient(100deg, transparent 25%, rgba(0, 229, 255, 0.4) 50%, transparent 75%);
+  transform: translateX(-120%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
 }
-@keyframes forage-dot-drift {
-  from { background-position: 0 0; }
-  to { background-position: 22px 22px; }
+.heading-sweep:hover::after {
+  animation: headingSweep 0.7s ease forwards;
 }
-@media (prefers-reduced-motion: reduce) {
-  .aurora-zone::before, .aurora-zone::after { animation: none; }
+@keyframes headingSweep {
+  to { transform: translateX(120%); }
+}
+
+@keyframes forage-cursor-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* ---- Data-stream section dividers ----
+   A hairline between sections with small light pulses traveling along it -- ties
+   into the scroll-thread "one continuous journey" idea. CSS-only; the global
+   reduced-motion rule at the bottom of this file kills the pulse animations. */
+.stream-divider {
+  position: relative;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+.stream-divider::before,
+.stream-divider::after {
+  content: "";
+  position: absolute;
+  top: -1.5px;
+  width: 72px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.7), transparent);
+  animation: streamPulse 7s linear infinite;
+}
+.stream-divider::after {
+  background: linear-gradient(90deg, transparent, rgba(186, 255, 46, 0.5), transparent);
+  animation-duration: 11s;
+  animation-delay: 3.5s;
+}
+@keyframes streamPulse {
+  from { left: -80px; }
+  to { left: 100%; }
+}
+
+/* ---- Dock border beam ----
+   A small glowing streak orbiting a card's border: a conic gradient with an
+   animated registered-property start angle, masked to a 1px ring. Browsers
+   without @property support just never animate --beam-angle and show the card's
+   normal static border (graceful no-op). Painted in the card's own accent via
+   the --beam-color custom property set inline per card. */
+@property --beam-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+.border-beam {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--beam-angle),
+    transparent 0deg,
+    transparent 300deg,
+    var(--beam-color, rgba(0, 229, 255, 0.9)) 340deg,
+    transparent 360deg
+  );
+  /* Composite declarations must come AFTER both mask shorthands: a mask/-webkit-mask
+     shorthand resets mask-composite to its default (add), which un-punches the ring
+     and paints the full conic wedge over the card -- a real, screenshot-confirmed bug
+     when these four lines were in the other order. */
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: beamOrbit 6s linear infinite;
+}
+.beam-paused .border-beam {
+  animation-play-state: paused;
+}
+@keyframes beamOrbit {
+  to { --beam-angle: 360deg; }
+}
+
+/* ---- Dock aurora ribbon ----
+   A blurred horizontal band blending every career path's accent color, slowly
+   flowing behind the drifting dock row -- each path has its own color, so the
+   ribbon reads as all of them woven together. `alternate` direction instead of a
+   wrapping loop: the gradient's thirds don't tile seamlessly, so a plain loop
+   would visibly jump at the seam. Paused off-screen via .beam-paused (same
+   ScrollTrigger that pauses the border beams and drift). */
+.dock-aurora {
+  position: absolute;
+  inset: 12% -8%;
+  background: linear-gradient(
+    90deg,
+    #b967ff,
+    #ffcc00,
+    #ff3d81,
+    #00ffb3,
+    #00e5ff,
+    #ff5b3d
+  );
+  background-size: 300% 100%;
+  filter: blur(70px);
+  opacity: 0.12;
+  border-radius: 999px;
+  pointer-events: none;
+  animation: auroraFlow 16s ease-in-out infinite alternate;
+}
+.beam-paused .dock-aurora {
+  animation-play-state: paused;
+}
+@keyframes auroraFlow {
+  from { background-position: 0% 0; }
+  to { background-position: 100% 0; }
 }
 
 /* ---- Glass surfaces ---- */
@@ -239,8 +396,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aurora-zone::before,
-  .aurora-zone::after { animation: none !important; }
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;

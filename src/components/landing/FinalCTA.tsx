@@ -6,6 +6,7 @@ import { useReducedMotion } from "framer-motion";
 import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger } from "@/components/ui/gsapMotion";
 import { ArrowRight } from "@/components/ui/icons";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 
 /** The page's closing beat: an idle glow pulse once the card is in view, a small
  * magnetic pull on the CTA button, and a quick tactile press-down on click -- a
@@ -82,7 +83,7 @@ export function FinalCTA() {
         ref={glowRef}
         className="absolute inset-0 bg-gradient-to-br from-[#00e5ff]/10 to-[#6ff9ff]/10 pointer-events-none"
       />
-      <h2 className="display text-2xl sm:text-3xl mb-3">Stop preparing to prepare.</h2>
+      <SectionHeading className="text-2xl sm:text-3xl mb-3">Stop preparing to prepare.</SectionHeading>
       <p className="text-sm text-[#7d99a3] max-w-md mx-auto mb-6">
         Start the Common Core today — it&rsquo;s free, it takes about 10-15 hours, and it
         ends with you choosing a real path.

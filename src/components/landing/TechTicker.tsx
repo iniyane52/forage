@@ -51,7 +51,12 @@ export function TechTicker() {
 
   useGSAP(
     () => {
-      if (reduce || !trackRef.current || !sectionRef.current) return;
+      // `mounted` must be BOTH checked here and in the dependencies: the hydration
+      // render commits the static branch (no track/section refs attached), so this
+      // effect's first run early-returns on null refs -- without `mounted` in deps
+      // it never re-runs after the animated branch mounts, leaving the marquee
+      // silently dead (same regression as TerminalHeading.tsx).
+      if (!mounted || reduce || !trackRef.current || !sectionRef.current) return;
 
       const tween = gsap.to(trackRef.current, {
         xPercent: -50,
@@ -84,7 +89,7 @@ export function TechTicker() {
         trigger.kill();
       };
     },
-    { scope: sectionRef, dependencies: [reduce] }
+    { scope: sectionRef, dependencies: [mounted, reduce] }
   );
 
   // Gating on `mounted` first (not just `reduce`) avoids a real hydration mismatch:

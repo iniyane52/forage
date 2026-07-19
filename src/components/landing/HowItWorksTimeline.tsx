@@ -1,58 +1,177 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { Stagger, StaggerItem } from "@/components/ui/motion";
+import { useReducedMotion } from "framer-motion";
+import { useGSAP } from "@gsap/react";
+import { gsap, SplitText } from "@/components/ui/gsapMotion";
+import { useMounted } from "@/hooks/useMounted";
 
 export type Step = { n: string; title: string; body: string; accent: string };
 
 /**
- * A connected, scroll-drawn timeline instead of a click-through carousel -- justified
- * because these 4 steps genuinely are a sequence (start -> choose -> study -> ready),
- * so a process line encodes real meaning rather than decorating. Bigger type than the
- * old carousel cards by design (the ask was "increase the scale").
+ * Each step animates in once as it's scrolled to, then recedes (scales down,
+ * fades) as the NEXT step arrives -- reads as the sequence building on itself,
+ * not just a plain list appearing.
+ *
+ * Deliberately NOT pinned (no CSS `position: sticky`, no GSAP ScrollTrigger
+ * `pin`). Both were tried and both are broken on this specific page: `<html>`
+ * and `<body>` both carry `overflow-x-hidden` (a real, documented fix for a
+ * separate marquee-leak bug -- see CLAUDE.md), and that combination makes the
+ * browser treat `<html>` as its own scrollport in a way that also corrupts the
+ * containing block used by `position: fixed` (which is exactly what GSAP's pin
+ * sets under the hood) -- confirmed directly: a pinned card's own inline style
+ * read `position: fixed; top: 96px`, yet its actual bounding rect drifted with
+ * scrollY as if `top` were a relative document offset, not a viewport one.
+ * CSS `sticky` failed the same way, for the same underlying reason. This is
+ * the same class of bug that already forced ScrollHero.tsx off scroll-tied
+ * pinning entirely in favor of a one-shot reveal -- this component takes the
+ * same resolution rather than re-fighting a page-wide CSS constraint that two
+ * different mechanisms have now both lost to.
  */
 export function HowItWorksTimeline({ steps }: { steps: Step[] }) {
   const reduce = useReducedMotion();
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 75%", "end 55%"] });
-  const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  // Gated on `mounted` first: SSR always resolves `reduce` falsy (no `matchMedia`
+  // server-side), but a client that genuinely prefers reduced motion resolves it
+  // synchronously on its very first render, before hydration completes -- branching
+  // the early return on `reduce` alone (a completely different DOM tree: no
+  // `elevated` styling, no per-card refs) is a real, confirmed hydration mismatch.
+  // Same fix as ScrollHero.tsx/StatCallout.tsx.
+  const mounted = useMounted();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const entranceRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const recedeRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useGSAP(
+    () => {
+      if (!mounted || reduce) return;
+      const entrances = entranceRefs.current.filter((c): c is HTMLDivElement => !!c);
+      const recedes = recedeRefs.current.filter((c): c is HTMLDivElement => !!c);
+      if (entrances.length < 2) return;
+
+      // Entrance and recede live on SEPARATE nested elements on purpose: both tween
+      // `opacity`, and two tweens sharing one element's property is a real bug that
+      // shipped here -- GSAP captures a tween's start values at its first render, so
+      // a scrub that first rendered mid-entrance captured a half-faded opacity as its
+      // "start" and restored that wrong value when scrolling back up (the reported
+      // "content not displayed properly when scrolling back" bug).
+      const splits: SplitText[] = [];
+      entrances.forEach((el, i) => {
+        gsap.from(el, {
+          y: 48,
+          opacity: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          scrollTrigger: { trigger: el, start: "top 85%", once: true },
+        });
+
+        // Split-flap roll-in, same trigger moment as the card entrance: title
+        // letters flip down into place like an airport departure board, and the
+        // big step number gets a stronger over-rotation of the same move. Chars
+        // only (SplitText words wrapper keeps line-breaks stable), backface
+        // hidden so the mid-flip frame doesn't show mirrored text.
+        const title = el.querySelector<HTMLElement>("[data-flap-title]");
+        const num = el.querySelector<HTMLElement>("[data-flap-num]");
+        if (title) {
+          const split = new SplitText(title, { type: "words,chars" });
+          splits.push(split);
+          gsap.set(split.chars, { backfaceVisibility: "hidden" });
+          gsap.from(split.chars, {
+            rotateX: -90,
+            opacity: 0,
+            transformOrigin: "center top",
+            stagger: 0.035,
+            duration: 0.55,
+            ease: "back.out(1.6)",
+            scrollTrigger: { trigger: el, start: "top 85%", once: true },
+          });
+        }
+        if (num) {
+          gsap.from(num, {
+            rotateX: -270,
+            opacity: 0,
+            transformPerspective: 500,
+            duration: 0.9,
+            ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 85%", once: true },
+          });
+        }
+
+        // Recede is driven by the card's OWN exit toward the viewport top (fully
+        // reversible in both scroll directions), not the next card's arrival -- the
+        // arrival version dimmed a card still centered in the viewport, which read
+        // as broken rather than as a stacking recede.
+        if (i === entrances.length - 1) return;
+        gsap.to(recedes[i], {
+          scale: 0.94,
+          opacity: 0.5,
+          ease: "none",
+          scrollTrigger: {
+            trigger: el,
+            start: "top 35%",
+            end: "top 8%",
+            scrub: true,
+          },
+        });
+      });
+
+      return () => splits.forEach((s) => s.revert());
+    },
+    { scope: containerRef, dependencies: [reduce, mounted] }
+  );
+
+  if (mounted && reduce) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-8">
+        {steps.map((s) => (
+          <StepCard key={s.n} step={s} />
+        ))}
+      </div>
+    );
+  }
 
   return (
-    <div ref={ref} className="relative max-w-2xl mx-auto">
-      <div className="absolute left-[27px] sm:left-[35px] top-3 bottom-3 w-[2px] bg-white/[0.08]" aria-hidden="true">
-        {!reduce && (
-          <motion.div
-            className="w-full h-full origin-top bg-gradient-to-b from-[#00e5ff] to-[#baff2e]"
-            style={{ scaleY: lineScale }}
-          />
-        )}
-      </div>
-      <Stagger className="space-y-10 sm:space-y-14">
-        {steps.map((s) => (
-          <StaggerItem key={s.n} className="relative pl-[70px] sm:pl-[92px]">
-            {/* Solid fill (not the translucent tint used elsewhere) so the line behind it
-                is fully hidden, not visible poking through the badge. */}
-            <motion.span
-              className="absolute left-0 top-0 z-10 w-14 h-14 sm:w-[70px] sm:h-[70px] rounded-2xl grid place-items-center font-mono font-bold text-xl sm:text-2xl"
-              style={{ backgroundColor: "#0c1116", color: s.accent, border: `2px solid ${s.accent}` }}
-              whileInView={
-                reduce
-                  ? undefined
-                  : { boxShadow: [`0 0 0 0px ${s.accent}66`, `0 0 0 16px ${s.accent}00`] }
-              }
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.9, ease: "easeOut" }}
-            >
-              {s.n}
-            </motion.span>
-            <h3 className="text-xl sm:text-3xl font-bold leading-tight" style={{ fontFamily: "var(--font-display)" }}>
-              {s.title}
-            </h3>
-            <p className="text-sm sm:text-base text-[#7d99a3] mt-2 max-w-lg leading-relaxed">{s.body}</p>
-          </StaggerItem>
-        ))}
-      </Stagger>
+    <div ref={containerRef} className="max-w-2xl mx-auto space-y-8">
+      {steps.map((s, i) => (
+        <div
+          key={s.n}
+          ref={(el) => {
+            entranceRefs.current[i] = el;
+          }}
+        >
+          <div
+            ref={(el) => {
+              recedeRefs.current[i] = el;
+            }}
+          >
+            <StepCard step={s} elevated />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StepCard({ step, elevated }: { step: Step; elevated?: boolean }) {
+  return (
+    <div
+      className={`rounded-3xl p-8 sm:p-10 ${elevated ? "glass-solid" : ""}`}
+      style={elevated ? { boxShadow: `0 30px 80px -30px ${step.accent}33` } : undefined}
+    >
+      <span
+        data-flap-num
+        className="inline-flex w-14 h-14 rounded-2xl items-center justify-center font-mono font-bold text-xl mb-5"
+        style={{ backgroundColor: "#0c1116", color: step.accent, border: `2px solid ${step.accent}` }}
+      >
+        {step.n}
+      </span>
+      <h3
+        data-flap-title
+        className="text-2xl sm:text-3xl font-bold leading-tight"
+        style={{ fontFamily: "var(--font-display)", perspective: 400 }}
+      >
+        {step.title}
+      </h3>
+      <p className="text-sm sm:text-base text-[#7d99a3] mt-2 max-w-lg leading-relaxed">{step.body}</p>
     </div>
   );
 }

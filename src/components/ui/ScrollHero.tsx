@@ -1,37 +1,19 @@
 "use client";
 
+import { useRef } from "react";
+import { useReducedMotion } from "framer-motion";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "@/components/ui/gsapMotion";
+import { useMounted } from "@/hooks/useMounted";
+
 /**
- * Static hero layout: header, then card, no scroll-tied pin/tilt effect.
- *
- * This used to pin the header+card near the top of the viewport while a card
- * rotated/scaled as the user scrolled through a tall section below it. Two
- * implementations were tried and both had real, unresolved bugs:
- *
- * 1. CSS `position: sticky` (original) never actually engaged -- confirmed via
- *    direct getBoundingClientRect() measurements showing the pinned wrapper just
- *    scrolling away 1:1 with the page at every scroll depth tested. Root-causing
- *    it turned up no fix after ruling out every known CSS disqualifier (overflow-
- *    auto-promotion on every ancestor, transform/filter/perspective/contain/
- *    isolation on every ancestor up to <html>).
- * 2. GSAP ScrollTrigger's `pin` (tried as the replacement) fixed several real,
- *    separate bugs along the way -- a page-wide CSS regression where the page-
- *    transition template's `transform: translateY(...)` (even resolved to a
- *    no-op post-animation) was silently breaking `position: fixed` for every
- *    descendant on the page; a duplicate ScrollTrigger instance from combining
- *    `gsap.matchMedia()` with `useGSAP`'s dependency-triggered re-runs; and a
- *    font-loading measurement-timing issue (fixed globally in gsapMotion.tsx via
- *    `document.fonts.ready.then(() => ScrollTrigger.refresh())`). But even after
- *    all three fixes, the pinned content still ended up rendering off-screen
- *    partway through the scroll range -- the trigger's own start/end detection
- *    measured correctly, but the pinned element's captured baseline position did
- *    not, most likely due to other ScrollTrigger-driven components on this same
- *    page (PathGrid, SkillConstellation, TechTicker, TerminalHeading) triggering
- *    their own refresh cascades. That's a real, deeper interaction bug worth a
- *    dedicated, isolated debugging session (e.g. testing ScrollHero alone on a
- *    blank page) rather than continued guessing here.
- *
- * Reverted to this simple static version so the hero is fully correct and never
- * disappears mid-scroll, at the cost of the pin/tilt effect for now.
+ * Asymmetric split hero: copy on the left, a slightly tilted glass product
+ * card on the right, desktop; stacks on mobile. The card settles into place
+ * with a one-shot zoom-in entrance (scale + rotate + fade, `once: true`,
+ * plain scroll-reveal via ScrollTrigger) -- deliberately NOT a scroll-tied
+ * pin. An earlier version of this component tried pinning the hero while
+ * scrolling and hit a real, unresolved bug (see git history / CLAUDE.md);
+ * a one-shot reveal has none of that risk since it plays once and stops.
  */
 export function ScrollHero({
   header,
@@ -42,10 +24,47 @@ export function ScrollHero({
   card: React.ReactNode;
   className?: string;
 }) {
+  const reduce = useReducedMotion();
+  const mounted = useMounted();
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      if (reduce || !mounted || !cardRef.current) return;
+
+      gsap.set(cardRef.current, {
+        transformPerspective: 1000,
+        rotate: -10,
+        scale: 1.06,
+        opacity: 0,
+      });
+      gsap.to(cardRef.current, {
+        rotate: -4,
+        scale: 1,
+        opacity: 1,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: { trigger: cardRef.current, start: "top 90%", once: true },
+      });
+    },
+    { scope: cardRef, dependencies: [reduce, mounted] }
+  );
+
   return (
-    <div className={className}>
+    <div className={`grid lg:grid-cols-[1.05fr_1fr] items-center gap-10 lg:gap-16 ${className}`}>
       <div>{header}</div>
-      <div className="glass rounded-[28px] mt-8 md:mt-12 max-w-5xl mx-auto overflow-hidden px-4 sm:px-6">
+      <div
+        ref={cardRef}
+        className="glass-solid rounded-[28px] overflow-hidden mx-auto lg:mx-0 max-w-xl w-full"
+        // Gated on `mounted` first, not just `reduce`: SSR has no `matchMedia`, so it
+        // always renders as if motion were allowed, but framer-motion's
+        // `useReducedMotion` reads the real value synchronously on the client's very
+        // first render (before hydration completes) -- if the visitor actually prefers
+        // reduced motion, that first client render disagrees with the server's markup
+        // immediately, a real hydration-mismatch error confirmed live. Matches the same
+        // fix already applied in SkillConstellation.tsx/ScrollProgressBar.tsx.
+        style={!mounted || reduce ? undefined : { transform: "rotate(-4deg)" }}
+      >
         {card}
       </div>
     </div>

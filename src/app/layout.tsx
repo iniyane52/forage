@@ -23,6 +23,23 @@ export const metadata: Metadata = {
   title: "Forage — learn it, prove it",
   description:
     "Forage teaches industry skills from absolute zero to hiring standard — lessons, FAANG-caliber quizzes, and real projects.",
+  openGraph: {
+    title: "Forage — learn it, prove it",
+    description:
+      "Real lessons, FAANG-caliber quizzes, a grounded AI tutor, and live voice mock interviews — from absolute zero to hiring standard.",
+    siteName: "Forage",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Forage — learn it, prove it",
+    description:
+      "Real lessons, FAANG-caliber quizzes, a grounded AI tutor, and live voice mock interviews — from absolute zero to hiring standard.",
+  },
+};
+
+export const viewport = {
+  themeColor: "#05070a",
 };
 
 export default function RootLayout({
