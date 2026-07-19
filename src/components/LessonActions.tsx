@@ -2,20 +2,34 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { CheckCircle2, HelpCircle, Medal } from "@/components/ui/icons";
+import { CheckCircle2, HelpCircle, Medal, Lock, ArrowRight } from "@/components/ui/icons";
 import { Confetti } from "@/components/ui/Confetti";
+import { useMounted } from "@/hooks/useMounted";
 
 export function MarkDoneButton({
   lessonId,
   initiallyDone,
+  questionCount,
+  quizHref,
 }: {
   lessonId: string;
   initiallyDone: boolean;
+  questionCount: number;
+  quizHref: string;
 }) {
   const router = useRouter();
   const supabase = createClient();
+  const reduce = useReducedMotion();
+  // Gated on `mounted` first: `initiallyDone` can already be `true` on the very first
+  // SSR pass (a revisited, already-completed lesson), which puts this motion.div in
+  // the server-rendered output -- and SSR always resolves `reduce` falsy (no
+  // `matchMedia`), while a client that genuinely prefers reduced motion resolves it
+  // synchronously on its first render, before hydration completes. Same confirmed
+  // hydration-mismatch class as ScrollHero.tsx/StatCallout.tsx/FadeUp.
+  const mounted = useMounted();
   const [done, setDone] = useState(initiallyDone);
   const [busy, setBusy] = useState(false);
   const [reward, setReward] = useState<string | null>(null);
@@ -80,6 +94,38 @@ export function MarkDoneButton({
       {!done && (
         <span className="text-xs text-[#7d99a3] hidden sm:inline">
           Only when you did the task AND can explain it.
+        </span>
+      )}
+
+      {/* Owned here (not the parent server component) so the quiz-unlock reveal is
+          driven by this button's own `done` state -- reliable the instant markDone()
+          resolves, rather than depending on router.refresh()'s RSC round-trip timing
+          to swap in server-rendered content with no entrance transition of its own. */}
+      {done &&
+        (questionCount === 0 ? (
+          <span className="text-xs text-[#7d99a3] glass rounded-xl px-3 py-2">
+            Study-only lesson — no quiz needed
+          </span>
+        ) : (
+          <motion.div
+            initial={!mounted || reduce ? false : { opacity: 0, y: 8, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <Link
+              href={quizHref}
+              className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#00e5ff] text-[#05070a] hover:bg-[#33ebff] transition-colors flex items-center gap-1.5"
+            >
+              Take the quiz ({questionCount} question{questionCount === 1 ? "" : "s"}) <ArrowRight size={15} />
+            </Link>
+          </motion.div>
+        ))}
+      {!done && (
+        <span
+          title="Study the lesson and mark it done to unlock the quiz"
+          className="flex items-center gap-1.5 text-xs text-[#7d99a3] glass rounded-xl px-3 py-2 cursor-not-allowed"
+        >
+          <Lock size={13} /> Study this first to unlock the quiz
         </span>
       )}
     </div>

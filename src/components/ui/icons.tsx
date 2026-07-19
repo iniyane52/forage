@@ -43,6 +43,7 @@ import {
   Shuffle,
   Menu,
   X,
+  Clock,
   type LucideIcon,
 } from "lucide-react";
 
@@ -104,6 +105,7 @@ export {
   Shuffle,
   Menu,
   X,
+  Clock,
 };
 
 // Resource kind → icon

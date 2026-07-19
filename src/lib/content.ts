@@ -65,3 +65,13 @@ export function getAdjacent(slug: string): { prev?: FlatLesson; next?: FlatLesso
   if (i === -1) return {};
   return { prev: flat[i - 1], next: flat[i + 1] };
 }
+
+/** ~200 wpm against the prose fields only -- code examples are skimmed/run, not read
+ * at reading speed, so they're deliberately excluded from the estimate. */
+export function estimateReadingMinutes(topic: Topic): number {
+  const prose = [topic.concept, topic.analogy, topic.handsOn, topic.doneWhen, ...(topic.mistakes ?? []), ...(topic.keyTakeaways ?? [])]
+    .filter(Boolean)
+    .join(" ");
+  const words = prose.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200));
+}

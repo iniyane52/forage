@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { CheckCircle2, XCircle, Trophy, Sparkles, Medal } from "@/components/ui/icons";
+import { CheckCircle2, XCircle, Trophy, Sparkles, Medal, ArrowRight } from "@/components/ui/icons";
 import { Confetti } from "@/components/ui/Confetti";
+import { useMounted } from "@/hooks/useMounted";
 
 export type PublicQuestion = {
   id: string;
@@ -41,18 +42,30 @@ function seededShuffle(n: number, seed: string): number[] {
   return a;
 }
 
+const AUTO_ADVANCE_MS = 2200;
+
 export function QuizRunner({
   lessonId,
   lessonSlug,
   questions,
+  nextLessonSlug,
+  nextLessonTitle,
 }: {
   lessonId: string;
   lessonSlug: string;
   questions: PublicQuestion[];
+  nextLessonSlug?: string;
+  nextLessonTitle?: string;
 }) {
   const router = useRouter();
   const supabase = createClient();
   const reduce = useReducedMotion();
+  // Gated on `mounted` first for the question-card transition below (the very first
+  // thing rendered on this page): SSR always resolves `reduce` falsy, but a client
+  // that genuinely prefers reduced motion resolves it synchronously on its first
+  // render, before hydration completes -- a real, confirmed hydration-mismatch
+  // pattern (see ScrollHero.tsx/StatCallout.tsx for the same fix elsewhere).
+  const mounted = useMounted();
   const [i, setI] = useState(0);
   const [chosen, setChosen] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
@@ -86,6 +99,43 @@ export function QuizRunner({
     if (fb.xp_awarded > 0) setXpTotal((x) => x + fb.xp_awarded);
   }
 
+  // 1-4/A-D pick an option, Enter advances -- keyboard parity with clicking.
+  // Placed above the `if (result)` early return (hooks must run unconditionally every
+  // render); the handler itself just no-ops once a result exists.
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (result || busy) return;
+      if (!feedback) {
+        const digit = Number(e.key);
+        if (digit >= 1 && digit <= q.options.length) {
+          answer(digit - 1);
+          return;
+        }
+        const letterIdx = e.key.toUpperCase().charCodeAt(0) - 65;
+        if (e.key.length === 1 && letterIdx >= 0 && letterIdx < q.options.length) {
+          answer(letterIdx);
+        }
+      } else if (e.key === "Enter") {
+        next();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
+
+  // Auto-advance only on a CORRECT answer, after enough time to actually read the
+  // "Correct · +XP" line (and a short explanation, if shown) -- a wrong answer always
+  // waits for a manual click/Enter, so a mistake never scrolls past before it's read.
+  // The manual "Next question"/"Finish quiz" button stays live throughout as an
+  // override for anyone who doesn't want to wait out the delay. Safe against a
+  // double-advance race: `next()` resets `feedback`, which re-runs this effect and
+  // its own cleanup clears any not-yet-fired timeout from the previous question.
+  useEffect(() => {
+    if (!feedback?.is_correct) return;
+    const t = setTimeout(() => next(), AUTO_ADVANCE_MS);
+    return () => clearTimeout(t);
+  }, [feedback]);
+
   async function next() {
     if (i + 1 < questions.length) {
       setI(i + 1);
@@ -108,6 +158,7 @@ export function QuizRunner({
 
   if (result) {
     const circ = 2 * Math.PI * 52;
+    const tone = result.passed ? "#3fb950" : "#ffb020";
     return (
       <motion.div
         initial={reduce ? false : { opacity: 0, scale: 0.96 }}
@@ -116,14 +167,24 @@ export function QuizRunner({
       >
         {result.passed && <Confetti />}
         <div className="relative w-36 h-36 mx-auto mb-4">
-          <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
+          {!reduce && (
+            <motion.div
+              aria-hidden="true"
+              className="absolute inset-0 rounded-full blur-2xl"
+              style={{ backgroundColor: tone }}
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 0.35, scale: 1.1 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            />
+          )}
+          <svg viewBox="0 0 120 120" className="relative w-full h-full -rotate-90">
             <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
             <motion.circle
               cx="60"
               cy="60"
               r="52"
               fill="none"
-              stroke={result.passed ? "#3fb950" : "#ffb020"}
+              stroke={tone}
               strokeWidth="10"
               strokeLinecap="round"
               strokeDasharray={circ}
@@ -133,15 +194,27 @@ export function QuizRunner({
             />
           </svg>
           <div className="absolute inset-0 grid place-items-center">
-            <span className="text-3xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
+            <motion.span
+              className="text-3xl font-bold"
+              style={{ fontFamily: "var(--font-display)" }}
+              initial={reduce ? false : { opacity: 0, scale: 0.4 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={reduce ? undefined : { delay: 0.9, type: "spring", stiffness: 280, damping: 16 }}
+            >
               {result.score}%
-            </span>
+            </motion.span>
           </div>
         </div>
-        <h2 className="text-xl font-bold flex items-center justify-center gap-2" style={{ fontFamily: "var(--font-display)" }}>
+        <motion.h2
+          className="text-xl font-bold flex items-center justify-center gap-2"
+          style={{ fontFamily: "var(--font-display)" }}
+          initial={reduce ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.1, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        >
           {result.passed && <Trophy size={22} className="text-[#ffb020]" />}
           {result.passed ? "Passed!" : questions.length === 1 ? "Not yet — try again" : "Not yet — 80% to pass"}
-        </h2>
+        </motion.h2>
         {xpTotal > 0 && (
           <p className="text-[#3fb950] font-semibold mt-2 flex items-center justify-center gap-1">
             <Sparkles size={16} /> +{xpTotal} XP earned this run
@@ -164,7 +237,7 @@ export function QuizRunner({
             ? "Solid. Retake anytime — the options reshuffle every run."
             : "Reread the weak spots and try again. Wrong answers showed you why."}
         </p>
-        <div className="flex gap-3 justify-center mt-6">
+        <div className="flex gap-3 justify-center flex-wrap mt-6">
           <button
             onClick={() => {
               setI(0); setChosen(null); setFeedback(null); setResult(null); setXpTotal(0);
@@ -174,12 +247,22 @@ export function QuizRunner({
           >
             Retake quiz
           </button>
-          <Link
-            href={`/learn/${lessonSlug}`}
-            className="px-4 py-2 rounded-xl bg-[#00e5ff] text-[#05070a] text-sm font-semibold hover:bg-[#33ebff] transition-colors"
-          >
-            Back to lesson
-          </Link>
+          {result.passed && nextLessonSlug ? (
+            <Link
+              href={`/learn/${nextLessonSlug}`}
+              className="px-4 py-2 rounded-xl bg-[#00e5ff] text-[#05070a] text-sm font-semibold hover:bg-[#33ebff] transition-colors flex items-center gap-1.5 max-w-[280px]"
+            >
+              <span className="truncate">Continue: {nextLessonTitle}</span>
+              <ArrowRight size={15} className="shrink-0" />
+            </Link>
+          ) : (
+            <Link
+              href={`/learn/${lessonSlug}`}
+              className="px-4 py-2 rounded-xl bg-[#00e5ff] text-[#05070a] text-sm font-semibold hover:bg-[#33ebff] transition-colors"
+            >
+              Back to lesson
+            </Link>
+          )}
         </div>
       </motion.div>
     );
@@ -213,9 +296,9 @@ export function QuizRunner({
       <AnimatePresence mode="wait">
         <motion.div
           key={i}
-          initial={reduce ? false : { opacity: 0, x: 40 }}
+          initial={!mounted || reduce ? false : { opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={reduce ? {} : { opacity: 0, x: -40 }}
+          exit={!mounted || reduce ? {} : { opacity: 0, x: -40 }}
           transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
         >
           <p className="font-semibold whitespace-pre-wrap text-[15px] leading-relaxed mb-5">

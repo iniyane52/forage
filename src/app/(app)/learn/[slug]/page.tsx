@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getLesson, getAdjacent } from "@/lib/content";
+import { getLesson, getAdjacent, estimateReadingMinutes } from "@/lib/content";
+import { highlightCode } from "@/lib/highlight";
+import { pathMeta } from "@/lib/pathMeta";
 import { MarkDoneButton, NotesBox, CheckReveal } from "@/components/LessonActions";
 import { TutorDrawer } from "@/components/TutorDrawer";
+import { ReadingProgressBar } from "@/components/ui/ReadingProgressBar";
+import { LessonOutline, type OutlineItem } from "@/components/LessonOutline";
 import { FadeUp } from "@/components/ui/motion";
 import {
   BookOpen,
@@ -19,7 +23,7 @@ import {
   ListChecks,
   ExternalLink,
   BookMarked,
-  Lock,
+  Clock,
   resourceIcon,
 } from "@/components/ui/icons";
 import type { LucideIcon } from "lucide-react";
@@ -28,14 +32,17 @@ function Label({
   children,
   color = "#00e5ff",
   icon: Icon,
+  id,
 }: {
   children: React.ReactNode;
   color?: string;
   icon: LucideIcon;
+  id?: string;
 }) {
   return (
     <h2
-      className="text-xs font-bold uppercase tracking-widest mt-8 mb-2 flex items-center gap-1.5"
+      id={id}
+      className="text-xs font-bold uppercase tracking-widest mt-8 mb-2 flex items-center gap-1.5 scroll-mt-24"
       style={{ color }}
     >
       <Icon size={14} /> {children}
@@ -97,8 +104,31 @@ export default async function LessonPage({
     throw new Error("Couldn't load this lesson. Please try again.");
   }
 
+  // Per-stream identity thread (progress bar / outline / title accent bar) --
+  // deliberately NOT applied to the section Labels below, which already use a
+  // considered, distinct rainbow of colors per section type (concept/analogy/
+  // mistakes/etc.); flattening those to one accent would erase that existing design.
+  const accent = pathMeta[stream?.slug ?? ""]?.accent ?? "#00e5ff";
+  const readingMinutes = estimateReadingMinutes(topic);
+  const highlightedExamples = topic.examples ? await Promise.all(topic.examples.map((e) => highlightCode(e.code))) : [];
+
+  const outlineItems: OutlineItem[] = [
+    { id: "concept", label: "What it is" },
+    ...(topic.analogy ? [{ id: "analogy", label: "Analogy" }] : []),
+    ...(topic.examples?.length ? [{ id: "examples", label: "Worked example" }] : []),
+    ...(topic.mistakes?.length ? [{ id: "mistakes", label: "Common mistakes" }] : []),
+    { id: "handson", label: "Hands-on task" },
+    { id: "donewhen", label: "Done when" },
+    ...(topic.keyTakeaways?.length ? [{ id: "takeaways", label: "Key takeaways" }] : []),
+    ...(topic.resources?.length ? [{ id: "resources", label: "Keep exploring" }] : []),
+    ...(topic.checks?.length ? [{ id: "checks", label: "Check yourself" }] : []),
+    { id: "notes", label: "Your notes" },
+  ];
+
   return (
-    <FadeUp>
+    <>
+      <ReadingProgressBar accent={accent} />
+      <LessonOutline items={outlineItems} accent={accent} />
       <article className="max-w-3xl mx-auto">
         <p className="text-xs text-[#7d99a3]">
           <Link href="/dashboard" className="hover:text-white transition-colors">
@@ -107,28 +137,41 @@ export default async function LessonPage({
           /{" "}
           <Link
             href={`/stream/${stream?.slug ?? "common-core"}`}
-            className="hover:text-white transition-colors"
+            className="hover:opacity-80 transition-opacity font-medium"
+            style={{ color: accent }}
           >
             {stream?.title ?? mod.title}
           </Link>
         </p>
-        <h1 className="display text-3xl sm:text-4xl md:text-5xl mt-3 mb-1">{topic.title}</h1>
+        <div className="flex gap-3 mt-3 mb-1">
+          <span className="w-1 rounded-full shrink-0" style={{ backgroundColor: accent }} />
+          <h1 className="display text-3xl sm:text-4xl md:text-5xl">{topic.title}</h1>
+        </div>
+        <p className="flex items-center gap-1.5 text-xs text-[#7d99a3] mb-1">
+          <Clock size={13} /> {readingMinutes} min read
+        </p>
 
-        <Label icon={BookOpen}>What it is</Label>
-        <p className="lead">{topic.concept}</p>
+        <FadeUp>
+          <Label id="concept" icon={BookOpen}>
+            What it is
+          </Label>
+          <p className="lead">{topic.concept}</p>
+        </FadeUp>
 
         {topic.analogy && (
-          <>
-            <Label color="#b967ff" icon={Lightbulb}>
+          <FadeUp>
+            <Label id="analogy" color="#b967ff" icon={Lightbulb}>
               Analogy
             </Label>
             <p className="text-[15px] leading-relaxed">{topic.analogy}</p>
-          </>
+          </FadeUp>
         )}
 
         {topic.examples && topic.examples.length > 0 && (
-          <>
-            <Label icon={Code2}>Worked example</Label>
+          <FadeUp>
+            <Label id="examples" icon={Code2}>
+              Worked example
+            </Label>
             {topic.examples.map((e, i) => (
               <div key={i} className="mb-3 rounded-xl overflow-hidden border border-white/[0.08]">
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.03] border-b border-white/[0.06]">
@@ -136,13 +179,14 @@ export default async function LessonPage({
                   <span className="w-2.5 h-2.5 rounded-full bg-[#ffb020]/70" />
                   <span className="w-2.5 h-2.5 rounded-full bg-[#3fb950]/70" />
                 </div>
-                <pre className="bg-black/40 p-4 overflow-x-auto text-[13.5px] leading-relaxed font-mono whitespace-pre-wrap">
-                  {e.code}
-                </pre>
+                <div
+                  className="bg-black/40 overflow-x-auto text-[13.5px] leading-relaxed [&>pre]:!bg-transparent [&>pre]:!m-0 [&>pre]:p-4 [&>pre]:font-mono [&>pre]:whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={{ __html: highlightedExamples[i] }}
+                />
                 {e.note && <p className="text-xs text-[#7d99a3] px-3 py-2 bg-white/[0.02]">{e.note}</p>}
               </div>
             ))}
-          </>
+          </FadeUp>
         )}
 
         {topic.warn && (
@@ -155,8 +199,8 @@ export default async function LessonPage({
         )}
 
         {topic.mistakes && topic.mistakes.length > 0 && (
-          <>
-            <Label color="#ffb020" icon={XCircle}>
+          <FadeUp>
+            <Label id="mistakes" color="#ffb020" icon={XCircle}>
               Common mistakes
             </Label>
             <ul className="space-y-1.5 text-sm">
@@ -167,22 +211,26 @@ export default async function LessonPage({
                 </li>
               ))}
             </ul>
-          </>
+          </FadeUp>
         )}
 
-        <Label color="#3fb950" icon={Target}>
-          Your hands-on task
-        </Label>
-        <p className="text-[15px] leading-relaxed">{topic.handsOn}</p>
+        <FadeUp>
+          <Label id="handson" color="#3fb950" icon={Target}>
+            Your hands-on task
+          </Label>
+          <p className="text-[15px] leading-relaxed">{topic.handsOn}</p>
+        </FadeUp>
 
-        <Label color="#7d99a3" icon={Target}>
-          Done when
-        </Label>
-        <p className="text-sm glass rounded-xl px-4 py-2.5">{topic.doneWhen}</p>
+        <FadeUp>
+          <Label id="donewhen" color="#7d99a3" icon={Target}>
+            Done when
+          </Label>
+          <p className="text-sm glass rounded-xl px-4 py-2.5">{topic.doneWhen}</p>
+        </FadeUp>
 
         {topic.keyTakeaways && topic.keyTakeaways.length > 0 && (
-          <>
-            <Label color="#ff3d81" icon={ListChecks}>
+          <FadeUp>
+            <Label id="takeaways" color="#ff3d81" icon={ListChecks}>
               Key takeaways
             </Label>
             <ul className="space-y-1.5 text-sm">
@@ -193,12 +241,12 @@ export default async function LessonPage({
                 </li>
               ))}
             </ul>
-          </>
+          </FadeUp>
         )}
 
         {topic.resources && topic.resources.length > 0 && (
-          <>
-            <Label color="#6ff9ff" icon={BookMarked}>
+          <FadeUp>
+            <Label id="resources" color="#6ff9ff" icon={BookMarked}>
               Keep exploring
             </Label>
             {(() => {
@@ -246,12 +294,12 @@ export default async function LessonPage({
                 </>
               );
             })()}
-          </>
+          </FadeUp>
         )}
 
         {topic.checks && topic.checks.length > 0 && (
-          <>
-            <Label color="#59d3c5" icon={HelpCircle}>
+          <FadeUp>
+            <Label id="checks" color="#59d3c5" icon={HelpCircle}>
               Check yourself
             </Label>
             <div className="space-y-2">
@@ -259,41 +307,24 @@ export default async function LessonPage({
                 <CheckReveal key={i} q={c.q} a={c.a} />
               ))}
             </div>
-          </>
+          </FadeUp>
         )}
 
         <div className="mt-8">
-          <Label icon={PenLine}>Your notes</Label>
+          <Label id="notes" icon={PenLine}>
+            Your notes
+          </Label>
           <NotesBox lessonId={row.id} initial={progress?.notes ?? ""} />
         </div>
 
-        {(() => {
-          const isDone = progress?.status === "done";
-          return (
-            <div className="mt-6 flex items-center gap-3 flex-wrap">
-              <MarkDoneButton lessonId={row.id} initiallyDone={isDone} />
-              {(questionCount ?? 0) === 0 ? (
-                <span className="text-xs text-[#7d99a3] glass rounded-xl px-3 py-2">
-                  Study-only lesson — no quiz needed
-                </span>
-              ) : isDone ? (
-                <Link
-                  href={`/quiz/${slug}`}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#00e5ff] text-[#05070a] hover:bg-[#33ebff] transition-colors"
-                >
-                  Take the quiz ({questionCount} question{questionCount === 1 ? "" : "s"}) →
-                </Link>
-              ) : (
-                <span
-                  title="Study the lesson and mark it done to unlock the quiz"
-                  className="flex items-center gap-1.5 text-xs text-[#7d99a3] glass rounded-xl px-3 py-2 cursor-not-allowed"
-                >
-                  <Lock size={13} /> Study this first to unlock the quiz
-                </span>
-              )}
-            </div>
-          );
-        })()}
+        <div className="mt-6">
+          <MarkDoneButton
+            lessonId={row.id}
+            initiallyDone={progress?.status === "done"}
+            questionCount={questionCount ?? 0}
+            quizHref={`/quiz/${slug}`}
+          />
+        </div>
 
         <nav className="mt-10 pt-6 border-t border-white/[0.06] flex justify-between text-sm gap-4">
           {prev ? (
@@ -324,6 +355,6 @@ export default async function LessonPage({
         handsOn={topic.handsOn}
         doneWhen={topic.doneWhen}
       />
-    </FadeUp>
+    </>
   );
 }

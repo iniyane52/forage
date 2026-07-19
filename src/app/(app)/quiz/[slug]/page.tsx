@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getLesson } from "@/lib/content";
+import { getLesson, getAdjacent } from "@/lib/content";
 import { QuizRunner, type PublicQuestion } from "@/components/QuizRunner";
 
 export default async function QuizPage({
@@ -12,6 +12,7 @@ export default async function QuizPage({
   const { slug } = await params;
   const lesson = getLesson(slug);
   if (!lesson) notFound();
+  const { next: nextLesson } = getAdjacent(slug);
 
   const supabase = await createClient();
   const {
@@ -52,6 +53,8 @@ export default async function QuizPage({
           lessonId={row.id}
           lessonSlug={slug}
           questions={questions as unknown as PublicQuestion[]}
+          nextLessonSlug={nextLesson?.topic.id}
+          nextLessonTitle={nextLesson?.topic.title}
         />
       ) : (
         <div className="rounded-xl border border-[#2a323d] bg-[#161b22] p-8 text-center">
