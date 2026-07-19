@@ -1,6 +1,7 @@
 "use client";
 
 import { useReducedMotion } from "framer-motion";
+import { useMounted } from "@/hooks/useMounted";
 
 /**
  * Route-transition loading state (e.g. right after clicking into a lesson) --
@@ -13,14 +14,29 @@ import { useReducedMotion } from "framer-motion";
  */
 export function LoadingMark() {
   const reduce = useReducedMotion();
+  // Gated on `mounted` first: server-side, `useReducedMotion()` always resolves to a
+  // falsy default (no `matchMedia` to check), but a client that genuinely prefers
+  // reduced motion resolves the real value synchronously on its very first render --
+  // before hydration completes -- so branching on `reduce` alone here (an extra DOM
+  // node, a different className) is a real hydration mismatch risk whenever this
+  // loading state is part of a server-streamed Suspense fallback. Same fix as
+  // ScrollHero.tsx/StatCallout.tsx.
+  const mounted = useMounted();
+  const showMotion = mounted && !reduce;
 
   return (
     <div role="status" aria-label="Loading" className="flex flex-col items-center justify-center gap-3 py-24">
       <div className="relative inline-block overflow-hidden">
-        <span className="gradient-word text-2xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
-          Forage
+        {/* var(--font-hero) + wide tracking to visually match IntroSplash's FORAGE
+            wordmark -- the route loader reads as a mini version of the same brand
+            moment, not a different logo. */}
+        <span
+          className="gradient-word text-xl font-bold tracking-[0.18em]"
+          style={{ fontFamily: "var(--font-hero)" }}
+        >
+          FORAGE
         </span>
-        {!reduce && (
+        {showMotion && (
           <span
             aria-hidden="true"
             className="loader-sweep absolute inset-0"
@@ -35,7 +51,7 @@ export function LoadingMark() {
         {[0, 0.15, 0.3].map((delay) => (
           <span
             key={delay}
-            className={`w-1.5 h-1.5 rounded-full bg-[#00e5ff] ${reduce ? "" : "loading-dot"}`}
+            className={`w-1.5 h-1.5 rounded-full bg-[#00e5ff] ${showMotion ? "loading-dot" : ""}`}
             style={{ animationDelay: `${delay}s` }}
           />
         ))}
