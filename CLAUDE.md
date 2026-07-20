@@ -324,8 +324,8 @@ Roughly in the order they'd likely matter for actually launching this as a real 
    8 modules apiece (36/34/30 lessons respectively), matching the depth of AI Engineer
    (10 modules/48 lessons) and Cloud & DevOps (7 modules/53 lessons) — see exact counts
    in the Database Schema section below.
-3. ~~**Deployment.**~~ **Done.** Live at `forage-b6qp.vercel.app` (Vercel, auto-deploys
-   `main`). No custom domain yet (`forage.co.in` not purchased) and no preview/production
+3. ~~**Deployment.**~~ **Done.** Live at `forage-b6qp.vercel.app` and the custom domain
+   `forage.co.in`/`www.forage.co.in` (Vercel, auto-deploys `main`). No preview/production
    split by design — a single environment.
 4. Stale task-tracker entries referencing superseded early-phase plans exist in this
    session's task list but don't affect the codebase — no code action needed, just noise
@@ -335,10 +335,54 @@ Roughly in the order they'd likely matter for actually launching this as a real 
    dedicated, isolated session rather than another incremental attempt.
 6. Minor nice-to-haves flagged during the last content audit but explicitly not actioned
    (low priority, listed for completeness): templated-feeling Module-3 "why" phrasing
-   repeated near-verbatim across the newer paths; a methodology nitpick in
-   `data-correlation-causation`'s partial-correlation demo; `cyber-incident-response`
-   states NIST's incident-response guide has 5 phases (it's actually 4 in the official
-   framing); Data Scientist path has no dedicated charting/visualization lesson.
+   repeated near-verbatim across the newer paths; `data-correlation-causation`'s
+   partial-correlation demo removes a confounder's effect using the synthetic dataset's
+   true generating coefficients rather than OLS-estimated ones, which isn't reproducible
+   on real data (a one-line caveat would fix it). Two items previously listed here were
+   re-verified during a full content audit and found to be already correct/already
+   fixed, not real defects: `cyber-incident-response` already correctly states NIST's
+   framework has 4 phases (not 5), and the Data Scientist path already has a solid
+   4-lesson `data-visualization` module (`data-viz-choosing-chart-type` through
+   `data-viz-mistakes-antipatterns`) — there was no charting gap.
+7. ~~**Cloud & DevOps content was wrong, not just thin.**~~ **Fixed.** A full content audit
+   found `content/stream1.json` (and the matching live DB rows) held a generic personal
+   bootcamp curriculum ("Month 1 — Linux", "Career & Interview Track", "ML Bridge") with
+   zero Kubernetes/CI-CD/Terraform/cloud-provider content — confirmed via `git log` to have
+   been wrong since this repo's very first commit, not a later regression, so there was no
+   historical "correct" version to restore. Rewritten from scratch, module by module, to a
+   real curriculum: Linux & the Command Line (9) → Networking Fundamentals for Ops (8) →
+   Git & Version Control for Operations (6) → Containers & Docker (7) → CI/CD & Automation
+   (8) → Kubernetes & Orchestration (9) → Infrastructure as Code, Cloud Providers &
+   Observability + capstone (6) = 53 lessons, same total as before. Every runnable example
+   was either actually executed (Linux/bash commands, git branching/merge-conflict/hooks,
+   curl/DNS/socket-binding networking checks — all via Git Bash on this Windows dev
+   machine) or explicitly labeled "doc-grounded, not executed here" when the environment
+   couldn't run it live (no running Docker daemon, no Kubernetes cluster, no Terraform
+   install, no real cloud account) — never silently presented as verified when it wasn't.
+   All 53 lessons got a matching quiz question synced to the DB (previously only 26 of 53
+   lessons had one at all). `npx tsc --noEmit`, `npx eslint`, and a full `npm run build`
+   all pass clean after the rewrite; `get_advisors` (security) shows no new findings.
+8. ~~**Software Engineer path had real depth gaps for its stated "crack interviews"
+   purpose.**~~ **Fixed.** A content audit found: zero OOP content anywhere, missing core
+   interview DSA topics (backtracking, greedy, graph algorithms beyond BFS/DFS, tries,
+   bit manipulation, quicksort), a real math error in `swe-common-complexities`
+   (misexplained why naive Fibonacci's runtime grows ~11x per +5 to n — cited 2⁵=32,
+   which is backwards; corrected to the real reason, φ⁵≈11.09), an unflagged O(n²)
+   recursion pattern (`lst[0] + sum_list(lst[1:])`) taught as if it were clean O(n) in
+   `swe-recursion-basics` (now explicitly flagged, with measured timing showing the real
+   quadratic blowup), and the same generic `neetcode.io/roadmap` URL reused as the
+   "resource" link for 8 different lessons with a different fake-specific label each time
+   (each replaced with a genuinely distinct, individually verified GeeksforGeeks page
+   matching its actual topic). Expanded from 4 modules/19 lessons to 5 modules/31 lessons:
+   added a new Object-Oriented Programming module (5 lessons: classes/objects,
+   inheritance, polymorphism, composition-over-inheritance, common design patterns —
+   Singleton/Factory/Strategy), and added tries, graph algorithms II (Dijkstra +
+   topological sort), Union-Find, bit manipulation, quicksort, backtracking, and greedy
+   algorithms as new lessons in the existing Data Structures and Algorithms modules. Every
+   code example was actually executed (Python) to verify its claims, including real
+   measured timing demonstrating quicksort's worst case, the O(n²) `sum_list` cost, and
+   the greedy coin-change counterexample. `npx tsc --noEmit`, `npx eslint`, and a full
+   `npm run build` all pass clean after the expansion.
 
 ## Coding conventions
 
@@ -426,9 +470,9 @@ re-verify, these will drift as content is added):
 | Stream | Modules | Lessons | Quiz Qs |
 |---|---|---|---|
 | Common Core (free) | 6 | 24 | 24 |
-| Cloud & DevOps | 7 | 53 | 26 |
+| Cloud & DevOps | 7 | 53 | 53 |
 | AI Engineer | 10 | 48 | 45 |
-| Software Engineer | 4 | 19 | 18 |
+| Software Engineer | 5 | 31 | 30 |
 | Full-Stack Developer | 8 | 36 | 35 |
 | Data Scientist | 8 | 34 | 33 |
 | Cybersecurity | 8 | 30 | 28 |

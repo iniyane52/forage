@@ -374,12 +374,12 @@
       {
         "id": "fs-ts-react-api-types",
         "title": "Typing React components and API responses",
-        "concept": "React's own official docs recommend typing a component's props with an `interface` or `type` once there's more than a trivial inline annotation — destructuring the typed props object directly in the function signature (`function MyButton({ title, disabled }: MyButtonProps)`), the exact same pattern from this path's earlier React module, just now with a named, reusable type instead of an untyped object. The same interface-driven approach extends naturally to backend responses: defining an interface for what an API endpoint returns, then typing a fetch wrapper as generic (`getJson<T>(url): Promise<T>`) so every call site gets full autocomplete and compile-time checking of the shape it expects back — directly connecting Module 1's async/await, this path's React props, and the Express backend module ahead.",
+        "concept": "React's own official docs recommend typing a component's props with an `interface` or `type` once there's more than a trivial inline annotation — destructuring the typed props object directly in the function signature (`function MyButton({ title, disabled }: MyButtonProps)`), the same destructuring-props pattern you'll use throughout this path's React module just ahead, just now with a named, reusable type instead of an untyped object. The same interface-driven approach extends naturally to backend responses: defining an interface for what an API endpoint returns, then typing a fetch wrapper as generic (`getJson<T>(url): Promise<T>`) so every call site gets full autocomplete and compile-time checking of the shape it expects back — directly connecting Module 1's async/await, this path's upcoming React props lesson, and the Express backend module ahead.",
         "analogy": "An untyped API response is like a mystery box arriving from a supplier with no packing list — you find out what's actually inside only by opening it and hoping. A typed interface for that response is the packing list itself, agreed on in advance: your code can rely on exactly what's declared to be inside, and if the supplier ever changes what they send without updating the packing list, TypeScript is the inspector who catches the mismatch immediately, rather than a customer finding out the hard way later.",
         "examples": [
           {
             "code": "// (Illustrative JSX -- matches React's own official docs pattern for typed props)\ninterface MyButtonProps {\n  title: string;\n  disabled: boolean;\n}\n\nfunction MyButton({ title, disabled }: MyButtonProps) {\n  return <button disabled={disabled}>{title}</button>;\n}\n\n// Usage -- TypeScript checks these calls at compile time:\n// <MyButton title=\"Save\" disabled={false} />   -- OK\n// <MyButton title=\"Save\" />                    -- ERROR: missing required 'disabled'",
-            "note": "This is React's own documented pattern verbatim: an interface describes the props' shape, and the component destructures directly from it -- exactly the same {name, isVip}-style destructuring from this path's earlier 'Components and props' lesson, just with a named, reusable, and now COMPILE-TIME-CHECKED type instead of an implicit one."
+            "note": "This is React's own documented pattern verbatim: an interface describes the props' shape, and the component destructures directly from it -- the same {title, disabled}-style destructuring you'll see again as {name, isVip} in this path's upcoming 'Components and props' lesson, just with a named, reusable, and now COMPILE-TIME-CHECKED type instead of an implicit one."
           },
           {
             "code": "interface ApiUser {\n  id: number;\n  name: string;\n  email: string;\n}\n\n// A typed wrapper around fetch -- the generic <T> (previous lesson) lets callers\n// specify exactly what shape they expect back from a given endpoint\nasync function getJson<T>(url: string): Promise<T> {\n  const res = await fetch(url);\n  if (!res.ok) {\n    throw new Error(`Request failed: ${res.status}`);\n  }\n  return res.json() as Promise<T>;\n}\n\nasync function main() {\n  // Standing in for a real network response, to show what getJson<ApiUser> gives you\n  const fakeUser: ApiUser = { id: 1, name: \"Aditi\", email: \"aditi@example.com\" };\n  console.log(`User #${fakeUser.id}: ${fakeUser.name} <${fakeUser.email}>`);\n  // fakeUser.nmae would be a compile-time typo error here -- caught before it ever runs\n}\n\nmain();",
@@ -1105,12 +1105,7 @@
         ],
         "resources": [
           {
-            "label": "MDN — JSON Web Tokens overview",
-            "url": "https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API",
-            "kind": "docs"
-          },
-          {
-            "label": "Auth0 — JWT.io introduction",
+            "label": "JWT.io — Introduction to JSON Web Tokens",
             "url": "https://jwt.io/introduction",
             "kind": "reference"
           }

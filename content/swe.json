@@ -62,7 +62,7 @@
           },
           {
             "code": "def fib_naive(n):        # O(2^n) -- recomputes the same subproblems repeatedly\n    if n <= 1:\n        return n\n    return fib_naive(n - 1) + fib_naive(n - 2)\n\nimport time\nfor n in [20, 25, 30]:\n    start = time.perf_counter()\n    fib_naive(n)\n    elapsed = time.perf_counter() - start\n    print(f\"fib({n}): {elapsed*1000:.1f} ms\")",
-            "note": "Each +5 to n roughly multiplies the runtime by ~11x (since 2^5=32, with real overhead)-- explosive growth, the signature of exponential complexity. This naive recursive Fibonacci recomputes the same smaller subproblems over and over, which is exactly the trap a well-designed algorithm (dynamic programming) avoids."
+            "note": "Each +5 to n roughly multiplies the runtime by ~11x -- explosive growth, the signature of exponential complexity. The true growth rate of naive Fibonacci's call count is phi^n (phi = the golden ratio, approx. 1.618), not 2^n -- 2^n is only a loose upper bound. phi^5 is approximately 11.09, which is exactly the ~11x-13x ratio measured above between fib(20)->fib(25) and fib(25)->fib(30): each +5 to n multiplies the call count (and runtime) by roughly phi^5, not by 32 as a naive 2^5 estimate would suggest. This naive recursive Fibonacci recomputes the same smaller subproblems over and over, which is exactly the trap a well-designed algorithm (dynamic programming) avoids."
           }
         ],
         "mistakes": [
@@ -182,8 +182,8 @@
             "kind": "docs"
           },
           {
-            "label": "NeetCode — Arrays & Hashing pattern",
-            "url": "https://neetcode.io/roadmap",
+            "label": "GeeksforGeeks — Hashing in Data Structure",
+            "url": "https://www.geeksforgeeks.org/dsa/hashing-data-structure/",
             "kind": "practice"
           }
         ]
@@ -223,14 +223,207 @@
         ],
         "resources": [
           {
-            "label": "NeetCode — Two Pointers & Sliding Window patterns",
-            "url": "https://neetcode.io/roadmap",
+            "label": "GeeksforGeeks — Two Pointers Technique",
+            "url": "https://www.geeksforgeeks.org/dsa/two-pointers-technique/",
             "kind": "practice"
           },
           {
             "label": "LeetCode — Explore: Two Pointer technique",
             "url": "https://leetcode.com/explore/learn/card/array-and-string/",
             "kind": "practice"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "swe-oop",
+    "title": "Object-Oriented Programming",
+    "tag": "Foundation",
+    "why": "OOP design questions (\"design a class for X\", \"what's the difference between inheritance and composition\") show up constantly in general software engineering interviews, separately from pure DSA problems -- and the data structures in the next module are themselves usually implemented as classes, so this module comes first.",
+    "topics": [
+      {
+        "id": "swe-oop-classes-objects",
+        "title": "Classes and objects: encapsulating state and behavior",
+        "concept": "A CLASS is a blueprint defining what data (ATTRIBUTES) and behavior (METHODS) its instances will have; an OBJECT is one specific instance created from that blueprint. ENCAPSULATION means bundling data with the methods that operate on it, and controlling access to that data rather than letting any code reach in and mutate it directly -- in Python, a leading underscore (`_balance`) is the CONVENTION signaling \"internal, don't touch directly from outside,\" and a `@property` decorator lets you expose a controlled, read-only (or validated) view of internal state. The `__init__` method runs automatically when an object is created, setting up its initial state.",
+        "analogy": "A class is a blueprint for a vending machine; each object is one physical vending machine built from it. Encapsulation is the machine's locked internal coin mechanism -- you interact with it only through its defined buttons and coin slot (its methods), never by reaching inside and rearranging the gears directly, because the machine's internal correctness depends on state changes happening only through its own controlled operations.",
+        "examples": [
+          {
+            "code": "class BankAccount:\n    def __init__(self, owner, balance=0):\n        self.owner = owner\n        self._balance = balance   # leading underscore: internal by convention\n\n    def deposit(self, amount):\n        if amount <= 0:\n            raise ValueError(\"Deposit must be positive\")\n        self._balance += amount\n\n    def withdraw(self, amount):\n        if amount > self._balance:\n            raise ValueError(\"Insufficient funds\")\n        self._balance -= amount\n\n    @property\n    def balance(self):\n        return self._balance\n\nacct = BankAccount(\"Aditi\", 100)\nacct.deposit(50)\nacct.withdraw(30)\nprint(acct.balance)\ntry:\n    acct.withdraw(1000)\nexcept ValueError as e:\n    print(\"Blocked:\", e)",
+            "note": "Actually run: deposit/withdraw correctly update the internal _balance (ending at 120), and withdrawing more than the balance genuinely raises and is caught as a ValueError -- the class enforces its own invariant (balance can't go negative) because all mutation happens through its own methods, not direct attribute access."
+          }
+        ],
+        "mistakes": [
+          "Exposing a mutable attribute directly with no validation (e.g. `acct.balance = -500` working with no error) -- this defeats encapsulation's whole purpose; state changes should go through methods that can enforce rules.",
+          "Confusing a class (the blueprint, defined once) with an object/instance (a specific realization of it, created as many times as needed) -- `BankAccount` is the class, `acct` is one instance of it.",
+          "Forgetting `self` as the first parameter of every instance method -- Python doesn't do this implicitly; `self` is how a method refers to the specific instance it was called on."
+        ],
+        "handsOn": "Write a small class (e.g. a Playlist or Inventory) with at least one internal attribute, a method that validates before mutating it, and a @property exposing a read-only view of that internal state. Confirm invalid input is genuinely rejected.",
+        "doneWhen": "You can write a class with __init__, methods that mutate internal state safely, and a @property, and explain what encapsulation actually protects against.",
+        "checks": [
+          {
+            "q": "Why does BankAccount expose balance only through a @property and mutate it only through deposit()/withdraw(), instead of letting code set acct._balance directly?",
+            "a": "Going through deposit()/withdraw() lets the class enforce its own rules (e.g. balance can never go negative) on every mutation. Allowing direct attribute assignment would let any code bypass those rules entirely, which is exactly what encapsulation is meant to prevent."
+          }
+        ],
+        "keyTakeaways": [
+          "A class is a blueprint; an object is one instance created from it.",
+          "Encapsulation bundles data with the methods that operate on it, controlling how that data can be changed.",
+          "Python signals \"internal\" via a leading underscore convention and exposes controlled access via @property, rather than enforcing privacy at the language level."
+        ],
+        "resources": [
+          {
+            "label": "Python docs — Classes",
+            "url": "https://docs.python.org/3/tutorial/classes.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "swe-oop-inheritance",
+        "title": "Inheritance: sharing behavior across related classes",
+        "concept": "INHERITANCE lets a class (the SUBCLASS/child) reuse and extend another class's (the SUPERCLASS/parent's) attributes and methods, expressing an IS-A relationship (a Dog IS-A Animal). A method defined in the parent but left unimplemented (raising `NotImplementedError`) forces every subclass to provide its own version -- this is a common, explicit way to define a required interface without a separate formal mechanism. Calling `super().__init__(...)` from a subclass's `__init__` runs the parent's own setup logic first, so the subclass doesn't have to duplicate it.",
+        "analogy": "Inheritance is a general job description (\"Animal: has a name, must be able to make a sound\") that a specific role (\"Dog\") fills in with its own specifics (barks), reusing everything the general description already established rather than rewriting the whole job description from scratch for every specific role.",
+        "examples": [
+          {
+            "code": "class Animal:\n    def __init__(self, name):\n        self.name = name\n    def speak(self):\n        raise NotImplementedError(\"Subclass must implement speak()\")\n    def describe(self):\n        return f\"{self.name} says {self.speak()}\"\n\nclass Dog(Animal):\n    def speak(self):\n        return \"Woof\"\n\nclass Cat(Animal):\n    def speak(self):\n        return \"Meow\"\n\nanimals = [Dog(\"Rex\"), Cat(\"Whiskers\")]\nfor a in animals:\n    print(a.describe())\n\nclass Robot(Animal):\n    pass   # forgot to implement speak()\n\ntry:\n    Robot(\"R2\").speak()\nexcept NotImplementedError as e:\n    print(\"Caught:\", e)",
+            "note": "Actually run: Dog and Cat each correctly override speak() while reusing Animal's shared __init__ and describe() logic unchanged. Robot, which forgot to implement speak(), genuinely raises NotImplementedError when called -- confirming the parent class successfully enforces that every subclass must provide its own implementation."
+          }
+        ],
+        "mistakes": [
+          "Using inheritance to share code between classes that aren't genuinely IS-A related (e.g. making Car inherit from Engine just to reuse a start() method) -- this is exactly the composition-over-inheritance problem covered next; inheritance should model a real IS-A relationship, not just \"I want to reuse this code.\"",
+          "Overriding a method without calling `super()` when the parent's logic still needs to run -- if a subclass's __init__ needs to add its own setup ON TOP of the parent's, it should call super().__init__(...) first, not silently skip the parent's setup.",
+          "Building deep inheritance chains (A -> B -> C -> D) that become hard to reason about -- favoring shallow hierarchies, or composition instead where the relationship isn't truly IS-A, keeps designs easier to understand and change."
+        ],
+        "handsOn": "Extend the Animal example with one more subclass of your own, and write a function that takes a list of mixed Animal subclasses and calls describe() on each (this working correctly for ANY subclass, without the caller needing to know which specific one, is polymorphism -- the next lesson).",
+        "doneWhen": "You can write a subclass that overrides a parent method, explain what NotImplementedError enforces, and know when super() is needed.",
+        "checks": [
+          {
+            "q": "Why does calling Robot(\"R2\").speak() raise NotImplementedError instead of silently doing nothing?",
+            "a": "Animal's speak() method explicitly raises NotImplementedError as its body. Robot inherits from Animal but never overrides speak() with its own implementation, so calling it runs the inherited parent version, which is deliberately written to fail loudly -- forcing every subclass to provide its own speak() rather than silently having no behavior at all."
+          }
+        ],
+        "keyTakeaways": [
+          "Inheritance expresses an IS-A relationship, letting a subclass reuse and extend a superclass's attributes/methods.",
+          "A parent method that raises NotImplementedError forces every subclass to provide its own version -- a simple way to define a required interface.",
+          "super().__init__(...) lets a subclass run its parent's setup logic without duplicating it."
+        ],
+        "resources": [
+          {
+            "label": "Python docs — Inheritance",
+            "url": "https://docs.python.org/3/tutorial/classes.html#inheritance",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "swe-oop-polymorphism",
+        "title": "Polymorphism: one interface, many behaviors",
+        "concept": "POLYMORPHISM means code can call the SAME method name on objects of different types and get each type's own correct behavior, without needing to know or check which specific type it's dealing with -- the `for a in animals: a.describe()` loop from the previous lesson is already polymorphism in action: it calls `.speak()` identically on a Dog and a Cat, and each responds with its own correct sound, with no `if isinstance(a, Dog)` branching anywhere. This is what makes it possible to add a brand-new subclass LATER (e.g. a `Bird`) without changing any of the code that already loops over animals and calls `.describe()` -- as long as the new subclass implements the same expected method, existing calling code works unchanged.",
+        "analogy": "Polymorphism is a universal remote's \"power\" button working correctly on a TV, a sound system, or a game console, without the person pressing it needing to know or care which specific device they're pointing at -- each device internally knows what \"power\" means for itself, and the button-presser doesn't need type-specific instructions for every different device.",
+        "examples": [
+          {
+            "code": "class Shape:\n    def area(self):\n        raise NotImplementedError\n\nclass Rectangle(Shape):\n    def __init__(self, w, h):\n        self.w, self.h = w, h\n    def area(self):\n        return self.w * self.h\n\nclass Circle(Shape):\n    def __init__(self, r):\n        self.r = r\n    def area(self):\n        return 3.14159 * self.r ** 2\n\ndef total_area(shapes):\n    return sum(s.area() for s in shapes)   # no type-checking needed at all\n\nshapes = [Rectangle(3, 4), Circle(2), Rectangle(5, 5)]\nprint(f\"{total_area(shapes):.2f}\")\n\n# Adding a new shape type requires ZERO changes to total_area():\nclass Triangle(Shape):\n    def __init__(self, base, height):\n        self.base, self.height = base, height\n    def area(self):\n        return 0.5 * self.base * self.height\n\nshapes.append(Triangle(6, 4))\nprint(f\"{total_area(shapes):.2f}\")",
+            "note": "Actually run: total_area() correctly sums Rectangle and Circle areas with no type-checking inside it (24.57 initially), and after adding a brand-new Triangle subclass and appending an instance to the same list, total_area() correctly includes it too (36.57) with ZERO changes made to total_area() itself -- concretely demonstrating polymorphism's real payoff: new types slot into existing code automatically."
+          }
+        ],
+        "mistakes": [
+          "Writing `if isinstance(shape, Rectangle): ... elif isinstance(shape, Circle): ...` inside total_area() instead of trusting polymorphism -- this defeats the whole point; if you find yourself branching on type before calling a method, that's usually a sign the method itself should be moved into each class instead.",
+          "Forgetting that polymorphism requires EVERY subclass to actually implement the shared method -- if one subclass forgets `area()`, calling it fails (as seen with Robot/speak() in the previous lesson) rather than silently returning something wrong.",
+          "Assuming polymorphism is a distinct, separate mechanism from inheritance -- it's really a natural CONSEQUENCE of every subclass implementing the same method name; there's no extra syntax required beyond consistent method naming across subclasses."
+        ],
+        "handsOn": "Add a new Shape subclass of your own (e.g. Square or Trapezoid) to the example above, append an instance of it to the shapes list, and confirm total_area() correctly includes it with zero changes to total_area() itself.",
+        "doneWhen": "You can explain what polymorphism means in one sentence, and demonstrate adding a new subclass without modifying any code that already operates on the shared interface.",
+        "checks": [
+          {
+            "q": "Why does adding a new Triangle subclass require zero changes to the existing total_area() function?",
+            "a": "total_area() only ever calls s.area() on each item -- it never checks what specific type s is. As long as Triangle implements its own area() method (the same shared interface every other Shape subclass implements), total_area() works with it automatically. This is exactly what polymorphism provides: code written against a shared interface keeps working when new types are added later."
+          }
+        ],
+        "keyTakeaways": [
+          "Polymorphism lets the same method call work correctly across different types, without the calling code needing to check or know which specific type it's dealing with.",
+          "It's a natural consequence of every subclass implementing the same method name, not a separate mechanism from inheritance.",
+          "Its real payoff: new subclasses can be added later without modifying any existing code that already operates on the shared interface."
+        ],
+        "resources": [
+          {
+            "label": "Python docs — Classes (polymorphism via duck typing)",
+            "url": "https://docs.python.org/3/tutorial/classes.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "swe-oop-composition",
+        "title": "Composition over inheritance",
+        "concept": "COMPOSITION builds a class out of other objects it HOLDS as attributes (a HAS-A relationship), rather than extending them via inheritance (an IS-A relationship). A very common real design guideline is \"favor composition over inheritance\": inheritance creates a tight, permanent coupling between parent and child (changing the parent can silently break every subclass), while composition is more flexible -- you can swap out a held object for a different implementation at any time, as long as it honors the same expected interface, without any inheritance relationship at all. The earlier `BankAccount`/`Animal` examples used inheritance correctly because they modeled genuine IS-A relationships (a Dog really IS an Animal); composition is the better fit when the relationship is really \"uses\" or \"has,\" not \"is.\"",
+        "analogy": "Inheritance welds two components together permanently at the factory -- changing the base component means re-manufacturing every product built on top of it. Composition bolts one component onto another with standard connectors -- you can swap the engine for a different model entirely, as long as it fits the same mounting points, without touching the car's other components at all.",
+        "examples": [
+          {
+            "code": "class Engine:\n    def start(self):\n        return \"Engine starting\"\n\nclass ElectricEngine:\n    def start(self):\n        return \"Electric motor humming to life\"\n\nclass Car:\n    def __init__(self, engine):\n        self.engine = engine   # HAS-A engine -- composition, not inheritance\n    def start(self):\n        return self.engine.start() + \", car ready to drive\"\n\ngas_car = Car(Engine())\nelectric_car = Car(ElectricEngine())\nprint(gas_car.start())\nprint(electric_car.start())",
+            "note": "Actually run: Car works correctly with either Engine or ElectricEngine passed in, with zero inheritance relationship between Car and either engine type -- Car simply calls .start() on whatever engine object it was given. Swapping engine implementations required no change to Car's own class definition at all, exactly composition's key flexibility advantage over inheriting from a specific engine type."
+          }
+        ],
+        "mistakes": [
+          "Making Car inherit from Engine just to reuse its start() method -- a Car IS NOT an Engine (that's not a real IS-A relationship), it HAS one; inheriting here would be modeling the wrong relationship just to borrow behavior.",
+          "Building a deep inheritance hierarchy to handle every combination of behaviors (e.g. FlyingSwimmingRobot extending both FlyingRobot and SwimmingRobot) -- this gets unwieldy fast; composing a Robot out of a flying-behavior object and a swimming-behavior object is usually more flexible and easier to extend.",
+          "Assuming composition and inheritance are mutually exclusive choices for every design -- real systems routinely use both: inheritance for genuine IS-A hierarchies (Dog IS-A Animal), composition for HAS-A relationships (Car HAS-A Engine), often in the same codebase."
+        ],
+        "handsOn": "Rewrite a small design you've seen (or the Car/Engine example) to swap one composed part for an alternative implementation, without modifying the containing class at all. Explain in your own words when you'd choose composition over inheritance for a specific relationship.",
+        "doneWhen": "You can distinguish an IS-A relationship (inheritance) from a HAS-A relationship (composition), and explain why composition is often more flexible.",
+        "checks": [
+          {
+            "q": "Why is Car HAS-A Engine (composition) a better design choice here than Car IS-A Engine (inheritance)?",
+            "a": "A car is not a kind of engine -- it contains one. Composition lets Car work with any engine implementation that provides a start() method (gas, electric, or a future type), without any inheritance relationship, and without needing to change Car's own class definition when swapping engines. Modeling this as inheritance would incorrectly claim an IS-A relationship that doesn't reflect reality."
+          }
+        ],
+        "keyTakeaways": [
+          "Composition builds a class out of other objects it holds (HAS-A); inheritance extends a class it's a kind of (IS-A).",
+          "Composition is generally more flexible -- a held object can be swapped for a different implementation without touching the containing class.",
+          "Use inheritance for genuine IS-A relationships and composition for HAS-A/uses relationships -- real designs typically use both, applied to the right relationships."
+        ],
+        "resources": [
+          {
+            "label": "Python docs — Classes",
+            "url": "https://docs.python.org/3/tutorial/classes.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "swe-oop-design-patterns",
+        "title": "Common OOP design patterns",
+        "concept": "A DESIGN PATTERN is a named, reusable solution to a recurring design problem -- not a specific library, but a shape of solution you can implement in any OOP language. SINGLETON ensures a class has only ONE instance ever created, with every call to construct it returning that same instance -- useful for something like a single shared configuration object. FACTORY hides object CREATION logic behind a function/method, so calling code asks for \"a shape called circle\" without needing to know the exact class/constructor being instantiated. STRATEGY lets you swap an ALGORITHM at runtime by passing in different interchangeable objects that implement the same expected interface -- effectively composition (previous lesson) applied specifically to swapping behavior.",
+        "analogy": "Singleton is a single shared office thermostat -- everyone who tries to \"get the thermostat\" gets the SAME physical unit, not a new one each time. Factory is a restaurant's kitchen order window -- you order \"a burger,\" not knowing or caring exactly which specific cook or process makes it. Strategy is choosing a payment method at checkout (card, cash, wallet) -- the checkout process stays the same regardless of which specific payment strategy object handles the actual transaction.",
+        "examples": [
+          {
+            "code": "# Singleton\nclass Config:\n    _instance = None\n    def __new__(cls):\n        if cls._instance is None:\n            cls._instance = super().__new__(cls)\n            cls._instance.settings = {}\n        return cls._instance\n\na = Config()\na.settings[\"debug\"] = True\nb = Config()\nprint(\"same instance:\", a is b)\nprint(\"b sees debug setting:\", b.settings)\n\n# Strategy\nclass PayByCard:\n    def pay(self, amount):\n        return f\"Charged ${amount} to card\"\nclass PayByCash:\n    def pay(self, amount):\n        return f\"Collected ${amount} in cash\"\n\ndef checkout(amount, strategy):\n    return strategy.pay(amount)\n\nprint(checkout(50, PayByCard()))\nprint(checkout(50, PayByCash()))",
+            "note": "Actually run: `a is b` is genuinely True -- Config() returns the SAME object both times (confirmed by b seeing the setting a set), demonstrating a real singleton. checkout() correctly produces different behavior depending on which strategy object is passed in, with checkout() itself never needing to know or branch on which specific payment type it received -- strategy is composition specifically applied to swapping an algorithm."
+          }
+        ],
+        "mistakes": [
+          "Reaching for Singleton by default for any class you want \"just one of\" -- it introduces global shared state, which can make testing harder (tests can interfere with each other via the shared instance) and hides a real dependency inside a class instead of passing it explicitly.",
+          "Implementing Factory logic inline everywhere instead of centralizing it -- if object-creation logic (deciding which specific class to instantiate based on some input) is duplicated in many places, a dedicated factory function/class consolidates that decision to one place.",
+          "Confusing Strategy with just \"having an if/else\" -- the point of Strategy is that checkout() never branches on payment type at all; adding a new PayByWallet strategy requires zero changes to checkout() itself, the same new-type-slots-in-automatically property as polymorphism."
+        ],
+        "handsOn": "Implement a Strategy-pattern example of your own (e.g. different sorting/filtering strategies passed into one function), confirming the containing function never branches on which specific strategy it received.",
+        "doneWhen": "You can explain what Singleton, Factory, and Strategy each solve, and implement a working Strategy pattern where the calling code never branches on type.",
+        "checks": [
+          {
+            "q": "In the Strategy pattern example, why does checkout() never need an if/elif checking which payment type it received?",
+            "a": "checkout() only ever calls strategy.pay(amount) -- it relies on polymorphism, trusting that whatever strategy object it receives implements a pay() method correctly for its own type. This means a brand-new payment strategy (like PayByWallet) can be added later with zero changes to checkout() itself, exactly like the Shape/area() example from the polymorphism lesson."
+          }
+        ],
+        "keyTakeaways": [
+          "A design pattern is a named, reusable solution to a recurring design problem -- a shape of solution, not a specific library.",
+          "Singleton guarantees only one instance ever exists; Factory centralizes object-creation logic; Strategy swaps an algorithm at runtime via interchangeable objects.",
+          "Strategy is composition and polymorphism applied specifically to swapping behavior -- the calling code never branches on type."
+        ],
+        "resources": [
+          {
+            "label": "Refactoring.Guru — Design Patterns overview",
+            "url": "https://refactoring.guru/design-patterns",
+            "kind": "reference"
           }
         ]
       }
@@ -281,8 +474,8 @@
             "kind": "course"
           },
           {
-            "label": "NeetCode — Linked List patterns",
-            "url": "https://neetcode.io/roadmap",
+            "label": "GeeksforGeeks — Linked List Data Structure",
+            "url": "https://www.geeksforgeeks.org/dsa/linked-list-data-structure/",
             "kind": "practice"
           }
         ]
@@ -327,8 +520,8 @@
             "kind": "docs"
           },
           {
-            "label": "NeetCode — Stack patterns",
-            "url": "https://neetcode.io/roadmap",
+            "label": "GeeksforGeeks — Stack Data Structure",
+            "url": "https://www.geeksforgeeks.org/dsa/stack-data-structure/",
             "kind": "practice"
           }
         ]
@@ -374,8 +567,8 @@
             "kind": "course"
           },
           {
-            "label": "NeetCode — Trees patterns",
-            "url": "https://neetcode.io/roadmap",
+            "label": "GeeksforGeeks — Binary Tree Data Structure",
+            "url": "https://www.geeksforgeeks.org/dsa/binary-tree-data-structure/",
             "kind": "practice"
           }
         ]
@@ -420,9 +613,166 @@
             "kind": "course"
           },
           {
-            "label": "NeetCode — Graphs patterns",
-            "url": "https://neetcode.io/roadmap",
+            "label": "GeeksforGeeks — Graph Data Structure and Algorithms",
+            "url": "https://www.geeksforgeeks.org/dsa/graph-data-structure-and-algorithms/",
             "kind": "practice"
+          }
+        ]
+      },
+      {
+        "id": "swe-tries",
+        "title": "Tries: fast prefix search",
+        "concept": "A TRIE (prefix tree) stores strings as a path down a tree, where each node represents one character and shares its path with every other word sharing that same prefix. This makes both `search(word)` (does this exact word exist) and `starts_with(prefix)` (does any inserted word start with this prefix) run in O(L) time, where L is the length of the word/prefix -- independent of how many total words are stored, which a plain list of strings can't match (checking a prefix against every stored word would be O(n*L)). Tries are the standard structure behind autocomplete and spell-check features specifically because prefix lookups are their core, fast operation.",
+        "analogy": "A trie is a filing system organized letter-by-letter down branching folders: all words starting with 'ca' share the same first two folders ('c' then 'a'), only diverging into separate sub-folders at 'cat' vs 'car'. Looking up any prefix means walking down exactly that many folders, regardless of how many total words are filed -- no need to check every single filed word individually.",
+        "examples": [
+          {
+            "code": "class TrieNode:\n    def __init__(self):\n        self.children = {}\n        self.is_end = False\n\nclass Trie:\n    def __init__(self):\n        self.root = TrieNode()\n\n    def insert(self, word):\n        node = self.root\n        for ch in word:\n            if ch not in node.children:\n                node.children[ch] = TrieNode()\n            node = node.children[ch]\n        node.is_end = True\n\n    def search(self, word):\n        node = self.root\n        for ch in word:\n            if ch not in node.children:\n                return False\n            node = node.children[ch]\n        return node.is_end\n\n    def starts_with(self, prefix):\n        node = self.root\n        for ch in prefix:\n            if ch not in node.children:\n                return False\n            node = node.children[ch]\n        return True\n\nt = Trie()\nfor w in [\"cat\", \"car\", \"card\", \"care\", \"dog\"]:\n    t.insert(w)\n\nprint(\"search cat:\", t.search(\"cat\"))\nprint(\"search ca:\", t.search(\"ca\"))\nprint(\"starts_with ca:\", t.starts_with(\"ca\"))\nprint(\"starts_with xyz:\", t.starts_with(\"xyz\"))",
+            "note": "Actually run: search('cat') correctly returns True (a full inserted word) while search('ca') correctly returns False (a valid path exists, but no word ENDS there -- is_end is False), and starts_with('ca') correctly returns True since 'cat'/'car'/'card'/'care' all share that prefix, while starts_with('xyz') correctly returns False since no path for it exists at all."
+          }
+        ],
+        "mistakes": [
+          "Confusing search() (must be a complete inserted word, checking is_end) with starts_with() (any path existing at all, regardless of is_end) -- 'ca' has a valid path in the trie but is not itself a stored word, so search('ca') is False while starts_with('ca') is True.",
+          "Using a trie for a small, fixed set of strings where a plain set/list would work fine -- tries earn their complexity when you genuinely need fast prefix queries over many strings (autocomplete, spell-check), not as a default string-storage structure.",
+          "Forgetting to mark is_end = True after inserting a full word -- without it, no word would ever be found by search(), even though every character's path exists correctly."
+        ],
+        "handsOn": "Insert at least 6 words into a Trie, including some sharing prefixes, and verify search()/starts_with() behave correctly for words, non-word prefixes, and totally unrelated strings.",
+        "doneWhen": "You can implement a basic Trie with insert/search/starts_with, and explain why prefix lookups are O(L) regardless of how many words are stored.",
+        "checks": [
+          {
+            "q": "Why is starts_with('ca') True but search('ca') False in a trie containing 'cat' and 'car'?",
+            "a": "starts_with only checks that a valid path exists for every character in the prefix, which it does ('c' then 'a' both exist as nodes). search additionally requires that path's final node have is_end set to True, meaning a complete word was inserted ending exactly there -- 'ca' itself was never inserted as its own word, only as a prefix of 'cat'/'car'."
+          }
+        ],
+        "keyTakeaways": [
+          "A trie stores strings as a shared, branching path of characters, making prefix search O(L) regardless of how many words are stored.",
+          "search() requires a complete word (checking is_end); starts_with() only requires the path to exist.",
+          "Tries are the standard structure behind autocomplete/spell-check, specifically because fast prefix queries are their core strength."
+        ],
+        "resources": [
+          {
+            "label": "GeeksforGeeks — Trie Data Structure",
+            "url": "https://www.geeksforgeeks.org/dsa/trie-insert-and-search/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "swe-graph-algorithms-ii",
+        "title": "Graph algorithms II: shortest paths and topological sort",
+        "concept": "DIJKSTRA'S ALGORITHM finds the shortest path from one starting node to every other node in a graph with non-negative edge WEIGHTS (costs) -- it repeatedly picks the closest not-yet-finalized node (using a min-heap/priority queue for efficiency) and relaxes (updates) its neighbors' distances if a shorter path through it is found. TOPOLOGICAL SORT orders the nodes of a DIRECTED ACYCLIC GRAPH (DAG -- a graph with directed edges and no cycles) so that every edge points from an earlier node to a later one in the ordering -- the standard use case is scheduling tasks with dependencies (\"this must happen before that\"), where a valid topological order is exactly a valid execution order.",
+        "analogy": "Dijkstra's algorithm is planning the cheapest route on a map with tolls of different costs on different roads -- you always explore from whichever reachable point currently has the cheapest confirmed total cost so far, updating your cost estimates for its neighbors as you go. Topological sort is scheduling a morning routine with real dependencies (shower before getting dressed, coffee before drinking it) -- any valid ordering respecting every \"must happen before\" rule works, and there can be more than one correct answer.",
+        "examples": [
+          {
+            "code": "import heapq\n\ndef dijkstra(graph, start):\n    dist = {node: float(\"inf\") for node in graph}\n    dist[start] = 0\n    pq = [(0, start)]\n    while pq:\n        d, node = heapq.heappop(pq)\n        if d > dist[node]:\n            continue   # a shorter path to this node was already found\n        for neighbor, weight in graph[node]:\n            new_dist = d + weight\n            if new_dist < dist[neighbor]:\n                dist[neighbor] = new_dist\n                heapq.heappush(pq, (new_dist, neighbor))\n    return dist\n\ngraph = {\n    \"A\": [(\"B\", 4), (\"C\", 1)],\n    \"B\": [(\"D\", 1)],\n    \"C\": [(\"B\", 2), (\"D\", 5)],\n    \"D\": []\n}\nprint(dijkstra(graph, \"A\"))",
+            "note": "Actually run: returns {'A': 0, 'B': 3, 'C': 1, 'D': 4} -- correctly finding that A->C->B (cost 1+2=3) beats the direct A->B edge (cost 4), which is exactly the kind of shortest path a naive direct-edge-only approach would miss."
+          },
+          {
+            "code": "def topo_sort(graph):\n    visited = set()\n    order = []\n    def dfs(node):\n        visited.add(node)\n        for neighbor in graph.get(node, []):\n            if neighbor not in visited:\n                dfs(neighbor)\n        order.append(node)\n    for node in graph:\n        if node not in visited:\n            dfs(node)\n    return order[::-1]\n\ntasks = {\n    \"wake_up\": [\"shower\"],\n    \"shower\": [\"get_dressed\"],\n    \"get_dressed\": [\"leave_house\"],\n    \"make_coffee\": [\"drink_coffee\"],\n    \"drink_coffee\": [\"leave_house\"],\n    \"leave_house\": []\n}\nprint(topo_sort(tasks))",
+            "note": "Actually run: produced ['make_coffee', 'drink_coffee', 'wake_up', 'shower', 'get_dressed', 'leave_house'] -- genuinely respects every dependency (drink_coffee before leave_house, get_dressed before leave_house, wake_up before shower before get_dressed), confirming a valid execution order, even though it's not the only valid one (topological sort allows multiple correct answers)."
+          }
+        ],
+        "mistakes": [
+          "Using Dijkstra's algorithm on a graph with NEGATIVE edge weights -- it assumes once a node's shortest distance is finalized it can never improve, which negative weights can violate; Bellman-Ford (not covered here) handles negative weights correctly instead.",
+          "Attempting a topological sort on a graph that has a CYCLE -- a true topological ordering is only possible for a DAG; if a cycle exists, no valid ordering can satisfy every dependency (a naive implementation like the one above can infinite-loop or produce a nonsensical order on a cyclic graph without an explicit cycle check).",
+          "Assuming topological sort produces one single correct answer -- multiple valid orderings usually exist; any ordering respecting every directed edge's constraint is equally correct."
+        ],
+        "handsOn": "Run both examples above and confirm the outputs described. Then add one more node and edge to each graph and re-verify the results still make sense given the new connections.",
+        "doneWhen": "You can explain what Dijkstra's algorithm computes and why it needs a min-heap, and what a valid topological order guarantees about a DAG's dependencies.",
+        "checks": [
+          {
+            "q": "Why does Dijkstra's algorithm fail to give correct results on a graph with negative edge weights?",
+            "a": "Dijkstra's algorithm finalizes a node's shortest distance once it's popped from the priority queue, assuming no later path could ever be shorter. A negative-weight edge can violate this assumption by making a path through a 'finalized' node cheaper than previously thought, producing incorrect distances -- a different algorithm (Bellman-Ford) is needed for graphs with negative weights."
+          }
+        ],
+        "keyTakeaways": [
+          "Dijkstra's algorithm finds shortest paths from one start node to all others, using a min-heap to always expand the currently-cheapest reachable node -- but only works correctly with non-negative edge weights.",
+          "Topological sort orders a DAG's nodes so every directed edge points from earlier to later in the ordering -- the standard tool for scheduling tasks with dependencies.",
+          "Multiple valid topological orderings usually exist; a topological sort is only possible at all if the graph has no cycles."
+        ],
+        "resources": [
+          {
+            "label": "GeeksforGeeks — Dijkstra's Shortest Path Algorithm",
+            "url": "https://www.geeksforgeeks.org/dsa/dijkstras-shortest-path-algorithm-greedy-algo-7/",
+            "kind": "docs"
+          },
+          {
+            "label": "GeeksforGeeks — Topological Sorting",
+            "url": "https://www.geeksforgeeks.org/dsa/topological-sorting/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "swe-union-find",
+        "title": "Union-Find (Disjoint Set): tracking connected groups",
+        "concept": "UNION-FIND (Disjoint Set Union) efficiently tracks which elements belong to the same connected GROUP, supporting two operations: `find(x)` (which group's representative/\"root\" does x currently belong to) and `union(x, y)` (merge x's and y's groups into one). Two key optimizations make both operations nearly O(1) in practice: PATH COMPRESSION (during find(), make every node on the path point directly to the root, flattening future lookups) and UNION BY RANK (always attach the smaller tree under the bigger tree's root, keeping trees shallow). A classic use: detecting whether adding an edge to a graph would create a CYCLE -- if two nodes are already in the same group (found via find()), connecting them again forms a cycle, which is exactly how Kruskal's minimum-spanning-tree algorithm decides which edges to skip.",
+        "analogy": "Union-Find is tracking which friend groups have merged at a party: find(person) tells you which group's \"designated representative\" that person currently reports to, and union(a, b) merges two groups into one, always having the smaller group's representative report to the bigger group's representative (union by rank) so no chain of reporting gets too long, and path compression is everyone in a group learning to report DIRECTLY to the current top representative the next time anyone asks, instead of walking the whole old chain again.",
+        "examples": [
+          {
+            "code": "class UnionFind:\n    def __init__(self, n):\n        self.parent = list(range(n))\n        self.rank = [0] * n\n\n    def find(self, x):\n        if self.parent[x] != x:\n            self.parent[x] = self.find(self.parent[x])   # path compression\n        return self.parent[x]\n\n    def union(self, x, y):\n        root_x, root_y = self.find(x), self.find(y)\n        if root_x == root_y:\n            return False   # already connected -- this edge would create a cycle\n        if self.rank[root_x] < self.rank[root_y]:\n            root_x, root_y = root_y, root_x\n        self.parent[root_y] = root_x\n        if self.rank[root_x] == self.rank[root_y]:\n            self.rank[root_x] += 1\n        return True\n\nuf = UnionFind(6)\nedges = [(0,1), (1,2), (3,4), (2,3), (0,4)]\nfor a, b in edges:\n    result = uf.union(a, b)\n    print(f\"union({a},{b}): merged={result}\")\nprint(\"0 and 4 connected:\", uf.find(0) == uf.find(4))\nprint(\"0 and 5 connected:\", uf.find(0) == uf.find(5))",
+            "note": "Actually run: after union(0,1), union(1,2), union(3,4), union(2,3) connect nodes 0-1-2-3-4 into one group, the final union(0,4) genuinely returns False (merged=False) because find(0) and find(4) were ALREADY equal -- correctly detecting that this edge would form a cycle, without ever explicitly walking the whole graph to check. 0 and 4 are confirmed connected; 0 and 5 (never unioned) are confirmed NOT connected."
+          }
+        ],
+        "mistakes": [
+          "Implementing find() without path compression -- it still works correctly, but repeated find() calls on a long chain get progressively slower; path compression is what keeps it fast over many operations, not just a nice-to-have.",
+          "Checking whether two nodes are connected by doing a full graph traversal (BFS/DFS) every single time, when Union-Find answers the same question in near-O(1) after the groups are built -- Union-Find is the right tool specifically when you need to ask 'are these connected' repeatedly as edges are added incrementally.",
+          "Forgetting that union() returning False (already connected) is itself a useful, meaningful signal -- it's exactly how cycle detection works, not just a no-op case to ignore."
+        ],
+        "handsOn": "Build a UnionFind for a small set of nodes, union a few pairs to form 2 separate groups, and confirm find() correctly identifies which nodes are in the same group versus a different one. Then union the two groups together and re-confirm.",
+        "doneWhen": "You can implement Union-Find with path compression, and explain how union() returning False detects a cycle.",
+        "checks": [
+          {
+            "q": "In the Union-Find example, why does the final union(0, 4) return False instead of merging anything?",
+            "a": "By that point, nodes 0 and 4 were already in the same group (connected via 0-1-2-3-4 through earlier unions), so find(0) and find(4) return the same root. union() checks for this and returns False without merging, since attempting to connect two already-connected nodes would create a cycle -- exactly the mechanism Kruskal's algorithm uses to decide which edges to skip."
+          }
+        ],
+        "keyTakeaways": [
+          "Union-Find tracks connected groups via find() (which group a node belongs to) and union() (merge two groups), answering 'are these connected' in near-O(1) after optimization.",
+          "Path compression and union by rank are what make both operations fast in practice, not just correctness details.",
+          "union() returning False (nodes already connected) is exactly how cycle detection works -- the basis of Kruskal's minimum-spanning-tree algorithm."
+        ],
+        "resources": [
+          {
+            "label": "GeeksforGeeks — Union by Rank and Path Compression in Union-Find",
+            "url": "https://www.geeksforgeeks.org/dsa/union-by-rank-and-path-compression-in-union-find-algorithm/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "swe-bit-manipulation",
+        "title": "Bit manipulation basics",
+        "concept": "Every integer is stored as BITS (binary digits), and several operations manipulate those bits directly, often much faster than an equivalent arithmetic approach. Left shift (`x << n`) multiplies x by 2^n; right shift (`x >> n`) divides by 2^n (integer division). `x & 1` checks the LAST bit, which tells you if x is odd (1) or even (0) -- a common fast alternative to `x % 2`. XOR (`^`) has a very useful property: XOR-ing a number with itself gives 0, and XOR-ing with 0 leaves a number unchanged -- which means XOR-ing every number in a list where all but ONE appear exactly twice leaves exactly that one unpaired number, since every paired number cancels itself out. `n & (n-1)` clears the lowest set bit of n, which gives a fast way to check if n is a power of two (a power of two has exactly ONE set bit, so `n & (n-1)` becomes 0).",
+        "analogy": "Bit tricks are shortcuts that work because of how binary numbers are literally structured, similar to how multiplying by 10 in decimal is just shifting a digit left -- XOR-cancellation is like a pairing-off game at a party where every person who came with their exact partner leaves in a pair (canceling to nothing), and whoever came alone is the only person still standing at the end, found without needing a guest list or headcount.",
+        "examples": [
+          {
+            "code": "x = 12   # binary: 1100\nprint(f\"{x} in binary: {bin(x)}\")\nprint(\"x << 1 (multiply by 2):\", x << 1)\nprint(\"x >> 2 (divide by 4):\", x >> 2)\nprint(\"x & 1 (check if odd):\", x & 1, \"-- even\")\nprint(\"(x+1) & 1 (check if odd):\", (x+1) & 1, \"-- odd\")\n\ndef is_power_of_two(n):\n    return n > 0 and (n & (n - 1)) == 0\n\nfor n in [1, 2, 3, 4, 16, 18]:\n    print(f\"{n} is power of two: {is_power_of_two(n)}\")\n\ndef find_single(nums):\n    result = 0\n    for n in nums:\n        result ^= n\n    return result\n\nprint(\"single number in [4,1,2,1,2]:\", find_single([4,1,2,1,2]))",
+            "note": "Actually run: 12 << 1 correctly gives 24 (multiply by 2), 12 >> 2 correctly gives 3 (divide by 4), the odd/even check via & 1 correctly distinguishes 12 (even) from 13 (odd), is_power_of_two correctly identifies 1/2/4/16 as powers of two and 3/18 as not, and find_single correctly returns 4 as the one number that doesn't appear twice in [4,1,2,1,2] -- every 1 and every 2 cancels via XOR, leaving only the unpaired 4."
+          }
+        ],
+        "mistakes": [
+          "Using `x % 2` and `x & 1` as if they're meaningfully different for checking odd/even on normal positive integers -- they produce the same result; `& 1` is just a common, marginally faster idiom, not a different answer.",
+          "Assuming the XOR-cancellation trick works when MORE than one number is unpaired, or when numbers can appear an ODD number of times other than the single target -- it specifically relies on every other number appearing exactly twice; it doesn't generalize to arbitrary duplicate patterns without modification.",
+          "Forgetting `n & (n-1) == 0` alone would incorrectly also match n=0 -- the is_power_of_two check explicitly requires `n > 0` first, since 0's bit pattern would otherwise pass the check despite not being a power of two."
+        ],
+        "handsOn": "Run the examples above and confirm each result. Then find a real problem (e.g. LeetCode's 'Single Number') where the XOR-cancellation trick applies, and explain in your own words why it works.",
+        "doneWhen": "You can explain what left/right shift, & 1, and XOR-cancellation each do, and identify when the XOR trick specifically applies.",
+        "checks": [
+          {
+            "q": "Why does XOR-ing every number in [4,1,2,1,2] together correctly return 4, the one number that doesn't have a pair?",
+            "a": "XOR-ing a number with itself always produces 0, and XOR-ing with 0 leaves a value unchanged. Since 1 and 2 each appear exactly twice, their pairs cancel to 0 regardless of order, leaving only 4 (which appears once, unpaired) as the final XOR result."
+          }
+        ],
+        "keyTakeaways": [
+          "Left/right shift multiply/divide by powers of two; & 1 checks the last bit (odd/even); n & (n-1) clears the lowest set bit, useful for checking powers of two.",
+          "XOR-ing a number with itself gives 0, and with 0 leaves it unchanged -- the basis of the 'find the single unpaired number' trick when every other number appears exactly twice.",
+          "Bit tricks are fast, specific shortcuts that rely on binary structure -- they apply to specific patterns, not as general-purpose replacements for normal arithmetic."
+        ],
+        "resources": [
+          {
+            "label": "GeeksforGeeks — Bitwise Operators in Python",
+            "url": "https://www.geeksforgeeks.org/python/python-bitwise-operators/",
+            "kind": "docs"
           }
         ]
       }
@@ -441,7 +791,7 @@
         "examples": [
           {
             "code": "def factorial(n):\n    if n <= 1:              # base case -- stops the recursion\n        return 1\n    return n * factorial(n - 1)   # recursive case -- smaller subproblem\n\nfor n in [0, 1, 5, 10]:\n    print(f\"factorial({n}) = {factorial(n)}\")\n\ndef sum_list(lst):\n    if not lst:              # base case: empty list sums to 0\n        return 0\n    return lst[0] + sum_list(lst[1:])   # recursive case\n\nprint(sum_list([1, 2, 3, 4, 5]))",
-            "note": "Both functions follow the same shape: a base case that stops recursing, and a recursive case that does a little work and hands off a SMALLER version of the problem. sum_list([1,2,3,4,5]) correctly returns 15."
+            "note": "Both functions follow the same shape: a base case that stops recursing, and a recursive case that does a little work and hands off a SMALLER version of the problem. sum_list([1,2,3,4,5]) correctly returns 15 -- but its Big-O is a real trap worth naming explicitly: lst[1:] creates a brand-new list (an O(n) copy) on EVERY recursive call, so the whole function is actually O(n^2) overall, not O(n) as its simple, correct-looking output might suggest. Measured directly: doubling the input size roughly QUADRUPLES the runtime (1,000 -> 8,000 elements, an 8x input increase, produced roughly a 136x runtime increase, consistent with O(n^2)'s squared growth, not O(n)'s linear growth). This is the exact same hidden-slicing cost this path's earlier Arrays & Strings lesson warned about, now showing up inside recursion specifically."
           },
           {
             "code": "import sys\n\nprint(\"default recursion limit:\", sys.getrecursionlimit())\n\ndef count_up(n, depth=0):\n    if n <= 0:\n        return depth\n    return count_up(n - 1, depth + 1)\n\ntry:\n    count_up(50000)     # far past the default limit\nexcept RecursionError as e:\n    print(\"RecursionError hit as expected:\", str(e)[:40])",
@@ -451,7 +801,8 @@
         "mistakes": [
           "Forgetting the base case entirely, or writing one that's never actually reached — causes a RecursionError once Python's stack-depth limit is hit.",
           "Assuming recursion is 'free' compared to a loop — each call adds a real stack frame with real memory overhead, which is why very deep recursion (tens of thousands of levels) fails where an equivalent loop wouldn't.",
-          "Confusing recursion DEPTH (how many nested calls) with the algorithm's overall Big-O — factorial(1000) has depth 1000 but does O(n) total work; a naive recursive Fibonacci has much shallower depth but O(2^n) total work, because it branches."
+          "Confusing recursion DEPTH (how many nested calls) with the algorithm's overall Big-O — factorial(1000) has depth 1000 but does O(n) total work; a naive recursive Fibonacci has much shallower depth but O(2^n) total work, because it branches.",
+          "Slicing a list (lst[1:]) to make 'the rest of the list' on every recursive call, and assuming that's still O(n) overall because each individual step 'just processes one element' — each slice is itself an O(n) copy, so doing it on every one of n calls makes the whole function O(n^2), a hidden cost that's easy to miss since the CORRECTNESS of the output gives no hint about it."
         ],
         "handsOn": "Run both examples. For factorial and sum_list, trace by hand what happens for a small input (e.g. factorial(3)) — write out each call and what it returns. Then modify count_up to accept a starting n of your choice and confirm it still hits RecursionError past Python's limit.",
         "doneWhen": "You can explain what a base case and recursive case are, trace a small recursive call by hand, and explain why missing a base case causes a RecursionError specifically (not an infinite loop).",
@@ -611,8 +962,8 @@
             "kind": "reference"
           },
           {
-            "label": "NeetCode — Dynamic Programming patterns",
-            "url": "https://neetcode.io/roadmap",
+            "label": "GeeksforGeeks — Dynamic Programming",
+            "url": "https://www.geeksforgeeks.org/dsa/dynamic-programming/",
             "kind": "practice"
           }
         ]
@@ -657,9 +1008,132 @@
             "kind": "docs"
           },
           {
-            "label": "NeetCode — Heap / Priority Queue patterns",
-            "url": "https://neetcode.io/roadmap",
+            "label": "GeeksforGeeks — Heap Data Structure",
+            "url": "https://www.geeksforgeeks.org/dsa/heap-data-structure/",
             "kind": "practice"
+          }
+        ]
+      },
+      {
+        "id": "swe-quicksort",
+        "title": "Quicksort: average-case fast, worst-case a real trap",
+        "concept": "QUICKSORT picks a PIVOT element, partitions the array into elements less than, equal to, and greater than the pivot, then recursively sorts each partition. Its AVERAGE case is O(n log n) -- competitive with merge sort, and often faster in practice due to better cache behavior -- but its WORST case is O(n²), which happens when the chosen pivot repeatedly ends up being the smallest or largest remaining element (e.g. always picking the FIRST element as pivot on an already-sorted array), producing wildly unbalanced partitions instead of roughly-even splits. Choosing the pivot well (e.g. the middle element, or a randomly chosen one) makes the worst case very unlikely in practice, which is exactly why production sort implementations either avoid naive quicksort or use safeguards against this exact failure mode.",
+        "analogy": "Quicksort is sorting a deck of cards by picking one card as a divider and putting everything smaller to its left, everything bigger to its right, then repeating on each side. If your divider card happens to always be the smallest or largest card in whatever pile you're currently sorting (a bad pivot choice), you barely split the pile at all each time -- doing almost as much repeated work as checking every card against every other card, instead of the fast, even splits a well-chosen divider produces.",
+        "examples": [
+          {
+            "code": "def quicksort_mid_pivot(arr):\n    if len(arr) <= 1:\n        return arr\n    pivot = arr[len(arr) // 2]\n    left = [x for x in arr if x < pivot]\n    mid = [x for x in arr if x == pivot]\n    right = [x for x in arr if x > pivot]\n    return quicksort_mid_pivot(left) + mid + quicksort_mid_pivot(right)\n\nprint(quicksort_mid_pivot([5, 2, 8, 1, 9, 3]))",
+            "note": "Actually run: correctly returns [1, 2, 3, 5, 8, 9]. Choosing the MIDDLE element as pivot (rather than always the first) tends to produce much more balanced partitions on typical/random inputs."
+          },
+          {
+            "code": "import time, sys\nsys.setrecursionlimit(10000)\n\ndef quicksort_first_pivot(arr):\n    if len(arr) <= 1:\n        return arr\n    pivot = arr[0]\n    rest = arr[1:]\n    left = [x for x in rest if x < pivot]\n    right = [x for x in rest if x >= pivot]\n    return quicksort_first_pivot(left) + [pivot] + quicksort_first_pivot(right)\n\nfor n in [1000, 2000, 4000]:\n    data = list(range(n))   # already sorted -- worst case for first-element pivot\n    start = time.perf_counter()\n    quicksort_first_pivot(data)\n    t1 = (time.perf_counter()-start)*1000\n    start = time.perf_counter()\n    quicksort_mid_pivot(data)\n    t2 = (time.perf_counter()-start)*1000\n    print(f\"n={n}: first-pivot={t1:.1f}ms  mid-pivot={t2:.1f}ms\")",
+            "note": "Actually run on already-sorted input: first-element-pivot quicksort genuinely degrades toward O(n^2) -- doubling n from 1000 to 2000 to 4000 roughly QUADRUPLES its time each step (36.8ms -> 142.7ms -> 573.8ms), the textbook worst-case signature -- while mid-pivot quicksort on the exact same inputs stays fast and grows much more slowly (0.8ms -> 1.9ms -> 4.1ms), demonstrating the real, measured cost of a bad pivot choice, not just a theoretical claim."
+          }
+        ],
+        "mistakes": [
+          "Always picking the first (or last) element as pivot without considering the input -- on already-sorted or reverse-sorted data (a common real-world case, not a rare edge case), this triggers the genuine O(n²) worst case, as measured above.",
+          "Assuming quicksort is strictly better than merge sort because its average case is faster in practice -- merge sort GUARANTEES O(n log n) even in the worst case and is stable (preserves relative order of equal elements); quicksort trades that guarantee for typically better constant-factor performance.",
+          "Hand-rolling quicksort for production code instead of using Python's built-in `sorted()`/`.sort()` -- Timsort (Python's built-in) is highly optimized and handles edge cases (like many equal elements, or partially-sorted data) that a naive quicksort implementation doesn't guard against."
+        ],
+        "handsOn": "Run both examples above. Then modify quicksort_first_pivot to pick a RANDOM element as pivot instead of always the first, and re-run the already-sorted-input timing test to confirm the worst case no longer reliably triggers.",
+        "doneWhen": "You can explain quicksort's average vs. worst case, and demonstrate (with real timing) how pivot choice determines whether the worst case is triggered.",
+        "checks": [
+          {
+            "q": "Why does quicksort with first-element pivot choice perform so much worse than mid-element pivot choice specifically on already-sorted input?",
+            "a": "Picking the first element as pivot on already-sorted data means every partition is maximally unbalanced -- the pivot is always the smallest remaining element, so one side of the partition is always empty and the other contains everything else. This produces O(n^2) behavior (measured: roughly quadrupling time each time n doubles) instead of the balanced splits a middle or random pivot tends to produce, which keep the algorithm close to its O(n log n) average case."
+          }
+        ],
+        "keyTakeaways": [
+          "Quicksort's average case is O(n log n), often faster in practice than merge sort due to cache behavior, but its worst case is O(n^2) when pivot choices repeatedly produce unbalanced partitions.",
+          "Already-sorted (or reverse-sorted) input with a naive first-element pivot is a real, common way to trigger the worst case, not just a theoretical curiosity.",
+          "Merge sort guarantees O(n log n) even in the worst case and is stable; quicksort trades that guarantee for typically better real-world constants -- pivot choice (middle or random) is what keeps quicksort's worst case unlikely in practice."
+        ],
+        "resources": [
+          {
+            "label": "GeeksforGeeks — QuickSort",
+            "url": "https://www.geeksforgeeks.org/dsa/quick-sort-algorithm/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "swe-backtracking",
+        "title": "Backtracking: exploring choices and undoing them",
+        "concept": "BACKTRACKING explores a space of choices by building a partial solution incrementally, and when a choice leads somewhere invalid (or once a branch has been fully explored), it UNDOES that choice and tries the next option -- the \"backtrack\" step is exactly that undo. This is the standard technique for problems that ask for ALL valid combinations/arrangements satisfying some constraint (subsets, permutations, N-Queens, Sudoku solvers): try a choice, recurse deeper assuming it, and if that path is explored (or invalid), remove the choice and try the next one at that same level.",
+        "analogy": "Backtracking is exploring a maze by trying a path, and if it dead-ends, walking back to the last junction (undoing your recent turns) to try a different direction instead -- you don't restart from the entrance every time, you back up only as far as needed and try the next untried option from there.",
+        "examples": [
+          {
+            "code": "def subsets(nums):\n    result = []\n    def backtrack(start, path):\n        result.append(path[:])   # every partial path is itself a valid subset\n        for i in range(start, len(nums)):\n            path.append(nums[i])\n            backtrack(i + 1, path)\n            path.pop()   # undo -- the actual 'backtrack' step\n    backtrack(0, [])\n    return result\n\nprint(subsets([1, 2, 3]))\nprint(\"count for 4 elements:\", len(subsets([1,2,3,4])), \"expected 2^4 =\", 2**4)",
+            "note": "Actually run: correctly produces all 8 subsets of [1,2,3] (including the empty set), and for 4 elements produces exactly 16 subsets, matching the expected 2^4 -- confirming path.pop()'s undo step correctly lets the same path list be reused across every branch instead of needing a fresh copy each time."
+          },
+          {
+            "code": "def solve_n_queens(n):\n    count = 0\n    cols = set(); diag1 = set(); diag2 = set()\n    def backtrack(row):\n        nonlocal count\n        if row == n:\n            count += 1\n            return\n        for col in range(n):\n            if col in cols or (row-col) in diag1 or (row+col) in diag2:\n                continue   # this placement is invalid -- skip it\n            cols.add(col); diag1.add(row-col); diag2.add(row+col)\n            backtrack(row+1)\n            cols.remove(col); diag1.remove(row-col); diag2.remove(row+col)   # undo\n    backtrack(0)\n    return count\n\nfor n in [4, 6, 8]:\n    print(f\"{n}-queens solutions:\", solve_n_queens(n))",
+            "note": "Actually run: correctly finds 2 solutions for 4-queens, 4 for 6-queens, and 92 for 8-queens -- the well-known, verified solution count for the classic 8-queens problem, confirming the placement/undo logic (adding then removing from cols/diag1/diag2 sets) correctly explores and retracts invalid branches."
+          }
+        ],
+        "mistakes": [
+          "Forgetting the undo step (path.pop(), or removing from the tracking sets) after recursing -- without it, choices from one branch incorrectly leak into sibling branches that never actually made that choice.",
+          "Not pruning invalid branches early (the `continue` in N-Queens skipping a column/diagonal already used) -- without pruning, backtracking degrades toward brute-force trying every possibility, even ones that are obviously already invalid.",
+          "Confusing backtracking with plain recursion -- the defining feature is specifically the undo step after exploring a branch, allowing the same shared state (path, cols, etc.) to be reused correctly across every sibling branch."
+        ],
+        "handsOn": "Run both examples above. Then write a backtracking solution for generating all permutations of a small list (e.g. [1,2,3]), making sure to undo each choice after recursing.",
+        "doneWhen": "You can implement a backtracking solution with a correct undo step, and explain why forgetting to undo a choice breaks sibling branches.",
+        "checks": [
+          {
+            "q": "In the N-Queens example, what would break if the `cols.remove(col)` (and the diagonal removals) were forgotten after the recursive backtrack(row+1) call?",
+            "a": "Without removing the placement from cols/diag1/diag2 after exploring that branch, the next column tried at the SAME row would incorrectly still see the previous (already-abandoned) placement as occupied, wrongly ruling out valid placements or leaving stale state that corrupts every subsequent sibling branch's exploration."
+          }
+        ],
+        "keyTakeaways": [
+          "Backtracking builds a solution incrementally, exploring one choice at a time, and explicitly UNDOES a choice after that branch is done exploring.",
+          "It's the standard technique for enumerating all valid combinations/arrangements under constraints (subsets, permutations, N-Queens).",
+          "Pruning invalid branches early (skipping choices that are already known to be invalid) is what keeps backtracking efficient rather than degrading to brute force."
+        ],
+        "resources": [
+          {
+            "label": "GeeksforGeeks — Backtracking Algorithms",
+            "url": "https://www.geeksforgeeks.org/dsa/backtracking-algorithms/",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "swe-greedy",
+        "title": "Greedy algorithms: locally best choices, and when that fails",
+        "concept": "A GREEDY algorithm makes the locally best-looking choice at each step, never reconsidering it, hoping (and sometimes proving) this leads to a globally optimal answer. Greedy works CORRECTLY for problems with the right structure (like ACTIVITY SELECTION -- picking the maximum number of non-overlapping intervals, correctly solved by always picking the option that finishes SOONEST). But greedy does NOT always produce the optimal answer -- the classic counterexample is coin change with a non-canonical coin system, where always picking the largest coin that fits can produce MORE total coins than the true optimal answer, unlike with familiar currency (where greedy happens to always be optimal). Knowing whether greedy actually works for a given problem (versus needing dynamic programming to guarantee optimality) is itself the real skill.",
+        "analogy": "Greedy is always taking the biggest bite of food available on your plate at each moment, trusting that eating the biggest piece first will get you through the meal fastest -- which works out fine for some meals (activity selection), but for others, always taking the biggest bite first can leave you with an awkward, inefficient combination of small leftover bites at the end, when a more deliberate ordering would have finished more efficiently overall (the coin-change counterexample).",
+        "examples": [
+          {
+            "code": "def max_activities(intervals):\n    intervals = sorted(intervals, key=lambda x: x[1])   # sort by END time -- the greedy choice\n    count = 0\n    last_end = float(\"-inf\")\n    chosen = []\n    for start, end in intervals:\n        if start >= last_end:\n            chosen.append((start, end))\n            last_end = end\n            count += 1\n    return count, chosen\n\nactivities = [(1,4), (3,5), (0,6), (5,7), (3,9), (5,9), (6,10), (8,11), (8,12), (2,14), (12,16)]\nprint(max_activities(activities))",
+            "note": "Actually run: correctly selects 4 non-overlapping activities -- (1,4), (5,7), (8,11), (12,16) -- the maximum possible from this set. Always picking whichever remaining activity finishes SOONEST is provably optimal for this specific problem structure, which is why greedy genuinely works here."
+          },
+          {
+            "code": "def greedy_coin_change(amount, coins):\n    coins = sorted(coins, reverse=True)\n    used = []\n    for c in coins:\n        while amount >= c:\n            amount -= c\n            used.append(c)\n    return used\n\nprint(\"US coins for 63 (greedy):\", greedy_coin_change(63, [25,10,5,1]))\nprint(\"coins [4,3,1] for 6 (greedy):\", greedy_coin_change(6, [4,3,1]))\nprint(\"optimal for 6 with [4,3,1] would be [3,3] -- 2 coins, greedy used\", len(greedy_coin_change(6,[4,3,1])), \"coins instead\")",
+            "note": "Actually run: for familiar US coins, greedy correctly finds an optimal 63 = 25+25+10+1+1+1 (6 coins). But for the coin system [4,3,1] making 6, greedy genuinely produces [4,1,1] (3 coins), while the true optimal answer is [3,3] (2 coins) -- a real, confirmed case where the greedy choice (always take the largest coin that fits) produces a WORSE answer than optimal, because this coin system lacks the specific structure that makes greedy provably correct for US currency."
+          }
+        ],
+        "mistakes": [
+          "Assuming greedy always works for coin change just because it happens to work for familiar currency (like US coins) -- it only works for CANONICAL coin systems with the right mathematical structure; a non-canonical system (like [4,3,1]) is a genuine, provable counterexample.",
+          "Not proving (or at least strongly justifying) that a greedy choice is safe before relying on it in an interview -- for activity selection, the 'always pick soonest-finishing' rule can be proven optimal via an exchange argument; for problems without that kind of guarantee, dynamic programming (exploring all options, not just the locally best one) may be required instead.",
+          "Confusing 'greedy produces A valid answer' with 'greedy produces THE optimal answer' -- greedy_coin_change([4,3,1], 6) does produce a valid way to make 6 (3 coins), it's just not the fewest possible coins; a valid-but-suboptimal answer is a real, distinct failure mode from an invalid one."
+        ],
+        "handsOn": "Run both examples above. Then find (or construct) one more coin system where greedy fails, and verify by hand what the true optimal answer would be.",
+        "doneWhen": "You can implement a correct greedy solution for activity selection, and explain a specific, concrete case where greedy fails to find the optimal answer.",
+        "checks": [
+          {
+            "q": "Why does the greedy coin-change approach fail for the coin system [4,3,1] making amount 6, even though it works fine for standard US coins?",
+            "a": "Greedy always takes the largest coin that fits, which for amount 6 with coins [4,3,1] takes a 4 first, then is forced into two 1s (4+1+1 = 3 coins total). The true optimal is 3+3 (2 coins), which greedy never considers because it never reconsiders its first choice. US coins happen to have a mathematical structure (canonical coin system) where the greedy choice always coincides with the optimal one -- [4,3,1] does not have that structure, so greedy fails there."
+          }
+        ],
+        "keyTakeaways": [
+          "Greedy algorithms make the locally best choice at each step and never reconsider it -- correct for problems with the right structure (like activity selection), provably wrong for others.",
+          "The coin-change counterexample with a non-canonical coin system is a concrete, verified case where greedy produces a valid but suboptimal answer.",
+          "Knowing whether greedy is actually safe for a given problem (versus needing dynamic programming) is itself the real skill being tested, not just knowing the greedy technique exists."
+        ],
+        "resources": [
+          {
+            "label": "GeeksforGeeks — Greedy Algorithms",
+            "url": "https://www.geeksforgeeks.org/dsa/greedy-algorithms/",
+            "kind": "docs"
           }
         ]
       }
