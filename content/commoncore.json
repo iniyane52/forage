@@ -596,7 +596,7 @@
       {
         "id": "cc-git-push",
         "title": "Push to GitHub",
-        "concept": "To get your project online, you create an empty repository on GitHub, connect your local project to it (a 'remote'), and `git push` your commits up. Now it's backed up and shareable — and it becomes your public proof of work. A good repo has a README explaining what the project is and how to run it.",
+        "concept": "To get your project online, you create an empty repository on GitHub, connect your local project to it (a 'remote'), and `git push` your commits up. Now it's backed up and shareable — and it becomes your public proof of work. A good repo has a README explaining what the project is and how to run it. One thing that trips up almost every beginner on their FIRST push: GitHub no longer accepts your account password for `git push` over HTTPS — you need a Personal Access Token (PAT, a long random string you generate once in GitHub's settings and paste in place of a password) or an SSH key set up instead. If `git push` asks for a password and rejects it, this is almost always why.",
         "analogy": "Your computer is your private workshop; GitHub is putting your finished pieces in a shop window on the street. Pushing is moving a piece from the workshop to the window where people can see it.",
         "examples": [
           {
@@ -607,7 +607,8 @@
         "mistakes": [
           "A repo with no README — reviewers can't tell what it is.",
           "Pushing secrets/passwords — never commit them; use environment variables + .gitignore.",
-          "Forgetting to commit before pushing — push only sends committed snapshots."
+          "Forgetting to commit before pushing — push only sends committed snapshots.",
+          "Typing your GitHub account password when `git push` prompts for one — GitHub stopped accepting passwords for this years ago; you need a Personal Access Token (generate one under GitHub Settings → Developer settings) or an SSH key set up instead."
         ],
         "handsOn": "Create a free GitHub account and a new empty repository. Push a small project (even a single README.md) to it. Confirm it appears online.",
         "doneWhen": "You have one project live on GitHub with a README, pushed from your own machine.",
@@ -635,6 +636,52 @@
           {
             "label": "About READMEs",
             "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes",
+            "kind": "docs"
+          },
+          {
+            "label": "GitHub — Managing your personal access tokens",
+            "url": "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-git-branch",
+        "title": "Branches: trying something without touching the main copy",
+        "concept": "A branch is a separate line of work that starts as a copy of your current code — you can experiment, break things, and commit changes on a branch with zero risk to your main copy, then bring the good changes back in (a MERGE) once you're happy with them, or just delete the branch if the experiment didn't work out. `git branch name` creates a branch; `git checkout -b name` creates AND switches to it in one step; `git checkout main` switches back. `git merge branch-name` (run while on `main`) brings a branch's commits into main.",
+        "analogy": "A branch is a photocopy of a document you're allowed to scribble on freely — the original stays untouched in the drawer the whole time. If your scribbled version turns out great, you merge (copy the good parts back into the original); if it doesn't, you just throw the photocopy away and the original was never at risk.",
+        "examples": [
+          {
+            "code": "git checkout -b add-dark-mode   # create + switch to a new branch\n# ... make changes, git add, git commit as usual ...\ngit checkout main                # switch back to main\ngit merge add-dark-mode           # bring those changes into main\ngit branch -d add-dark-mode        # delete the branch, its work is now in main",
+            "note": "This is the real, standard flow: branch off for one focused change, commit on the branch, switch back to main, merge, then delete the now-merged branch. main was never touched until the merge step."
+          }
+        ],
+        "mistakes": [
+          "Making all your changes directly on `main` — a mistake that becomes expensive the moment you want to try something risky or work on two unrelated things at once; branching costs nothing and avoids this entirely.",
+          "Forgetting which branch you're currently on before committing — `git status` always shows your current branch at the top; check it if you're ever unsure.",
+          "Never deleting old branches once merged — they pile up and make the branch list confusing; `git branch -d name` cleans up a branch that's already safely merged."
+        ],
+        "handsOn": "In a project with at least one commit, create a new branch, make and commit a small change on it, switch back to main and confirm your change ISN'T there, then merge the branch and confirm it now is.",
+        "doneWhen": "You've created a branch, committed on it, switched back to main, and merged — and can explain why this kept main safe the whole time.",
+        "checks": [
+          {
+            "q": "Why create a branch instead of just making risky changes directly on main?",
+            "a": "A branch isolates your changes completely — main stays exactly as it was until you deliberately merge. If the experiment doesn't work out, you just delete the branch; main was never at risk."
+          },
+          {
+            "q": "What does `git checkout -b name` do that `git branch name` alone doesn't?",
+            "a": "`git branch name` only creates the branch — you're still on your previous branch. `git checkout -b name` creates it AND switches you onto it in one step."
+          }
+        ],
+        "keyTakeaways": [
+          "A branch is an isolated copy of your code you can freely change without affecting main.",
+          "`git checkout -b name` creates and switches to a branch in one step; `git merge` brings its changes into main.",
+          "Deleting a merged branch (`git branch -d`) is normal cleanup, not data loss — its commits already live in main."
+        ],
+        "resources": [
+          {
+            "label": "Git — Branches in a Nutshell (official docs)",
+            "url": "https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell",
             "kind": "docs"
           }
         ]

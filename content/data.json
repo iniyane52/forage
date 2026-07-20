@@ -524,6 +524,56 @@
         ]
       },
       {
+        "id": "data-sql-window-functions",
+        "title": "SQL window functions: ROW_NUMBER, RANK, and running comparisons",
+        "concept": "A WINDOW FUNCTION computes a value across a set of related rows (a \"window\") WITHOUT collapsing them into one row the way GROUP BY does — every original row stays, with an extra computed column added. `ROW_NUMBER() OVER (PARTITION BY col ORDER BY col2)` numbers rows 1, 2, 3... within each partition (group); `RANK()` does the same but gives TIES the same rank and skips the next number(s) accordingly. `LAG(col) OVER (...)` looks at the PREVIOUS row's value within the same ordered partition — useful for comparing each row to the one before it (like month-over-month change). A CTE (Common Table Expression, `WITH name AS (...)`) names a subquery so it can be referenced cleanly afterward — turning a query with a nested subquery into readable, sequential steps. Together, window functions + CTEs solve some of the most common real interview SQL patterns: \"find the top N per group,\" \"rank rows within a category,\" and \"compare each row to the previous one.\"",
+        "analogy": "GROUP BY is collapsing a spreadsheet's rows into one summary row per group, losing the individual rows. A window function is adding an extra column to that SAME spreadsheet, computed by looking at each row's group — but every original row stays visible, nothing collapses. A CTE is giving a named label to a scratch calculation so a later step can just say 'use the ranked list,' instead of re-writing the whole calculation inline every time it's needed.",
+        "examples": [
+          {
+            "code": "-- ROW_NUMBER and RANK within each region, ordered by amount descending\nSELECT region, rep, amount,\n       ROW_NUMBER() OVER (PARTITION BY region ORDER BY amount DESC) AS rn,\n       RANK() OVER (PARTITION BY region ORDER BY amount DESC) AS rnk\nFROM sales;",
+            "note": "Actually run (via SQLite, which supports standard ANSI window-function syntax identically to PostgreSQL): correctly numbered each region's sales reps 1, 2, 3... by amount descending, independently per region (West's ranking restarts at 1, separate from East's)."
+          },
+          {
+            "code": "-- Find the top earner per region using a CTE + ROW_NUMBER\nWITH ranked AS (\n  SELECT region, rep, amount,\n         ROW_NUMBER() OVER (PARTITION BY region ORDER BY amount DESC) AS rn\n  FROM sales\n)\nSELECT region, rep, amount FROM ranked WHERE rn = 1;",
+            "note": "Actually run: correctly returned exactly one row per region -- the single top earner -- by naming the ranked subquery `ranked` via a CTE, then simply filtering WHERE rn = 1. This 'find the top N per group' pattern is one of the most common real SQL interview questions, and the CTE makes it read as clear, sequential steps rather than a nested nightmare."
+          },
+          {
+            "code": "-- LAG: compare each sale to the previous one in the same region\nSELECT region, rep, amount,\n       LAG(amount) OVER (PARTITION BY region ORDER BY amount) AS prev_amount\nFROM sales;",
+            "note": "Actually run: for each region, LAG correctly returned the previous row's amount (ordered ascending within that region) as a new column, with NULL for each region's very first row (there's no 'previous' row for it) -- exactly the mechanism behind month-over-month or day-over-day comparison queries."
+          }
+        ],
+        "mistakes": [
+          "Confusing ROW_NUMBER with RANK when ties exist — ROW_NUMBER always gives distinct sequential numbers even for tied values (arbitrarily breaking ties), while RANK gives tied rows the SAME rank and then skips ahead (e.g. 1, 2, 2, 4) — using the wrong one silently changes what 'top N' actually means when ties are present.",
+          "Trying to filter directly on a window function's result in the SAME SELECT it's computed in (e.g. `WHERE rn = 1` in the same query as `ROW_NUMBER() OVER (...) AS rn`) — window functions are computed AFTER WHERE filtering, so this fails; a CTE (or subquery) computing the window function first, then filtering in an outer query, is the standard fix.",
+          "Reaching for a self-JOIN or a correlated subquery to compare a row to the 'previous' one, when LAG (or LEAD, for the next row) does this directly and far more readably in one window function call."
+        ],
+        "handsOn": "Using a real or hypothetical table with a category column and a numeric value, write a query using ROW_NUMBER + a CTE to find the top row per category, and a second query using LAG to compute the difference between each row and the previous one in its category.",
+        "doneWhen": "You can write a window function with PARTITION BY and ORDER BY, use a CTE to filter on that window function's result, and explain when RANK differs from ROW_NUMBER.",
+        "checks": [
+          {
+            "q": "Why does `SELECT *, ROW_NUMBER() OVER (...) AS rn FROM table WHERE rn = 1` fail, even though the syntax looks reasonable?",
+            "a": "Window functions are computed AFTER the WHERE clause filters rows, so rn doesn't exist yet at the point WHERE is evaluated in the same query. The standard fix is wrapping the window-function query in a CTE (or subquery) and filtering on rn in an outer SELECT, once the window function's result actually exists to filter on."
+          }
+        ],
+        "keyTakeaways": [
+          "Window functions compute a value across related rows without collapsing them like GROUP BY does — every original row stays, with an added computed column.",
+          "ROW_NUMBER gives distinct sequential numbers even for ties; RANK gives ties the same rank and skips ahead — choosing the wrong one changes what 'top N' means when ties exist.",
+          "CTEs (WITH name AS (...)) turn nested subqueries into clear, sequential steps — essential for filtering on a window function's result, since that requires a CTE/subquery rather than filtering in the same query the window function is computed in."
+        ],
+        "resources": [
+          {
+            "label": "PostgreSQL docs — Window Functions",
+            "url": "https://www.postgresql.org/docs/current/tutorial-window.html",
+            "kind": "docs"
+          },
+          {
+            "label": "PostgreSQL docs — WITH Queries (Common Table Expressions)",
+            "url": "https://www.postgresql.org/docs/current/queries-with.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
         "id": "data-pandas-merge",
         "title": "Pandas merge — SQL JOINs in Python",
         "concept": "Pandas' `.merge()` is the direct equivalent of a SQL JOIN, for when your data is already loaded as DataFrames rather than sitting in a database. `pd.merge(df1, df2, on='key_column', how='inner')` mirrors INNER JOIN; `how='left'` mirrors LEFT JOIN — same semantics as the SQL lesson, just expressed in pandas' API. Knowing both means you can work with data whether it's already in Python or still needs to be pulled from a database first.",
@@ -1324,7 +1374,8 @@
         "mistakes": [
           "Applying a forecasting method that assumes stationarity directly to clearly non-stationary (trending/drifting) data without differencing first — the method's assumptions are violated, which can produce unreliable forecasts.",
           "Differencing repeatedly out of habit without checking whether one round of differencing already achieved stationarity — over-differencing can introduce its own artifacts.",
-          "Misreading the ADF p-value direction — a high p-value here means 'still looks non-stationary,' the OPPOSITE of the usual 'small p-value = interesting finding' framing from standard hypothesis testing, since the null hypothesis itself is flipped (non-stationarity, not 'no effect')."
+          "Misreading the ADF p-value direction — a high p-value here means 'still looks non-stationary,' the OPPOSITE of the usual 'small p-value = interesting finding' framing from standard hypothesis testing, since the null hypothesis itself is flipped (non-stationarity, not 'no effect').",
+          "Applying this path's earlier cross-validation lesson's 'always shuffle before splitting' advice to time-ordered data like this — shuffling a time series before splitting lets future values leak into training, since a model can effectively see 'the future' when predicting 'the past.' Time-ordered data needs a walk-forward/expanding-window split (or scikit-learn's `TimeSeriesSplit`) instead, which always trains on the past and validates on a later, unseen period — never shuffled."
         ],
         "handsOn": "Run both examples and confirm the original series fails the stationarity test while the differenced series passes it. Then try differencing TWICE (differencing the already-differenced series again) and check whether the ADF p-value changes meaningfully from the single-differenced result.",
         "doneWhen": "You can run an ADF test, correctly interpret its p-value direction, and apply differencing to convert a non-stationary series into a stationary one.",
@@ -1489,6 +1540,94 @@
             "label": "AI Engineer path — Model Evaluation module (deeper metrics coverage)",
             "url": "/learn/aiml-confusion-matrix",
             "kind": "course"
+          }
+        ]
+      },
+      {
+        "id": "data-ml-tree-ensembles",
+        "title": "Tree-based models: decision trees, random forests, and gradient boosting",
+        "concept": "A DECISION TREE splits data repeatedly on feature thresholds (\"is age > 30?\") until each leaf makes a prediction — easy to interpret, but a single tree tends to OVERFIT (memorizing training-data quirks rather than general patterns). A RANDOM FOREST trains MANY trees, each on a random subset of rows and features, then averages their predictions — this ENSEMBLE approach cancels out individual trees' overfitting since their mistakes tend to be uncorrelated, usually beating a single tree by a real margin. GRADIENT BOOSTING also combines many trees, but SEQUENTIALLY: each new tree is trained specifically to correct the errors the previous trees made, rather than averaging independent trees — often reaching even higher accuracy than a random forest, at the cost of being more sensitive to hyperparameters and slower to train.",
+        "analogy": "A single decision tree is one person's judgment call, prone to their own specific blind spots. A random forest is polling many independent people who each only saw a partial, random slice of the evidence, then taking the majority vote — individual blind spots average out. Gradient boosting is a chain of specialists, where each new specialist is specifically brought in to fix the previous specialists' collective mistakes, rather than voting independently from scratch.",
+        "examples": [
+          {
+            "code": "from sklearn.datasets import make_classification\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier\nfrom sklearn.metrics import accuracy_score\n\nX, y = make_classification(n_samples=500, n_features=10, n_informative=6, random_state=42)\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)\n\ntree = DecisionTreeClassifier(max_depth=3, random_state=42).fit(X_train, y_train)\nforest = RandomForestClassifier(n_estimators=100, random_state=42).fit(X_train, y_train)\ngb = GradientBoostingClassifier(n_estimators=100, random_state=42).fit(X_train, y_train)\n\nprint(\"Single tree accuracy:\", accuracy_score(y_test, tree.predict(X_test)))\nprint(\"Random forest accuracy:\", accuracy_score(y_test, forest.predict(X_test)))\nprint(\"Gradient boosting accuracy:\", accuracy_score(y_test, gb.predict(X_test)))",
+            "note": "Actually run and confirmed: on this synthetic dataset, the single depth-limited tree scored 0.780, the random forest scored 0.860, and gradient boosting scored 0.873 — a real, measured improvement from ensembling, not just a theoretical claim. The exact numbers depend on the dataset, but ensembles beating a single tree is the consistent, expected pattern."
+          }
+        ],
+        "mistakes": [
+          "Using a single, very deep decision tree with no depth limit and expecting it to generalize well — deep single trees are the classic overfitting case; ensembling or limiting depth (or both) are the standard fixes.",
+          "Assuming gradient boosting always beats random forest — it often does on clean, well-tuned data, but it's also more sensitive to hyperparameters (learning rate, tree depth, number of estimators) and can overfit if not tuned carefully, unlike random forest's more forgiving defaults.",
+          "Treating tree ensembles as uninterpretable black boxes with no way to explain predictions — feature importance scores (available on both RandomForestClassifier and GradientBoostingClassifier) show which features drove predictions most, a real, checkable explanation, even if less transparent than a single shallow tree's explicit split rules."
+        ],
+        "handsOn": "Run the example above and confirm the three accuracy scores. Then check `forest.feature_importances_` and identify which of the 10 features the random forest relied on most.",
+        "doneWhen": "You can explain why an ensemble of trees typically outperforms a single tree, and distinguish random forest's parallel-independent-trees approach from gradient boosting's sequential-error-correcting approach.",
+        "checks": [
+          {
+            "q": "Why does a random forest typically outperform a single decision tree, even though both use the same underlying tree-splitting logic?",
+            "a": "A single tree tends to overfit specific quirks in the training data. A random forest trains many trees, each on a random subset of rows and features, and averages their predictions — since each tree's overfitting tends to be uncorrelated with the others', averaging cancels much of it out, usually producing better generalization than any single tree alone."
+          }
+        ],
+        "keyTakeaways": [
+          "A single decision tree is interpretable but prone to overfitting; random forest and gradient boosting are ensembles that combine many trees to generalize better.",
+          "Random forest trains many trees independently (in parallel) on random subsets and averages them; gradient boosting trains trees sequentially, each correcting the previous trees' errors.",
+          "Ensembles aren't fully black-box — feature importance scores still show which inputs drove predictions most."
+        ],
+        "resources": [
+          {
+            "label": "scikit-learn — Random Forests",
+            "url": "https://scikit-learn.org/stable/modules/ensemble.html#random-forests",
+            "kind": "docs"
+          },
+          {
+            "label": "scikit-learn — Gradient Boosting",
+            "url": "https://scikit-learn.org/stable/modules/ensemble.html#gradient-boosting",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "data-ml-clustering-pca",
+        "title": "Unsupervised learning: k-means clustering and PCA",
+        "concept": "Every model covered so far in this path has been SUPERVISED (trained on labeled examples). UNSUPERVISED learning finds structure in data with NO labels at all. K-MEANS CLUSTERING groups points into k clusters by repeatedly assigning each point to its nearest cluster CENTER, then recalculating each center as the mean of its assigned points, until the assignments stop changing — useful for discovering natural groupings (customer segments, similar documents) with no predefined categories. Choosing k is itself a judgment call — the ELBOW METHOD plots INERTIA (total within-cluster spread) against different k values and looks for the point where adding more clusters stops meaningfully reducing inertia. PCA (Principal Component Analysis) reduces the number of FEATURES (dimensions) while preserving as much of the data's variance as possible — useful for visualizing high-dimensional data in 2D/3D, or speeding up a downstream model by removing redundant/correlated features.",
+        "analogy": "K-means is sorting an unlabeled pile of photos into groups by visual similarity alone, with no pre-existing category labels — you start with a guess at k group-centers, keep reassigning photos to whichever center they're closest to, and keep recalculating each center's true middle, until the groups stabilize. PCA is summarizing a long, detailed description of something down to its 2-3 most informative characteristics — losing some nuance, but keeping most of what actually distinguishes one item from another, in a form that's much easier to look at directly.",
+        "examples": [
+          {
+            "code": "from sklearn.datasets import make_blobs\nfrom sklearn.cluster import KMeans\n\nX, true_labels = make_blobs(n_samples=300, centers=3, cluster_std=1.0, random_state=42)\n\ninertias = []\nfor k in range(1, 7):\n    km = KMeans(n_clusters=k, random_state=42, n_init=10).fit(X)\n    inertias.append(km.inertia_)\nprint(\"Inertia by k:\", [round(i, 1) for i in inertias])",
+            "note": "Actually run and confirmed: inertia drops sharply from k=1 to k=3 (20402.3 -> 5763.5 -> 566.9), then flattens out much more gradually afterward (566.9 -> 496.4 -> 427.1 -> 375.0) -- a genuine, visible 'elbow' at k=3, which correctly matches the true number of clusters (3) this synthetic dataset was generated with. In real data you won't know the true k in advance, which is exactly why the elbow method is used to estimate it."
+          },
+          {
+            "code": "from sklearn.decomposition import PCA\nfrom sklearn.datasets import load_iris\n\ndata = load_iris()\nX = data.data\nprint(\"original shape:\", X.shape)\n\npca = PCA(n_components=2)\nX_reduced = pca.fit_transform(X)\nprint(\"reduced shape:\", X_reduced.shape)\nprint(\"explained variance ratio:\", pca.explained_variance_ratio_)\nprint(\"total variance retained:\", sum(pca.explained_variance_ratio_))",
+            "note": "Actually run and confirmed: the classic iris dataset's 4 features were reduced to 2 principal components while retaining 97.77% of the original variance (92.46% + 5.31%) -- a real, measured result showing PCA can compress most datasets' meaningful structure into far fewer dimensions than they started with, here more than halving the feature count while losing barely 2% of the information."
+          }
+        ],
+        "mistakes": [
+          "Picking k arbitrarily without checking an elbow plot (or a business reason for a specific k, like 'we want exactly 4 customer segments to target with 4 different campaigns') — an unjustified k can produce clusters that don't reflect any real structure in the data.",
+          "Running k-means on unscaled features where one feature's scale dwarfs the others (e.g. income in dollars vs. age in years) — distance-based clustering is sensitive to scale, so features usually need to be standardized first (this path's earlier feature-scaling lesson) or the clustering will be dominated by whichever feature happens to have the largest raw numeric range.",
+          "Treating PCA's reduced components as still meaning the same thing as the original features — a principal component is a mathematical COMBINATION of original features, not any single original feature by itself; it typically loses direct, human-readable interpretability in exchange for compression."
+        ],
+        "handsOn": "Run both examples above. Then try scaling the blob data with StandardScaler before clustering and check whether the resulting clusters or inertia values change meaningfully compared to the unscaled version.",
+        "doneWhen": "You can explain how k-means iteratively assigns and recenters clusters, use the elbow method to justify a choice of k, and explain what PCA trades away in exchange for dimensionality reduction.",
+        "checks": [
+          {
+            "q": "The elbow method plot shows inertia dropping sharply until k=4, then flattening out. What does this suggest about a good choice of k?",
+            "a": "k=4 is likely a reasonable choice — beyond that point, adding more clusters only marginally reduces the total within-cluster spread (inertia), suggesting the data doesn't have meaningfully more distinct groupings beyond 4. The 'elbow' (where the curve bends and flattens) is exactly the visual signal this method looks for."
+          }
+        ],
+        "keyTakeaways": [
+          "Unsupervised learning finds structure with no labels — k-means groups points into k clusters by iteratively reassigning points to the nearest center and recalculating centers.",
+          "The elbow method plots inertia against k and looks for where adding clusters stops meaningfully helping, to justify a choice of k.",
+          "PCA reduces the number of features while preserving as much variance as possible, useful for visualization or speeding up downstream models — at the cost of losing direct interpretability of individual components."
+        ],
+        "resources": [
+          {
+            "label": "scikit-learn — K-Means Clustering",
+            "url": "https://scikit-learn.org/stable/modules/clustering.html#k-means",
+            "kind": "docs"
+          },
+          {
+            "label": "scikit-learn — PCA",
+            "url": "https://scikit-learn.org/stable/modules/decomposition.html#pca",
+            "kind": "docs"
           }
         ]
       },

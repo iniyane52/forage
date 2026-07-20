@@ -48,6 +48,48 @@
         ]
       },
       {
+        "id": "cyber-cia-aaa",
+        "title": "Core vocabulary: the CIA triad and AAA",
+        "concept": "The CIA TRIAD names the three properties nearly every security control ultimately protects: CONFIDENTIALITY (only authorized parties can read the data — protected by encryption), INTEGRITY (data hasn't been tampered with — protected by hashing and digital signatures), and AVAILABILITY (the system stays usable for legitimate users — threatened directly by attacks like DDoS, and protected by redundancy/rate-limiting). AAA names the three related but distinct steps controlling WHO can do WHAT: AUTHENTICATION (proving who you are — a password, a token, an SSH key), AUTHORIZATION (checking what that verified identity is actually allowed to do — an access-control rule), and ACCOUNTING (recording what actually happened — logging, for later audit or incident investigation). These six terms aren't new mechanisms — you'll recognize the underlying techniques from other lessons in this path — but naming them explicitly is exactly the vocabulary a security interview or certification expects you to use precisely.",
+        "analogy": "The CIA triad is what every lock, seal, and backup generator on a building is ultimately protecting: confidentiality is the locked door (only the right people get in), integrity is a tamper-evident seal on a package (you'd know if it was opened), availability is the building's backup generator (it stays open even when the main power fails). AAA is the building's front desk process: authentication checks your ID, authorization checks whether your badge actually opens THIS specific door, and accounting is the sign-in log recording who came through and when.",
+        "examples": [
+          {
+            "code": "# Mapping CIA + AAA onto mechanisms already covered in this path (not new code -- a vocabulary map):\n# Confidentiality -> symmetric/asymmetric encryption, TLS/HTTPS      (Cryptography Fundamentals module)\n# Integrity       -> hashing, digital signatures                     (Cryptography Fundamentals module)\n# Availability    -> DDoS defenses, redundancy, rate-limiting        (this module's DDoS lesson)\n# Authentication  -> passwords, MFA, SSH keys                        (Web Security: cyber-auth-secrets)\n# Authorization   -> access-control checks, least privilege          (cyber-web-broken-access-control, cyber-cloud-iam-least-privilege)\n# Accounting      -> logs, audit trails                               (Security Operations: cyber-log-analysis)",
+            "note": "This is a deliberate vocabulary map, not new code to run -- the point of this lesson is recognizing that mechanisms you've already learned (or will learn later in this path) are each answering one of these six named questions, which is exactly the framing a security interview expects."
+          }
+        ],
+        "mistakes": [
+          "Being able to explain a mechanism (e.g. 'hashing detects if a file changed') without knowing which CIA property it maps to (integrity) -- interviewers and certification exams routinely ask for the term, not just the mechanism.",
+          "Confusing authentication with authorization -- proving who you are (authentication) is a completely separate check from what you're allowed to do once verified (authorization); a valid, authenticated user can still be correctly denied a specific action.",
+          "Treating accounting as an afterthought -- without logs, a security incident can't be investigated after the fact at all; accounting is what makes 'what actually happened' answerable, not just 'what should have happened.'"
+        ],
+        "handsOn": "For each of the 6 terms (Confidentiality, Integrity, Availability, Authentication, Authorization, Accounting), write one sentence naming a specific real-world example of a control that protects/implements it -- at least 2 should reference something covered elsewhere in this path.",
+        "doneWhen": "You can define all six CIA/AAA terms without notes, and correctly map at least 4 of them to a specific mechanism you've learned.",
+        "checks": [
+          {
+            "q": "A system correctly identifies a user via their password (authentication succeeds), but then blocks them from deleting another user's account. Which AAA property is doing the blocking, and how does it differ from authentication?",
+            "a": "Authorization. Authentication only verifies WHO the user is; authorization is the separate check for WHAT that verified user is actually allowed to do. A user can be correctly authenticated and still be correctly denied a specific action they're not authorized for."
+          }
+        ],
+        "keyTakeaways": [
+          "CIA triad: Confidentiality (encryption), Integrity (hashing/signatures), Availability (DDoS defenses, redundancy) — the three properties security controls ultimately protect.",
+          "AAA: Authentication (who you are), Authorization (what you're allowed to do), Accounting (what actually happened, via logs) — three distinct, sequential checks.",
+          "These are vocabulary for mechanisms you already know or will learn — naming them precisely is what a security interview or certification specifically expects."
+        ],
+        "resources": [
+          {
+            "label": "NIST — Glossary: CIA Triad-related terms",
+            "url": "https://csrc.nist.gov/glossary",
+            "kind": "reference"
+          },
+          {
+            "label": "CISA — Authentication, Authorization, and Accounting overview",
+            "url": "https://www.cisa.gov/topics/cybersecurity-best-practices",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
         "id": "cyber-networking-basics",
         "title": "How networks actually work",
         "concept": "Every network connection follows the same basic pattern: an IP ADDRESS identifies a machine (like a street address), and a PORT identifies a specific SERVICE on that machine (like an apartment number) — port 80/443 for web traffic, port 22 for SSH remote access, port 53 for DNS. Understanding what's normally running on which ports is foundational to BOTH offense and defense — a defender who doesn't know their own system's normal open ports can't recognize an abnormal one.",
@@ -491,6 +533,48 @@
           {
             "label": "Nmap — Legal Issues (scanme.nmap.org authorization)",
             "url": "https://nmap.org/book/legal-issues.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cyber-net-ddos",
+        "title": "DDoS: attacking availability directly",
+        "concept": "A DDoS (Distributed Denial-of-Service) attack floods a target with traffic from MANY sources at once, aiming to exhaust its resources (bandwidth, connections, CPU) so legitimate users can't get through — a direct attack on AVAILABILITY, the third property of the CIA triad. Three broad categories: VOLUMETRIC (raw traffic volume, e.g. UDP floods, aiming to saturate network bandwidth), PROTOCOL (exploiting weaknesses in a protocol's handshake, e.g. SYN floods that open many half-finished TCP connections and exhaust the server's connection table), and APPLICATION-LAYER (fewer, more expensive requests aimed at a specific slow endpoint, e.g. repeatedly hitting a search feature that triggers an expensive database query — much lower volume than a flood, but effective because each request costs the server disproportionately more than it costs the attacker to send). Being DISTRIBUTED (many source machines, often a botnet of compromised devices) is what makes blocking a single IP address ineffective as a defense.",
+        "analogy": "A volumetric DDoS is a flash mob overwhelming a single doorway all at once — nobody can get in or out, simply from sheer numbers. A protocol attack (SYN flood) is many people starting a handshake and never finishing it, tying up the greeter's attention on incomplete introductions instead of real visitors. An application-layer attack is a smaller crowd repeatedly asking the one staff member who handles the slowest, most expensive request to do it again and again — a small number of attackers can meaningfully affect service even without a flood.",
+        "examples": [
+          {
+            "code": "import time\n\nclass TokenBucket:\n    def __init__(self, capacity, refill_rate):\n        self.capacity = capacity\n        self.tokens = capacity\n        self.refill_rate = refill_rate   # tokens added per second\n        self.last_refill = time.monotonic()\n\n    def allow_request(self):\n        now = time.monotonic()\n        elapsed = now - self.last_refill\n        self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)\n        self.last_refill = now\n        if self.tokens >= 1:\n            self.tokens -= 1\n            return True\n        return False\n\nbucket = TokenBucket(capacity=5, refill_rate=1)   # burst of 5, refills 1/sec\nallowed = blocked = 0\nfor i in range(20):\n    if bucket.allow_request():\n        allowed += 1\n    else:\n        blocked += 1\nprint(f\"Simulated 20 rapid requests: {allowed} allowed, {blocked} blocked\")",
+            "note": "Actually run: a token-bucket rate limiter (a real, standard defensive technique) correctly allowed only the first 5 rapid requests (the configured burst capacity) and blocked the remaining 15, since tokens refill far slower than the requests arrived -- a genuine, working example of one small piece of DDoS defense (rate-limiting a single client), not a full-scale attack simulation, which would be both unsafe and pointless to attempt in this authoring environment."
+          }
+        ],
+        "mistakes": [
+          "Believing blocking one IP address stops a DDoS attack -- the 'distributed' part specifically means traffic comes from many sources (often thousands of compromised devices in a botnet), making single-IP blocking largely ineffective on its own.",
+          "Assuming DDoS defense is purely a bandwidth/infrastructure problem -- application-layer attacks specifically target expensive operations with relatively low traffic volume, meaning rate-limiting and request-cost awareness (not just 'more bandwidth') are part of a real defense.",
+          "Confusing a DDoS attack (many sources, aimed at making a service UNAVAILABLE) with other attack types aimed at stealing data (like SQL injection or XSS) -- DDoS's specific target is availability, not confidentiality or integrity."
+        ],
+        "handsOn": "Run the token-bucket example above and confirm the allowed/blocked counts. Then look up one real, publicly-documented large-scale DDoS incident (many are written about by cloud/CDN providers) and identify which category (volumetric/protocol/application-layer) it was.",
+        "doneWhen": "You can name the three DDoS categories and which resource each targets, and explain why distributing an attack across many sources defeats simple IP-based blocking.",
+        "checks": [
+          {
+            "q": "Why is a SYN flood classified as a protocol attack rather than a volumetric one?",
+            "a": "A SYN flood doesn't necessarily require enormous total traffic volume -- it exploits a weakness in the TCP handshake itself, opening many half-finished connections that exhaust the server's connection table. The attack's effectiveness comes from exploiting protocol behavior, not from sheer bandwidth, which is what distinguishes it from a volumetric attack."
+          }
+        ],
+        "keyTakeaways": [
+          "DDoS attacks flood a target from many sources at once, directly attacking availability -- the third property of the CIA triad.",
+          "Three categories: volumetric (raw bandwidth), protocol (exploiting a handshake/protocol weakness), and application-layer (expensive requests at low volume).",
+          "Being distributed across many sources (often a botnet) is specifically what defeats simple single-IP blocking as a defense."
+        ],
+        "resources": [
+          {
+            "label": "Cloudflare Learning — What is a DDoS Attack?",
+            "url": "https://www.cloudflare.com/learning/ddos/what-is-a-ddos-attack/",
+            "kind": "article"
+          },
+          {
+            "label": "CISA — Understanding Denial-of-Service Attacks",
+            "url": "https://www.cisa.gov/news-events/news/understanding-denial-service-attacks",
             "kind": "docs"
           }
         ]

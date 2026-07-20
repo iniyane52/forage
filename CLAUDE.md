@@ -383,6 +383,23 @@ Roughly in the order they'd likely matter for actually launching this as a real 
    measured timing demonstrating quicksort's worst case, the O(n²) `sum_list` cost, and
    the greedy coin-change counterexample. `npx tsc --noEmit`, `npx eslint`, and a full
    `npm run build` all pass clean after the expansion.
+9. ~~**Smaller audit-flagged content gaps.**~~ **Fixed.** Common Core's Git module now
+   mentions Personal Access Token/SSH auth in `cc-git-push` (GitHub stopped accepting
+   passwords for `git push` years ago) and gained a new `cc-git-branch` lesson (create,
+   switch, commit on, and merge a branch — verified live). Cybersecurity gained a new
+   `cyber-cia-aaa` lesson (naming the CIA triad and AAA explicitly, cross-referencing
+   mechanisms taught elsewhere in the path) and a new `cyber-net-ddos` lesson (volumetric/
+   protocol/application-layer DDoS categories, with a real, safely-executed token-bucket
+   rate-limiter as one small defensive example — never a real attack simulation). Data
+   Scientist gained two new lessons on algorithm breadth it previously lacked entirely
+   (`data-ml-tree-ensembles` — decision trees/random forests/gradient boosting, and
+   `data-ml-clustering-pca` — k-means + PCA, both with real scikit-learn results) plus
+   `data-sql-window-functions` (ROW_NUMBER/RANK/LAG/CTEs, verified via SQLite, which
+   supports the same ANSI window-function syntax as this project's Postgres), and
+   `data-ts-stationarity` now explicitly warns that the earlier cross-validation lesson's
+   "always shuffle" advice would leak future values into training if applied to
+   time-ordered data (the fix is `TimeSeriesSplit`, verified). Content counts updated
+   above: Common Core 25 lessons, Cybersecurity 32, Data Scientist 37.
 
 ## Coding conventions
 
@@ -469,13 +486,13 @@ re-verify, these will drift as content is added):
 
 | Stream | Modules | Lessons | Quiz Qs |
 |---|---|---|---|
-| Common Core (free) | 6 | 24 | 24 |
+| Common Core (free) | 6 | 25 | 25 |
 | Cloud & DevOps | 7 | 53 | 53 |
 | AI Engineer | 10 | 48 | 45 |
 | Software Engineer | 5 | 31 | 30 |
 | Full-Stack Developer | 8 | 36 | 35 |
-| Data Scientist | 8 | 34 | 33 |
-| Cybersecurity | 8 | 30 | 28 |
+| Data Scientist | 8 | 37 | 36 |
+| Cybersecurity | 8 | 32 | 30 |
 
 **Postgres functions** (all `SECURITY DEFINER`, check `auth.uid()` internally, callable via
 `supabase.rpc(...)` from the client — this is the app's substitute for API routes, see
