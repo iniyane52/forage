@@ -1,9 +1,17 @@
 "use client";
 
+import Link from "next/link";
 import { useRef } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "@/components/ui/gsapMotion";
+
+const LEGAL_LINKS = [
+  { href: "/terms", label: "Terms" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/refund", label: "Refunds" },
+  { href: "/contact", label: "Contact" },
+];
 
 /** A restrained one-shot reveal plus a single delayed color-flash on the wordmark's
  * dot -- the page's closing beat, not a new focal point. */
@@ -28,15 +36,27 @@ export function LandingFooter() {
   );
 
   return (
-    <footer ref={footerRef} className="border-t border-white/[0.06] py-8">
-      <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#7d99a3]">
-        <span style={{ fontFamily: "var(--font-display)" }}>
-          Forage
-          <span ref={dotRef} className="text-[#00e5ff]">
-            .
+    <footer ref={footerRef} className="border-t border-white/[0.06] py-8 mt-auto">
+      <div className="max-w-5xl mx-auto px-4 flex flex-col gap-5">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#7d99a3]">
+          <span style={{ fontFamily: "var(--font-display)" }}>
+            Forage
+            <span ref={dotRef} className="text-[#00e5ff]">
+              .
+            </span>
           </span>
-        </span>
-        <span>Built for people done preparing-as-procrastination.</span>
+          <span>Built for people done preparing-as-procrastination.</span>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-5 border-t border-white/[0.06] text-xs text-[#7d99a3]">
+          <span>© {new Date().getFullYear()} Forage. All rights reserved.</span>
+          <nav className="flex items-center gap-4">
+            {LEGAL_LINKS.map((l) => (
+              <Link key={l.href} href={l.href} className="hover:text-white transition-colors">
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
       </div>
     </footer>
   );
