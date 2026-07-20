@@ -92,7 +92,7 @@ export function InterviewSpotlight() {
           live, voice-first mock interview for your target role. Pick behavioral,
           technical, or DSA — the AI interviewer asks one question at a time, follows up
           naturally, and closes with a feedback report: what worked, what to fix, and a
-          stronger model answer. Free users get one 3-minute trial; Pro is unlimited.
+          stronger model answer. Free users get one 4-minute trial; Pro is unlimited.
         </p>
         <Link
           ref={ctaRef}

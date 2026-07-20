@@ -12,7 +12,7 @@ const freePerks = [
   "Programming, Git & professional skills",
   "Career Discovery — find your path",
   "Quizzes, XP, streaks & badges",
-  "Forage Interview — one free 3-minute trial",
+  "Forage Interview — one free 4-minute trial",
 ];
 const proPerks = [
   "Everything in Free, plus:",

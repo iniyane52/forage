@@ -41,7 +41,7 @@ export function PricingCards() {
         </p>
         <p className="text-xs text-[#7d99a3]">forever</p>
         <ul className="mt-5 space-y-2 text-sm">
-          {["The full Common Core", "Quizzes, XP, streaks & badges", "One free 3-minute mock interview"].map((p) => (
+          {["The full Common Core", "Quizzes, XP, streaks & badges", "One free 4-minute mock interview"].map((p) => (
             <li key={p} className="flex items-start gap-2">
               <CheckCircle2 size={16} className="text-[#3fb950] mt-0.5 shrink-0" />
               {p}

@@ -84,7 +84,7 @@ export function DashboardMockup() {
         </span>
         <p className="text-[11px] font-bold flex-1">Forage Interview</p>
         <span className="text-[9px] font-semibold px-2 py-0.5 rounded-lg bg-[#ffb020]/15 text-[#ffb020]">
-          3-min trial
+          4-min trial
         </span>
       </div>
 

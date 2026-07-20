@@ -200,7 +200,7 @@ export default async function Dashboard() {
                   <Sparkles size={12} /> Unlimited
                 </>
               ) : (
-                "3-min trial"
+                "4-min trial"
               )}
             </span>
           </div>
