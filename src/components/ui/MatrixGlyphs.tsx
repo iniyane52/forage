@@ -4,9 +4,17 @@ import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useMounted } from "@/hooks/useMounted";
 
-const GLYPHS = "アカサタナハマヤラワ0123456789ABCDEF#{}<>/=+*";
-const GLYPH_COUNT = 44;
-const FLIP_INTERVAL_MS = 350;
+// Real tokens from what Forage actually teaches, not decorative noise -- a visitor
+// half-reading these should recognize "def", "SELECT", "docker run" as real syntax
+// tied to the product, not abstract matrix-rain katakana/hex with no connection to
+// the brand.
+const GLYPHS = [
+  "def", "const", "async", "await", "class", "import", "return", "=>",
+  "SELECT", "docker run", "git commit", "npm i", "useState()", "O(n)",
+  "try/catch", "kubectl", "GROUP BY", "fetch()", "{ }", "grep -r",
+];
+const GLYPH_COUNT = 28;
+const FLIP_INTERVAL_MS = 420;
 
 type Glyph = {
   top: number;
@@ -21,9 +29,10 @@ function randomChar() {
 }
 
 /**
- * The "live" layer of the background: scattered code glyphs (katakana/hex/symbols)
- * at low opacity across the viewport, each occasionally flipping to a new character
- * -- calm matrix energy over the grid, not the full falling-rain cliche.
+ * The "live" layer of the background: scattered real code tokens (the same syntax
+ * Forage's lessons actually teach -- `def`, `SELECT`, `docker run`, not abstract
+ * matrix-rain symbols) at low opacity across the viewport, each occasionally
+ * flipping to a new token -- calm, on-brand energy over the grid, not filler noise.
  *
  * One shared setInterval flips 1-2 random glyphs per tick (CSS transition does the
  * actual flip; JS only swaps the character at the flip midpoint) -- no rAF loop, no

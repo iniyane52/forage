@@ -8,6 +8,10 @@ export type ToolkitItem = {
   title: string;
   body: string;
   color: string;
+  /** Featured-only: a small live-feeling detail (a chat snippet, a waveform) so the
+   * 2 featured cells read as real previews of the feature, not just a bigger version
+   * of the same icon+title+text template as the other 4. */
+  preview?: React.ReactNode;
 };
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -46,6 +50,11 @@ function Cell({
         {item.title}
       </h3>
       <p className={`text-[#7d99a3] leading-relaxed ${featured ? "text-sm" : "text-xs"}`}>{item.body}</p>
+      {featured && item.preview ? (
+        <div key="preview" className="mt-3">
+          {item.preview}
+        </div>
+      ) : null}
     </motion.div>
   );
 }

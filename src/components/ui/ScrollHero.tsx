@@ -6,14 +6,24 @@ import { useGSAP } from "@gsap/react";
 import { gsap } from "@/components/ui/gsapMotion";
 import { useMounted } from "@/hooks/useMounted";
 
+const TILT_MAX_DEG = 9;
+const GLOW_SIZE = 260;
+
 /**
- * Asymmetric split hero: copy on the left, a slightly tilted glass product
- * card on the right, desktop; stacks on mobile. The card settles into place
- * with a one-shot zoom-in entrance (scale + rotate + fade, `once: true`,
- * plain scroll-reveal via ScrollTrigger) -- deliberately NOT a scroll-tied
- * pin. An earlier version of this component tried pinning the hero while
- * scrolling and hit a real, unresolved bug (see git history / CLAUDE.md);
- * a one-shot reveal has none of that risk since it plays once and stops.
+ * Asymmetric split hero: copy on the left, a glass product card on the right,
+ * desktop; stacks on mobile. The card settles into place with a one-shot
+ * zoom-in entrance (scale + fade, `once: true`, plain scroll-reveal via
+ * ScrollTrigger) -- deliberately NOT a scroll-tied pin. An earlier version of
+ * this component tried pinning the hero while scrolling and hit a real,
+ * unresolved bug (see git history / CLAUDE.md); a one-shot reveal has none of
+ * that risk since it plays once and stops.
+ *
+ * Used to settle into a fixed -4deg rotation and stay there. Now -- desktop/
+ * fine-pointer only -- the card instead tracks the cursor with a real 3D tilt
+ * (rotateX/rotateY mapped to pointer position within the card) plus a moving
+ * specular highlight, so it reads as a physical glass object you can look
+ * around rather than a flat image with one baked-in angle. Reference: Raycast's
+ * hero command palette, Drift's mouse-driven product mockup tilt.
  */
 export function ScrollHero({
   header,
@@ -27,25 +37,58 @@ export function ScrollHero({
   const reduce = useReducedMotion();
   const mounted = useMounted();
   const cardRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
       if (reduce || !mounted || !cardRef.current) return;
+      const cardEl = cardRef.current;
 
-      gsap.set(cardRef.current, {
-        transformPerspective: 1000,
-        rotate: -10,
-        scale: 1.06,
-        opacity: 0,
-      });
-      gsap.to(cardRef.current, {
-        rotate: -4,
+      gsap.set(cardEl, { transformPerspective: 1000, scale: 1.06, opacity: 0 });
+      gsap.to(cardEl, {
         scale: 1,
         opacity: 1,
         duration: 1,
         ease: "power3.out",
-        scrollTrigger: { trigger: cardRef.current, start: "top 90%", once: true },
+        scrollTrigger: { trigger: cardEl, start: "top 90%", once: true },
       });
+
+      if (!window.matchMedia("(pointer: fine)").matches) return;
+
+      // Plain gsap.to (not quickTo) for the tilt: quickTo's fast-path reset tracking
+      // gets confused when another gsap call (the entrance tween above) already
+      // touched this element's transform -- it logs a real "not eligible for reset"
+      // warning, confirmed live, the same class of issue PathDock.tsx hit with
+      // quickTo("scale") and worked around by splitting into scaleX/scaleY. rotateX/
+      // rotateY have no such split, so plain `.to()` with `overwrite: "auto"` (GSAP
+      // cleanly overwrites the prior tween on the same properties) is the fix here.
+      const setGlowX = glowRef.current ? gsap.quickTo(glowRef.current, "x", { duration: 0.35, ease: "power3.out" }) : null;
+      const setGlowY = glowRef.current ? gsap.quickTo(glowRef.current, "y", { duration: 0.35, ease: "power3.out" }) : null;
+
+      function onMove(e: MouseEvent) {
+        const rect = cardEl.getBoundingClientRect();
+        const relX = (e.clientX - rect.left) / rect.width;
+        const relY = (e.clientY - rect.top) / rect.height;
+        gsap.to(cardEl, {
+          rotateX: -(relY - 0.5) * TILT_MAX_DEG * 2,
+          rotateY: (relX - 0.5) * TILT_MAX_DEG * 2,
+          duration: 0.5,
+          ease: "power3.out",
+          overwrite: "auto",
+        });
+        setGlowX?.(relX * rect.width - GLOW_SIZE / 2);
+        setGlowY?.(relY * rect.height - GLOW_SIZE / 2);
+      }
+      function onLeave() {
+        gsap.to(cardEl, { rotateX: 0, rotateY: 0, duration: 0.5, ease: "power3.out", overwrite: "auto" });
+      }
+
+      cardEl.addEventListener("mousemove", onMove);
+      cardEl.addEventListener("mouseleave", onLeave);
+      return () => {
+        cardEl.removeEventListener("mousemove", onMove);
+        cardEl.removeEventListener("mouseleave", onLeave);
+      };
     },
     { scope: cardRef, dependencies: [reduce, mounted] }
   );
@@ -55,16 +98,21 @@ export function ScrollHero({
       <div>{header}</div>
       <div
         ref={cardRef}
-        className="glass-solid rounded-[28px] overflow-hidden mx-auto lg:mx-0 max-w-xl w-full"
-        // Gated on `mounted` first, not just `reduce`: SSR has no `matchMedia`, so it
-        // always renders as if motion were allowed, but framer-motion's
-        // `useReducedMotion` reads the real value synchronously on the client's very
-        // first render (before hydration completes) -- if the visitor actually prefers
-        // reduced motion, that first client render disagrees with the server's markup
-        // immediately, a real hydration-mismatch error confirmed live. Matches the same
-        // fix already applied in SkillConstellation.tsx/ScrollProgressBar.tsx.
-        style={!mounted || reduce ? undefined : { transform: "rotate(-4deg)" }}
+        className="relative glass-solid rounded-[28px] overflow-hidden mx-auto lg:mx-0 max-w-xl w-full"
       >
+        <div
+          ref={glowRef}
+          aria-hidden="true"
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            width: GLOW_SIZE,
+            height: GLOW_SIZE,
+            top: 0,
+            left: 0,
+            background: "radial-gradient(circle, rgba(255,255,255,0.14), transparent 70%)",
+            mixBlendMode: "overlay",
+          }}
+        />
         {card}
       </div>
     </div>

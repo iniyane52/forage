@@ -91,7 +91,7 @@ export function FinalCTA() {
       <Link
         ref={btnRef}
         href="/auth"
-        className="inline-flex items-center gap-1.5 px-6 py-3 rounded-xl bg-gradient-to-r from-[#00e5ff] to-[#ff3d81] text-[#05070a] text-sm font-semibold hover:opacity-90 transition-opacity"
+        className="inline-flex items-center gap-1.5 px-6 py-3 rounded-xl bg-[#00e5ff] text-[#05070a] text-sm font-semibold hover:bg-[#33ebff] transition-colors"
       >
         Start learning free <ArrowRight size={16} />
       </Link>

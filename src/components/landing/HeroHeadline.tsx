@@ -11,12 +11,11 @@ import { useMounted } from "@/hooks/useMounted";
  * entrance (a separate one-shot GSAP reveal, not scroll-tied) animates independently,
  * so there's no shared scroll target or property overlap between the two.
  *
- * The gradient-clipped "Prove it." span is deliberately NOT run through SplitText:
- * `.gradient-word` relies on `background-clip: text` painting the parent span's own
- * text glyphs, and SplitText replaces those glyphs with nested char divs that have no
- * background of their own -- clipping the gradient per-character would need a
- * background-position hack to look continuous, so it's simpler and more correct to
- * animate that span as one unit (scale/fade) alongside the char reveal on either side.
+ * The "Prove it." span is deliberately NOT run through SplitText: `.highlight-block`
+ * paints a solid rectangle behind the whole span, and SplitText replaces its glyphs
+ * with nested char divs that would each need their own slice of that background to
+ * look continuous -- so it's simpler and more correct to animate that span as one
+ * unit (scale/fade) alongside the char reveal on either side.
  * Splitting with `type: "words,chars"` (not just "chars") matters too: a plain char
  * split lets the browser insert a line break between any two adjacent letters, which
  * broke "hired." across lines; the word-level wrapper keeps each word atomic.
@@ -151,7 +150,7 @@ export function HeroHeadline() {
       style={{ perspective: 650 }}
     >
       <span ref={leadRef}>Learn it. </span>
-      <span ref={gradientRef} className="gradient-word inline-block">
+      <span ref={gradientRef} className="highlight-block inline-block">
         Prove it.
       </span>
       <span ref={tailRef}> Get hired.</span>

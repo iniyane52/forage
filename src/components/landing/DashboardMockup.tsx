@@ -1,3 +1,8 @@
+"use client";
+
+import { motion, useReducedMotion } from "framer-motion";
+import { useMounted } from "@/hooks/useMounted";
+import { CountUp } from "@/components/ui/motion";
 import {
   Sparkles,
   Flame,
@@ -16,9 +21,29 @@ const PATHS = [
   { icon: BarChart3, title: "Data Scientist", locked: false, pct: 34 },
 ];
 
+/** Animates in on mount (not whileInView -- this whole card sits above the fold,
+ * visible immediately, so a scroll-triggered reveal would never have anything to
+ * trigger off of). */
+function Bar({ pct, className = "h-1.5" }: { pct: number; className?: string }) {
+  const reduce = useReducedMotion();
+  const mounted = useMounted();
+  return (
+    <div className={`rounded-full bg-white/[0.06] overflow-hidden ${className}`}>
+      <motion.div
+        className="h-full w-full origin-left rounded-full bg-gradient-to-r from-[#00e5ff] to-[#3fb950]"
+        initial={!mounted || reduce ? false : { scaleX: 0 }}
+        animate={{ scaleX: pct / 100 }}
+        transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      />
+    </div>
+  );
+}
+
 /**
  * A stylized, illustrative recreation of the real Forage dashboard —
  * not a live view, not a screenshot. Fake data, purely decorative.
+ * Progress bars fill in and the XP counts up on mount instead of sitting static,
+ * so the card reads as a living product snapshot, not a flat screenshot.
  */
 export function DashboardMockup() {
   return (
@@ -33,7 +58,7 @@ export function DashboardMockup() {
             Lv 4
           </span>
           <span className="px-2 py-0.5 rounded-lg bg-white/[0.05] text-[#3fb950] font-semibold text-[10px] flex items-center gap-1">
-            <Sparkles size={10} /> 860 XP
+            <Sparkles size={10} /> <CountUp value={860} /> XP
           </span>
           <span className="px-2 py-0.5 rounded-lg bg-white/[0.05] text-[#ffb020] font-semibold text-[10px] flex items-center gap-1">
             <Flame size={10} /> 6
@@ -50,9 +75,7 @@ export function DashboardMockup() {
           </span>
         </div>
         <p className="text-sm font-bold mb-2.5">Continue where you left off</p>
-        <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-          <div className="h-full w-[62%] rounded-full bg-gradient-to-r from-[#00e5ff] to-[#3fb950]" />
-        </div>
+        <Bar pct={62} className="h-1.5" />
         <p className="text-[10px] text-[#7d99a3] mt-1.5">5 of 8 lessons · 62%</p>
       </div>
 
@@ -65,14 +88,7 @@ export function DashboardMockup() {
               <p.icon size={14} />
             </span>
             <p className="text-[10px] font-bold leading-tight">{p.title}</p>
-            {!p.locked && (
-              <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden mt-1.5">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#00e5ff] to-[#3fb950]"
-                  style={{ width: `${p.pct}%` }}
-                />
-              </div>
-            )}
+            {!p.locked && <Bar pct={p.pct ?? 0} className="h-1 mt-1.5" />}
           </div>
         ))}
       </div>

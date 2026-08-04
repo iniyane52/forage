@@ -16,7 +16,7 @@ import { ToolkitBento } from "@/components/landing/ToolkitBento";
 import { SkillConstellation } from "@/components/landing/SkillConstellation";
 import { TerminalHeading } from "@/components/landing/TerminalHeading";
 import { StatCallout } from "@/components/landing/StatCallout";
-import { HowItWorksTimeline } from "@/components/landing/HowItWorksTimeline";
+import { TerminalWalkthrough } from "@/components/landing/TerminalWalkthrough";
 import { InterviewSpotlight } from "@/components/landing/InterviewSpotlight";
 import { PricingCards } from "@/components/landing/PricingCards";
 import { FinalCTA } from "@/components/landing/FinalCTA";
@@ -51,12 +51,32 @@ const VALUE_PROPS = [
     title: "Forage Tutor",
     body: "A grounded AI tutor for every lesson — hints before answers, Socratic, never does your quiz for you.",
     color: "#ff3d81",
+    preview: (
+      <div className="rounded-lg bg-black/30 border border-white/[0.06] p-2.5 text-[10px] leading-relaxed">
+        <p className="text-[#7d99a3] mb-1">You: &ldquo;Why is this recursion O(n²)?&rdquo;</p>
+        <p className="text-[#ff9db3]">
+          Tutor: &ldquo;Look at what your loop rebuilds on every call — what&rsquo;s getting recreated
+          each time?&rdquo;
+        </p>
+      </div>
+    ),
   },
   {
     icon: <Mic size={20} />,
     title: "Forage Interview",
     body: "A live, voice-first AI mock interview for your target role — behavioral, technical, or DSA — with a real feedback report.",
     color: "#3d8fff",
+    preview: (
+      <div className="flex items-end gap-1 h-6" aria-hidden="true">
+        {[0.3, 0.7, 1, 0.5, 0.85, 0.4, 0.65].map((delay, i) => (
+          <span
+            key={i}
+            className="waveform-bar flex-1 rounded-full bg-[#5ba3ff]"
+            style={{ height: "100%", animationDelay: `${delay * -1.1}s` }}
+          />
+        ))}
+      </div>
+    ),
   },
   {
     icon: <Trophy size={20} />,
@@ -72,11 +92,31 @@ const VALUE_PROPS = [
   },
 ];
 
-const STEPS = [
-  { n: "01", title: "Start free", body: "The Common Core — 6 modules, zero to functional, no card required.", accent: "#00e5ff" },
-  { n: "02", title: "Choose your path", body: "AI Engineer, Software Engineer, Full-Stack, Data Scientist, Cloud & DevOps, or Cybersecurity.", accent: "#baff2e" },
-  { n: "03", title: "Study, then prove it", body: "Read the lesson, do the hands-on task, then pass the quiz — study-first, always.", accent: "#ff3d81" },
-  { n: "04", title: "Get interview-ready", body: "Ask the Tutor when you're stuck, then rehearse with Forage Interview before the real thing.", accent: "#b967ff" },
+const HOW_IT_WORKS = [
+  {
+    command: "forage start",
+    output: "Common Core unlocked — 6 modules, zero to functional, no card required.",
+    tag: "FREE · NO CARD",
+    accent: "#00e5ff",
+  },
+  {
+    command: "forage path --list",
+    output: "AI Engineer · Software Engineer · Full-Stack · Data Scientist · Cloud & DevOps · Cybersecurity",
+    tag: "6 PATHS",
+    accent: "#baff2e",
+  },
+  {
+    command: "forage study --next",
+    output: "Read the lesson → hands-on task → quiz (80% to pass).",
+    tag: "+XP PER LESSON",
+    accent: "#ff3d81",
+  },
+  {
+    command: "forage interview --start",
+    output: "Live mock interview ready. Ask the Tutor anytime you're stuck.",
+    tag: "🏆 READY",
+    accent: "#b967ff",
+  },
 ];
 
 export default function LandingPage() {
@@ -140,7 +180,7 @@ export default function LandingPage() {
                 <div className="mt-8 flex items-center gap-3 flex-wrap">
                   <Link
                     href="/auth"
-                    className="inline-flex items-center gap-1.5 px-6 py-3 rounded-xl bg-gradient-to-r from-[#00e5ff] to-[#ff3d81] text-[#05070a] text-sm font-semibold hover:opacity-90 transition-opacity"
+                    className="inline-flex items-center gap-1.5 px-6 py-3 rounded-xl bg-[#00e5ff] text-[#05070a] text-sm font-semibold hover:bg-[#33ebff] transition-colors"
                   >
                     Start learning free <ArrowRight size={16} />
                   </Link>
@@ -157,7 +197,11 @@ export default function LandingPage() {
               </FadeUp>
             </div>
           }
-          card={<DashboardMockup />}
+          card={
+            <ScrollParallax yRange={18}>
+              <DashboardMockup />
+            </ScrollParallax>
+          }
         />
         </div>
 
@@ -189,11 +233,10 @@ export default function LandingPage() {
 
         <SectionDivider />
 
-        {/* How it works -- HowItWorksTimeline is deliberately OUTSIDE ScrollParallax:
-            its own ScrollTrigger scrub measures each card's position directly, and a
-            parallax translateY on an ancestor would keep nudging that measurement
-            every frame for no benefit (the timeline has no need for the extra
-            parallax drift the way a static section does). */}
+        {/* How it works -- TerminalWalkthrough is deliberately OUTSIDE ScrollParallax:
+            it drives its own scroll-triggered typing sequence via a standalone
+            ScrollTrigger, and a parallax translateY on an ancestor would keep
+            nudging that trigger's measured position for no benefit. */}
         <section className="relative max-w-7xl mx-auto px-4 py-14">
           <SkillConstellation variant="b" />
           <ScrollParallax>
@@ -201,7 +244,7 @@ export default function LandingPage() {
               <TerminalHeading text="How Forage works" className="text-2xl sm:text-4xl text-center mb-12" />
             </FadeUp>
           </ScrollParallax>
-          <HowItWorksTimeline steps={STEPS} />
+          <TerminalWalkthrough steps={HOW_IT_WORKS} />
         </section>
 
         <SectionDivider />
