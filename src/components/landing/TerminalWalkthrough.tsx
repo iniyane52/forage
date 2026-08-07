@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "@/components/ui/gsapMotion";
+import { gsap, ScrollTrigger } from "@/components/ui/gsapMotion";
 import { useMounted } from "@/hooks/useMounted";
 import { Confetti } from "@/components/ui/Confetti";
 
@@ -34,11 +34,55 @@ export function TerminalWalkthrough({ steps }: { steps: CliStep[] }) {
   const reduce = useReducedMotion();
   const mounted = useMounted();
   const containerRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const commandRefs = useRef<(HTMLElement | null)[]>([]);
   const outputRefs = useRef<(HTMLElement | null)[]>([]);
   const [started, setStarted] = useState(false);
   const [revealedTag, setRevealedTag] = useState(-1);
   const [confetti, setConfetti] = useState(false);
+
+  // GSAP-driven, not Framer: a Framer `initial` value is only honored on a
+  // component's first-ever recognized render, but useMounted()'s
+  // useSyncExternalStore hydration causes that first render to always be
+  // `mounted=false` (so `initial={false}`) with a second, near-instant render
+  // flipping to true -- Framer never retroactively applies the "real" initial
+  // values from that second render, so the card would render already-settled
+  // with nothing to animate from. Confirmed live (same bug independently
+  // found in ToolkitBento.tsx's pre-existing entrance). GSAP's imperative
+  // gsap.set/gsap.to has no such mount-order dependency.
+  // Kept in its own useGSAP call (not merged with the typing-trigger effect
+  // below) deliberately: that effect's deps include `started`, and a shared
+  // callback would re-run (via useGSAP's revert-and-recreate on scope) every
+  // time `started` flips true -- recreating this entrance's ScrollTrigger
+  // after the container is already scrolled past its `start` point, which
+  // never re-fires (the exact "already in view at creation" bug found and
+  // fixed in ScrollHero.tsx this session).
+  useGSAP(
+    () => {
+      if (!mounted || reduce || !containerRef.current || !cardRef.current) return;
+      gsap.set(cardRef.current, {
+        transformPerspective: 900,
+        opacity: 0,
+        rotate: -4,
+        scale: 0.94,
+        y: 16,
+      });
+      gsap.to(cardRef.current, {
+        opacity: 1,
+        rotate: 0,
+        scale: 1,
+        y: 0,
+        duration: 0.7,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top 85%",
+          once: true,
+        },
+      });
+    },
+    { scope: containerRef, dependencies: [mounted, reduce] }
+  );
 
   useGSAP(
     () => {
@@ -104,24 +148,7 @@ export function TerminalWalkthrough({ steps }: { steps: CliStep[] }) {
       <p className="sr-only">
         {steps.map((s) => `${s.command}: ${s.output} (${s.tag})`).join(". ")}
       </p>
-      <motion.div
-        aria-hidden="true"
-        className="rounded-2xl terminal-surface overflow-hidden"
-        // A Framer whileInView entrance, deliberately NOT part of the GSAP
-        // ScrollTrigger above -- that trigger is keyed off `containerRef` (this
-        // element's own PARENT), so this inner div rotating/scaling into view
-        // never moves `containerRef` itself, leaving its ScrollTrigger
-        // measurement untouched. Framer's whileInView uses IntersectionObserver,
-        // which (unlike the GSAP ScrollTrigger bug found in ScrollHero.tsx this
-        // same session) correctly fires immediately for an already-visible
-        // element at observation setup, so there's no equivalent "stuck
-        // invisible" risk here.
-        initial={!mounted || reduce ? false : { opacity: 0, rotate: -4, scale: 0.94, y: 16 }}
-        whileInView={{ opacity: 1, rotate: 0, scale: 1, y: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        style={{ transformPerspective: 900 }}
-      >
+      <div ref={cardRef} aria-hidden="true" className="rounded-2xl terminal-surface overflow-hidden">
         <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/[0.06]">
           <span className="w-2.5 h-2.5 rounded-full bg-[#ff4757]/60" />
           <span className="w-2.5 h-2.5 rounded-full bg-[#ffb020]/60" />
@@ -166,7 +193,7 @@ export function TerminalWalkthrough({ steps }: { steps: CliStep[] }) {
             </div>
           ))}
         </div>
-      </motion.div>
+      </div>
       {confetti && <Confetti count={36} />}
     </div>
   );
