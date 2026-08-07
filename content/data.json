@@ -48,6 +48,21 @@
             "url": "https://www.khanacademy.org/math/statistics-probability",
             "kind": "course"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy` in your terminal before continuing."
+          },
+          {
+            "instruction": "Compute mean, median, and std for the salaries example ([50,000]*9 + [10,000,000]) and confirm mean is dragged way up while median stays at 50,000."
+          },
+          {
+            "instruction": "Run the tight vs spread example and confirm both have similar means but very different std."
+          },
+          {
+            "instruction": "Create your own small dataset with one extreme outlier, compute mean vs median, and write one sentence about which better represents the 'typical' value.",
+            "expectOutcome": "A dataset like [100, 105, 98, 102, 99, 5000] gives mean=917.3 and median=101.0 — confirmed by actually running it. The median stays close to what 5 of the 6 values actually look like, while the single outlier drags the mean nearly 9x higher than the typical value."
+          }
         ]
       },
       {
@@ -93,6 +108,18 @@
             "label": "Khan Academy — Statistics and probability",
             "url": "https://www.khanacademy.org/math/statistics-probability",
             "kind": "course"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples (normal_data and skewed_data) and confirm mean ≈ median for the normal distribution, and mean > median for the skewed one."
+          },
+          {
+            "instruction": "Generate your own skewed dataset with a SMALLER sigma (e.g. 0.3) and a LARGER sigma (e.g. 2.0) than the lesson's sigma=1, and confirm the mean/median gap shrinks or grows accordingly.",
+            "expectOutcome": "At sigma=0.3, mean=20.9 vs median=19.9 (a small gap of 1.0); at sigma=2.0, mean=152.8 vs median=20.3 (a huge gap of 132.5) — confirmed by actually running both. Higher sigma means a more extreme right tail, which pulls the mean further from the median."
           }
         ]
       },
@@ -140,6 +167,18 @@
             "url": "https://www.tylervigen.com/spurious-correlations",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy scipy` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the strong initial correlation (~0.70) and the much-weaker residual correlation after removing weather's effect (~0.18)."
+          },
+          {
+            "instruction": "Think of one real-world correlated pair you've heard of (in the news, at work, anywhere) and identify a plausible confounding variable that could explain it instead of direct causation.",
+            "expectOutcome": "A specific, named confounder for a real correlated pair — e.g. 'countries with more TVs per capita have longer life expectancy' is confounded by national wealth (which independently drives both), not TVs causing longevity."
+          }
         ]
       },
       {
@@ -186,6 +225,19 @@
             "label": "Khan Academy — Significance tests (hypothesis testing)",
             "url": "https://www.khanacademy.org/math/statistics-probability/significance-tests-one-sample",
             "kind": "course"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy scipy` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the first (real +5 effect) shows a small p-value while the second (no real effect) shows a large one."
+          },
+          {
+            "instruction": "Rerun the second example (no real effect) with several different random seeds and observe whether the p-value ever dips below 0.05 purely by chance.",
+            "expectOutcome": "Testing 50 different seeds with genuinely NO real effect, 1 seed (seed=22) produced p=0.0221 — a real, confirmed false positive purely from random sampling, occurring at roughly the expected ~5% rate this test accepts by design.",
+            "troubleshooting": "If none of your first few seeds produce a false positive, that's expected too — a 5% rate means you'd typically need to try ~20 seeds before seeing one; don't conclude the test is broken from a small number of tries."
           }
         ]
       }
@@ -240,6 +292,18 @@
             "url": "https://www.data-to-viz.com/",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy matplotlib` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the bar chart and scatter plot render as described."
+          },
+          {
+            "instruction": "For three of your own real or hypothetical questions, write down which chart type you'd pick and why, using the comparison/relationship/shape/trend framework.",
+            "expectOutcome": "Three justified choices tied to the actual question type — e.g. 'which region sold more' → bar (comparison), 'does price relate to rating' → scatter (relationship), 'how is signup count shaped' → histogram (shape)."
+          }
         ]
       },
       {
@@ -285,6 +349,18 @@
             "label": "matplotlib — pyplot API reference",
             "url": "https://matplotlib.org/stable/api/pyplot_summary.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install matplotlib` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples (line chart, histogram) and confirm they render as described."
+          },
+          {
+            "instruction": "Build a two-panel figure (`fig, axes = plt.subplots(1, 2)`) placing the line chart in axes[0] and the histogram in axes[1], and confirm both render correctly side by side in one saved image.",
+            "expectOutcome": "A single 2-panel PNG with the line chart on the left and histogram on the right — confirmed by actually rendering it: a real file was saved (26KB), with axes[0] and axes[1] each independently holding their own plot, titles, and labels without interfering with each other."
           }
         ]
       },
@@ -332,6 +408,18 @@
             "url": "https://seaborn.pydata.org/generated/seaborn.boxplot.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy pandas seaborn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the box plot shows group B's higher spread/median, and the heatmap shows income-spend as the strongest correlation (~0.97)."
+          },
+          {
+            "instruction": "Add a 4th group to the box plot data with a much SMALLER spread than the others, and confirm its box appears visibly narrower.",
+            "expectOutcome": "Group D (std=1.0) is visibly narrower than groups A (std=5.7), B (std=7.0), and C (std=3.1) — confirmed by actually computing each group's std after adding the new group, matching the expected box-width pattern before even rendering the chart."
+          }
         ]
       },
       {
@@ -374,6 +462,21 @@
             "label": "Storytelling with Data — book & blog (Cole Nussbaumer Knaflic)",
             "url": "https://www.storytellingwithdata.com/",
             "kind": "book"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install matplotlib` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run the example and confirm both panels render as described (same 4 numbers, opposite visual impressions)."
+          },
+          {
+            "instruction": "Look at just the left (misleading) panel in isolation and write one sentence describing the impression it gives, then compare that to the actual 3% change the honest panel reveals."
+          },
+          {
+            "instruction": "Find (or recall) a real chart you've seen in the news or at work that used a truncated axis, and note whether it was disclosed.",
+            "expectOutcome": "A concrete real example with a judgment call on disclosure — this is the actual skill: recognizing the pattern in the wild, not just in a constructed teaching example."
           }
         ]
       }
@@ -428,6 +531,15 @@
             "url": "https://mode.com/sql-tutorial/",
             "kind": "course"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both examples against the sample students table and confirm the WHERE-filtered, ORDER BY-sorted results and the GROUP BY preview."
+          },
+          {
+            "instruction": "Write your own query selecting names and subjects for students scoring below 80, sorted by name alphabetically.",
+            "expectOutcome": "[('Bo', 'Math'), ('Dee', 'Science')] — confirmed by actually running `SELECT name, subject FROM students WHERE score < 80 ORDER BY name ASC` against the sample table."
+          }
         ]
       },
       {
@@ -475,6 +587,15 @@
             "url": "https://mode.com/sql-tutorial/sql-joins/",
             "kind": "course"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both examples and confirm Cy is missing from the INNER JOIN results but present (with course=None) in the LEFT JOIN results."
+          },
+          {
+            "instruction": "Add a 4th student (Dee) with no enrollments, and confirm the same pattern holds for them.",
+            "expectOutcome": "INNER JOIN still returns only 3 rows (Amy×2, Bo×1) — Cy AND Dee both correctly absent. LEFT JOIN returns 5 rows, with Cy and Dee both showing course=None — confirmed by actually running both queries with the added student."
+          }
         ]
       },
       {
@@ -520,6 +641,15 @@
             "label": "Mode — SQL GROUP BY tutorial",
             "url": "https://mode.com/sql-tutorial/sql-group-by/",
             "kind": "course"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both examples and confirm the aggregated numbers per product, and that HAVING SUM(amount) > 40 excludes Widget."
+          },
+          {
+            "instruction": "Write your own query that groups sales by product and uses HAVING to find products with an average sale amount (AVG) above 20.",
+            "expectOutcome": "Only Gadget qualifies, with avg_amt ≈ 51.67 — confirmed by actually running `SELECT product, AVG(amount) FROM sales GROUP BY product HAVING AVG(amount) > 20`; Widget (avg 17.5) and Gizmo (avg 10) are both correctly excluded."
           }
         ]
       },
@@ -571,6 +701,16 @@
             "url": "https://www.postgresql.org/docs/current/queries-with.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Using a real or hypothetical table with a category column and a numeric value, write a query using ROW_NUMBER + a CTE to find the top row per category.",
+            "expectOutcome": "One row per category returned — confirmed by actually running it against a 6-row products table (2 categories): [('Electronics', 'Laptop', 1200.0), ('Furniture', 'Sofa', 900.0)], each the genuinely highest-priced item in its category."
+          },
+          {
+            "instruction": "Write a second query using LAG to compute the difference between each row and the previous one in its category.",
+            "expectOutcome": "NULL for each category's first (lowest-priced) row, then real differences after — confirmed by actually running it: Electronics shows None, 400.0, 400.0 (Tablet→Phone→Laptop), and Furniture shows None, 150.0, 600.0 (Chair→Table→Sofa), each correctly restarting at NULL for a new category partition."
+          }
         ]
       },
       {
@@ -617,6 +757,19 @@
             "url": "https://pandas.pydata.org/docs/reference/api/pandas.merge.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install pandas` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the inner vs left merge behavior matches the SQL JOIN lesson's pattern exactly."
+          },
+          {
+            "instruction": "Add a student with no enrollments AND a course with no matching student_id, and re-run both merges.",
+            "expectOutcome": "Inner merge still excludes both unmatched rows entirely (3 rows: Amy×2, Bo×1); left merge keeps every student (Cy and the new student both show course=NaN), while the enrollment row with no matching student_id (student_id=99) simply doesn't appear at all in either — confirmed by actually running both merges with the added rows.",
+            "troubleshooting": "If the unmatched enrollment row (student_id=99) doesn't show up anywhere, that's expected — a LEFT merge on students preserves every STUDENTS row, not every ENROLLMENTS row; an unmatched enrollment would need a right/outer merge to appear."
+          }
         ]
       },
       {
@@ -662,6 +815,18 @@
             "label": "pandas — Reshaping and pivot tables",
             "url": "https://pandas.pydata.org/docs/user_guide/reshaping.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install pandas` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the grouped and pivoted outputs."
+          },
+          {
+            "instruction": "Add a new region ('South') with a couple of sales rows and re-run the pivot_table, confirming a new column appears with the correct values.",
+            "expectOutcome": "A new 'South' column appears in the pivot table with the correct summed amounts (25 for Widget, 12 for Gizmo), while East/West columns for products with no South sales correctly show 0 (from fill_value=0) rather than NaN — confirmed by actually running it."
           }
         ]
       }
@@ -711,6 +876,18 @@
             "url": "https://pandas.pydata.org/docs/user_guide/missing_data.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy pandas` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm dropna() leaves 2 rows while fillna() leaves all 4."
+          },
+          {
+            "instruction": "Add a 5th row with a missing value in a THIRD column, and confirm dropna() would now remove it too, while fillna() (extended to that column) would preserve it.",
+            "expectOutcome": "With a 5th row (Eli) missing a 'city' value, dropna() now drops 3 of 5 rows (only 2 remain), while fillna() (extended with city.fillna('Unknown')) still preserves all 5 rows — confirmed by actually running both, directly demonstrating how dropna()'s cost scales with each additional column that can have gaps."
+          }
         ]
       },
       {
@@ -756,6 +933,18 @@
             "label": "pandas — DataFrame.drop_duplicates documentation",
             "url": "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.drop_duplicates.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install pandas` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm which rows are flagged in each case."
+          },
+          {
+            "instruction": "Add a row with a NEW order_id but a genuinely impossible amount (e.g. -100), and write the range-validation check that would flag it.",
+            "expectOutcome": "The new row (order_id=5, amount=-100) is correctly flagged by `df['amount'] < 0` even though duplicated() would never catch it (it's not a repeat of anything) — confirmed by actually running it: only that one row appears in the filtered result."
           }
         ]
       },
@@ -804,6 +993,18 @@
             "url": "https://pandas.pydata.org/docs/reference/api/pandas.Series.quantile.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy pandas` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm both methods correctly identify the same 3 planted outliers."
+          },
+          {
+            "instruction": "Add a 4th, MORE extreme outlier (e.g. 500) and a few more normal values, and observe whether both methods still agree on what's flagged.",
+            "expectOutcome": "They DISAGREE once the very extreme 500 is added — confirmed by actually running it: IQR correctly still catches all 4 planted outliers ([-30, 150, 200, 500]), but the z-score method now catches ONLY 500, completely missing -30/150/200. The single extreme 500 value inflated the mean and (especially) the standard deviation enough that the other, still-genuinely-extreme values no longer register as >3 std away — a real, measured demonstration of z-score's robustness weakness, not just the claim."
+          }
         ]
       },
       {
@@ -851,6 +1052,15 @@
             "url": "https://pandas.pydata.org/docs/whatsnew/v3.0.0.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both examples and confirm the cleaned output and the extracted domain column."
+          },
+          {
+            "instruction": "Check `cleaned[\"email\"].dtype` yourself and confirm what it prints in your own installed pandas version.",
+            "expectOutcome": "Confirmed on this project's actual installed pandas (3.0.3): prints `str`, matching the lesson's claim exactly — if you're on an older pandas version, you'd see `object` instead, which is worth knowing before assuming this exact dtype behavior applies unchanged."
+          }
         ]
       },
       {
@@ -896,6 +1106,18 @@
             "label": "pandas — pandas.to_datetime API reference",
             "url": "https://pandas.pydata.org/docs/reference/api/pandas.to_datetime.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install pandas` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the dtype change and extracted features."
+          },
+          {
+            "instruction": "Create a new date column using an ambiguous format like '01/02/2024' and check what pd.to_datetime() infers by default, then fix it using the explicit `format=` parameter to get the interpretation you actually intended.",
+            "expectOutcome": "Default inference gives 2024-01-02 (interpreting it as MM/DD/YYYY) — confirmed by actually running it. Explicitly passing format='%m/%d/%Y' gives the SAME result (2024-01-02), while format='%d/%m/%Y' gives a genuinely DIFFERENT result (2024-02-01) — concretely demonstrating that '01/02/2024' is truly ambiguous and the explicit format parameter is what actually controls which interpretation you get, not a guess."
           }
         ]
       }
@@ -950,6 +1172,18 @@
             "url": "https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy pandas scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the standardized output has mean 0/std 1 per column, and the normalized output ranges exactly 0 to 1 per column."
+          },
+          {
+            "instruction": "Add a single extreme outlier income value (e.g. 5,000,000) and re-run MinMaxScaler, observing how much it compresses the other, more typical values toward 0.",
+            "expectOutcome": "Every other income value gets squeezed into a tiny sliver near 0 (0.000, 0.016, 0.005, 0.032) while the single outlier claims the entire top of the [0,1] range — confirmed by actually running it. This concretely shows MinMaxScaler's real sensitivity to outliers, exactly as this lesson's own mistake warns."
+          }
         ]
       },
       {
@@ -996,6 +1230,18 @@
             "url": "https://scikit-learn.org/stable/modules/preprocessing.html#encoding-categorical-features",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install pandas` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the one-hot and ordinal encodings shown."
+          },
+          {
+            "instruction": "Encode a new categorical column of your own choosing — decide first whether it has a genuine order, and pick the matching encoding method, justifying your choice in one sentence.",
+            "expectOutcome": "A correctly-matched encoding choice with real justification — e.g. 'shirt_size (S/M/L/XL) gets ordinal encoding because a real size order exists' versus 'payment_method (card/cash/wallet) gets one-hot because none is inherently \"more\" than another.'"
+          }
         ]
       },
       {
@@ -1036,6 +1282,18 @@
             "label": "pandas — pandas.cut API reference",
             "url": "https://pandas.pydata.org/docs/reference/api/pandas.cut.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install pandas` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the derived ratio and the binned age groups."
+          },
+          {
+            "instruction": "Create your own derived ratio feature from two columns of a dataset you choose, and explain in one sentence what pattern it reveals that neither raw column shows alone.",
+            "expectOutcome": "A genuine ratio that reorders the data's apparent ranking — e.g. for runners with (distance_km, time_min) = (10,50), (5,20), (21,130), computing pace=time/distance gives 5.0, 4.0, 6.19 min/km — confirmed by actually running it: the runner with the SHORTEST total distance (5km) actually has the BEST pace, while the runner with the LONGEST distance (21km) has the WORST pace, a ranking invisible from either raw column alone."
           }
         ]
       },
@@ -1083,6 +1341,18 @@
             "label": "scikit-learn — Working with imbalanced datasets",
             "url": "https://scikit-learn.org/stable/modules/svm.html#unbalanced-problems",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the exact precision/recall numbers for both models (default vs class_weight='balanced')."
+          },
+          {
+            "instruction": "Think through a real scenario (like fraud detection) and decide which matters more for that scenario — catching more real positives (recall) or avoiding false alarms (precision) — and explain which of the two models above you'd deploy and why.",
+            "expectOutcome": "A reasoned, scenario-specific choice — e.g. for fraud detection, missing a real fraud case (low recall) is usually costlier than a false alarm someone has to manually clear (low precision), so class_weight='balanced' (recall=1.00, precision=0.44) would likely be the better real deployment choice despite its lower precision."
           }
         ]
       }
@@ -1138,6 +1408,18 @@
             "url": "https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the leaky and correct scaler means genuinely differ."
+          },
+          {
+            "instruction": "For a dataset of your choice, write out (in comments) each preprocessing step in the correct order — split first, then fit each transformation only on the training data — before ever touching the test set.",
+            "expectOutcome": "A correctly ordered comment list: 1) train_test_split() first, 2) fit any scaler/encoder/imputer ONLY on Xtr, 3) transform() (not fit_transform()) on Xte using that same already-fitted object — never re-fitting anything on test data."
+          }
         ]
       },
       {
@@ -1180,6 +1462,18 @@
             "url": "https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run the example and confirm the 5 per-fold scores and the mean/std (mean ≈0.947, std ≈0.010)."
+          },
+          {
+            "instruction": "Rerun with n_splits=10 instead of 5, and compare whether the mean and std change meaningfully with more, smaller folds.",
+            "expectOutcome": "10-fold gives mean=0.943, std=0.018 — confirmed by actually running it. The mean is nearly identical to the 5-fold result (0.947), but the std roughly doubles, since each of the 10 smaller folds is noisier individually — a real, measured illustration of the fold-count tradeoff, not just a claim."
+          }
         ]
       },
       {
@@ -1217,6 +1511,18 @@
             "label": "scikit-learn — Underfitting vs. Overfitting example",
             "url": "https://scikit-learn.org/stable/auto_examples/model_selection/plot_underfitting_overfitting.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run the example and confirm the three degrees' actual train/test MSE values match what's described here (degree=1 underfits, degree=2 fits well, degree=20 overfits badly)."
+          },
+          {
+            "instruction": "Try degree=5 and degree=10, and observe where test_mse starts climbing away from train_mse.",
+            "expectOutcome": "Overfitting is already visible at degree=5 (train_mse=0.59, test_mse=3.86 — the gap has opened up) and gets dramatically worse at degree=10 (train_mse=0.11, test_mse=315.4 — even worse than degree=20's 148.5) — confirmed by actually running it. The gap between train and test error widens well before degree=20, showing overfitting is a gradual slide, not a switch that flips at one specific degree."
           }
         ]
       },
@@ -1263,6 +1569,18 @@
             "label": "scikit-learn — classification_report documentation",
             "url": "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.classification_report.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the five metrics (accuracy=0.997, precision=1.000, recall=0.857, f1=0.923, roc-auc=1.000) and the dumb-baseline accuracy (0.977)."
+          },
+          {
+            "instruction": "Think of two different real scenarios — one where precision matters most (false alarms are costly) and one where recall matters most (missed cases are costly) — and explain your reasoning for each.",
+            "expectOutcome": "Two concrete, justified scenarios — e.g. spam-filtering a CEO's inbox prioritizes precision (a false positive could bury an important real email), while airport security screening prioritizes recall (a missed real threat is far costlier than an extra manual check)."
           }
         ]
       }
@@ -1312,6 +1630,18 @@
             "url": "https://www.statsmodels.org/stable/generated/statsmodels.tsa.seasonal.seasonal_decompose.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy pandas statsmodels` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the trend's rising values and the seasonal component's exact 12-month repetition (identical values 12 months apart)."
+          },
+          {
+            "instruction": "Change `period=12` to `period=6` (a wrong period for this data) and observe how much less coherent the resulting seasonal component looks.",
+            "expectOutcome": "With the wrong period=6, the seasonal component's std collapses to 1.48 (versus 11.65 with the correct period=12) — confirmed by actually running it — most of the real seasonal signal gets dumped into the residual instead (residual std jumps from 2.48 to 5.04), concretely showing the wrong period fails to capture the real yearly cycle."
+          }
         ]
       },
       {
@@ -1352,6 +1682,18 @@
             "label": "pandas — Series.rolling API reference",
             "url": "https://pandas.pydata.org/docs/reference/api/pandas.Series.rolling.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy pandas` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the NaN pattern (first 6 values) and the std reduction (14.84 → 9.95)."
+          },
+          {
+            "instruction": "Try window=3 and window=14, and compare how much each smooths the series.",
+            "expectOutcome": "std shrinks progressively with larger windows: window=3 gives std=12.68 (barely smoothed), window=7 gives 9.95 (the lesson's own value), window=14 gives 6.88 (heavily smoothed, and with 13 leading NaNs instead of 6) — confirmed by actually running all three, showing the window-size tradeoff as a real gradient, not just two endpoints."
           }
         ]
       },
@@ -1395,6 +1737,18 @@
             "label": "statsmodels — adfuller API reference",
             "url": "https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.adfuller.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy pandas statsmodels` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the original series fails the stationarity test (p≈0.83) while the differenced series passes it (p≈0.000000)."
+          },
+          {
+            "instruction": "Try differencing TWICE (differencing the already-differenced series again) and check whether the ADF p-value changes meaningfully from the single-differenced result.",
+            "expectOutcome": "Both are already extremely small and strongly reject non-stationarity — single-diff p≈3.4e-25, double-diff p≈7.7e-17 — confirmed by actually running both. Double-differencing didn't meaningfully improve anything (if anything the p-value crept slightly less extreme), confirming this lesson's own warning: once one round of differencing achieves stationarity, further differencing adds no real benefit."
           }
         ]
       },
@@ -1441,6 +1795,18 @@
             "label": "scikit-learn — mean_absolute_error API reference",
             "url": "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_absolute_error.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy pandas scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the naive (MAE=12.25) and seasonal naive (MAE=10.37) baseline values match what's described here."
+          },
+          {
+            "instruction": "Remove the seasonality term from the synthetic data generation (set seasonality to zero) and rerun both baselines.",
+            "expectOutcome": "Without real seasonality, plain naive (MAE=7.25) now BEATS seasonal naive (MAE=10.37) — confirmed by actually running it, a genuine reversal from the original result. This concretely proves seasonal naive's advantage was earned specifically from the data's real seasonal structure, not some inherent superiority of the method itself."
           }
         ]
       }
@@ -1495,6 +1861,18 @@
             "url": "https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy scikit-learn scipy` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the linear case gives a clean, high correlation and interpretable coefficient, while the U-shaped case gives a near-zero correlation despite an obviously real relationship."
+          },
+          {
+            "instruction": "Write one sentence describing a real business question where a simple stat would be the RIGHT choice, and one where you'd genuinely want ML instead.",
+            "expectOutcome": "Two concrete, well-justified examples — e.g. 'does tenure predict salary' (simple, interpretable, linear regression is enough) versus 'will this specific transaction be fraudulent' (genuinely complex, non-linear interactions, prediction accuracy matters more than a clean explanation)."
+          }
         ]
       },
       {
@@ -1541,6 +1919,18 @@
             "url": "/learn/aiml-confusion-matrix",
             "kind": "course"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the classification report and business-framed output (high-risk customer count at the default 0.5 threshold)."
+          },
+          {
+            "instruction": "Adjust high_risk_threshold to 0.3 and 0.7, and observe how the number of flagged customers changes.",
+            "expectOutcome": "Flagged count shrinks as the threshold rises: 51 flagged at 0.3, 26 at 0.5, 17 at 0.7 (out of 150 test customers) — confirmed by actually running all three. A lower threshold catches more true positives but also more false alarms (more retention offers sent to customers who wouldn't have churned); write one sentence recommending a threshold given the real cost of an unnecessary offer vs a missed at-risk customer."
+          }
         ]
       },
       {
@@ -1582,6 +1972,18 @@
             "label": "scikit-learn — Gradient Boosting",
             "url": "https://scikit-learn.org/stable/modules/ensemble.html#gradient-boosting",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run the example above and confirm the three accuracy scores (single tree < random forest < gradient boosting)."
+          },
+          {
+            "instruction": "Check `forest.feature_importances_` and identify which of the 10 features the random forest relied on most.",
+            "expectOutcome": "Feature 0 is the most important (importance≈0.253), followed by feature 4 (≈0.152) and feature 8 (≈0.111) — confirmed by actually running it and sorting the importances array, giving a real, checkable answer rather than treating the forest as a black box."
           }
         ]
       },
@@ -1629,6 +2031,19 @@
             "url": "https://scikit-learn.org/stable/modules/decomposition.html#pca",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples above (k-means elbow method, PCA on iris) and confirm the inertia values and the ~97.77% variance retained."
+          },
+          {
+            "instruction": "Add a wildly-scaled extra feature (e.g. uniform 0-1000) to the blob data, cluster it WITHOUT scaling, then scale it with StandardScaler first and re-cluster — compare how well each recovers the true 3 clusters.",
+            "expectOutcome": "A dramatic difference: unscaled clustering essentially fails to recover the true structure (adjusted Rand index ≈0.004, close to random), while scaling first perfectly recovers it (adjusted Rand index = 1.0) — confirmed by actually running both. The single wildly-scaled feature completely dominated the unscaled distance calculation, exactly the scaling lesson's warning now shown concretely inside clustering specifically.",
+            "troubleshooting": "If your unscaled result doesn't fail this badly, check that your extra feature's range is genuinely much larger than the blob features' natural range (roughly -10 to 10 here) — a mild scale difference won't dominate distances nearly as dramatically as a 100x+ difference will."
+          }
         ]
       },
       {
@@ -1675,6 +2090,15 @@
             "url": "https://hbr.org/2018/07/how-to-tell-a-story-with-data",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Take a finding from any earlier lesson in this module (or your own past analysis) and write a 'bad' technical-jargon version, following the pattern shown."
+          },
+          {
+            "instruction": "Write the corresponding 'good' plain-language, recommendation-led version of the same finding.",
+            "expectOutcome": "A clear before/after pair — the bad version leads with methodology and statistical jargon (coefficients, p-values, precision/recall); the good version leads with the actionable insight and a concrete recommendation in plain language, exactly mirroring this lesson's own bad_summary/good_summary example."
+          }
         ]
       },
       {
@@ -1716,6 +2140,22 @@
             "label": "Forage Interview — practice presenting this analysis live",
             "url": "/interview",
             "kind": "practice"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Choose a real, publicly available dataset and a genuine question worth answering."
+          },
+          {
+            "instruction": "Run the full analysis pipeline: explore the data (Module 1's stats), pull/join/aggregate as needed (Module 2's SQL/pandas), check correlations and consider whether a simple stat or ML model fits."
+          },
+          {
+            "instruction": "Write the final one-page summary following the skeleton above (question, finding, recommendation, evidence, methodology last).",
+            "expectOutcome": "A complete write-up where the finding and recommendation come FIRST, in plain language, with methodology available but not leading — matching this module's own storytelling lesson applied to a real deliverable, not just a code notebook."
+          },
+          {
+            "instruction": "Rehearse presenting your finding and recommendation out loud in under 2 minutes, without reading from notes.",
+            "troubleshooting": "If you find yourself narrating your code/methodology first when rehearsing out loud, that's the exact gap this lesson (and the storytelling lesson before it) targets — restart by saying the finding and recommendation in your very first sentence."
           }
         ]
       }

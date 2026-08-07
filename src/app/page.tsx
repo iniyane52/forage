@@ -52,7 +52,7 @@ const VALUE_PROPS = [
     body: "A grounded AI tutor for every lesson — hints before answers, Socratic, never does your quiz for you.",
     color: "#ff3d81",
     preview: (
-      <div className="rounded-lg bg-black/30 border border-white/[0.06] p-2.5 text-[10px] leading-relaxed">
+      <div className="rounded-lg bg-[rgb(var(--surface-rgb)/0.05)] border border-[var(--color-border)] p-2.5 text-[10px] leading-relaxed">
         <p className="text-[#7d99a3] mb-1">You: &ldquo;Why is this recursion O(n²)?&rdquo;</p>
         <p className="text-[#ff9db3]">
           Tutor: &ldquo;Look at what your loop rebuilds on every call — what&rsquo;s getting recreated
@@ -121,7 +121,7 @@ const HOW_IT_WORKS = [
 
 export default function LandingPage() {
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col force-dark-scope">
       {/* IntroSplash first: its layout effect must set the data-splash flag before
           HeroHeadline (a later sibling, deeper in the tree) reads it. */}
       <IntroSplash />
@@ -134,21 +134,21 @@ export default function LandingPage() {
         <div className="glass border-x-0 border-t-0 rounded-none">
           <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-4">
             <span className="font-bold text-lg tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
-              Forage<span className="text-[#00e5ff]">.</span>
+              Forage<span className="text-[var(--color-primary)]">.</span>
             </span>
-            <nav className="hidden sm:flex gap-5 text-sm text-[#7d99a3] ml-6">
-              <a href="#paths" className="hover:text-white transition-colors">Career paths</a>
-              <a href="#interview" className="hover:text-white transition-colors">Forage Interview</a>
-              <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+            <nav className="hidden sm:flex gap-5 text-sm text-[var(--color-text-secondary)] ml-6">
+              <a href="#paths" className="hover:text-[var(--color-text)] transition-colors">Career paths</a>
+              <a href="#interview" className="hover:text-[var(--color-text)] transition-colors">Forage Interview</a>
+              <a href="#pricing" className="hover:text-[var(--color-text)] transition-colors">Pricing</a>
             </nav>
             <LandingMobileNav />
             <div className="ml-auto flex items-center gap-2">
-              <Link href="/auth" className="px-3.5 py-2 rounded-xl text-sm text-[#7d99a3] hover:text-white transition-colors">
+              <Link href="/auth" className="px-3.5 py-2 rounded-xl text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors">
                 Sign in
               </Link>
               <Link
                 href="/auth"
-                className="px-4 py-2 rounded-xl bg-[#00e5ff] text-[#05070a] text-sm font-semibold hover:bg-[#33ebff] transition-colors"
+                className="px-4 py-2 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-semibold hover:opacity-90 transition-opacity"
               >
                 Start free
               </Link>
@@ -168,7 +168,7 @@ export default function LandingPage() {
           header={
             <div>
               <FadeUp>
-                <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[#ff3d81] glass rounded-full px-3 py-1.5 mb-6">
+                <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[var(--color-accent)] glass rounded-full px-3 py-1.5 mb-6">
                   <Sparkles size={13} /> Free Common Core + 6 career paths
                 </p>
                 <HeroHeadline />
@@ -180,7 +180,7 @@ export default function LandingPage() {
                 <div className="mt-8 flex items-center gap-3 flex-wrap">
                   <Link
                     href="/auth"
-                    className="inline-flex items-center gap-1.5 px-6 py-3 rounded-xl bg-[#00e5ff] text-[#05070a] text-sm font-semibold hover:bg-[#33ebff] transition-colors"
+                    className="inline-flex items-center gap-1.5 px-6 py-3 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-semibold hover:opacity-90 transition-opacity"
                   >
                     Start learning free <ArrowRight size={16} />
                   </Link>
@@ -191,7 +191,7 @@ export default function LandingPage() {
                     See Forage Interview
                   </a>
                 </div>
-                <p className="text-xs text-[#7d99a3] mt-4">
+                <p className="text-xs text-[var(--color-text-secondary)] mt-4">
                   180 lessons across 7 tracks — start studying today.
                 </p>
               </FadeUp>
@@ -220,8 +220,8 @@ export default function LandingPage() {
               <div className="flex items-end justify-between gap-6 flex-wrap mb-8">
                 <TerminalHeading text="The full toolkit, not just lessons" className="text-xl sm:text-2xl" />
                 <div className="flex items-center gap-8">
-                  <StatCallout value={175} suffix="+" label="original lessons across 7 tracks" accent="#00e5ff" />
-                  <StatCallout value={6} label="career paths, basics to advanced" accent="#ff3d81" />
+                  <StatCallout value={175} suffix="+" label="original lessons across 7 tracks" accent="var(--color-primary)" />
+                  <StatCallout value={6} label="career paths, basics to advanced" accent="var(--color-accent)" />
                 </div>
               </div>
             </FadeUp>
@@ -258,17 +258,17 @@ export default function LandingPage() {
             <FadeUp>
               <div className="max-w-5xl mx-auto px-4 flex items-end justify-between gap-4 mb-5 flex-wrap">
                 <div>
-                  <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-[#7d99a3] mb-1.5">
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--color-text-secondary)] mb-1.5">
                     Six tracks, one curriculum
                   </p>
                   <div className="flex items-center gap-2.5">
-                    <GraduationCap size={24} className="text-[#ff3d81] shrink-0" />
+                    <GraduationCap size={24} className="text-[var(--color-accent)] shrink-0" />
                     <SectionHeading className="text-2xl sm:text-3xl">
                       {"Start free, choose your path when you’re ready"}
                     </SectionHeading>
                   </div>
                 </div>
-                <p className="text-sm text-[#7d99a3] max-w-xs">
+                <p className="text-sm text-[var(--color-text-secondary)] max-w-xs">
                   Everyone begins with the free Common Core, then picks a track — each
                   basics-to-advanced with a capstone.
                 </p>
@@ -298,7 +298,7 @@ export default function LandingPage() {
               Simple, honest pricing
             </SectionHeading>
             <PricingCards />
-            <p className="text-center text-xs text-[#7d99a3] mt-6">
+            <p className="text-center text-xs text-[var(--color-text-secondary)] mt-6">
               Forage never claims to guarantee placement — we build for the real hiring loop instead.
             </p>
           </ScrollParallax>

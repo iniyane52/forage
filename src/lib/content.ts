@@ -13,6 +13,17 @@ export type Resource = {
   url: string;
   kind: "docs" | "course" | "book" | "practice" | "video" | "reference" | "community";
 };
+export type HandsOnStep = {
+  instruction: string;
+  /** What you should actually see/get if you did the step right -- omitted for
+   * reflective/planning steps that have no crisp "correct output" to check against. */
+  expectOutcome?: string;
+  /** The most common real wrong-but-plausible result and what it actually means --
+   * targets beginners' #1 documented frustration (ambiguous errors, not knowing if
+   * what they're seeing is a real problem). Only present where a specific common
+   * variant is worth naming, not a general catch-all for every possible error. */
+  troubleshooting?: string;
+};
 export type Topic = {
   id: string;
   title: string;
@@ -22,6 +33,7 @@ export type Topic = {
   warn?: string;
   mistakes?: string[];
   handsOn: string;
+  handsOnSteps?: HandsOnStep[];
   doneWhen: string;
   checks?: Check[];
   keyTakeaways?: string[];
@@ -69,7 +81,15 @@ export function getAdjacent(slug: string): { prev?: FlatLesson; next?: FlatLesso
 /** ~200 wpm against the prose fields only -- code examples are skimmed/run, not read
  * at reading speed, so they're deliberately excluded from the estimate. */
 export function estimateReadingMinutes(topic: Topic): number {
-  const prose = [topic.concept, topic.analogy, topic.handsOn, topic.doneWhen, ...(topic.mistakes ?? []), ...(topic.keyTakeaways ?? [])]
+  const prose = [
+    topic.concept,
+    topic.analogy,
+    topic.handsOn,
+    topic.doneWhen,
+    ...(topic.mistakes ?? []),
+    ...(topic.keyTakeaways ?? []),
+    ...(topic.handsOnSteps ?? []).flatMap((s) => [s.instruction, s.expectOutcome, s.troubleshooting]),
+  ]
     .filter(Boolean)
     .join(" ");
   const words = prose.trim().split(/\s+/).filter(Boolean).length;

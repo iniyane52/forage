@@ -103,7 +103,7 @@ export function TutorDrawer({
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-full bg-gradient-to-r from-[#00e5ff] to-[#ff3d81] text-[#05070a] text-sm font-semibold shadow-lg shadow-[#00e5ff]/25 hover:scale-105 transition-transform"
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-[var(--color-on-primary)] text-sm font-semibold shadow-lg shadow-[var(--color-primary)]/25 hover:scale-105 transition-transform"
         >
           <Sparkles size={16} /> Ask the Tutor
         </button>
@@ -121,54 +121,54 @@ export function TutorDrawer({
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             className="fixed bottom-6 right-6 z-50 w-[min(92vw,380px)] max-h-[70vh] flex flex-col glass rounded-2xl overflow-hidden"
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
               <p className="text-sm font-bold flex items-center gap-1.5">
-                <Sparkles size={15} className="text-[#ff3d81]" /> Forage Tutor
+                <Sparkles size={15} className="text-[var(--color-secondary)]" /> Forage Tutor
               </p>
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Close tutor"
-                className="text-[#7d99a3] hover:text-white"
+                className="text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
               >
                 <XCircle size={18} />
               </button>
             </div>
-            <p className="text-[11px] text-[#7d99a3] px-4 pt-2">
+            <p className="text-[11px] text-[var(--color-text-secondary)] px-4 pt-2">
               Grounded in <b>&ldquo;{lessonTitle}&rdquo;</b> -- hints first, never full quiz answers.
             </p>
 
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5 min-h-[120px]">
               {messages.length === 0 && !unavailable && (
-                <p className="text-xs text-[#7d99a3]">Stuck on something in this lesson? Ask away.</p>
+                <p className="text-xs text-[var(--color-text-secondary)]">Stuck on something in this lesson? Ask away.</p>
               )}
               {messages.map((m, i) => (
                 <div
                   key={i}
                   className={`text-sm rounded-xl px-3 py-2 max-w-[85%] ${
                     m.role === "user"
-                      ? "ml-auto bg-[#00e5ff]/20 text-white"
-                      : "bg-white/[0.05] text-[#ece9f5]"
+                      ? "ml-auto bg-[var(--color-primary)]/20 text-[var(--color-text)]"
+                      : "bg-[rgb(var(--surface-rgb)/0.05)] text-[var(--color-text)]"
                   }`}
                 >
                   {m.text}
                 </div>
               ))}
               {busy && (
-                <div className="flex items-center gap-2 text-xs text-[#7d99a3]">
+                <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
                   <Loader2 size={13} className="animate-spin" /> Thinking...
                 </div>
               )}
             </div>
 
             {notice && (
-              <p role="status" className="text-xs text-[#ffb020] px-4 pb-1">
+              <p role="status" className="text-xs text-[var(--color-warning)] px-4 pb-1">
                 {notice}
               </p>
             )}
 
             {unavailable ? (
-              <div className="p-4 border-t border-white/[0.08]">
-                <p className="text-xs text-[#7d99a3] mb-2">
+              <div className="p-4 border-t border-[var(--color-border)]">
+                <p className="text-xs text-[var(--color-text-secondary)] mb-2">
                   The live tutor isn&rsquo;t configured yet. Use Claude instead:
                 </p>
                 <button
@@ -179,19 +179,19 @@ export function TutorDrawer({
                 </button>
               </div>
             ) : (
-              <div className="p-3 border-t border-white/[0.08] flex gap-2">
+              <div className="p-3 border-t border-[var(--color-border)] flex gap-2">
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && send()}
                   placeholder="Ask about this lesson..."
-                  className="flex-1 bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#00e5ff]"
+                  className="flex-1 bg-[rgb(var(--surface-rgb)/0.05)] border border-[var(--color-border)] rounded-xl px-3 py-2 text-sm outline-none focus:border-[var(--color-primary)]"
                 />
                 <button
                   onClick={send}
                   disabled={busy || !input.trim()}
                   aria-label="Send message"
-                  className="px-3 py-2 rounded-xl bg-[#00e5ff] text-[#05070a] text-sm font-semibold disabled:opacity-50"
+                  className="px-3 py-2 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-semibold disabled:opacity-50"
                 >
                   →
                 </button>

@@ -52,6 +52,31 @@
             "url": "https://numpy.org/doc/stable/user/basics.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run `import numpy as np` then `a = np.array([1, 2, 3, 4])`, `print(a * 2)`, `print(a.shape)`, `print(a.dtype)`.",
+            "expectOutcome": "`[2 4 6 8]`, then `(4,)`, then `int64` — every element doubled in one step, no loop, plus the shape (4 elements, 1 dimension) and the type."
+          },
+          {
+            "instruction": "Create a 2D array for 3 students' scores on 2 tests, e.g. `scores = np.array([[85, 90], [70, 75], [95, 100]])`."
+          },
+          {
+            "instruction": "Run `print(scores.mean(axis=1))` (each student's average).",
+            "expectOutcome": "`[87.5 72.5 97.5]` — one average per ROW, axis=1 collapsing across columns."
+          },
+          {
+            "instruction": "Run `print(scores.mean(axis=0))` (each test's average).",
+            "expectOutcome": "`[83.33 88.33]` — one average per COLUMN this time, axis=0 collapsing across rows.",
+            "troubleshooting": "If your two results look swapped from what you expected, that's the single most common real numpy confusion — axis=0 is always the FIRST dimension in `.shape` (rows collapse), axis=1 the second (columns collapse). Re-check which axis you actually meant."
+          },
+          {
+            "instruction": "Check both against the raw numbers by hand for just the first student (85, 90) — does `(85+90)/2` match the first value in your `axis=1` result?",
+            "expectOutcome": "87.5 both ways — confirming the vectorised result matches what you'd compute by hand, just automatically and for every row/column at once."
+          }
         ]
       },
       {
@@ -101,6 +126,27 @@
             "label": "pandas — official documentation",
             "url": "https://pandas.pydata.org/docs/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install pandas` in your terminal before continuing."
+          },
+          {
+            "instruction": "Build a DataFrame with 5+ rows about something real to you, with at least 3 columns of different types (text, number, boolean/category)."
+          },
+          {
+            "instruction": "Run `df[df[\"<numeric column>\"] > <some value>]` to filter it.",
+            "expectOutcome": "Only the rows matching your condition — if you instead see a column of True/False values, you forgot to wrap the condition back in `df[...]`.",
+            "troubleshooting": "`df[\"score\"] > 80` alone gives you a Series of True/False labels, not filtered rows — the actual filtering happens when you wrap the WHOLE DataFrame in that condition: `df[df[\"score\"] > 80]`."
+          },
+          {
+            "instruction": "Add a computed column with `.apply()`, e.g. `df[\"new_col\"] = df[\"<some column>\"].apply(lambda x: ...)`.",
+            "expectOutcome": "A new column appears in your DataFrame, one value per row, each computed from that row's original value by your lambda."
+          },
+          {
+            "instruction": "Run a `.groupby(\"<category column>\")[\"<numeric column>\"].mean()`.",
+            "expectOutcome": "One average per distinct category value in your grouping column — like a spreadsheet pivot table, computed in one line."
           }
         ]
       },
@@ -153,6 +199,30 @@
             "url": "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.duplicated.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy pandas` in your terminal before continuing."
+          },
+          {
+            "instruction": "Take your DataFrame (or a fresh small one) and deliberately introduce: one missing value (`np.nan` or `None`), one exact duplicate row, and one inconsistent text value (e.g. 'Chennai' vs 'chennai')."
+          },
+          {
+            "instruction": "Run `df.isna().sum()`.",
+            "expectOutcome": "A count of missing values PER COLUMN — exactly which columns have gaps and how many."
+          },
+          {
+            "instruction": "Run `df.duplicated().sum()`.",
+            "expectOutcome": "The count of rows that are EXACT copies of an earlier row — your deliberately-duplicated row should show up here."
+          },
+          {
+            "instruction": "Normalize the inconsistent text column first: `df[\"col\"] = df[\"col\"].str.strip().str.lower()`, THEN run `df = df.drop_duplicates()`.",
+            "troubleshooting": "If you drop duplicates BEFORE normalizing casing, a row that only differs by 'Chennai' vs 'chennai' won't be caught as a duplicate yet — order matters here, normalize text first."
+          },
+          {
+            "instruction": "Fill the missing numeric value: `df[\"col\"] = df[\"col\"].fillna(df[\"col\"].mean())`, then print the final DataFrame.",
+            "expectOutcome": "No more NaN in that column, replaced with the column's own average computed from the remaining real values — verify by hand: does the filled number actually equal the average of the other values in that column?"
+          }
         ]
       },
       {
@@ -203,6 +273,24 @@
             "url": "https://docs.jupyter.org/en/latest/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "In a terminal, from a new project folder, run `python -m venv .venv`.",
+            "expectOutcome": "A new `.venv` folder appears — an isolated Python environment for just this project."
+          },
+          {
+            "instruction": "Activate it (`.venv\\Scripts\\activate` on Windows, `source .venv/bin/activate` on Mac/Linux), then run `pip install numpy pandas matplotlib jupyter`.",
+            "expectOutcome": "Your terminal prompt now shows `(.venv)` at the start, and pip install output ends with everything successfully installed INTO that folder, not system-wide.",
+            "troubleshooting": "If `pip install` seems to affect packages outside this project (or a different project breaks later), double check you actually activated the venv first — installing without activating installs globally, which is exactly the mistake this lesson warns about."
+          },
+          {
+            "instruction": "Run `jupyter notebook`, create a new notebook, and write 3 cells: one creating a small DataFrame, one filtering it, one printing a `.describe()` summary."
+          },
+          {
+            "instruction": "Run each cell once (in order), then use the 'Restart & Run All' option.",
+            "expectOutcome": "The exact same output as your first run-through, cell by cell top to bottom — confirming the notebook works cleanly from a fresh state, not just because of leftover variables from your earlier out-of-order exploring."
+          }
         ]
       },
       {
@@ -252,6 +340,23 @@
             "label": "matplotlib — pyplot tutorial",
             "url": "https://matplotlib.org/stable/tutorials/pyplot.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy matplotlib` in your terminal before continuing."
+          },
+          {
+            "instruction": "Using two numeric columns from any dataset (or the example arrays), run `plt.scatter(x, y)`, add `plt.xlabel(...)`, `plt.ylabel(...)`, `plt.title(...)`, then `plt.show()`.",
+            "expectOutcome": "A scatter plot window with labeled axes and a title — check whether the points roughly follow a line, curve, or show no pattern at all."
+          },
+          {
+            "instruction": "Using one numeric column, run `plt.hist(values, bins=5)` with the same labeling.",
+            "expectOutcome": "A histogram showing how your values are distributed — look specifically for any bar sitting alone, far from the rest, which is a visual outlier."
+          },
+          {
+            "instruction": "Write one sentence for each plot: what does it tell you about the data that scrolling through the raw numbers wouldn't have shown you as quickly?",
+            "expectOutcome": "For the scatter: whether a relationship exists and roughly what shape. For the histogram: the overall distribution shape and whether any single value sits apart from the rest — both genuinely hard to see from a list of raw numbers, easy to see in one glance at a plot."
           }
         ]
       }
@@ -310,6 +415,26 @@
             "url": "https://www.khanacademy.org/math/linear-algebra/vectors-and-spaces/dot-cross-products",
             "kind": "course"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy` in your terminal before continuing."
+          },
+          {
+            "instruction": "Pick 3 features about yourself or a friend (e.g. hours slept, cups of coffee, minutes exercised) and 3 made-up weights for how much each contributes to feeling energetic."
+          },
+          {
+            "instruction": "Compute the dot product BY HAND first: multiply each feature by its matching weight and add the results."
+          },
+          {
+            "instruction": "Now run `np.dot(features, weights)` on the same numbers.",
+            "expectOutcome": "The exact same number as your by-hand calculation — confirming `np.dot` does precisely what you just did manually, just automatically.",
+            "troubleshooting": "If NumPy raises a shape-mismatch error instead of a number, your two arrays have different lengths — a dot product requires the same number of elements in both."
+          },
+          {
+            "instruction": "Change ONE weight and re-run `np.dot`.",
+            "expectOutcome": "A different result, shifted specifically by (that feature's value × the amount you changed the weight by) — a concrete, checkable demonstration of how one weight change ripples into the final prediction."
+          }
         ]
       },
       {
@@ -361,6 +486,27 @@
             "url": "https://www.3blue1brown.com/topics/linear-algebra",
             "kind": "course"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy` in your terminal before continuing."
+          },
+          {
+            "instruction": "Build a matrix `X` with 4-5 rows (examples) and 3 columns (features), and a matching 3-element `weights` vector."
+          },
+          {
+            "instruction": "Run `predictions = X @ weights` then `print(predictions)`.",
+            "expectOutcome": "One number per ROW of X — same count as your number of examples, one prediction each, computed in a single line."
+          },
+          {
+            "instruction": "Verify ONE row by hand using `np.dot(X[0], weights)` (or manual multiply-and-add).",
+            "expectOutcome": "The exact same value as `predictions[0]` — confirming `X @ weights` is really just running the single-row dot product from the last lesson, once per row, automatically.",
+            "troubleshooting": "If `X @ weights` raises a dimension-mismatch error, check that the number of COLUMNS in X matches the number of elements in weights — that shared dimension is what gets summed over."
+          },
+          {
+            "instruction": "Run `print(X.shape)`, `print(weights.shape)`, `print((X @ weights).shape)`.",
+            "expectOutcome": "`(n, 3)`, `(3,)`, `(n,)` — n examples in, n predictions out, with the middle dimension (3) being what matched and got summed away."
+          }
         ]
       },
       {
@@ -406,6 +552,24 @@
             "label": "3Blue1Brown — Gradient descent, how neural networks learn (free video)",
             "url": "https://www.3blue1brown.com/lessons/gradient-descent",
             "kind": "course"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Define `error(w) = (w - 3) ** 2` and `approx_gradient(w)` as the small numerical-derivative function from this lesson's example."
+          },
+          {
+            "instruction": "Run it for `w` in `[0, 2, 3, 5]` and print the gradient at each.",
+            "expectOutcome": "Negative gradients below w=3 (0 and 2), exactly 0 AT w=3, and a positive gradient above it (at w=5) — confirming the gradient is 0 exactly at the true minimum and has opposite signs on either side."
+          },
+          {
+            "instruction": "Write a loop: start at `w = 0`, and 20 times do `w = w - 0.1 * approx_gradient(w)`, printing w each step.",
+            "expectOutcome": "w climbing steadily toward 3 — roughly 0.6, 1.08, 1.46... slowing down as it gets closer, landing around 2.96-2.97 after 20 steps, never quite reaching exactly 3 but converging toward it.",
+            "troubleshooting": "If w shoots far past 3 or oscillates wildly instead of settling, your step size (0.1 here) is too large for this problem — a real, common training failure mode called an unstable/too-high learning rate."
+          },
+          {
+            "instruction": "Write one sentence: why does the update SUBTRACT the gradient rather than add it?",
+            "expectOutcome": "The gradient points toward increasing error — subtracting it moves w in the direction that DECREASES error instead, which is the entire mechanism gradient descent relies on."
           }
         ]
       },
@@ -457,6 +621,23 @@
             "url": "https://scikit-learn.org/stable/modules/calibration.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run `spam_probs = np.array([0.92, 0.05, 0.51, 0.88, 0.12])` then `print(spam_probs > 0.3)`, `print(spam_probs > 0.5)`, `print(spam_probs > 0.7)`.",
+            "expectOutcome": "3 spam predictions at threshold 0.3, still 3 at 0.5 (nothing in this exact data falls between 0.3 and 0.5), then only 2 at 0.7 — the 0.51 email specifically flips from 'spam' to 'not spam' once the threshold passes it."
+          },
+          {
+            "instruction": "Write one sentence: as the threshold rises, what happens to the NUMBER of things predicted positive?",
+            "expectOutcome": "It can only stay the same or go DOWN, never up — raising the bar for 'confident enough to call it spam' can only exclude borderline cases, never newly include one."
+          },
+          {
+            "instruction": "Write one more sentence: for something like cancer screening (versus spam filtering), would you want a HIGHER or LOWER threshold than 0.5, and why?",
+            "expectOutcome": "Lower — deliberately catching more true cases (fewer missed diagnoses) is worth accepting more false alarms, the opposite tradeoff priority from a spam filter where a false positive (real email marked spam) is more annoying than a missed spam email."
+          }
         ]
       },
       {
@@ -506,6 +687,28 @@
             "label": "Google Machine Learning Crash Course — Loss",
             "url": "https://developers.google.com/machine-learning/crash-course/linear-regression/loss",
             "kind": "course"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run the `true_values`/`predictions` MSE example and note the baseline MSE.",
+            "expectOutcome": "`0.175` — a small number, since all 4 predictions are fairly close to their true values."
+          },
+          {
+            "instruction": "Change 2-3 predictions to be further from the truth and recompute MSE.",
+            "expectOutcome": "A meaningfully higher MSE than 0.175 — confirming MSE genuinely tracks 'how wrong overall', going up as predictions get worse."
+          },
+          {
+            "instruction": "Now make just ONE prediction wildly wrong (e.g. change one value to be off by 20) and recompute MSE.",
+            "expectOutcome": "A dramatic jump — far larger than the increase from several small errors combined, e.g. jumping to 100+ from a single bad prediction versus ~1.1 from several moderately-worse ones.",
+            "troubleshooting": "If the jump surprises you, that's the point of this exercise: squaring the error means being off by 20 contributes 400 to the sum, not 20 — MSE is deliberately far more sensitive to a few extreme errors than to many small ones."
+          },
+          {
+            "instruction": "Write one sentence: why might that squaring behavior be actively WRONG for a dataset with a few extreme, unrepresentative outliers?",
+            "expectOutcome": "A model trained on MSE will contort itself trying to reduce the huge penalty from an outlier, potentially at the cost of fitting the rest of the data worse — for outlier-heavy data, a loss less sensitive to extreme errors (like MAE) is often a better fit."
           }
         ]
       }
@@ -564,6 +767,25 @@
             "url": "https://scikit-learn.org/stable/getting_started.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run the `LinearRegression` example: `X = [[0,0],[1,1],[2,2]]`, `y = [0,1,2]`, `reg.fit(X, y)`, then `print(reg.coef_)` and `print(reg.intercept_)`.",
+            "expectOutcome": "`[0.5 0.5]` for coef_, and something like `1.11e-16` for intercept_ — a tiny floating-point number, not a clean 0.0.",
+            "troubleshooting": "That `1.11e-16` isn't a bug — it's ordinary floating-point rounding noise from the underlying math. Treat anything smaller than about 1e-10 as effectively zero, not a sign your fit failed."
+          },
+          {
+            "instruction": "Add a third feature column to both X and y (make up 2 more rows) and re-fit.",
+            "expectOutcome": "New `.coef_`/`.intercept_` values reflecting your new data — one weight per feature column now, matching however many columns you gave X."
+          },
+          {
+            "instruction": "Call `.predict()` on 2 brand-new rows you didn't include in training, then check `.shape` on the result.",
+            "expectOutcome": "A shape of `(2,)` — exactly one prediction per row you passed in, confirming predict's output size always tracks your INPUT row count.",
+            "troubleshooting": "If you call `.predict()` before `.fit()`, you'll get a 'not fitted' error — the model has no learned coef_/intercept_ to use yet."
+          }
         ]
       },
       {
@@ -613,6 +835,23 @@
             "label": "scikit-learn — Cross-validation guide",
             "url": "https://scikit-learn.org/stable/modules/cross_validation.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Build or reuse a small dataset, then run `train_test_split(X, y, test_size=0.25, random_state=42)`."
+          },
+          {
+            "instruction": "Print the `.shape` of all four outputs (`X_train`, `X_test`, `y_train`, `y_test`).",
+            "expectOutcome": "X_train + X_test row counts add up to your original total, split roughly 75/25 — e.g. a 20-row dataset gives 15 train / 5 test."
+          },
+          {
+            "instruction": "Run the exact same split again with a DIFFERENT `random_state` (e.g. 99 instead of 42).",
+            "expectOutcome": "A genuinely different set of rows in `y_test` this time — same sizes, different actual rows selected, confirming `random_state` is what makes a split reproducible (or not).",
+            "troubleshooting": "If you forget `random_state` entirely, every single rerun gives a different split — making it impossible to fairly tell whether a later model change actually helped or you just got a luckier split."
           }
         ]
       },
@@ -665,6 +904,26 @@
             "url": "https://scikit-learn.org/stable/modules/model_evaluation.html#regression-metrics",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Using a numeric-prediction dataset (the housing example or your own), split into train/test, then `model.fit(X_train, y_train)`."
+          },
+          {
+            "instruction": "Run `model.predict(X_test)` and compute `mean_squared_error(y_test, predictions)`.",
+            "expectOutcome": "A real MSE number — on the housing example specifically, something around 4-5, small relative to house prices in the hundreds."
+          },
+          {
+            "instruction": "Compute a trivial baseline: predict the TRAINING MEAN for every single test row, and compute ITS mean_squared_error against y_test.",
+            "expectOutcome": "A much LARGER MSE than your model's — on the housing example, the baseline MSE is over 1000x worse (thousands vs single digits), confirming the model is genuinely learning something, not just getting lucky."
+          },
+          {
+            "instruction": "Write one sentence: if your model's MSE were only slightly better than the baseline's, what would that tell you?",
+            "expectOutcome": "The model isn't learning much real signal from the features — it's barely beating 'just guess the average every time', a real warning sign worth investigating rather than declaring success."
+          }
         ]
       },
       {
@@ -714,6 +973,23 @@
             "label": "scikit-learn — accuracy_score and classification metrics",
             "url": "https://scikit-learn.org/stable/modules/model_evaluation.html#accuracy-score",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Fit a `LogisticRegression(max_iter=200)` on a categorical-target dataset (iris or your own), then run both `.predict()` and `.predict_proba()` on the same 5 test rows."
+          },
+          {
+            "instruction": "Print both outputs side by side.",
+            "expectOutcome": "`.predict()` gives one class label per row; `.predict_proba()` gives one probability PER CLASS per row, all rows summing to ~1.0 across their classes.",
+            "troubleshooting": "If scikit-learn warns about convergence, increase `max_iter` — LogisticRegression trains iteratively (it's Module 2's gradient descent under the hood), and the default iteration limit sometimes isn't enough."
+          },
+          {
+            "instruction": "Find the row with the LOWEST max probability across its classes (the one where the top class isn't overwhelmingly ahead).",
+            "expectOutcome": "A row where the top two class probabilities are close together (e.g. 0.51 vs 0.49) — write one sentence connecting this to Module 2's probability lesson: this is what 'the model is genuinely unsure' looks like numerically, not a bug."
           }
         ]
       },
@@ -765,6 +1041,27 @@
             "url": "https://scikit-learn.org/stable/modules/ensemble.html#random-forests",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Load the digits dataset, split into train/test, then fit an unrestricted `DecisionTreeClassifier(random_state=42)`."
+          },
+          {
+            "instruction": "Print BOTH train and test accuracy for the tree.",
+            "expectOutcome": "Train accuracy at (or very near) 1.0 (100%), test accuracy noticeably lower, around 0.85 — a real, sizeable gap between the two."
+          },
+          {
+            "instruction": "Fit a `RandomForestClassifier(n_estimators=100, random_state=42)` on the same split, and print its train and test accuracy too.",
+            "expectOutcome": "Train accuracy still ~1.0, but test accuracy meaningfully HIGHER than the single tree's — around 0.97 on this dataset, closing most of the tree's gap.",
+            "troubleshooting": "Don't assume the forest wins by this much on every dataset — on small, easy datasets (like iris) a single well-sized tree can sometimes match or beat a forest. Always compare on YOUR actual data rather than assuming the 'more advanced' model automatically wins."
+          },
+          {
+            "instruction": "Write one sentence: which model showed the bigger train/test gap, and what does that gap tell you?",
+            "expectOutcome": "The single tree — a big train/test gap is a direct sign of overfitting (memorizing training data rather than learning a generalizable pattern), and the forest's smaller gap is exactly why ensembling multiple trees tends to generalize better."
+          }
         ]
       },
       {
@@ -810,6 +1107,23 @@
             "label": "Google Machine Learning Crash Course — model families overview",
             "url": "https://developers.google.com/machine-learning/crash-course",
             "kind": "course"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Take the 3-model comparison loop (LogisticRegression, DecisionTreeClassifier, RandomForestClassifier) and add a 4th model of your choice from scikit-learn's docs (e.g. `KNeighborsClassifier`)."
+          },
+          {
+            "instruction": "Run all 4 on the SAME train/test split and print each one's test accuracy.",
+            "expectOutcome": "Four distinct accuracy numbers, all comparable because they used the identical split — on iris, expect all 4 somewhere in the 0.88-0.98 range, with the ranking itself being real, useful information.",
+            "troubleshooting": "If you compared models using DIFFERENT train/test splits, any difference you see might just be from the data split, not the model itself — always keep the split fixed when comparing."
+          },
+          {
+            "instruction": "Write 2-3 sentences: which model won on test accuracy, and would you trust it in a context where you need to explain individual predictions to a human?",
+            "expectOutcome": "A real tradeoff articulated — e.g. 'Model X won by a small margin, but Logistic Regression's coefficients are directly interpretable while the winner is more of a black box, so for an explainability-critical use case I'd lean toward the more interpretable option even at a small accuracy cost.'"
           }
         ]
       }
@@ -873,6 +1187,24 @@
             "url": "https://www.youtube.com/watch?v=Kdsp6soqA7o",
             "kind": "video"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Take a classifier from Module 3 (or the exact `y_true`/`y_pred` example), run `confusion_matrix(y_true, y_pred).ravel()` and unpack it as `tn, fp, fn, tp`.",
+            "expectOutcome": "Four numbers in that exact order — on the lesson's own example: `TN=2 FP=1 FN=2 TP=3`.",
+            "troubleshooting": "scikit-learn's `.ravel()` order is always TN, FP, FN, TP — mixing this order up silently swaps your metrics without any error, so double-check you unpacked it in that exact sequence."
+          },
+          {
+            "instruction": "Print the full matrix with `confusion_matrix(y_true, y_pred)` (no `.ravel()`).",
+            "expectOutcome": "A 2×2 grid where ROWS are the actual class and COLUMNS are what the model predicted — the diagonal (top-left, bottom-right) is where it got things right."
+          },
+          {
+            "instruction": "Point to which cell is False Positives and which is False Negatives in your printed matrix, then write one sentence: for YOUR specific problem, which mistake (a false alarm or a miss) would matter more?",
+            "expectOutcome": "A concrete, problem-specific answer — e.g. for a spam filter, a false positive (real email marked spam) is often worse than a false negative (spam that slips through); for a disease screen, it's usually the reverse."
+          }
         ]
       },
       {
@@ -923,6 +1255,27 @@
             "url": "https://developers.google.com/machine-learning/crash-course/classification/precision-and-recall",
             "kind": "course"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Compute `precision_score(y_true, y_pred)` and `recall_score(y_true, y_pred)` on a classifier's test predictions.",
+            "expectOutcome": "Two different numbers — on the lesson's own example, precision 0.75 and recall 0.6, deliberately NOT the same, since they measure different failure modes."
+          },
+          {
+            "instruction": "Lower the decision threshold (e.g. `predict_proba()[:, 1] > 0.3` instead of the default 0.5) and recompute both.",
+            "expectOutcome": "Recall goes UP, precision goes DOWN — more things get flagged positive, catching more real positives but also more false alarms."
+          },
+          {
+            "instruction": "Push the extreme: predict EVERYTHING positive (ignore the model entirely) and compute both metrics.",
+            "expectOutcome": "Recall hits 1.0 (you literally cannot miss a positive if you flag everything) while precision craters (e.g. 0.4) — proof that recall alone is trivially gameable and must be read alongside precision."
+          },
+          {
+            "instruction": "Write one sentence naming a real problem where you'd deliberately accept LOW precision to get HIGH recall.",
+            "expectOutcome": "Something like a cancer screening test — missing a real case (low recall) is far worse than a false alarm that gets ruled out by a follow-up test (low precision), so you'd deliberately tune toward recall."
+          }
         ]
       },
       {
@@ -972,6 +1325,20 @@
             "label": "Wikipedia — F-score (harmonic mean rationale)",
             "url": "https://en.wikipedia.org/wiki/F-score",
             "kind": "reference"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Compute precision and recall for a classifier, then `f1_score(y_true, y_pred)`, and separately by hand: `2 * p * r / (p + r)`.",
+            "expectOutcome": "The two F1 values match exactly (e.g. both ≈0.667 on the lesson's example) — confirming `f1_score` is really just computing the harmonic mean formula."
+          },
+          {
+            "instruction": "Construct a case with precision=1.0, recall=0.0 (or close to it) and compute both a plain average and the harmonic-mean F1 by hand.",
+            "expectOutcome": "Plain average gives a falsely reassuring 0.5; F1 gives 0.0 — the honest answer, since a model that never actually catches a real positive is worthless regardless of how 'precise' its rare guesses are.",
+            "troubleshooting": "If your F1 comes out closer to the plain average than expected, double check you're using the HARMONIC mean formula `2pr/(p+r)`, not `(p+r)/2` — they look similar but behave very differently near extremes."
           }
         ]
       },
@@ -1024,6 +1391,24 @@
             "url": "https://developers.google.com/machine-learning/crash-course/classification/roc-and-auc",
             "kind": "course"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Train a probability classifier (e.g. LogisticRegression on breast_cancer or your own data), get `predict_proba()[:, 1]`, and run `roc_auc_score(y_test, y_scores)`.",
+            "expectOutcome": "A number close to 1.0 for a genuinely good model — on the breast cancer example, around 0.99.",
+            "troubleshooting": "If you pass `.predict()` (hard 0/1 labels) instead of `.predict_proba()[:, 1]` (probabilities), you'll still get a number back, but it won't be evaluating what ROC-AUC is meant to measure — it needs the underlying scores to sweep across thresholds, not one fixed decision."
+          },
+          {
+            "instruction": "Generate pure random scores (e.g. `np.random.default_rng(0).random(len(y_test))`) and compute `roc_auc_score` on THOSE against the same y_test.",
+            "expectOutcome": "A number close to the 0.5 coin-flip floor (real runs land somewhere in a range around 0.5, not exactly 0.500) — confirming genuinely random guessing scores near 0.5, the reference point every real model needs to beat."
+          },
+          {
+            "instruction": "Write one sentence: what does an AUC of 0.5 versus 0.99 tell you about a model?",
+            "expectOutcome": "0.5 means the model ranks positive and negative examples no better than random chance — it learned nothing useful. 0.99 means it correctly ranks almost every actual positive above almost every actual negative, regardless of what specific threshold you'd eventually pick."
+          }
         ]
       },
       {
@@ -1074,6 +1459,23 @@
             "url": "https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.cross_val_score.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run `cross_val_score(model, X, y, cv=5)` on a model and dataset, print the 5 individual scores AND their mean/std.",
+            "expectOutcome": "5 distinct numbers that vary somewhat (e.g. 0.933 to 1.0 on iris with LogisticRegression), plus a mean and a small std — the spread itself is the point, showing real fold-to-fold variance."
+          },
+          {
+            "instruction": "Compare the 5-fold mean to whatever single train/test-split score you got for the same model back in Module 3.",
+            "expectOutcome": "The single split's score likely differs somewhat from the cross-validated mean — note whether your original split happened to be optimistic (higher than the CV mean) or pessimistic (lower), which is exactly the 'luck of the draw' this lesson warns about."
+          },
+          {
+            "instruction": "Write one sentence: why is the cross-validated MEAN more trustworthy to report than any single fold's score?",
+            "expectOutcome": "Any one fold (or one train/test split) could have landed on an easier or harder slice of the data purely by chance — averaging across 5 different splits smooths out that luck, giving a more honest estimate of real-world performance."
+          }
         ]
       },
       {
@@ -1123,6 +1525,27 @@
             "label": "Google ML Crash Course — Generalization (overfitting)",
             "url": "https://developers.google.com/machine-learning/crash-course/overfitting/overfitting",
             "kind": "course"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Train the SAME model type at 3 complexity levels on one dataset (e.g. a decision tree at `max_depth=1`, `max_depth=10`, and unrestricted) and print train AND test accuracy for each."
+          },
+          {
+            "instruction": "Identify which one is underfitting.",
+            "expectOutcome": "The simplest one (e.g. max_depth=1) — BOTH train and test accuracy are low and close together (e.g. ~0.20 each on digits) — the model is too simple to capture the pattern at all, even on data it's already seen."
+          },
+          {
+            "instruction": "Identify which one is overfitting.",
+            "expectOutcome": "The unrestricted one — train accuracy near 1.0 but test accuracy meaningfully lower (e.g. 1.00 vs ~0.85) — a big gap is the signature of memorizing training data rather than learning a generalizable pattern.",
+            "troubleshooting": "If you see high training accuracy and are tempted to call it a success, check the TEST score first — near-perfect training accuracy is usually a red flag for overfitting, not a win."
+          },
+          {
+            "instruction": "Write one sentence each: how would you fix the underfitting one, versus the overfitting one?",
+            "expectOutcome": "Underfitting needs MORE complexity (deeper tree, more features, a more expressive model) or better features. Overfitting needs LESS complexity (shallower tree, regularization) or more training data — the two fixes are opposites, which is why correctly diagnosing which one you have (via the train/test gap) matters."
           }
         ]
       }
@@ -1177,6 +1600,26 @@
             "url": "https://www.youtube.com/watch?v=aircAruvnKk",
             "kind": "video"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install torch` in your terminal before continuing."
+          },
+          {
+            "instruction": "Pick your own 3 inputs, 3 weights, and a bias. Compute the neuron's output BY HAND: multiply each input by its weight, sum, add the bias."
+          },
+          {
+            "instruction": "Verify with `torch.dot(x, w) + b` using tensors of your same numbers.",
+            "expectOutcome": "The exact same number as your by-hand calculation (up to tiny floating-point noise) — e.g. the lesson's own example: hand math gives 0.7, `torch.dot` gives `0.7000000476837158`, the same value."
+          },
+          {
+            "instruction": "Create `nn.Linear(3, 4)` and run your original 3-value input tensor through it.",
+            "expectOutcome": "An output of shape `torch.Size([4])` — 4 independent neurons, each doing its own weighted-sum-plus-bias on the same 3 inputs."
+          },
+          {
+            "instruction": "Print `layer.weight.shape` and `layer.bias.shape`.",
+            "expectOutcome": "`torch.Size([4, 3])` and `torch.Size([4])` — 4 neurons × 3 weights each, plus 4 biases, all initialized randomly and ready to be learned during training."
+          }
         ]
       },
       {
@@ -1227,6 +1670,23 @@
             "url": "https://docs.pytorch.org/docs/stable/nn.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install torch` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run a tensor with mixed positive/negative values (e.g. `[-2.0, -0.5, 0.0, 1.5, 3.0]`) through `nn.ReLU()`.",
+            "expectOutcome": "`[0. 0. 0. 1.5 3.]` — every negative becomes exactly 0, everything else passes through unchanged."
+          },
+          {
+            "instruction": "Create two `nn.Linear` layers with `bias=False`, run an input through both stacked (`l2(l1(x))`), and separately compute `(l2.weight @ l1.weight) @ x`.",
+            "expectOutcome": "`torch.allclose()` on the two results returns `True` — two stacked linear layers really are mathematically identical to one combined linear layer with no activation between them."
+          },
+          {
+            "instruction": "Now insert `nn.ReLU()` between the two layers (`l2(relu(l1(x)))`) and compare against that same combined-weight calculation again.",
+            "expectOutcome": "`torch.allclose()` now returns `False` — the equivalence breaks the moment a real non-linearity sits between the layers, which is the entire reason activation functions matter for depth."
+          }
         ]
       },
       {
@@ -1272,6 +1732,23 @@
             "label": "PyTorch — Quickstart tutorial",
             "url": "https://docs.pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install torch` in your terminal before continuing."
+          },
+          {
+            "instruction": "Define your own `nn.Module` subclass with 2-3 `nn.Linear` layers and `nn.ReLU()` between them, picking your own layer sizes (keeping each layer's output size matching the next layer's input size)."
+          },
+          {
+            "instruction": "Run a random input tensor (e.g. `torch.rand(1, <your input size>)`) through your model and print the output shape.",
+            "expectOutcome": "A shape matching `(1, <your final layer's output size>)` — confirming data flowed through every layer you defined in `forward()`.",
+            "troubleshooting": "If you get a shape-mismatch error, check that each layer's declared output size matches the NEXT layer's declared input size — `nn.Linear(4, 8)` feeding into `nn.Linear(8, 3)` works because 8 matches 8; any mismatch here is a real, common bug."
+          },
+          {
+            "instruction": "Count and print total learnable parameters: `sum(p.numel() for p in model.parameters())`.",
+            "expectOutcome": "A single number — verify it by hand for one layer: `nn.Linear(4, 8)` should contribute `4*8 + 8 = 40` parameters (weights + biases), matching what you'd compute from your own layer sizes."
           }
         ]
       },
@@ -1324,6 +1801,27 @@
             "url": "https://www.youtube.com/watch?v=Ilg3gGewQ5U",
             "kind": "video"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install torch` in your terminal before continuing."
+          },
+          {
+            "instruction": "Build a small `nn.Linear` model, run a forward pass, compute an MSE loss against a made-up target, and print `model.weight.grad` BEFORE calling `.backward()`.",
+            "expectOutcome": "`None` — no gradient has been computed yet, nothing to show."
+          },
+          {
+            "instruction": "Call `loss.backward()`, then print `model.weight.grad` again.",
+            "expectOutcome": "A real tensor of numbers now, one gradient value per weight — exactly how much each weight contributed to the loss."
+          },
+          {
+            "instruction": "Create an `optim.SGD` optimizer, save a copy of the weight (`.clone()`), call `optimizer.step()`, and confirm with `torch.equal()` that the weight actually changed."
+          },
+          {
+            "instruction": "Deliberately SKIP `optimizer.zero_grad()` and run `.backward()` a second time on a fresh forward pass with the SAME input, printing `.grad` after each call.",
+            "expectOutcome": "The second `.grad` is roughly DOUBLE the first — PyTorch accumulates gradients by default instead of resetting them, so without `zero_grad()`, each new backward pass adds onto the old gradient rather than replacing it.",
+            "troubleshooting": "If you ever see gradients that seem to be growing across steps in a real training loop, missing `optimizer.zero_grad()` is the single most common real cause — check for it first."
+          }
         ]
       },
       {
@@ -1373,6 +1871,27 @@
             "label": "PyTorch — Quickstart (full end-to-end example)",
             "url": "https://docs.pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install torch` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run the full training loop example (learning y=2x+1 with noise, 200 epochs, `lr=0.01`), printing loss every 50 epochs.",
+            "expectOutcome": "Loss starting relatively high (e.g. ~30+) and dropping steadily to a small, stable number (e.g. under 1) — real evidence the network is genuinely learning the relationship, not just running code."
+          },
+          {
+            "instruction": "Change ONLY the learning rate to something far too large (e.g. `lr=10`) and rerun.",
+            "expectOutcome": "Loss becomes `nan` (not-a-number) within the first several epochs instead of decreasing — training has genuinely diverged, exactly the 'too-large learning rate' failure mode Module 2's gradient descent lesson warned about, now seen at network scale.",
+            "troubleshooting": "If your loss ever prints `nan` in real training, an unstable (too high) learning rate is one of the most common real causes — try dropping it by 10x or more as a first troubleshooting step."
+          },
+          {
+            "instruction": "Set the learning rate back to 0.01 and confirm the loss decreases normally again."
+          },
+          {
+            "instruction": "With the properly-trained model, run a test input (e.g. `torch.tensor([[3.0]])`) through it with `torch.no_grad()` and compare against the true answer.",
+            "expectOutcome": "A prediction reasonably close to the true value (e.g. predicting ~6.98 for the true answer 7) — close but not exact, since the training data had noise added on purpose."
           }
         ]
       }
@@ -1427,6 +1946,24 @@
             "url": "https://huggingface.co/learn/llm-course/chapter6/1",
             "kind": "course"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Install `transformers`, load `AutoTokenizer.from_pretrained(\"gpt2\")`, and encode a sentence of your own with `.encode(text)`."
+          },
+          {
+            "instruction": "Compare `len(text.split())` (word count) to `len(ids)` (token count).",
+            "expectOutcome": "Different numbers, usually more tokens than words — on the lesson's own example, 8 words became 11 tokens.",
+            "troubleshooting": "On Windows, printing `tok.convert_ids_to_tokens(ids)` directly can raise a `UnicodeEncodeError` about a 'Ġ' character — that's just your terminal's default encoding, not a real bug. Force UTF-8 output (e.g. wrap stdout, or run inside a UTF-8-capable terminal) to see the token strings themselves."
+          },
+          {
+            "instruction": "Try encoding a made-up word and a genuinely rare/long word (e.g. `\"antidisestablishmentarianism\"`) with `add_special_tokens=False`, and compare their token counts to a common short word like `\"the\"`.",
+            "expectOutcome": "Common short words cost 1 token; the rare long word splits into several (5 on the lesson's own example) — confirming rarer words fall back to smaller subword pieces."
+          },
+          {
+            "instruction": "Write one sentence: why does this matter for real LLM API usage, beyond just curiosity?",
+            "expectOutcome": "API usage limits, pricing, and context-window limits are all measured in TOKENS, not words or characters — a word-count estimate can meaningfully undercount your real usage, especially with unusual vocabulary."
+          }
         ]
       },
       {
@@ -1473,6 +2010,23 @@
             "url": "https://www.sbert.net/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Install `sentence-transformers`, load `SentenceTransformer(\"all-MiniLM-L6-v2\")`, and embed 4-5 sentences of your own — include two that mean the same thing in different words, plus one or two unrelated ones."
+          },
+          {
+            "instruction": "Run `cosine_similarity(embs)` on all of them at once and print the matrix.",
+            "expectOutcome": "The two semantically-related sentences score notably higher similarity with EACH OTHER than with the unrelated ones — on the lesson's own example, two different phrasings of a Medicare question scored 0.89 together versus ~0 against an unrelated weather sentence.",
+            "troubleshooting": "If your 'related' pair doesn't score clearly higher, check they actually share meaning, not just topic — 'How do I sign up for Medicare?' and 'How can I register for Medicare?' share almost no exact words but mean the same thing; that's the point being tested."
+          },
+          {
+            "instruction": "Print each sentence's length in characters next to its embedding's length in numbers.",
+            "expectOutcome": "Every sentence — however long or short — produces the SAME size vector (384 numbers for this model), confirming embeddings are fixed-size regardless of input length."
+          }
         ]
       },
       {
@@ -1515,6 +2069,25 @@
             "label": "3Blue1Brown — Attention in transformers, visually explained (video)",
             "url": "https://www.youtube.com/watch?v=eMlx5fFNoYc",
             "kind": "video"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy` in your terminal before continuing."
+          },
+          {
+            "instruction": "Write your own sentence with an ambiguous pronoun or reference (like 'The trophy didn't fit in the suitcase because it was too big' — does 'it' mean the trophy or the suitcase?)."
+          },
+          {
+            "instruction": "Reason through, in writing, which earlier word 'it' most likely refers to, and WHY — what clue in the sentence tells you?",
+            "expectOutcome": "A real explanation grounded in the sentence's meaning — e.g. 'it' refers to the trophy, because something being 'too big to fit' describes the trophy's size relative to the suitcase, not the suitcase's own size."
+          },
+          {
+            "instruction": "Run the illustrative attention-weights example (`attention_from_it` array) and confirm the weights sum to 1.0 and the highest weight lands on the word your own reasoning picked.",
+            "expectOutcome": "Weights summing to exactly 1.0 (a probability distribution), with the largest single weight (0.55 in the lesson's example) landing on 'trophy' — matching genuine human reasoning about the ambiguous pronoun, not a coincidence."
+          },
+          {
+            "instruction": "Read the first two sections of Hugging Face's LLM course chapter on transformer architecture (linked below) and write one sentence connecting the terms 'query, key, value' to this same intuition."
           }
         ]
       },
@@ -1561,6 +2134,25 @@
             "label": "OpenAI — Prompt engineering guide",
             "url": "https://platform.openai.com/docs/guides/prompt-engineering",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Pick a real task you want an LLM to do (summarizing, classifying, extracting data from text)."
+          },
+          {
+            "instruction": "Write a VAGUE version of the prompt (one short sentence, no format/length/constraint specified)."
+          },
+          {
+            "instruction": "Write a SPECIFIC version: name the exact format, a length constraint, and a content filter — plus 2-3 worked examples (few-shot) if the task is classification-like."
+          },
+          {
+            "instruction": "If you have access to any LLM (a chat UI counts), run both prompts on the same input and compare the outputs.",
+            "expectOutcome": "The vague prompt's output varies more in format/length across attempts, while the specific+few-shot version reliably follows your exact constraints — a directly observable difference in consistency, not just a claim."
+          },
+          {
+            "instruction": "Write one sentence: if the vague prompt gave a bad or inconsistent answer, whose 'fault' is that, and what's the fix?",
+            "expectOutcome": "The prompt's, not the model's — specificity is the engineer's job; the fix is adding format/length/content constraints and examples, not blaming the model for guessing your unstated intent."
           }
         ]
       },
@@ -1612,6 +2204,28 @@
             "label": "Pinecone — Retrieval-Augmented Generation guide",
             "url": "https://www.pinecone.io/learn/retrieval-augmented-generation/",
             "kind": "reference"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy scikit-learn sentence-transformers` in your terminal before continuing."
+          },
+          {
+            "instruction": "Build a small 'knowledge base' of 3-5 document sentences on a topic you know well, plus one clearly unrelated distractor sentence."
+          },
+          {
+            "instruction": "Embed all your documents with `SentenceTransformer(\"all-MiniLM-L6-v2\")`, then embed a QUESTION that doesn't share exact keywords with the right document's wording."
+          },
+          {
+            "instruction": "Run `cosine_similarity` between the question and all documents, and find the best match with `np.argmax`.",
+            "expectOutcome": "The genuinely relevant document scores highest, and the unrelated distractor scores clearly lowest — on the lesson's own example, a question about 'the free plan' correctly retrieved a document about 'the free tier' despite the different wording, scoring 0.38 versus 0.05 for the unrelated fact."
+          },
+          {
+            "instruction": "Repeat with 2 more different questions against the same document set and confirm retrieval picks the right document each time."
+          },
+          {
+            "instruction": "Write the final grounded prompt: instruct the model to answer ONLY using the retrieved context, and to say so if the context doesn't contain the answer.",
+            "expectOutcome": "A prompt with an explicit 'answer only from this context, say so if you can't' instruction — this constraint is specifically what keeps a RAG system honest instead of letting the model quietly fall back on its own (possibly wrong or outdated) training knowledge."
           }
         ]
       }
@@ -1666,6 +2280,23 @@
             "url": "https://joblib.readthedocs.io/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install scikit-learn joblib` in your terminal before continuing."
+          },
+          {
+            "instruction": "Train any classifier from Module 3 on a dataset of your choice, then `joblib.dump(model, \"my_model.joblib\")`.",
+            "expectOutcome": "A `.joblib` file appears in your working directory — the model's complete fitted state, ready to reload without retraining."
+          },
+          {
+            "instruction": "In a NEW Python session (or after restarting your kernel), run `loaded_model = joblib.load(\"my_model.joblib\")` and call `.predict()` on the same sample WITHOUT ever calling `.fit()` in this new session."
+          },
+          {
+            "instruction": "Compare `loaded_model.predict(X)` against what the original model would have predicted (if you still have it) with `(loaded_model.predict(X) == model.predict(X)).all()`.",
+            "expectOutcome": "`True` — identical predictions confirm the file genuinely captured everything needed, with nothing lost or changed in the round trip.",
+            "troubleshooting": "If loading fails with a version-related error, check whether your scikit-learn version matches what the model was saved with — version mismatches between save and load are a real, common source of silent or loud incompatibilities in production."
+          }
         ]
       },
       {
@@ -1712,6 +2343,23 @@
             "url": "https://fastapi.tiangolo.com/tutorial/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install fastapi` in your terminal before continuing."
+          },
+          {
+            "instruction": "Write a minimal FastAPI app: `app = FastAPI()`, a `GET /` endpoint returning a message dict, and a `GET /health` endpoint returning `{\"status\": \"ok\"}`."
+          },
+          {
+            "instruction": "Create a `TestClient(app)` and call `client.get(\"/\")` and `client.get(\"/health\")`, printing status code and JSON for each.",
+            "expectOutcome": "Both return status `200`, each with the exact dict your function returns — `/` gives your message, `/health` gives `{\"status\": \"ok\"}`.",
+            "troubleshooting": "If a request 404s unexpectedly, double check the PATH in your decorator (`@app.get(\"/health\")`) — that string, not your Python function's name, is what determines the URL."
+          },
+          {
+            "instruction": "Write one sentence: why might a real deployment (like a load balancer) specifically ping `/health` rather than `/`?",
+            "expectOutcome": "A dedicated health-check endpoint lets infrastructure confirm the service is alive with a fast, predictable response, separate from your actual application logic on `/` — a common real production pattern."
+          }
         ]
       },
       {
@@ -1757,6 +2405,27 @@
             "label": "Pydantic — official docs",
             "url": "https://docs.pydantic.dev/latest/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install fastapi` in your terminal before continuing."
+          },
+          {
+            "instruction": "Define a Pydantic `BaseModel` matching the features your model expects (e.g. `IrisInput` with 4 required float fields), and a `POST` endpoint accepting it."
+          },
+          {
+            "instruction": "Call it with `TestClient` using a fully valid JSON body.",
+            "expectOutcome": "Status `200`, with the response echoing back exactly what you sent — confirming valid data flows through cleanly."
+          },
+          {
+            "instruction": "Call it again with one field as the WRONG type (e.g. a string where a float is required).",
+            "expectOutcome": "Status `422` — your endpoint function's code never even runs; FastAPI/Pydantic rejected the request before it got there.",
+            "troubleshooting": "If you find yourself manually checking `isinstance()` or writing your own type-checking code inside the endpoint, you're reimplementing what a Pydantic model already does automatically — define the field types instead and let FastAPI handle rejection."
+          },
+          {
+            "instruction": "Call it a third time with a required field MISSING entirely.",
+            "expectOutcome": "Also `422` — a missing required field is rejected the same way as a wrong type, both before your function body runs."
           }
         ]
       },
@@ -1809,6 +2478,22 @@
             "url": "https://scikit-learn.org/stable/model_persistence.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy fastapi joblib` in your terminal before continuing."
+          },
+          {
+            "instruction": "Save a Module 3 model with `joblib.dump()`, then in a FastAPI app, load it ONCE at module level (outside any endpoint function): `model = joblib.load(...)`."
+          },
+          {
+            "instruction": "Define a Pydantic input model matching the model's expected features, and a `POST /predict` endpoint that reshapes the validated input into the `(1, n_features)` array shape scikit-learn expects, then calls `model.predict()`."
+          },
+          {
+            "instruction": "Test with `TestClient` using a real example row from your dataset, and separately call `model.predict()` directly (not through the API) on that same row in a notebook.",
+            "expectOutcome": "Identical predictions both ways — confirming the full JSON-in → validate → reshape → predict → JSON-out pipeline genuinely preserves the model's real behavior, not an approximation of it.",
+            "troubleshooting": "If the API returns a 500 error trying to serialize the response, check whether you're returning a raw NumPy type (like `numpy.int64`) instead of casting to plain Python `int`/`float` first — FastAPI's default JSON encoder can choke on NumPy types specifically."
+          }
         ]
       },
       {
@@ -1854,6 +2539,26 @@
             "label": "MDN — HTTP response status codes",
             "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status",
             "kind": "reference"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install fastapi` in your terminal before continuing."
+          },
+          {
+            "instruction": "Add a `@field_validator` to your Pydantic input model that rejects a technically-valid-but-nonsensical value (e.g. a negative measurement) by raising `ValueError`."
+          },
+          {
+            "instruction": "Test with a value that's a valid FLOAT but fails your domain rule (e.g. `sepal_length: -1.0`).",
+            "expectOutcome": "Status `422`, with the error detail specifically naming your validator's message (e.g. 'measurements must be positive') — caught before the prediction ever runs on garbage input."
+          },
+          {
+            "instruction": "Test with a genuinely valid value on the same endpoint.",
+            "expectOutcome": "Status `200` as normal — confirming your validator only rejects the specific bad case, not everything."
+          },
+          {
+            "instruction": "Write one sentence: why is a 422 with a specific message better here than either a generic 500 error or silently computing a prediction from the negative value?",
+            "expectOutcome": "A 422 correctly signals it's the CALLER'S fault (bad input) with a specific, actionable reason — a 500 would wrongly suggest a server bug, and silently predicting from nonsensical input could produce a confidently-wrong answer with no warning at all."
           }
         ]
       }
@@ -1908,6 +2613,18 @@
             "url": "https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Without writing any Docker code yet, run `python --version` and `pip show fastapi scikit-learn joblib numpy | grep Version` (or `findstr Version` on Windows) to see your exact current environment."
+          },
+          {
+            "instruction": "Write down every piece your Module 7 FastAPI app needs to run on a FRESH machine: the exact Python version, every pip package AND its version, the saved model file, and the app code itself."
+          },
+          {
+            "instruction": "Write one sentence: if you handed just your `main.py` file to a teammate with no other instructions, what's the realistic chance it runs correctly on the first try?",
+            "expectOutcome": "Low, realistically — they'd need to independently guess or discover the right Python version and exact package versions, and any mismatch (a newer scikit-learn with different behavior, a missing package) could cause a subtle bug or an outright crash. This exact gap is what Docker closes."
+          }
         ]
       },
       {
@@ -1955,6 +2672,22 @@
             "url": "https://docs.docker.com/build/building/best-practices/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write a Dockerfile for your Module 7 app: `FROM python:3.11-slim`, `WORKDIR /app`, then `COPY requirements.txt .` and `RUN pip install --no-cache-dir -r requirements.txt` BEFORE copying your actual app code."
+          },
+          {
+            "instruction": "Add `COPY main.py .` and `COPY <your-model-file>.joblib .`, then `EXPOSE 8000` and `CMD [\"uvicorn\", \"main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]`.",
+            "troubleshooting": "If you write `--host 127.0.0.1` instead of `0.0.0.0`, the server will start successfully but be COMPLETELY unreachable from outside the container — this is a real, common mistake that looks fine until you actually try to connect."
+          },
+          {
+            "instruction": "Write a `requirements.txt` with EXACT pinned versions (e.g. `fastapi==0.139.0`, not just `fastapi`) matching what you actually have installed (from step 1's version check)."
+          },
+          {
+            "instruction": "Review your Dockerfile against this checklist without building it yet: is the dependency install BEFORE the code copy? Are all versions pinned? Is the host `0.0.0.0`?",
+            "expectOutcome": "A Dockerfile that passes all three checks — if dependencies are installed before code copy, a future code-only change won't force a slow full reinstall on rebuild, thanks to Docker's layer caching."
+          }
         ]
       },
       {
@@ -2001,6 +2734,23 @@
             "url": "https://docs.docker.com/reference/cli/docker/container/run/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "With Docker running, build your image from the last lesson's Dockerfile: `docker build -t forage-model-api .`."
+          },
+          {
+            "instruction": "Run it with the port mapping: `docker run -p 8000:8000 forage-model-api`.",
+            "troubleshooting": "If you forget the `-p 8000:8000` flag, the container starts and runs fine internally, but nothing outside it can reach the API — you'll get a connection error trying to reach localhost:8000, not because the app crashed, but because nothing mapped the port."
+          },
+          {
+            "instruction": "In a SEPARATE terminal, send the exact same /predict request you tested with TestClient in Module 7, via curl: `curl -X POST http://localhost:8000/predict -H \"Content-Type: application/json\" -d '{\"sepal_length\":5.1,\"sepal_width\":3.5,\"petal_length\":1.4,\"petal_width\":0.2}'`.",
+            "expectOutcome": "The identical response you got from TestClient in Module 7 (e.g. `{\"predicted_class\":0}`) — same model, same logic, now running fully containerized and reachable over a real network port."
+          },
+          {
+            "instruction": "Make a small change to your app code (not the Dockerfile) and immediately re-run the SAME `docker run` command without rebuilding first.",
+            "expectOutcome": "Your OLD code still runs — `docker run` starts a container from the image as it was last BUILT, not your current files. You must `docker build` again for code changes to actually take effect."
+          }
         ]
       },
       {
@@ -2046,6 +2796,27 @@
             "label": "Google Cloud — MLOps: Continuous delivery and automation pipelines in ML",
             "url": "https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning",
             "kind": "reference"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install scikit-learn joblib` in your terminal before continuing."
+          },
+          {
+            "instruction": "Add a metadata-recording step to your Module 3/7 training script: capture `sklearn.__version__`, a training timestamp (`datetime.now(timezone.utc).isoformat()`), and your training dataset's row count, saved alongside the model with `joblib.dump()`."
+          },
+          {
+            "instruction": "Run it and print the metadata dict.",
+            "expectOutcome": "A dict with real, current values — your actual installed scikit-learn version, a genuine timestamp, and the real row count you trained on, not placeholder values."
+          },
+          {
+            "instruction": "Write a small check: load the metadata back, compare `saved_meta[\"sklearn_version\"]` against your CURRENTLY installed `sklearn.__version__`.",
+            "expectOutcome": "`True` if nothing has changed since training — but write one sentence: what would it mean if this ever printed `False` on a real production system?",
+            "troubleshooting": "A `False` here is a genuine, concrete drift signal — someone (or some deployment process) upgraded scikit-learn since this model was trained, and its behavior could have subtly changed as a result. This is exactly the kind of silent risk a pinned Docker image is meant to prevent."
+          },
+          {
+            "instruction": "Write one paragraph: what does 'reproducibility' mean for an ML model specifically, and why is a pinned Docker image only HALF the story (what's the other half)?",
+            "expectOutcome": "Docker pins the CODE environment (Python + package versions) — the other half is the DATA and the exact training process (random seeds, data version, hyperparameters) that produced this specific model's weights. Reproducibility means someone could recreate the SAME model, not just run the SAME code."
           }
         ]
       }
@@ -2097,6 +2868,22 @@
             "url": "https://www.evidentlyai.com/ml-in-production/model-monitoring",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run the `weekly_accuracy` example (a list of declining accuracy values over 7 weeks) and print each week with a flag for anything under 0.85.",
+            "expectOutcome": "Weeks 5-7 flagged (accuracy 0.85, 0.81, 0.76) — and notice NOTHING in this simulation ever raised an error or exception; every one of those weeks would have looked like a perfectly healthy, responding API from the outside."
+          },
+          {
+            "instruction": "Take a model you've evaluated somewhere in this path. Write one paragraph: what real-world signal would tell you if THIS model started performing worse after deployment?"
+          },
+          {
+            "instruction": "Be specific and honest in that paragraph about the ground-truth problem: for your model's domain, how would you even GET the correct answer for a live prediction to check it against, and how long would that realistically take?",
+            "expectOutcome": "A genuine, specific answer — e.g. for a fraud model, you might only learn the true answer weeks later when a chargeback is filed; for a spam filter, a user marking something 'not spam' gives a near-immediate signal. The DELAY in getting ground truth is often the real, hard part of monitoring, not the statistics."
+          }
         ]
       },
       {
@@ -2139,6 +2926,23 @@
             "url": "https://www.evidentlyai.com/ml-in-production/data-drift",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy scipy` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run the KS-test example with your own two synthetic distributions: one barely shifted from a baseline (e.g. mean 32 vs mean 33), one meaningfully shifted (e.g. mean 32 vs mean 50)."
+          },
+          {
+            "instruction": "Print the KS statistic AND p-value for both comparisons.",
+            "expectOutcome": "Both p-values may show as ~0.000 (both 'statistically significant' at this sample size), but the KS STATISTIC differs dramatically — around 0.1 for the barely-shifted case versus 0.8+ for the meaningfully-shifted one.",
+            "troubleshooting": "If both comparisons show a tiny p-value and you conclude both are equally 'drifted', that's the exact nuance this lesson warns about — with a large enough sample, even a trivial shift becomes statistically significant. Judge severity by the KS STATISTIC's magnitude, not just whether p crosses 0.05."
+          },
+          {
+            "instruction": "Think of one real feature from a model you've built in this path. Write one sentence describing a realistic way its real-world distribution could drift after launch.",
+            "expectOutcome": "A concrete, plausible scenario — e.g. 'if my iris model were deployed for a different region's flower species, average petal measurements could genuinely shift from what it was trained on.'"
+          }
         ]
       },
       {
@@ -2180,6 +2984,23 @@
             "label": "Google Cloud — MLOps continuous monitoring",
             "url": "https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run the transaction-amount example: same input distribution, but a BEFORE fraud-rule and an AFTER fraud-rule that flag completely different transactions.",
+            "expectOutcome": "The BEFORE rule flags nothing in a small sample; the AFTER rule flags several MID-size transactions instead — and critically, the raw `transaction_amount` values themselves are identical in both cases, only which values MEAN 'fraud' has changed."
+          },
+          {
+            "instruction": "Write one sentence: would a data-drift check (comparing input distributions) catch this change? Why or why not?",
+            "expectOutcome": "No — the INPUT distribution (transaction amounts) hasn't shifted at all in this example; only the relationship between input and correct-answer has. A data-drift check specifically looks at input statistics, so it would see nothing wrong here."
+          },
+          {
+            "instruction": "Write one paragraph describing a realistic concept-drift scenario for a domain you're interested in (not necessarily fraud) — specifically what input would look UNCHANGED, but what real-world relationship would have shifted underneath it.",
+            "expectOutcome": "A genuine domain-specific scenario with the input/relationship distinction clearly drawn — e.g. a spam filter where the WORDS spammers use evolve, so 'contains word X' stops meaning what it used to, even though the distribution of email lengths/senders looks the same."
           }
         ]
       }
@@ -2225,6 +3046,21 @@
             "url": "https://archive.ics.uci.edu/",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Choose your capstone dataset now — ideally something with real texture (messy data, class imbalance, a genuine tradeoff), not necessarily iris/digits."
+          },
+          {
+            "instruction": "Write 3-5 sentences: what the dataset is, why you chose it, and what the exact prediction task is (what are you predicting, from what inputs)."
+          },
+          {
+            "instruction": "Write one more sentence tying back to Module 4: what specific metric would make a model 'good' for THIS problem, and why not just accuracy?",
+            "expectOutcome": "A real, problem-specific answer — e.g. 'this dataset is imbalanced, so I'd track recall on the minority class specifically, since accuracy alone would be misleadingly high even from a model that mostly guesses the majority class.'"
+          },
+          {
+            "instruction": "Sketch the project folder structure you'll build toward (README, requirements.txt, train.py, main.py, model file, Dockerfile, tests/) — you don't need every file yet, just the plan."
+          }
         ]
       },
       {
@@ -2263,6 +3099,28 @@
             "url": "https://fastapi.tiangolo.com/tutorial/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Step 1: load, clean, and explore your data. Confirm its shape, check for missing values, and check class balance if it's a classification task. Don't move on until this step is genuinely verified, not just 'ran without error'."
+          },
+          {
+            "instruction": "Step 2: train and evaluate a model using the RIGHT metric for your problem (not default accuracy unless that's genuinely the right call), and check the train/test gap for over/underfitting."
+          },
+          {
+            "instruction": "Step 3: save the model with joblib, then load it fresh and confirm identical predictions — the same round-trip check from Module 7."
+          },
+          {
+            "instruction": "Step 4: wire a FastAPI endpoint and test it locally with TestClient before touching Docker at all."
+          },
+          {
+            "instruction": "Step 5: write the Dockerfile, build it, run it, and confirm the containerized API responds identically to your local TestClient results.",
+            "troubleshooting": "If something breaks at step 5 but steps 1-4 worked, the bug is almost certainly in the Dockerfile or container config (missing file copy, wrong port, unpinned dependency), not in your model or API logic — narrow your debugging there first, since you already verified the app itself works."
+          },
+          {
+            "instruction": "Keep a running note of any bug you hit at any step and exactly how you diagnosed it.",
+            "expectOutcome": "A real debugging log — this becomes genuinely valuable interview material later (Module 10's next lessons), since 'I hit X, suspected Y, confirmed it by Z, fixed it with W' is a much stronger interview answer than a project with no visible friction at all."
+          }
         ]
       },
       {
@@ -2299,6 +3157,23 @@
             "label": "GitHub — About READMEs",
             "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write your README's first paragraph ONLY: what the project predicts, from what, using what model type, and its key result metric — no setup instructions yet."
+          },
+          {
+            "instruction": "Walk away for at least a few minutes (or have someone else read it), then come back and read ONLY that first paragraph.",
+            "expectOutcome": "You (or your reader) can state what the project does and why it might be worth a look, from that paragraph alone — if not, it's leading with the wrong thing.",
+            "troubleshooting": "If your first instinct was to write 'clone the repo, then run pip install...' as line one, that's leading with setup, not substance — move it down; a busy reviewer skimming decides whether to keep reading in the first few seconds."
+          },
+          {
+            "instruction": "Add a Results section with REAL numbers from your actual evaluation (Module 4's metric, not a bare accuracy with no context) and one sentence interpreting what the number means."
+          },
+          {
+            "instruction": "Add a genuine 'What I'd improve with more time' section — 2-3 specific, honest ideas, not vague ones like 'make it better'.",
+            "expectOutcome": "Concrete improvement ideas specific to YOUR project's actual limitations — this section is one of the highest-signal parts of a README for a technical reviewer, showing you understand your own project's real boundaries."
           }
         ]
       },
@@ -2341,6 +3216,22 @@
             "label": "Forage Interview — practice explaining this project live",
             "url": "/interview",
             "kind": "practice"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write out, in your own words, an answer to each of the 5 talking points: what problem it solves (one sentence), why this dataset/model over alternatives, why this evaluation metric specifically, one real tradeoff you made, and what you'd improve first."
+          },
+          {
+            "instruction": "Out loud — to yourself, a friend, or recorded — deliver a 60-90 second walkthrough covering all five points, timing yourself."
+          },
+          {
+            "instruction": "Do it a SECOND time without looking at your notes.",
+            "expectOutcome": "A noticeably tighter, more fluent second pass — this is expected and is exactly the point: the first time saying something out loud is always rougher than the second, which is why you rehearse before the real interview, not during it."
+          },
+          {
+            "instruction": "Write one sentence: which of the 5 talking points did you stumble on most, and what does that tell you about which part of the project you understand least deeply?",
+            "expectOutcome": "An honest self-assessment — stumbling on 'why this metric' might mean revisiting Module 4's reasoning for your specific problem; stumbling on 'what tradeoff' might mean you haven't yet articulated a real design decision you made, which is worth doing before a real interview, not during one."
           }
         ]
       }

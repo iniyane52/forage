@@ -93,7 +93,7 @@ foundary/
 ├── CLAUDE.md                    # this file
 ├── REBUILD.md                   # historical/superseded — see constraint note above
 ├── content/                     # lesson content JSON — see "content pipeline" below
-│   ├── commoncore.json          #   Common Core (free), 24 lessons / 6 modules
+│   ├── commoncore.json          #   Common Core (free), 30 lessons / 7 modules
 │   ├── stream1.json             #   Cloud & DevOps, 53 lessons / 7 modules
 │   ├── aiml.json                #   AI Engineer, 48 lessons / 10 modules
 │   ├── swe.json                 #   Software Engineer, 19 lessons / 4 modules
@@ -305,10 +305,86 @@ foundary/
 
 ## Features currently in progress / partially done
 
-- Nothing is mid-implementation as of this writing — the last active work (new SWE DSA
-  module, cross-path content fixes, consistent-hashing correction) is complete and
-  verified. Treat the repo as in a clean, working state; anything below is *not started*,
-  not partially built.
+- **Learn → Discuss → Practice → Confirm → Test rollout is COMPLETE.** The 5-stage
+  layout (`LessonStepFlow.tsx`) is now the *only* lesson layout — it replaced the old
+  single-scroll layout everywhere (`LegacyLessonLayout.tsx`/`LessonOutline.tsx` were
+  deleted as dead code once nothing referenced them anymore), so every stream renders
+  the new structure. The interactive `handsOnSteps` checklist (`HandsOnChecklist.tsx`)
+  renders when a lesson has `handsOnSteps` authored in its JSON. **All 7 streams are now
+  fully authored with real, executed-and-verified steps: Common Core (30/30), Cloud &
+  DevOps (53/53), AI Engineer (48/48), Software Engineer (31/31), Full-Stack Developer
+  (36/36), Data Scientist (37/37), and Cybersecurity (32/32) — 267 lessons total across
+  the whole platform, every single one carrying a real, hands-on-verified checklist.**
+  Docker/Kubernetes/Terraform/Prometheus lessons
+  in Cloud & DevOps, and Docker-specific lessons in AI Engineer's MLOps module, couldn't be
+  executed against live infrastructure (no Docker daemon running, no cluster, no
+  Terraform/Prometheus installed in this authoring environment, confirmed live rather than
+  assumed) — those follow this project's existing "doc-grounded, not executed here"
+  convention already used for the original Cloud & DevOps content, verified against each
+  tool's own official docs instead. Every authored step follows the same bar as the
+  original content otherwise: technical steps are
+  actually run to get real `expectOutcome` text, not guessed (AI Engineer's steps were
+  verified with real installed libraries — transformers, sentence-transformers, FastAPI,
+  Pydantic, scikit-learn, joblib — not guessed output); a `troubleshooting` field
+  additionally names the most common wrong-but-plausible result and what it means,
+  specifically targeting beginners' most common documented frustration (ambiguous errors)
+  — not present on every step, only where a real common variant exists (e.g. AI Engineer's
+  `aiml-tokens` step flags a real Windows-specific `UnicodeEncodeError` hit and fixed
+  during authoring, and `aiml-dockerfile-model-api` flags the classic `--host 127.0.0.1`
+  vs `0.0.0.0` unreachable-container mistake). Software Engineer's technical steps
+  (Big-O timing, OOP examples, all 8 data structures, all 8 recursion/sorting/DP/heap/
+  quicksort/backtracking/greedy lessons, and the caching/load-balancing system-design
+  lessons) were each actually executed in Python to verify real numbers before writing
+  `expectOutcome` text — e.g. a hand-traced `factorial(3)`, a from-scratch max-heap via
+  the negate-on-push trick, a second real coin-change counterexample (`[6,4,1]` making 8:
+  greedy gives 3 coins, optimal is 2), and confirming random-pivot quicksort stays fast
+  on already-sorted input where first-element-pivot degrades toward O(n²). Full-Stack
+  Developer's technical steps were executed for real wherever the tooling exists in this
+  environment: plain JS/closures/array-methods/async in Node, TypeScript narrowing/generics
+  via actual `tsc` compile errors (not guessed error text), a real Vitest suite (installed
+  fresh in a scratch project — 5 tests including a deliberately-broken one to confirm a
+  genuine Expected/Received failure diff), a real Express + `cors` server actually serving
+  GET/POST requests, and Node's `crypto.scryptSync`/`timingSafeEqual` password hashing. Two
+  of the module's own lesson examples (`fs-db-relational-modeling`, `fs-db-sql-queries`)
+  embedded "real" live-database query results that had gone stale since those paths were
+  later expanded (e.g. claiming Cybersecurity/Data Scientist/Full-Stack had only 3 modules
+  each, when the later full-path-rewrite TODO below brought them to 8) — caught by
+  re-running the exact same queries live against Supabase during this rollout and finding
+  the numbers no longer matched; both lessons' embedded query results were corrected to
+  the current live data as part of this pass, not just left stale. What couldn't be
+  executed here (a real browser DOM, a real Next.js/React dev server, a real Prisma+SQLite
+  migration, a real Playwright browser run, a real cloud deployment) follows the same
+  "doc-grounded, not executed here" convention as Cloud & DevOps' Docker/Kubernetes
+  content — each such lesson already had real, verified "Actually run" output baked in by
+  its original author, which the new steps build on rather than duplicate or guess at.
+  Data Scientist's technical steps were executed for real in Python throughout — NumPy/
+  SciPy stats (a genuine false-positive p-value found at seed=22 out of 50 tried, matching
+  the ~5% rate a hypothesis test accepts by design), real SQLite queries for every SQL/
+  pandas variation, matplotlib/seaborn figures actually rendered and saved, and scikit-
+  learn/statsmodels runs confirming real, sometimes-surprising results — e.g. adding one
+  more extreme planted outlier (500) makes the IQR and z-score outlier-detection methods
+  genuinely DISAGREE (IQR still catches all 4 outliers; z-score's own mean/std get dragged
+  around by the outlier and it catches only 1), and adding one wildly-scaled extra feature
+  before k-means clustering drops the adjusted Rand index from a perfect 1.0 to essentially
+  random noise (0.004) unless the data is scaled first — real, measured demonstrations of
+  each lesson's own stated point, not just repeated claims. Cybersecurity's technical steps
+  were executed for real throughout — the `cryptography` package (RSA sign/verify/encrypt,
+  confirming a public-key object genuinely has no `.decrypt` method at the type level), live
+  TLS handshakes against real sites (python.org via GlobalSign, github.com via Sectigo — two
+  different real CAs, both correctly trusted), SQLite injection payloads (including a real
+  `DROP TABLE` attempt safely neutralized by parameterization), a real `bcrypt` install
+  showing it's ~300,000x slower per hash than SHA-256 (measured: 190ms for one bcrypt hash
+  vs 0.63 microseconds per SHA-256 hash), and a genuine cross-platform finding on the Linux
+  permissions lesson: `os.chmod()` was confirmed to silently no-op on this project's native
+  Windows dev environment (file stayed `-rw-rw-rw-` regardless of the chmod value) but work
+  correctly under WSL Ubuntu (chmod 600 → `-rw-------`, chmod 754 → `-rwxr-xr--`) — this
+  exact discrepancy is now the lesson's own troubleshooting note, verified live rather than
+  assumed from the lesson's pre-existing warning text. One honest non-clean result was kept
+  rather than reworked to look tidier: an SSRF decimal-IP-notation bypass test blocked for
+  the *wrong* reason in this environment (a DNS resolution error, not the intended
+  is_private/is_loopback check ever firing) — written up as-is, since a real security
+  practitioner needs to learn to check *why* a defense blocked something, not just *whether*
+  it did.
 
 ## Remaining TODOs
 
@@ -400,6 +476,115 @@ Roughly in the order they'd likely matter for actually launching this as a real 
    "always shuffle" advice would leak future values into training if applied to
    time-ordered data (the fix is `TimeSeriesSplit`, verified). Content counts updated
    above: Common Core 25 lessons, Cybersecurity 32, Data Scientist 37.
+10. **Award XP for completing individual hands-on steps, not just whole lessons.** The
+    lesson layout's Practice stage (`HandsOnChecklist.tsx`) has a real per-step
+    walkthrough (check off a step, jot what you got, reveal the expected outcome to
+    compare against, plus a `troubleshooting` hint where a common wrong-but-plausible
+    result exists) — but it's local `useState` only, by design, matching the
+    "stay local-only for now" decision, reaffirmed by the project owner when this was
+    re-raised mid-rollout. Only the lesson-level `MarkDoneButton` (Test stage) awards
+    real XP today. A follow-up would need a new DB table for per-step completion plus a
+    rate-limited award RPC (same shape as `tutor_bump_usage`/`post_lesson_comment` —
+    `SECURITY DEFINER`, atomic `insert ... on conflict`) and UI to reflect it — not
+    started, tracked here per the project owner's explicit ask to keep this idea on the
+    list.
+11. **Light/dark theme toggle — infra and app-shell/lesson pages done, marketing/complex
+    surfaces not yet.** `next-themes` + a full light/dark CSS custom-property token
+    system (`src/app/globals.css`) now drive a working toggle (`ThemeToggle.tsx`) —
+    system-preference default, remembered per-browser, no flash. Fully converted:
+    lesson pages (all streams), the app-shell header/nav, and the auth page. **The
+    landing page is deliberately dark-only** (explicit project-owner choice, reversing
+    an earlier decision to convert it) — `ThemeToggle` was removed from its header
+    entirely, and the page's root wrapper carries a `.force-dark-scope` class
+    (`globals.css`) that redeclares the exact same token values as the default `html`
+    (dark) block, so it renders correctly dark even for a signed-out visitor whose
+    browser already has a stored `light` preference from elsewhere on the site — same
+    descendant-custom-property-override mechanism `.lesson-accent-scope` already uses,
+    not a JS/hydration-dependent fix. Light mode elsewhere deliberately drops each path's
+    neon accent for one calm blue
+    (`LIGHT_ACCENT` in `src/lib/pathMeta.ts`, resolved via a CSS custom-property cascade
+    in `.lesson-accent-scope`, not JS, so there's no theme-flip flash) and swaps
+    headings from Chakra Petch/Unbounded to Inter in light mode only (dark mode
+    typography is unchanged) — both per explicit project-owner choice, not a default
+    assumption. Syntax-highlighted code blocks use Shiki's dual-theme output
+    (`src/lib/highlight.ts`). **Not yet converted**: Interview UI, Quiz runner, profile/
+    pricing/legal pages — the toggle works there but those pages' colors don't respond
+    yet. Terminal/CLI decorative mockups (`TypingCode.tsx`, `TerminalWalkthrough.tsx`)
+    deliberately stay dark in both themes via a `.terminal-surface` utility class — not
+    a gap, an intentional convention (a real terminal isn't white-on-white).
+12. ~~**`handsOnSteps` rollout across all 7 streams.**~~ **Done.** Every lesson across
+    Common Core and all 6 Pro paths (262 lessons total) now has an interactive,
+    per-step hands-on checklist authored to this project's real-execution standard —
+    see the "Features currently in progress / partially done" section above for the
+    full per-path verification detail (what was actually run, what was live-spot-checked
+    via Playwright with a real signed-up/Pro-granted QA account per path, and the two
+    genuinely stale live-database query results caught and fixed along the way in the
+    Full-Stack Developer path's own lesson content). All 5 QA accounts created during
+    this rollout were profile/progress-cleaned via SQL; their `auth.users` rows still
+    need manual deletion from the Supabase dashboard (see "Things future Claude sessions
+    should know" below for the full list).
+13. ~~**Post-rollout content audit: missing install steps, no stated aim, landing-page
+    light mode.**~~ **Fixed.** A follow-up audit of the just-finished `handsOnSteps`
+    rollout, run programmatically (detecting third-party imports in each lesson's code
+    examples and cross-checking whether that lesson's own steps ever say to install
+    them), found 74 lessons across AI Engineer (37), Data Scientist (30), Full-Stack
+    Developer (4), and Cybersecurity (3) that used a package — scikit-learn, FastAPI,
+    transformers/sentence-transformers, seaborn, statsmodels, scipy, torch, joblib,
+    cryptography, Prisma, Vitest, Express/cors — with zero install instruction anywhere
+    in that lesson, meaning a student following the steps literally would hit an
+    ImportError/`Cannot find module` on their first real run. Every one of the 74 now
+    has an explicit `pip install`/`npm install` step listing exactly the packages that
+    specific lesson's code actually imports, added to EVERY lesson that uses a package
+    (not just the first lesson per module to introduce it) — deliberately repetitive
+    across a module by project-owner choice, so each lesson stays fully self-contained
+    even if a student jumps in mid-module. Re-running the same detection script after
+    the fix confirms zero remaining gaps. Separately: every lesson's Practice stage now
+    opens with a one-line **Aim** (`LessonStepFlow.tsx`, above "Your hands-on task") —
+    reusing each lesson's own already-authored `doneWhen` field rather than requiring
+    262 new lines of content, so it shipped immediately with no new authoring. And the
+    **landing page is now dark-only** by explicit reversal of the earlier light-mode
+    conversion — see item #11 above for the `.force-dark-scope` mechanism.
+14. ~~**Landing-page bug pass + a new free Common Core module (5 lessons) previewing
+    5 of the 6 Pro paths.**~~ **Done.** A live check (this session, prompted by the
+    project owner circling the hero dashboard-mockup card and the "how it works"
+    terminal card and asking for an intro animation) found a genuine, serious bug in
+    `ScrollHero.tsx`: its entrance `gsap.to(...)` used `scrollTrigger: { start: "top
+    90%", once: true }`, but that card is always above the fold, so on a fresh page
+    load (no scroll event to prompt a recheck) the trigger's already-satisfied state
+    was never checked — confirmed live, the card was stuck at `opacity: 0` (genuinely
+    invisible) until the page was scrolled away and back. `ScrollTrigger.refresh()`
+    did not fix it (refresh recalculates positions, it doesn't retroactively fire enter
+    callbacks for non-scrubbed tweens); fixed by dropping the scroll-trigger gate
+    entirely and playing the entrance on mount instead, since there's no real "wait for
+    scroll" case for an always-visible element. A rotate was added to that same
+    entrance tween (the project owner's actual ask), and `TerminalWalkthrough.tsx` got
+    a matching Framer `whileInView` rotate-in entrance on its own inner card — applied
+    to the inner `.terminal-surface` div, deliberately not wrapping the component's own
+    `containerRef` root, so the GSAP `ScrollTrigger` that drives its typing sequence
+    keeps measuring an untransformed element (see the transform/containing-block
+    lesson under "Architecture decisions"). `ToolkitBento.tsx`'s cards gained a
+    hover-tilt to match `HoverTilt`'s existing treatment elsewhere. The landing page's
+    other motion (the dock's magnify/drag, `TerminalHeading`'s scroll-scrub + cursor-
+    proximity + hover-scramble, `CursorGlow`, `MatrixGlyphs`) was already extensive —
+    deliberately not layering on more, to stay restrained rather than gild it further.
+    Separately, per the project owner's request for "5 additional technical lessons so
+    [free users] get to know what's in the pro versions," added a new 7th Common Core
+    module, `cc-preview` — 5 lessons, each borrowed from a different Pro path's real
+    toolkit (NumPy/correlation from Data Scientist, a real scikit-learn
+    `LogisticRegression` from AI Engineer, a plain-JS render function from Full-Stack,
+    `hashlib` password hashing from Cybersecurity, `os.environ` config from Cloud &
+    DevOps — Software Engineer deliberately skipped, since Common Core's own
+    Programming module already previews that skill set) — all 5 sharing ONE dataset
+    (an 8-student "StudyTrack" study-hours/exam-score set) so each lesson visibly
+    builds on the last (the Full-Stack lesson renders the exact predictions the AI
+    Engineer lesson computed) rather than reading as 5 disconnected demos, per the
+    project owner's explicit ask for the lessons to feel "connected." Every code
+    example was actually executed — twice, once during authoring and again by
+    re-extracting and re-running the exact code stored in the JSON afterward, byte for
+    byte, to rule out any transcription error. Synced to the live database via
+    `apply_migration` (a new `modules` row, 5 `lessons` rows, 5 `quiz_questions` rows,
+    one MCQ per lesson) — `get_advisors` (security) shows no new findings beyond the
+    pre-existing baseline. Common Core is now 30 lessons / 7 modules (was 25/6).
 
 ## Coding conventions
 
@@ -486,7 +671,7 @@ re-verify, these will drift as content is added):
 
 | Stream | Modules | Lessons | Quiz Qs |
 |---|---|---|---|
-| Common Core (free) | 6 | 25 | 25 |
+| Common Core (free) | 7 | 30 | 30 |
 | Cloud & DevOps | 7 | 53 | 53 |
 | AI Engineer | 10 | 48 | 45 |
 | Software Engineer | 5 | 31 | 30 |
@@ -543,33 +728,34 @@ client-server communication is one of:
 
 ## Known bugs
 
-**One real, currently-open bug**: `ScrollHero.tsx`'s original pin/tilt effect (header+
-card stay near the top of the viewport while a card rotates/scales as the user scrolls
-past) does not work and is currently disabled — the component renders a plain static
-layout instead. Two implementations were tried this session and both had real,
-unresolved bugs:
-1. CSS `position: sticky` never engaged at all — confirmed via direct
-   `getBoundingClientRect()` measurements across scroll depths showing the "pinned"
-   wrapper just scrolling away 1:1 with the page. Root-causing it turned up no fix
-   after ruling out every known CSS disqualifier (overflow-auto-promotion on every
-   ancestor, transform/filter/perspective/contain/isolation on every ancestor up to
-   `<html>`).
-2. GSAP ScrollTrigger's `pin` (tried as the replacement) surfaced and fixed three real,
-   separate bugs along the way (see the transform/containing-block and font-loading-
-   timing entries under "Architecture decisions" above, plus a duplicate-ScrollTrigger-
-   instance bug from combining `gsap.matchMedia()` with `useGSAP`'s dependency-triggered
-   re-runs). But even after all three fixes, the pinned content still ended up
-   rendering off-screen partway through the scroll range — the trigger's own start/end
-   detection measured correctly (confirmed via `onRefresh` logging), but the pinned
-   element's own captured baseline position did not, most likely due to other
-   ScrollTrigger-driven components on the same landing page (`PathGrid`,
-   `SkillConstellation`, `TechTicker`, `TerminalHeading`) triggering their own refresh
-   cascades that corrupt ScrollHero's baseline. This needs a dedicated, isolated
-   debugging session (e.g. testing `ScrollHero` alone on a blank page, without the
-   other components, to conclusively prove or disprove that theory) rather than
-   further guessing. See `ScrollHero.tsx`'s own doc comment for the full history.
+**`ScrollHero.tsx`'s pin/tilt saga is resolved — this section previously described it
+as broken/disabled, which was stale.** The original scroll-PINNED tilt (header+card stay
+near the top while the card rotates/scales as the user scrolls past) genuinely never got
+working: CSS `position: sticky` never engaged, and a GSAP ScrollTrigger `pin` replacement
+still ended up rendering off-screen partway through the scroll range after fixing three
+other real bugs along the way. Rather than continuing to chase that specific mechanic,
+the component was **redesigned**: the card now gets a one-shot GSAP entrance (scale+fade,
+`ScrollTrigger... once: true`) plus a real cursor-tracking 3D tilt on desktop/fine-pointer
+devices (rotateX/rotateY mapped to pointer position within the card, plus a moving
+specular highlight glow) — see `ScrollHero.tsx`'s own doc comment. This sidesteps the
+pin mechanic entirely rather than fixing it, and is a genuinely different, working
+design, not a patch. **A real, separate bug was found and fixed in this same component**
+during a later session: the entrance's `ScrollTrigger` used `start: "top 90%", once:
+true`, which only fires on an actual scroll event crossing that threshold — but this
+card is always above the fold, so on a fresh page load (no scroll yet) the trigger's
+"already satisfied" state was never checked, leaving the card stuck at its pre-entrance
+state (`opacity: 0` — genuinely invisible) until the user scrolled at all. Confirmed live
+(computed style stuck at `opacity: 0` on load, then correctly resolving to `1` only after
+a scroll-away-and-back). A `ScrollTrigger.refresh()` call after setup did NOT fix it
+(refresh recalculates trigger positions, it doesn't retroactively fire enter callbacks
+for non-scrubbed tweens). Fixed by dropping the `scrollTrigger` config entirely and just
+playing the entrance tween on mount — correct here specifically because this element is
+guaranteed visible at page load, so there's no real "wait for scroll" case to handle.
+If you add a new scroll-triggered entrance to any OTHER above-the-fold element, don't
+copy the old `scrollTrigger`-gated pattern; use a plain mount-triggered tween instead.
 
-A second, smaller lesson from that same debugging session: **testing scroll-dependent
+A second, smaller lesson from an earlier debugging session on this same component:
+**testing scroll-dependent
 behavior via repeated `page.goto()` calls in one long-lived Playwright browser tab
 produced misleading, inconsistent results** (the same exact code measured differently
 across runs). Closing the tab and opening a genuinely fresh one before each test
@@ -630,6 +816,27 @@ above.
 - Bash tool's working directory can silently drift to the parent `C:\claude` instead of
   `C:\claude\foundary` between calls — if `npx tsc`/`npx eslint` suddenly can't find the
   local binaries, check `pwd` first rather than assuming the tool is broken.
+- **A real Ubuntu WSL distro is installed on this dev machine** (confirmed via `wsl.exe -l
+  -v`) — genuinely useful for verifying any Linux-specific behavior (file permissions,
+  POSIX-only tools) that native Windows can't correctly demonstrate, rather than just
+  noting the limitation and moving on. Used successfully to verify the Cybersecurity
+  path's Linux-permissions lesson (`os.chmod()` has zero real effect on native Windows
+  NTFS, but works correctly under `wsl.exe -d Ubuntu -- bash -c "python3 ..."`).
+- **`bcrypt` was installed globally via pip** (`pip install bcrypt`, now v5.0.0) during
+  the Cybersecurity content-authoring pass, to actually measure its hashing speed
+  against SHA-256 rather than leave that lesson's bcrypt example unexecuted/illustrative
+  like it originally was — this is a real, permanent change to this machine's global
+  Python environment, not scoped to a virtualenv; harmless (bcrypt is a small, common
+  package) but worth knowing if a future session is surprised to find it already present.
+- **Accumulated QA accounts needing manual deletion from the Supabase Auth dashboard**
+  (Authentication → Users) — Claude cannot delete `auth.users` rows itself (blocked by
+  a safety classifier every time it's tried); `public.profiles`/`public.lesson_progress`
+  rows for each were already cleaned up via SQL, only the actual auth account remains:
+  `forage-qa-claude-20260806@example.com`, `forage-qa-theme-check@example.com`,
+  `forage-qa-prolesson-check@example.com`, `forage-qa-clouddevops-check@example.com`,
+  `forage-qa-aiml-verify@example.com`, `forage-qa-swe-verify@example.com`,
+  `forage-qa-fs-verify@example.com`, `forage-qa-data-verify@example.com`,
+  `forage-qa-cyber-verify@example.com`.
 
 ## Suggested next steps
 
@@ -649,12 +856,12 @@ security pass) is now **done**; what's left:
    the full list. A couple of lower-priority items from that audit were explicitly left
    for later: none blocking, listed in that commit's message.
 4. A custom domain (`forage.co.in`) is not yet purchased — optional, no urgency.
-5. **Debug and fix `ScrollHero.tsx`'s pin/tilt effect** in a dedicated session — see
-   "Known bugs" for the full history of what's already been ruled out (both a CSS
-   `position: sticky` attempt and a GSAP ScrollTrigger `pin` attempt failed after
-   fixing three real, separate bugs along the way). Start by isolating `ScrollHero` on
-   a blank test page without the landing page's other ScrollTrigger-driven components,
-   to confirm or rule out cross-component refresh-cascade interference.
+5. ~~**Debug and fix `ScrollHero.tsx`'s pin/tilt effect.**~~ **Resolved, via redesign
+   not repair.** The pin mechanic itself was abandoned (see "Known bugs" for the full
+   history of both failed attempts) in favor of a one-shot entrance + cursor-tracking
+   3D tilt, which works. A separate, real bug in that redesign (the entrance staying
+   invisible on a fresh page load — see "Known bugs") was found and fixed in a later
+   session.
 6. Google OAuth: the "Continue with Google" button and `/auth/callback` route exist and
    are wired correctly, but the Google Cloud OAuth credentials and the Supabase
    dashboard provider toggle are the user's own tasks (external credentials, can't be

@@ -20,14 +20,14 @@ const PATHS = [
 function Segment({ slug, title }: { slug: string; title: string }) {
   const meta = pathMeta[slug];
   const Icon = streamIcon[slug] ?? streamIcon.foundations;
-  const accent = meta?.accent ?? "#00e5ff";
+  const accent = meta?.accent ?? "var(--color-primary)";
   return (
     <span className="inline-flex items-center gap-2.5 mx-4 shrink-0 font-mono text-[12px] sm:text-[13px] whitespace-nowrap">
       <Icon size={14} style={{ color: accent }} className="shrink-0" />
       <span className="font-bold tracking-wide" style={{ color: accent }}>
         {title}
       </span>
-      <span className="text-[#7d99a3]">{meta?.skills.join(" · ")}</span>
+      <span className="text-[var(--color-text-secondary)]">{meta?.skills.join(" · ")}</span>
     </span>
   );
 }
@@ -109,7 +109,7 @@ export function TechTicker() {
   return (
     <div
       ref={sectionRef}
-      className="relative overflow-hidden border-y border-white/[0.06] py-3"
+      className="relative overflow-hidden border-y border-[var(--color-border)] py-3"
       style={{
         maskImage: "linear-gradient(90deg, transparent, black 6%, black 94%, transparent)",
         WebkitMaskImage: "linear-gradient(90deg, transparent, black 6%, black 94%, transparent)",
@@ -126,7 +126,7 @@ export function TechTicker() {
             {PATHS.map((p) => (
               <span key={`${copy}-${p.slug}`} className="flex items-center">
                 <Segment {...p} />
-                <span className="text-white/15">/</span>
+                <span className="text-[var(--color-text-secondary)]/30">/</span>
               </span>
             ))}
           </div>

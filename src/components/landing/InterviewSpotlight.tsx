@@ -87,8 +87,8 @@ export function InterviewSpotlight() {
       <div className="absolute -left-10 -bottom-10 w-56 h-56 rounded-full bg-[#3d8fff]/15 blur-3xl pointer-events-none" />
       <div>
         <h2 className="display text-2xl sm:text-3xl mb-3">Rehearse the real thing, out loud</h2>
-        <p className="text-sm text-[#7d99a3] max-w-xl leading-relaxed">
-          <strong className="text-[#ece9f5] font-semibold">Forage Interview</strong> is a
+        <p className="text-sm text-[var(--color-text-secondary)] max-w-xl leading-relaxed">
+          <strong className="text-[var(--color-text)] font-semibold">Forage Interview</strong> is a
           live, voice-first mock interview for your target role. Pick behavioral,
           technical, or DSA — the AI interviewer asks one question at a time, follows up
           naturally, and closes with a feedback report: what worked, what to fix, and a

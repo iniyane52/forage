@@ -92,7 +92,7 @@ export function SkillConstellation({ variant = "a" }: { variant?: "a" | "b" }) {
       {LAYOUTS[variant].map((f, i) => {
         const meta = pathMeta[f.slug];
         const Icon = streamIcon[f.slug] ?? streamIcon.foundations;
-        const accent = meta?.accent ?? "#00e5ff";
+        const accent = meta?.accent ?? "var(--color-primary)";
         return (
           <span
             key={i}

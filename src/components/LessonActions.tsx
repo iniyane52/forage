@@ -61,8 +61,8 @@ export function MarkDoneButton({
         disabled={done || busy}
         className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-colors ${
           done
-            ? "bg-[#3fb950]/15 text-[#3fb950] cursor-default"
-            : "bg-[#3fb950] text-[#04240f] hover:bg-[#35a344]"
+            ? "bg-[var(--color-success)]/15 text-[var(--color-success)] cursor-default"
+            : "bg-[var(--color-success)] text-[var(--color-on-primary)] hover:opacity-90"
         }`}
       >
         {done && <CheckCircle2 size={16} />}
@@ -74,7 +74,7 @@ export function MarkDoneButton({
             role={rewardIsError ? "alert" : undefined}
             initial={{ opacity: 0, scale: 0.8, y: 6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className={`text-sm font-bold ${rewardIsError ? "text-[#f85149]" : "text-[#3fb950]"}`}
+            className={`text-sm font-bold ${rewardIsError ? "text-[var(--color-danger)]" : "text-[var(--color-success)]"}`}
           >
             {reward}
           </motion.span>
@@ -85,14 +85,14 @@ export function MarkDoneButton({
             initial={{ opacity: 0, scale: 0.8, y: 6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ delay: 0.1 + i * 0.1 }}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#ffb020] bg-[#ffb020]/10 border border-[#ffb020]/30 rounded-full px-2.5 py-1"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-warning)] bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/30 rounded-full px-2.5 py-1"
           >
             <Medal size={13} /> Badge earned: {title}
           </motion.span>
         ))}
       </AnimatePresence>
       {!done && (
-        <span className="text-xs text-[#7d99a3] hidden sm:inline">
+        <span className="text-xs text-[var(--color-text-secondary)] hidden sm:inline">
           Only when you did the task AND can explain it.
         </span>
       )}
@@ -103,7 +103,7 @@ export function MarkDoneButton({
           to swap in server-rendered content with no entrance transition of its own. */}
       {done &&
         (questionCount === 0 ? (
-          <span className="text-xs text-[#7d99a3] glass rounded-xl px-3 py-2">
+          <span className="text-xs text-[var(--color-text-secondary)] glass rounded-xl px-3 py-2">
             Study-only lesson — no quiz needed
           </span>
         ) : (
@@ -114,7 +114,7 @@ export function MarkDoneButton({
           >
             <Link
               href={quizHref}
-              className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#00e5ff] text-[#05070a] hover:bg-[#33ebff] transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl text-sm font-semibold bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:opacity-90 transition-opacity flex items-center gap-1.5"
             >
               Take the quiz ({questionCount} question{questionCount === 1 ? "" : "s"}) <ArrowRight size={15} />
             </Link>
@@ -123,7 +123,7 @@ export function MarkDoneButton({
       {!done && (
         <span
           title="Study the lesson and mark it done to unlock the quiz"
-          className="flex items-center gap-1.5 text-xs text-[#7d99a3] glass rounded-xl px-3 py-2 cursor-not-allowed"
+          className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)] glass rounded-xl px-3 py-2 cursor-not-allowed"
         >
           <Lock size={13} /> Study this first to unlock the quiz
         </span>
@@ -155,7 +155,7 @@ export function NotesBox({ lessonId, initial }: { lessonId: string; initial: str
       <div className="flex items-center justify-end -mt-6 mb-1">
         <span
           role={saved === "error" ? "alert" : undefined}
-          className={`text-[10px] ${saved === "error" ? "text-[#f85149]" : "text-[#7d99a3]"}`}
+          className={`text-[10px] ${saved === "error" ? "text-[var(--color-danger)]" : "text-[var(--color-text-secondary)]"}`}
         >
           {saved === "saving"
             ? "saving..."
@@ -170,7 +170,7 @@ export function NotesBox({ lessonId, initial }: { lessonId: string; initial: str
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Write what you'd tell a friend about this topic..."
-        className="w-full min-h-24 bg-black/30 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-[#00e5ff] resize-y transition-colors"
+        className="w-full min-h-24 bg-[rgb(var(--surface-rgb)/0.05)] border border-[var(--color-border)] rounded-xl p-3 text-sm outline-none focus:border-[var(--color-primary)] resize-y transition-colors"
       />
     </div>
   );
@@ -182,9 +182,9 @@ export function CheckReveal({ q, a }: { q: string; a: string }) {
     <div className="glass rounded-xl overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full text-left px-4 py-2.5 text-sm hover:bg-white/[0.03] flex items-start gap-2 transition-colors"
+        className="w-full text-left px-4 py-2.5 text-sm hover:bg-[rgb(var(--surface-rgb)/0.03)] flex items-start gap-2 transition-colors"
       >
-        <HelpCircle size={16} className="text-[#59d3c5] mt-0.5 shrink-0" />
+        <HelpCircle size={16} className="text-[var(--color-primary)] mt-0.5 shrink-0" />
         <span className="flex-1">{q}</span>
       </button>
       <AnimatePresence initial={false}>
@@ -196,8 +196,8 @@ export function CheckReveal({ q, a }: { q: string; a: string }) {
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="overflow-hidden"
           >
-            <p className="px-4 py-2.5 text-sm text-[#7d99a3] border-t border-white/[0.06]">
-              <span className="text-[#3fb950] font-bold mr-1">A</span>
+            <p className="px-4 py-2.5 text-sm text-[var(--color-text-secondary)] border-t border-[var(--color-border)]">
+              <span className="text-[var(--color-success)] font-bold mr-1">A</span>
               {a}
             </p>
           </motion.div>

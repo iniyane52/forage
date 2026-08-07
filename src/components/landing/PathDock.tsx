@@ -254,7 +254,7 @@ export function PathDock() {
 
 function DockCard({ slug, title, tabbable = true }: { slug: string; title: string; tabbable?: boolean }) {
   const meta = pathMeta[slug];
-  const accent = meta?.accent ?? "#00e5ff";
+  const accent = meta?.accent ?? "var(--color-primary)";
   const Icon = streamIcon[slug] ?? streamIcon.foundations;
 
   return (
@@ -262,7 +262,7 @@ function DockCard({ slug, title, tabbable = true }: { slug: string; title: strin
       href="/auth"
       tabIndex={tabbable ? undefined : -1}
       draggable={false}
-      className="relative glass-solid rounded-2xl p-5 w-[172px] shrink-0 flex flex-col gap-2.5 hover:border-white/20 transition-colors"
+      className="relative glass-solid rounded-2xl p-5 w-[172px] shrink-0 flex flex-col gap-2.5 hover:border-[var(--color-primary)]/30 transition-colors"
       style={{ borderColor: `${accent}22` }}
     >
       <span

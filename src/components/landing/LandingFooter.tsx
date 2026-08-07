@@ -36,22 +36,22 @@ export function LandingFooter() {
   );
 
   return (
-    <footer ref={footerRef} className="border-t border-white/[0.06] py-8 mt-auto">
+    <footer ref={footerRef} className="border-t border-[var(--color-border)] py-8 mt-auto">
       <div className="max-w-5xl mx-auto px-4 flex flex-col gap-5">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#7d99a3]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--color-text-secondary)]">
           <span style={{ fontFamily: "var(--font-display)" }}>
             Forage
-            <span ref={dotRef} className="text-[#00e5ff]">
+            <span ref={dotRef} className="text-[var(--color-primary)]">
               .
             </span>
           </span>
           <span>Built for people done preparing-as-procrastination.</span>
         </div>
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-5 border-t border-white/[0.06] text-xs text-[#7d99a3]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-5 border-t border-[var(--color-border)] text-xs text-[var(--color-text-secondary)]">
           <span>© {new Date().getFullYear()} Forage. All rights reserved.</span>
           <nav className="flex items-center gap-4">
             {LEGAL_LINKS.map((l) => (
-              <Link key={l.href} href={l.href} className="hover:text-white transition-colors">
+              <Link key={l.href} href={l.href} className="hover:text-[var(--color-text)] transition-colors">
                 {l.label}
               </Link>
             ))}

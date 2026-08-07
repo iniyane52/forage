@@ -45,6 +45,15 @@
             "url": "https://tryhackme.com/",
             "kind": "practice"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write down, in your own words, the three legitimate contexts where security testing is authorized (your own systems, explicit written permission, sanctioned practice platforms)."
+          },
+          {
+            "instruction": "Identify one platform you could practice on legally once you have hands-on skills later in this path — research this yourself (e.g. a well-known CTF platform or an intentionally-vulnerable training app).",
+            "expectOutcome": "A genuine, named platform with a one-sentence description of what it offers — e.g. 'TryHackMe: guided rooms with sanctioned practice targets' or 'OWASP Juice Shop: an intentionally-vulnerable app you run locally.'"
+          }
         ]
       },
       {
@@ -86,6 +95,12 @@
             "label": "CISA — Authentication, Authorization, and Accounting overview",
             "url": "https://www.cisa.gov/topics/cybersecurity-best-practices",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "For each of the 6 terms (Confidentiality, Integrity, Availability, Authentication, Authorization, Accounting), write one sentence naming a specific real-world example of a control that protects/implements it.",
+            "expectOutcome": "Six correctly-matched examples — at least 2 referencing something covered elsewhere in this path (e.g. Confidentiality → TLS/HTTPS encryption, Integrity → a digital signature detecting tampering, Availability → rate-limiting against DDoS)."
           }
         ]
       },
@@ -133,6 +148,15 @@
             "url": "https://www.cloudflare.com/learning/network-layer/what-is-a-computer-port/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the port-check example against your own localhost (127.0.0.1) and confirm the results match what you know is actually running on your machine.",
+            "expectOutcome": "Real, machine-specific results — confirmed on this dev machine: ports 22/80/443/5432/9999 closed, but port 3000 open (the Forage Next.js dev server actually running on this system) — a genuine, live confirmation, not a guessed/hypothetical result."
+          },
+          {
+            "instruction": "Memorize the well-known ports table — you'll need this vocabulary throughout the rest of the path."
+          }
         ]
       },
       {
@@ -179,6 +203,17 @@
             "label": "DigitalOcean — An Introduction to Linux Permissions",
             "url": "https://www.digitalocean.com/community/tutorials/an-introduction-to-linux-permissions",
             "kind": "reference"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both examples on a REAL Linux system (WSL, a Linux VM, or a Linux server) and confirm the permission string and octal notation match, and chmod 600 correctly restricts access.",
+            "expectOutcome": "On a real Linux system (verified via WSL Ubuntu on this machine): chmod 600 produces '-rw-------' and chmod 754 produces '-rwxr-xr--' — genuinely restricted permissions, confirmed by actually running Python's os.chmod there.",
+            "troubleshooting": "If you run this on native Windows instead of a real Linux environment, os.chmod() will appear to succeed but have NO real effect — confirmed directly on this exact machine: the file stayed '-rw-rw-rw-' regardless of which chmod value was set. This isn't a bug in your code; it's Windows' NTFS filesystem not implementing true Unix permission bits. Always verify this specific lesson's claims on WSL/a VM/a real Linux box, never native Windows."
+          },
+          {
+            "instruction": "Create a few test files with different chmod values (644, 700, 755) on a real Linux system, and predict each one's permission string BEFORE checking it.",
+            "expectOutcome": "644 → -rw-r--r--, 700 → -rwx------, 755 → -rwxr-xr-x — each correctly matching the 4=read/2=write/1=execute bit-summing rule per digit."
           }
         ]
       }
@@ -233,6 +268,18 @@
             "url": "https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install cryptography` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the symmetric key successfully round-trips a message, and the asymmetric key pair correctly encrypts with the public key and decrypts only with the private key."
+          },
+          {
+            "instruction": "Confirm for yourself that trying to call a decrypt-like operation on the public key object fails or doesn't exist.",
+            "expectOutcome": "hasattr(public_key, 'decrypt') returns False, and actually calling public_key.decrypt(...) raises a real AttributeError naming the RSAPublicKey type — confirmed by actually running it. The public key object genuinely has no decrypt capability at the type level, not just 'isn't meant to be used that way' by convention."
+          }
         ]
       },
       {
@@ -278,6 +325,18 @@
             "label": "Python — hashlib documentation",
             "url": "https://docs.python.org/3/library/hashlib.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install cryptography` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm encryption round-trips correctly while hashing genuinely has no reverse operation, and that a single added period completely changes the hash."
+          },
+          {
+            "instruction": "Hash a few different, closely-related strings (e.g. 'password', 'Password', 'password ', 'password1') and confirm each produces a wildly different hash.",
+            "expectOutcome": "Four completely different 64-character hex hashes with zero visible pattern between them — confirmed by actually running it: 'password'→5e8848..., 'Password'→e7cf3e..., 'password '→d41ca5..., 'password1'→0b14d5... — directly observing the avalanche effect across multiple closely-related inputs, not just the one example already in the lesson."
           }
         ]
       },
@@ -326,6 +385,15 @@
             "url": "https://www.cloudflare.com/learning/ssl/transport-layer-security-tls/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both examples and confirm the real certificate details for a live site (python.org), and the hostname-mismatch rejection."
+          },
+          {
+            "instruction": "Try the same check against a different real HTTPS site of your choosing, and compare its certificate's issuer and validity period.",
+            "expectOutcome": "A genuinely different Certificate Authority — confirmed by actually running it against github.com: TLS 1.3, issued to 'github.com' by Sectigo Limited (versus python.org's GlobalSign), valid until Sep 30 2026 — directly confirming different sites can use entirely different trusted CAs, still all verified successfully by the same browser/client trust store."
+          }
         ]
       },
       {
@@ -366,6 +434,18 @@
             "label": "cryptography (Python) — RSA signature documentation",
             "url": "https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install cryptography` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples and confirm the genuine signature verifies successfully while the tampered message's verification correctly fails."
+          },
+          {
+            "instruction": "Sign a message of your own choosing, and independently confirm you can identify why the signing key (private) and verifying key (public) are opposite from the earlier asymmetric-encryption lesson.",
+            "expectOutcome": "A correct, explicit statement of the reversal: encryption uses public-key-encrypts/private-key-decrypts, while signing uses private-key-signs/public-key-verifies — the two mechanisms use the SAME key pair concept but in opposite directions for opposite goals (privacy vs. authenticity)."
           }
         ]
       }
@@ -412,6 +492,15 @@
             "url": "https://www.cisa.gov/resources-tools/resources/layering-network-security-through-segmentation-infographic",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the example and confirm the allow/deny results for all four test ports (443/22 allowed, 3389/8080 denied)."
+          },
+          {
+            "instruction": "Add a new rule allowing port 3389 BEFORE the default-deny rule, and confirm port 3389 now gets allowed — then move that same rule to the very end (after default-deny) and confirm it becomes unreachable.",
+            "expectOutcome": "Confirmed by actually running both orderings: with the allow rule before default-deny, port 3389 evaluates to 'allow'; with the identical rule moved after default-deny, it evaluates to 'deny' — the exact same rule, only its position changed, directly proving rule order determines outcome, not just rule presence."
+          }
         ]
       },
       {
@@ -450,6 +539,15 @@
             "url": "https://www.cloudflare.com/learning/access-management/what-is-a-vpn/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the example and trace through both data paths (without VPN vs with VPN)."
+          },
+          {
+            "instruction": "Research what a 'no-logs' VPN policy actually claims to guarantee, and write one sentence about why that claim is inherently hard for an end user to independently verify.",
+            "expectOutcome": "A grounded, skeptical answer — e.g. a 'no-logs' claim is a policy statement, not a technically provable guarantee an outside user can audit; only an independent security audit (which some providers do commission) offers any real verification, and even then only for the audited period."
+          }
         ]
       },
       {
@@ -487,6 +585,15 @@
             "label": "Imperva — What is ARP Spoofing",
             "url": "https://www.imperva.com/learn/application-security/arp-spoofing/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the example and confirm the ARP cache is silently overwritten with the forged entry, with zero verification happening."
+          },
+          {
+            "instruction": "Research one real, standard defense against ARP spoofing (e.g. static ARP entries) and implement a small simulation showing it blocking the same forged reply.",
+            "expectOutcome": "A working defense simulation — confirmed by actually running it: a version of receive_arp_reply that checks the claimed IP against a set of 'static_entries' correctly REJECTS the forged claim for 192.168.1.1, leaving the cache at its original, genuine MAC address, unlike the undefended version which silently accepted it."
           }
         ]
       },
@@ -535,6 +642,18 @@
             "url": "https://nmap.org/book/legal-issues.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the Python scanner against your own localhost and confirm the open ports match what you know is actually running."
+          },
+          {
+            "instruction": "Extend the scan to a much larger range (e.g. all of ports 1-1024) and time how long it takes with the concurrent approach.",
+            "expectOutcome": "A real, measured scan — confirmed on this machine: scanning all 1024 well-known ports concurrently took about 10.8 seconds and found ports 135 and 445 genuinely open (Windows RPC and SMB, both real, expected services on a Windows machine's localhost) — demonstrating the concurrent approach scales to a realistic port range in a reasonable time, unlike a naive one-at-a-time scan."
+          },
+          {
+            "instruction": "(Optionally, if you install nmap) try `nmap scanme.nmap.org` and `nmap -sV scanme.nmap.org` against nmap's own explicitly-authorized practice target, comparing its output to your own scanner's simpler results."
+          }
         ]
       },
       {
@@ -576,6 +695,18 @@
             "label": "CISA — Understanding Denial-of-Service Attacks",
             "url": "https://www.cisa.gov/news-events/news/understanding-denial-service-attacks",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the token-bucket example above and confirm the allowed/blocked counts (5 allowed, 15 blocked)."
+          },
+          {
+            "instruction": "Try different capacity/refill_rate combinations (e.g. capacity=2, or capacity=10 with a faster refill_rate=2) and observe how the allowed/blocked split changes.",
+            "expectOutcome": "A clean, real gradient — confirmed by actually running three configurations: capacity=5/rate=1 → 5 allowed/15 blocked; capacity=2/rate=1 → 2 allowed/18 blocked (stricter); capacity=10/rate=2 → 10 allowed/10 blocked (more permissive) — directly showing how tuning these two parameters trades off burst tolerance against sustained-rate protection."
+          },
+          {
+            "instruction": "Look up one real, publicly-documented large-scale DDoS incident and identify which category (volumetric/protocol/application-layer) it was."
           }
         ]
       }
@@ -631,6 +762,15 @@
             "url": "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both examples and confirm the vulnerable version's query string is altered by the malicious input, while the parameterized version correctly treats it as harmless literal data."
+          },
+          {
+            "instruction": "Find a piece of code (yours or an open-source example) that builds a SQL query via string formatting and rewrite it using parameterized queries. As an extra check, try a more destructive-looking payload (e.g. \"'; DROP TABLE users; --\") against the SAFE version.",
+            "expectOutcome": "The users table survives completely intact — confirmed by actually running it: safe_login() with the DROP TABLE payload returns an empty result (no username literally matches that text) and the table still contains alice's real row afterward, proving parameterization isn't just about the specific OR '1'='1' example, it neutralizes injection payloads generally."
+          }
         ]
       },
       {
@@ -678,6 +818,15 @@
             "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both examples and confirm the encoded version's special characters are converted to their safe entity form."
+          },
+          {
+            "instruction": "Take a piece of code that inserts a variable into an HTML string, and add html.escape() (or your framework's equivalent) around the user-supplied part.",
+            "expectOutcome": "A working, safe pattern applied consistently — confirmed by actually running html.escape() against the lesson's own payload: '<' and '>' become '&lt;'/'&gt;', which a browser would display as literal visible text reading '<script>...' rather than parsing and executing it."
+          }
         ]
       },
       {
@@ -724,6 +873,19 @@
             "label": "bcrypt — Python package documentation",
             "url": "https://pypi.org/project/bcrypt/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the SHA-256 timing example and note how fast 100,000 hashes complete — that speed is precisely the vulnerability."
+          },
+          {
+            "instruction": "If you can install the bcrypt package, actually hash the same password with bcrypt and time a single hash — compare it directly to SHA-256's per-hash speed.",
+            "expectOutcome": "A dramatic, real, measured gap — confirmed by actually installing and running bcrypt: 100,000 SHA-256 hashes took only 62.6ms total (0.63 microseconds each), while a SINGLE bcrypt hash took 190.3ms — bcrypt is roughly 300,000x slower per hash than SHA-256, a concrete number that makes 'deliberately slow' tangible rather than abstract. Also confirmed: hashing the same password twice with bcrypt.gensalt() produces two genuinely different hashes, and bcrypt.checkpw() correctly accepts the right password and rejects a wrong one."
+          },
+          {
+            "instruction": "Research what a 'work factor' or 'cost parameter' controls in bcrypt, and explain in one sentence why it's tunable over time.",
+            "expectOutcome": "A correct explanation: the work factor controls how many rounds of internal computation bcrypt performs, letting the hashing cost be deliberately increased as hardware gets faster over the years — keeping brute-force attacks expensive even as computing power grows, rather than a fixed cost that becomes cheaper to attack every year."
           }
         ]
       }
@@ -773,6 +935,15 @@
             "url": "https://owasp.org/Top10/A01_2021-Broken_Access_Control/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both examples and confirm the vulnerable version leaks bob's order while the secure version correctly rejects it."
+          },
+          {
+            "instruction": "Add a third function simulating a DELETE action, and write the ownership check it would need before actually deleting an order.",
+            "expectOutcome": "Confirmed by actually running it: alice attempting to delete bob's order 102 gets 'not authorized to delete this order' and the order remains untouched; alice deleting her OWN order 101 succeeds and it's genuinely removed from orders_db — the same ownership-check pattern applied consistently to a second, more destructive action type."
+          }
         ]
       },
       {
@@ -819,6 +990,15 @@
             "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both examples and confirm the forged request is rejected while the legitimate one succeeds."
+          },
+          {
+            "instruction": "Simulate an attacker who somehow obtains a STALE, previously-used token, and consider whether your implementation would need to also expire tokens after use to fully close that gap.",
+            "expectOutcome": "A correct, reasoned answer: since this lesson's simple implementation stores one long-lived token per user (never rotated), a stolen but still-active token WOULD succeed if replayed — a real, more complete implementation should rotate/expire the token after use (or tie it to a short session), which this lesson's minimal version doesn't yet do."
+          }
         ]
       },
       {
@@ -855,6 +1035,15 @@
             "label": "OWASP Top 10 — A05 Security Misconfiguration",
             "url": "https://owasp.org/Top10/A05_2021-Security_Misconfiguration/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the example and review each misconfiguration pattern."
+          },
+          {
+            "instruction": "Pick one real system you have access to (your own project, a personal server) and check it against at least two of these four patterns — report what you found (even 'this one is fine') as if writing a mini security note.",
+            "expectOutcome": "A genuine, specific finding (or genuine confirmation of absence) for a real system — e.g. checking this very Forage project: no directory listing is exposed (Next.js doesn't serve raw file listings by default), and error pages in production don't show stack traces (Next.js's production build strips them) — a real, checkable pair of findings, not hypothetical."
           }
         ]
       },
@@ -898,6 +1087,16 @@
             "label": "OWASP Top 10 — A10 Server-Side Request Forgery",
             "url": "https://owasp.org/Top10/A10_2021-Server-Side_Request_Forgery_%28SSRF%29/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the example and confirm the legitimate URL is allowed while all three attack attempts are blocked."
+          },
+          {
+            "instruction": "Add a test case using the raw decimal representation of an internal IP (e.g. 2130706433, which is 127.0.0.1) and check whether your validation function still correctly catches it.",
+            "expectOutcome": "A genuinely nuanced real result, not the 'expected' clean bypass: on this machine, socket.gethostbyname('2130706433') itself fails with a DNS resolution error (getaddrinfo failed) rather than resolving to 127.0.0.1 — so the request gets blocked, but for the WRONG reason (a resolution failure, not the function's actual private-IP check triggering). This is a genuinely important, honest finding: the validation logic's is_private/is_loopback check was NEVER exercised by this particular bypass attempt in this environment, meaning it's unproven against decimal-notation IPs specifically — a real browser or a different resolver library might handle '2130706433' differently and actually resolve it, which would bypass this exact validation. Don't assume 'it got blocked' always means 'the defense worked' — check WHY.",
+            "troubleshooting": "If your own test shows a clean resolution to 127.0.0.1 and a correct block via is_loopack, that's also a valid, useful result — it just means your resolver library handles decimal notation differently than Python's socket.gethostbyname does on this specific machine. Either way, the real lesson is to check WHICH code path actually did the blocking."
           }
         ]
       }
@@ -943,6 +1142,15 @@
             "url": "https://www.cisa.gov/topics/cyber-threats-and-advisories/malware-phishing-and-ransomware",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the example and confirm all 5 hosts become infected automatically, with zero simulated user interaction."
+          },
+          {
+            "instruction": "Modify the connections dictionary to make host_c isolated (no connections to/from any infected host), and confirm it correctly stays uninfected.",
+            "expectOutcome": "Confirmed by actually running it: with host_c's connections removed, the infection still spreads to host_a, host_b, host_d, and host_e automatically, but host_c genuinely stays uninfected (False) — directly demonstrating that network segmentation (this path's earlier module) breaks a worm's automatic spread path, not just in theory."
+          }
         ]
       },
       {
@@ -980,6 +1188,15 @@
             "label": "CISA — Avoiding Social Engineering and Phishing Attacks",
             "url": "https://www.cisa.gov/news-events/news/avoiding-social-engineering-and-phishing-attacks",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the example and confirm which URLs are correctly flagged as suspicious."
+          },
+          {
+            "instruction": "Write your own extract_registered_domain check and test it against 2-3 new lookalike examples you construct yourself.",
+            "expectOutcome": "Confirmed by actually running it against 3 new examples for a different real domain (chase.com): the exact-match URL correctly shows LEGITIMATE, while both a hyphenated lookalike ('chase-online-secure.com') and a subdomain trick ('secure.chase.com.login-verify.xyz') correctly show SUSPICIOUS — the same detection logic generalizing beyond the lesson's original PayPal example to a different brand entirely."
           }
         ]
       },
@@ -1019,6 +1236,15 @@
             "url": "https://www.cisa.gov/stopransomware/ransomware-guide",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the example and confirm you understand why a connected backup is insufficient against ransomware."
+          },
+          {
+            "instruction": "Research what 'air-gapped' means specifically, and write one sentence explaining why an air-gapped backup provides a stronger guarantee than one that's merely 'not currently connected but could be plugged back in.'",
+            "expectOutcome": "A correct, precise distinction: 'air-gapped' means physically, permanently isolated from any network with no connection path at all, versus a backup drive that's simply unplugged right now — the latter is only as safe as the discipline of never reconnecting it while compromised, a human process that can fail, while true air-gapping removes that failure mode structurally."
+          }
         ]
       },
       {
@@ -1055,6 +1281,15 @@
             "label": "NIST — Defense in Depth (glossary definition)",
             "url": "https://csrc.nist.gov/glossary/term/defense_in_depth",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the example and confirm the combined failure probability is dramatically lower than any single layer's."
+          },
+          {
+            "instruction": "Remove one layer from the list (simulating that control not existing) and observe how much the combined risk increases.",
+            "expectOutcome": "Confirmed by actually running all 5 single-layer-removal scenarios: removing the STRONGEST layer (the firewall, 90% stop rate) increases overall failure risk the most in relative terms (0.0225% → 0.225%, a 10x jump), while removing the WEAKEST layer (security-aware user, 70% stop rate) increases it the least (0.0225% → 0.075%, ~3.3x) — directly showing that a defense-in-depth stack's strongest layer matters disproportionately, even though every layer still contributes."
           }
         ]
       }
@@ -1100,6 +1335,15 @@
             "url": "https://aws.amazon.com/compliance/shared-responsibility-model/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the example and review the responsibility split for both service types (EC2 vs S3)."
+          },
+          {
+            "instruction": "Pick a cloud service you're familiar with (or research one), and write out what you believe falls on each side of the responsibility line for that specific service.",
+            "expectOutcome": "A correctly-reasoned split for a real, named service — e.g. for a managed database service (like AWS RDS), the provider handles patching the DB engine and underlying host, while the customer still owns network access rules, IAM permissions, and what data goes in — matching the pattern that access/data control stays with the customer regardless of how managed the service is."
+          }
         ]
       },
       {
@@ -1136,6 +1380,15 @@
             "label": "AWS IAM — JSON Policy Elements Reference",
             "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the example and compare both policy documents (overly-permissive vs least-privilege)."
+          },
+          {
+            "instruction": "Write your own least-privilege IAM policy for a hypothetical role that only needs to READ (not write) objects from a specific bucket path.",
+            "expectOutcome": "A real, valid JSON policy scoped to exactly `s3:GetObject` (not GetObject+PutObject, and definitely not \"*\") on one specific bucket ARN path — confirmed by actually writing and parsing it as valid JSON, matching AWS's real policy document structure."
           }
         ]
       },
@@ -1178,6 +1431,15 @@
             "label": "AWS — Blocking public access to your Amazon S3 storage",
             "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both examples and confirm the risky policy is correctly detected."
+          },
+          {
+            "instruction": "Write a second, genuinely private bucket policy (scoped to a specific IAM role's ARN as the Principal, instead of \"*\"), and confirm your check_bucket_policy_risk function correctly does NOT flag it.",
+            "expectOutcome": "Confirmed by actually running it: a policy with Principal set to a specific role ARN (arn:aws:iam::123456789012:role/my-app-role) instead of '*' produces ZERO flagged risky statements, correctly distinguishing a genuinely scoped, private policy from the earlier public one — the check function's logic generalizes correctly, not just for the one example already shown."
           }
         ]
       },
@@ -1224,6 +1486,15 @@
             "label": "AWS — Security groups for your VPC",
             "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both examples and confirm you understand why IMDSv2 specifically defeats simple SSRF forwarding, and that port 3389 is correctly flagged as risky in the security group check."
+          },
+          {
+            "instruction": "Add a new rule for port 5432 (PostgreSQL) with source 0.0.0.0/0, and confirm your check correctly flags it too.",
+            "expectOutcome": "Confirmed by actually running it with the added rule: port 5432 is correctly flagged RISKY alongside port 3389, while ports 443 (intentionally public) and the internally-restricted port 22 remain correctly unflagged — the same detection rule generalizing to a different, equally sensitive database port."
           }
         ]
       }
@@ -1279,6 +1550,15 @@
             "url": "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both examples and confirm carol's failure count clearly stands out from the other users."
+          },
+          {
+            "instruction": "Adjust the detection threshold and observe how it changes what gets flagged.",
+            "expectOutcome": "A real, measured alert-fatigue gradient — confirmed by actually running a larger 6-user, 150-login sample: threshold=0 flags 5 of 6 users (way too sensitive, mostly ordinary typos), threshold=1 still flags 3 users (alice, carol, frank — still noisy), and threshold=2 or higher correctly flags only carol (the genuine 30-attempt burst) — directly demonstrating the sensitivity-vs-alert-fatigue tradeoff with real numbers, not just the claim."
+          }
         ]
       },
       {
@@ -1325,6 +1605,15 @@
             "url": "https://www.sans.org/white-papers/33901/",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the phases example and memorize the four-phase order (noting that containment/eradication/recovery are one combined phase, not three)."
+          },
+          {
+            "instruction": "Write a short (3-4 sentence) hypothetical incident scenario of your own and walk through what would happen at each of the four phases.",
+            "expectOutcome": "A concrete, correctly-ordered walkthrough — e.g. for a hypothetical phishing-led credential compromise: Preparation (an existing incident runbook and on-call rotation), Detection & Analysis (an unusual login location alert), Containment/Eradication/Recovery (force-reset the compromised credential and revoke active sessions, then confirm no further unauthorized access, then restore normal access), Post-Incident (review why the phishing email got through and add a targeted awareness reminder)."
+          }
         ]
       },
       {
@@ -1368,6 +1657,16 @@
             "url": "https://tryhackme.com/",
             "kind": "practice"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Research how to run OWASP Juice Shop locally — it has an official, simple setup via Docker."
+          },
+          {
+            "instruction": "Set it up on your own machine and confirm you can access it locally, without exposing it to the public internet.",
+            "expectOutcome": "A running local instance reachable only at localhost (e.g. http://localhost:3000), confirmed NOT reachable from any other device — the correct, safe setup this lesson's warning requires.",
+            "troubleshooting": "If `docker run` fails because Docker isn't installed or the daemon isn't running, that's a genuine environment gap, not a mistake in the steps — install Docker Desktop (or Docker Engine on Linux) and confirm `docker ps` runs without error before retrying."
+          }
         ]
       },
       {
@@ -1410,6 +1709,22 @@
             "label": "Forage Interview — practice presenting this assessment live",
             "url": "/interview",
             "kind": "practice"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run a real assessment against a system you own: check open ports (Module 1)."
+          },
+          {
+            "instruction": "Check file permissions on any sensitive files, and whether any secrets are stored in plain text anywhere on the system."
+          },
+          {
+            "instruction": "Apply at least one concrete hardening fix based on what you found."
+          },
+          {
+            "instruction": "Write the full report following the skeleton above.",
+            "expectOutcome": "A complete report with real, specific findings from YOUR system (not hypothetical placeholders), each with a calibrated risk level and a concrete remediation — e.g. 'found port 3000 open (Next.js dev server) — Low risk, expected during local development, no action needed' alongside at least one genuine, actionable finding.",
+            "troubleshooting": "If your assessment turns up zero findings at all, that's suspicious, not reassuring — re-check you're actually looking (open ports, file permissions on anything containing credentials, .env files) rather than concluding the system is perfectly secure; a real assessment usually finds at least something worth noting, even if low-risk."
           }
         ]
       }

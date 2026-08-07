@@ -1,54 +1,10 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getLesson, getAdjacent, estimateReadingMinutes } from "@/lib/content";
 import { highlightCode } from "@/lib/highlight";
-import { pathMeta } from "@/lib/pathMeta";
-import { MarkDoneButton, NotesBox, CheckReveal } from "@/components/LessonActions";
+import { pathMeta, LIGHT_ACCENT } from "@/lib/pathMeta";
 import { TutorDrawer } from "@/components/TutorDrawer";
-import { ReadingProgressBar } from "@/components/ui/ReadingProgressBar";
-import { LessonOutline, type OutlineItem } from "@/components/LessonOutline";
-import { FadeUp } from "@/components/ui/motion";
-import {
-  BookOpen,
-  Lightbulb,
-  Code2,
-  XCircle,
-  AlertTriangle,
-  Target,
-  HelpCircle,
-  PenLine,
-  ArrowLeft,
-  ArrowRight,
-  ListChecks,
-  ExternalLink,
-  BookMarked,
-  Clock,
-  resourceIcon,
-} from "@/components/ui/icons";
-import type { LucideIcon } from "lucide-react";
-
-function Label({
-  children,
-  color = "#00e5ff",
-  icon: Icon,
-  id,
-}: {
-  children: React.ReactNode;
-  color?: string;
-  icon: LucideIcon;
-  id?: string;
-}) {
-  return (
-    <h2
-      id={id}
-      className="text-xs font-bold uppercase tracking-widest mt-8 mb-2 flex items-center gap-1.5 scroll-mt-24"
-      style={{ color }}
-    >
-      <Icon size={14} /> {children}
-    </h2>
-  );
-}
+import { LessonStepFlow } from "@/components/LessonStepFlow";
 
 export default async function LessonPage({
   params,
@@ -108,246 +64,38 @@ export default async function LessonPage({
   // deliberately NOT applied to the section Labels below, which already use a
   // considered, distinct rainbow of colors per section type (concept/analogy/
   // mistakes/etc.); flattening those to one accent would erase that existing design.
+  // In light mode this per-path neon is replaced by one calm blue (LIGHT_ACCENT) --
+  // resolved via the --lesson-accent-scope CSS custom-property cascade below, not JS,
+  // so there's no theme-flip flash.
   const accent = pathMeta[stream?.slug ?? ""]?.accent ?? "#00e5ff";
   const readingMinutes = estimateReadingMinutes(topic);
   const highlightedExamples = topic.examples ? await Promise.all(topic.examples.map((e) => highlightCode(e.code))) : [];
 
-  const outlineItems: OutlineItem[] = [
-    { id: "concept", label: "What it is" },
-    ...(topic.analogy ? [{ id: "analogy", label: "Analogy" }] : []),
-    ...(topic.examples?.length ? [{ id: "examples", label: "Worked example" }] : []),
-    ...(topic.mistakes?.length ? [{ id: "mistakes", label: "Common mistakes" }] : []),
-    { id: "handson", label: "Hands-on task" },
-    { id: "donewhen", label: "Done when" },
-    ...(topic.keyTakeaways?.length ? [{ id: "takeaways", label: "Key takeaways" }] : []),
-    ...(topic.resources?.length ? [{ id: "resources", label: "Keep exploring" }] : []),
-    ...(topic.checks?.length ? [{ id: "checks", label: "Check yourself" }] : []),
-    { id: "notes", label: "Your notes" },
-  ];
+  const sharedProps = {
+    slug,
+    topic,
+    mod,
+    stream,
+    accent,
+    readingMinutes,
+    highlightedExamples,
+    lessonId: row.id,
+    progress,
+    questionCount: questionCount ?? 0,
+    prev,
+    next,
+  };
+
+  const accentScopeStyle = {
+    "--lesson-accent-dark": accent,
+    "--lesson-accent-light": LIGHT_ACCENT,
+  } as React.CSSProperties;
 
   return (
     <>
-      <ReadingProgressBar accent={accent} />
-      <LessonOutline items={outlineItems} accent={accent} />
-      <article className="max-w-3xl mx-auto">
-        <p className="text-xs text-[#7d99a3]">
-          <Link href="/dashboard" className="hover:text-white transition-colors">
-            Dashboard
-          </Link>{" "}
-          /{" "}
-          <Link
-            href={`/stream/${stream?.slug ?? "common-core"}`}
-            className="hover:opacity-80 transition-opacity font-medium"
-            style={{ color: accent }}
-          >
-            {stream?.title ?? mod.title}
-          </Link>
-        </p>
-        <div className="flex gap-3 mt-3 mb-1">
-          <span className="w-1 rounded-full shrink-0" style={{ backgroundColor: accent }} />
-          <h1 className="display text-3xl sm:text-4xl md:text-5xl">{topic.title}</h1>
-        </div>
-        <p className="flex items-center gap-1.5 text-xs text-[#7d99a3] mb-1">
-          <Clock size={13} /> {readingMinutes} min read
-        </p>
-
-        <FadeUp>
-          <Label id="concept" icon={BookOpen}>
-            What it is
-          </Label>
-          <p className="lead">{topic.concept}</p>
-        </FadeUp>
-
-        {topic.analogy && (
-          <FadeUp>
-            <Label id="analogy" color="#b967ff" icon={Lightbulb}>
-              Analogy
-            </Label>
-            <p className="text-[15px] leading-relaxed">{topic.analogy}</p>
-          </FadeUp>
-        )}
-
-        {topic.examples && topic.examples.length > 0 && (
-          <FadeUp>
-            <Label id="examples" icon={Code2}>
-              Worked example
-            </Label>
-            {topic.examples.map((e, i) => (
-              <div key={i} className="mb-3 rounded-xl overflow-hidden border border-white/[0.08]">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.03] border-b border-white/[0.06]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#f85149]/70" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#ffb020]/70" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#3fb950]/70" />
-                </div>
-                <div
-                  className="bg-black/40 overflow-x-auto text-[13.5px] leading-relaxed [&>pre]:!bg-transparent [&>pre]:!m-0 [&>pre]:p-4 [&>pre]:font-mono [&>pre]:whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ __html: highlightedExamples[i] }}
-                />
-                {e.note && <p className="text-xs text-[#7d99a3] px-3 py-2 bg-white/[0.02]">{e.note}</p>}
-              </div>
-            ))}
-          </FadeUp>
-        )}
-
-        {topic.warn && (
-          <div className="mt-4 rounded-xl border border-[#f85149]/40 bg-[#f85149]/10 px-4 py-3 text-sm flex items-start gap-2">
-            <AlertTriangle size={18} className="text-[#f85149] mt-0.5 shrink-0" />
-            <span>
-              <b className="text-[#f85149]">Safety:</b> {topic.warn}
-            </span>
-          </div>
-        )}
-
-        {topic.mistakes && topic.mistakes.length > 0 && (
-          <FadeUp>
-            <Label id="mistakes" color="#ffb020" icon={XCircle}>
-              Common mistakes
-            </Label>
-            <ul className="space-y-1.5 text-sm">
-              {topic.mistakes.map((m, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <XCircle size={15} className="text-[#ffb020] mt-1 shrink-0" />
-                  <span>{m}</span>
-                </li>
-              ))}
-            </ul>
-          </FadeUp>
-        )}
-
-        <FadeUp>
-          <Label id="handson" color="#3fb950" icon={Target}>
-            Your hands-on task
-          </Label>
-          <p className="text-[15px] leading-relaxed">{topic.handsOn}</p>
-        </FadeUp>
-
-        <FadeUp>
-          <Label id="donewhen" color="#7d99a3" icon={Target}>
-            Done when
-          </Label>
-          <p className="text-sm glass rounded-xl px-4 py-2.5">{topic.doneWhen}</p>
-        </FadeUp>
-
-        {topic.keyTakeaways && topic.keyTakeaways.length > 0 && (
-          <FadeUp>
-            <Label id="takeaways" color="#ff3d81" icon={ListChecks}>
-              Key takeaways
-            </Label>
-            <ul className="space-y-1.5 text-sm">
-              {topic.keyTakeaways.map((k, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <ListChecks size={15} className="text-[#ff3d81] mt-1 shrink-0" />
-                  <span>{k}</span>
-                </li>
-              ))}
-            </ul>
-          </FadeUp>
-        )}
-
-        {topic.resources && topic.resources.length > 0 && (
-          <FadeUp>
-            <Label id="resources" color="#6ff9ff" icon={BookMarked}>
-              Keep exploring
-            </Label>
-            {(() => {
-              const [primary, ...rest] = topic.resources;
-              const PrimaryIcon = resourceIcon[primary.kind] ?? BookMarked;
-              return (
-                <>
-                  <a
-                    href={primary.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="glass glass-hover rounded-xl px-4 py-3.5 flex items-center gap-3 text-sm group border-[#6ff9ff]/25"
-                  >
-                    <span className="shrink-0 w-9 h-9 rounded-lg grid place-items-center bg-[#6ff9ff]/12 text-[#6ff9ff]">
-                      <PrimaryIcon size={17} />
-                    </span>
-                    <span className="flex-1 min-w-0">
-                      <span className="block text-[10px] font-bold uppercase tracking-widest text-[#6ff9ff]/80">
-                        {primary.kind === "docs" ? "Official docs" : "Primary resource"}
-                      </span>
-                      <span className="block font-medium truncate">{primary.label}</span>
-                    </span>
-                    <ExternalLink size={14} className="text-[#7d99a3] shrink-0" />
-                  </a>
-                  {rest.length > 0 && (
-                    <div className="grid sm:grid-cols-2 gap-2 mt-2">
-                      {rest.map((r, i) => {
-                        const RIcon = resourceIcon[r.kind] ?? BookMarked;
-                        return (
-                          <a
-                            key={i}
-                            href={r.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="glass glass-hover rounded-xl px-3 py-2.5 flex items-center gap-2.5 text-sm group"
-                          >
-                            <RIcon size={15} className="text-[#7d99a3] shrink-0" />
-                            <span className="flex-1 min-w-0 truncate">{r.label}</span>
-                            <ExternalLink size={13} className="text-[#7d99a3] shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </a>
-                        );
-                      })}
-                    </div>
-                  )}
-                </>
-              );
-            })()}
-          </FadeUp>
-        )}
-
-        {topic.checks && topic.checks.length > 0 && (
-          <FadeUp>
-            <Label id="checks" color="#59d3c5" icon={HelpCircle}>
-              Check yourself
-            </Label>
-            <div className="space-y-2">
-              {topic.checks.map((c, i) => (
-                <CheckReveal key={i} q={c.q} a={c.a} />
-              ))}
-            </div>
-          </FadeUp>
-        )}
-
-        <div className="mt-8">
-          <Label id="notes" icon={PenLine}>
-            Your notes
-          </Label>
-          <NotesBox lessonId={row.id} initial={progress?.notes ?? ""} />
-        </div>
-
-        <div className="mt-6">
-          <MarkDoneButton
-            lessonId={row.id}
-            initiallyDone={progress?.status === "done"}
-            questionCount={questionCount ?? 0}
-            quizHref={`/quiz/${slug}`}
-          />
-        </div>
-
-        <nav className="mt-10 pt-6 border-t border-white/[0.06] flex justify-between text-sm gap-4">
-          {prev ? (
-            <Link
-              href={`/learn/${prev.topic.id}`}
-              className="text-[#7d99a3] hover:text-white flex items-center gap-1 transition-colors"
-            >
-              <ArrowLeft size={15} /> {prev.topic.title}
-            </Link>
-          ) : (
-            <span />
-          )}
-          {next && (
-            <Link
-              href={`/learn/${next.topic.id}`}
-              className="text-[#7d99a3] hover:text-white text-right flex items-center gap-1 transition-colors"
-            >
-              {next.topic.title} <ArrowRight size={15} />
-            </Link>
-          )}
-        </nav>
-      </article>
-
+      <div className="lesson-accent-scope" style={accentScopeStyle}>
+        <LessonStepFlow {...sharedProps} />
+      </div>
       <TutorDrawer
         lessonTitle={topic.title}
         concept={topic.concept}

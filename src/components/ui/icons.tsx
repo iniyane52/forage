@@ -44,6 +44,9 @@ import {
   Menu,
   X,
   Clock,
+  Circle,
+  Sun,
+  Moon,
   type LucideIcon,
 } from "lucide-react";
 
@@ -106,6 +109,9 @@ export {
   Menu,
   X,
   Clock,
+  Circle,
+  Sun,
+  Moon,
 };
 
 // Resource kind → icon

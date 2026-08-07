@@ -14,7 +14,7 @@ export function StatCallout({
   value,
   suffix = "",
   label,
-  accent = "#00e5ff",
+  accent = "var(--color-primary)",
   className = "",
 }: {
   value: number;
@@ -63,7 +63,7 @@ export function StatCallout({
             hydration mismatch (server "0+", client "175+"). Same fix as ScrollHero.tsx. */}
         {!mounted || !reduce ? `0${suffix}` : `${value}${suffix}`}
       </div>
-      <p className="text-[11px] text-[#7d99a3] uppercase tracking-widest mt-1.5 max-w-[10rem]">{label}</p>
+      <p className="text-[11px] text-[var(--color-text-secondary)] uppercase tracking-widest mt-1.5 max-w-[10rem]">{label}</p>
     </div>
   );
 }

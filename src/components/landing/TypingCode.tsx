@@ -73,7 +73,7 @@ export function TypingCode() {
   const live = mounted && !reduce;
 
   return (
-    <div className="rounded-xl bg-[#05070a]/80 border border-white/[0.06] mt-4 overflow-hidden">
+    <div className="rounded-xl terminal-surface mt-4 overflow-hidden">
       <div className="flex items-center gap-1.5 px-3 py-2 border-b border-white/[0.06]">
         <span className="w-2 h-2 rounded-full bg-[#ff4757]/60" />
         <span className="w-2 h-2 rounded-full bg-[#ffb020]/60" />

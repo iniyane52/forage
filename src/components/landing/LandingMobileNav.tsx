@@ -24,21 +24,21 @@ export function LandingMobileNav() {
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
-        className="text-[#7d99a3] hover:text-white p-1 -m-1"
+        className="text-[var(--color-text-secondary)] hover:text-[var(--color-text)] p-1 -m-1"
       >
         {open ? <X size={20} /> : <Menu size={20} />}
       </button>
       {open && (
         <nav
           aria-label="Sections"
-          className="absolute left-0 top-full mt-2 min-w-[180px] bg-[#0a0e14] rounded-xl border border-white/[0.1] shadow-xl shadow-black/50 flex flex-col p-1.5 text-sm z-30"
+          className="absolute left-0 top-full mt-2 min-w-[180px] bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-xl shadow-[rgb(var(--surface-rgb)/0.5)] flex flex-col p-1.5 text-sm z-30"
         >
           {LINKS.map((l) => (
             <a
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="px-3 py-2 rounded-lg text-[#7d99a3] hover:text-white hover:bg-white/[0.05] transition-colors"
+              className="px-3 py-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[rgb(var(--surface-rgb)/0.05)] transition-colors"
             >
               {l.label}
             </a>

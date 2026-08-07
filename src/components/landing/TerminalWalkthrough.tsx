@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "@/components/ui/gsapMotion";
 import { useMounted } from "@/hooks/useMounted";
@@ -104,7 +104,24 @@ export function TerminalWalkthrough({ steps }: { steps: CliStep[] }) {
       <p className="sr-only">
         {steps.map((s) => `${s.command}: ${s.output} (${s.tag})`).join(". ")}
       </p>
-      <div aria-hidden="true" className="rounded-2xl glass-solid overflow-hidden">
+      <motion.div
+        aria-hidden="true"
+        className="rounded-2xl terminal-surface overflow-hidden"
+        // A Framer whileInView entrance, deliberately NOT part of the GSAP
+        // ScrollTrigger above -- that trigger is keyed off `containerRef` (this
+        // element's own PARENT), so this inner div rotating/scaling into view
+        // never moves `containerRef` itself, leaving its ScrollTrigger
+        // measurement untouched. Framer's whileInView uses IntersectionObserver,
+        // which (unlike the GSAP ScrollTrigger bug found in ScrollHero.tsx this
+        // same session) correctly fires immediately for an already-visible
+        // element at observation setup, so there's no equivalent "stuck
+        // invisible" risk here.
+        initial={!mounted || reduce ? false : { opacity: 0, rotate: -4, scale: 0.94, y: 16 }}
+        whileInView={{ opacity: 1, rotate: 0, scale: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        style={{ transformPerspective: 900 }}
+      >
         <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/[0.06]">
           <span className="w-2.5 h-2.5 rounded-full bg-[#ff4757]/60" />
           <span className="w-2.5 h-2.5 rounded-full bg-[#ffb020]/60" />
@@ -149,7 +166,7 @@ export function TerminalWalkthrough({ steps }: { steps: CliStep[] }) {
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
       {confetti && <Confetti count={36} />}
     </div>
   );

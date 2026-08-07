@@ -48,6 +48,20 @@
             "url": "https://www.bigocheatsheet.com/",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the O(n) sum_list timing example exactly as shown, across all four input sizes."
+          },
+          {
+            "instruction": "Run the O(n²) has_duplicate_slow timing example exactly as shown, across all four input sizes.",
+            "expectOutcome": "As n doubles (500→1,000→2,000→4,000), the runtime should roughly QUADRUPLE each step — the signature of O(n²), since nested loops mean total work grows with n×n."
+          },
+          {
+            "instruction": "Write your own O(n) function (e.g. finding the max of a list without using max()) and time it at n = 1,000 / 10,000 / 100,000 / 1,000,000, the same way sum_list was timed.",
+            "expectOutcome": "Runtime scales roughly 10x each time n scales 10x — confirmed: a hand-written find_max ran in ~0.02ms / 0.22ms / 2.19ms / 24.57ms at those four sizes, a clean linear pattern.",
+            "troubleshooting": "If your timings look noisy or don't scale cleanly at the smallest sizes (n=1,000), that's expected — timer overhead and system noise dominate at sub-millisecond durations; trust the pattern across the larger sizes more than the smallest one."
+          }
         ]
       },
       {
@@ -93,6 +107,19 @@
             "label": "MIT OCW — 6.006 Introduction to Algorithms",
             "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/",
             "kind": "course"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the binary_search example and observe the step count at n = 1,000 / 1,000,000 / 1,000,000,000.",
+            "expectOutcome": "Step count barely grows even as n grows 1000x each time — the hallmark of O(log n), since each step eliminates half the remaining search space."
+          },
+          {
+            "instruction": "Run the naive Fibonacci timing example at n = 20, 25, 30.",
+            "expectOutcome": "Each +5 to n multiplies the runtime by roughly 11x (φ⁵ ≈ 11.09) — explosive growth, the signature of exponential complexity."
+          },
+          {
+            "instruction": "Write one sentence naming a nested-loop pattern you've seen or written (in this path or elsewhere) that was accidentally O(n²)."
           }
         ]
       },
@@ -140,6 +167,16 @@
             "url": "https://docs.python.org/3/library/stdtypes.html#str.join",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both build_string_naive and build_string_fast and confirm the timing gap grows as n increases."
+          },
+          {
+            "instruction": "Write your own naive-concatenation function (e.g. building a comma-separated report string in a loop with +=) and its list+join equivalent, then confirm both produce IDENTICAL output before comparing their timing.",
+            "expectOutcome": "Identical output confirmed, with the naive version's time growing faster than the list+join version's as n increases — verified directly: at n=50k/100k/200k, naive took 11.72/27.23/141.86ms versus list+join's 9.73/19.22/46.92ms, the gap widening as n grows.",
+            "troubleshooting": "If the naive version isn't meaningfully slower at small n, that's expected and matches the lesson's own honest caveat — CPython has an in-place resize optimization that softens this specific pattern's real-world cost at small sizes; the gap should still widen as n grows, and list+join remains the always-safe idiom regardless."
+          }
         ]
       },
       {
@@ -185,6 +222,15 @@
             "label": "GeeksforGeeks — Hashing in Data Structure",
             "url": "https://www.geeksforgeeks.org/dsa/hashing-data-structure/",
             "kind": "practice"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both has_duplicate_slow and has_duplicate_fast on the same 4,000-element list and confirm the fast version is meaningfully quicker."
+          },
+          {
+            "instruction": "Take the nested-loop pattern you named in the previous lesson (or the example here) and rewrite it using a hash set/dict to eliminate the inner loop.",
+            "expectOutcome": "A working O(n) rewrite — the inner 'have I seen this?' check becomes a single `in seen` lookup instead of a nested scan."
           }
         ]
       },
@@ -232,6 +278,16 @@
             "url": "https://leetcode.com/explore/learn/card/array-and-string/",
             "kind": "practice"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both two_sum_sorted and longest_unique_substring and confirm the outputs match the comments."
+          },
+          {
+            "instruction": "Trace two_sum_sorted([2, 4, 7, 11, 15, 20], 18) BY HAND: write down lo, hi, and the current sum at each step until it finds the answer.",
+            "expectOutcome": "lo/hi start at 0/5 (sum=22, too big, hi moves to 4), then sum=17 (too small, lo moves to 1), then sum=19 (too big, hi moves to 3), then sum=4+11=15... continuing until lo=2/hi=3 gives 7+11=18 — matching (2,3) exactly.",
+            "troubleshooting": "If your hand trace doesn't converge to (2,3), double check you're moving lo UP when the sum is too small and hi DOWN when too large — moving the wrong pointer is the most common tracing mistake here."
+          }
         ]
       }
     ]
@@ -277,6 +333,19 @@
             "url": "https://docs.python.org/3/tutorial/classes.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write a small class of your own (e.g. Playlist or Inventory) with at least one internal attribute (leading-underscore convention)."
+          },
+          {
+            "instruction": "Add a method that VALIDATES input before mutating that internal attribute (e.g. reject a negative quantity), and a @property exposing a read-only view of it."
+          },
+          {
+            "instruction": "Test it: call the mutating method with valid input, confirm the @property reflects the change, then call it with invalid input and confirm it's genuinely rejected (not silently accepted).",
+            "expectOutcome": "Valid input updates the internal state (visible via the @property); invalid input raises an error and leaves the internal state unchanged.",
+            "troubleshooting": "If invalid input doesn't raise anything, check your validation is actually inside the mutating method (not just documented as a rule) — encapsulation only works if the class itself enforces it, not just convention."
+          }
         ]
       },
       {
@@ -313,6 +382,18 @@
             "label": "Python docs — Inheritance",
             "url": "https://docs.python.org/3/tutorial/classes.html#inheritance",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the Animal/Dog/Cat example and confirm describe() produces each animal's correct sound."
+          },
+          {
+            "instruction": "Confirm Robot(\"R2\").speak() genuinely raises NotImplementedError, by wrapping the call in try/except and printing the caught exception."
+          },
+          {
+            "instruction": "Add one more Animal subclass of your own (e.g. Bird), and write a function that takes a list of mixed Animal subclasses and calls describe() on each.",
+            "expectOutcome": "Your new subclass's describe() output appears correctly in the loop, with zero special-casing needed for it in the loop itself — this working automatically is exactly what the next lesson (polymorphism) names explicitly."
           }
         ]
       },
@@ -351,6 +432,18 @@
             "url": "https://docs.python.org/3/tutorial/classes.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the Shape/Rectangle/Circle/total_area example and confirm the printed total matches (24.57 for the initial 3 shapes)."
+          },
+          {
+            "instruction": "Add the Triangle subclass shown and confirm total_area updates to include it (36.57) with ZERO changes made to total_area() itself."
+          },
+          {
+            "instruction": "Add ONE MORE Shape subclass of your own (e.g. Square), append an instance to the shapes list, and confirm total_area() correctly includes it — again with zero changes to total_area().",
+            "expectOutcome": "The new shape's area is included in the running total automatically, confirming polymorphism's real payoff: code written against a shared interface keeps working as new types are added."
+          }
         ]
       },
       {
@@ -388,6 +481,18 @@
             "url": "https://docs.python.org/3/tutorial/classes.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the Car/Engine/ElectricEngine example and confirm both gas_car.start() and electric_car.start() work correctly."
+          },
+          {
+            "instruction": "Write one more engine-like class (e.g. HybridEngine) with its own start() method, and pass it into Car without changing Car's class definition at all.",
+            "expectOutcome": "Car works correctly with your new engine type — confirming composition's key flexibility: a held object can be swapped for a new implementation without touching the containing class."
+          },
+          {
+            "instruction": "Write one or two sentences: for a specific relationship in a project you've worked on (or the Car/Engine example), explain why you'd choose composition (HAS-A) over inheritance (IS-A) for it."
+          }
         ]
       },
       {
@@ -424,6 +529,19 @@
             "label": "Refactoring.Guru — Design Patterns overview",
             "url": "https://refactoring.guru/design-patterns",
             "kind": "reference"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the Singleton (Config) example and confirm `a is b` is True and that b sees the setting a made."
+          },
+          {
+            "instruction": "Run the Strategy (PayByCard/PayByCash) example and confirm checkout() produces different, correct behavior for each strategy."
+          },
+          {
+            "instruction": "Implement a Strategy pattern of your own — e.g. SortByPrice/SortByName strategies passed into a process(items, strategy) function — and confirm process() never branches on which strategy it received.",
+            "expectOutcome": "A working strategy swap with zero type-checking inside process() — verified: SortByPrice and SortByName each correctly produced their own sort order (cheapest-first vs alphabetical) from the exact same process() call, just with a different strategy object passed in.",
+            "troubleshooting": "If you find yourself writing `if isinstance(strategy, SortByPrice)` inside process(), that defeats the pattern — process() should only ever call strategy.apply(...) (or similar), trusting polymorphism to route to the right implementation."
           }
         ]
       }
@@ -478,6 +596,19 @@
             "url": "https://www.geeksforgeeks.org/dsa/linked-list-data-structure/",
             "kind": "practice"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Implement the LinkedList class above (Node + push_front + to_list), push a few values, and confirm to_list() matches [1, 2, 3] for pushes 3, 2, 1."
+          },
+          {
+            "instruction": "Run the find() example and confirm it returns the right index for a present value and -1 for a missing one."
+          },
+          {
+            "instruction": "Add a push_back(value) method that walks to the last node and appends there, then push a value onto the end and confirm it lands there.",
+            "expectOutcome": "push_back(99) after push_front(3), push_front(2), push_front(1) produces [1, 2, 3, 99] — confirmed by actually running it.",
+            "troubleshooting": "If push_back on an EMPTY list crashes, check you're handling self.head is None as its own case (setting self.head = node directly) — walking `current.next` from a None head fails immediately."
+          }
         ]
       },
       {
@@ -523,6 +654,19 @@
             "label": "GeeksforGeeks — Stack Data Structure",
             "url": "https://www.geeksforgeeks.org/dsa/stack-data-structure/",
             "kind": "practice"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the stack example (append/pop) and confirm LIFO order."
+          },
+          {
+            "instruction": "Run the deque vs list.pop(0) timing comparison and confirm deque.popleft() is meaningfully faster at scale."
+          },
+          {
+            "instruction": "Implement a balanced-parentheses checker using a stack (push on open bracket, pop-and-compare on close, valid only if the stack ends empty) and test it on at least 4 strings including a genuinely invalid one.",
+            "expectOutcome": "Correctly classifies all four: '(a+b)' → True, '([)]' → False (wrong nesting order), '{[()]}' → True, '(((' → False (unclosed) — verified by actually running it.",
+            "troubleshooting": "If '([)]' comes back True, you're probably only checking bracket TYPE counts, not nesting ORDER — you need to compare each closing bracket against the most recently opened one (the top of the stack), not just tally totals."
           }
         ]
       },
@@ -571,6 +715,15 @@
             "url": "https://www.geeksforgeeks.org/dsa/binary-tree-data-structure/",
             "kind": "practice"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Implement bst_insert, bst_search, and inorder_traversal, insert the same values [50,30,70,20,40,60,80], and confirm the outputs shown."
+          },
+          {
+            "instruction": "Insert values in already-SORTED order (e.g. 1,2,3,4,5) into a fresh BST and reason about (or measure) the resulting shape.",
+            "expectOutcome": "Every value goes to the right child of the previous one — the tree degrades into a straight line, exactly the worst-case behavior the lesson warns about, since every new value is always greater than everything inserted so far."
+          }
         ]
       },
       {
@@ -617,6 +770,20 @@
             "url": "https://www.geeksforgeeks.org/dsa/graph-data-structure-and-algorithms/",
             "kind": "practice"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Implement both bfs and dfs on the example graph and confirm the traversal orders shown (['A','B','C','D','E'] for BFS, ['A','B','D','C','E'] for DFS)."
+          },
+          {
+            "instruction": "Add a new node 'F' connected only to 'E', re-run BFS from 'A', and confirm F appears reachable at the end.",
+            "expectOutcome": "BFS from A now returns ['A', 'B', 'C', 'D', 'E', 'F'] — F correctly appears last, since it's the furthest node from A."
+          },
+          {
+            "instruction": "Temporarily remove the visited-tracking logic and run BFS on a graph with a cycle (e.g. the original A-B-C-D-E graph), being ready to interrupt it.",
+            "expectOutcome": "It loops indefinitely (or grows the queue without bound) — concretely demonstrating why visited-tracking isn't optional on a graph with cycles.",
+            "troubleshooting": "If you're not comfortable letting it hang, add a hard iteration cap (e.g. break after 100 loop iterations) so you can observe the queue growing without actually freezing your terminal."
+          }
         ]
       },
       {
@@ -653,6 +820,15 @@
             "label": "GeeksforGeeks — Trie Data Structure",
             "url": "https://www.geeksforgeeks.org/dsa/trie-insert-and-search/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Insert at least 6 words into a Trie, including several sharing prefixes (e.g. bat, ball, bald, band, banana, bandana)."
+          },
+          {
+            "instruction": "Test search() on a full word and on a valid-but-unfinished prefix, and test starts_with() on that same prefix, a nonexistent extension, and a totally unrelated letter.",
+            "expectOutcome": "search('bat')=True, search('ban')=False (valid path, but 'ban' was never itself inserted as a word), starts_with('ban')=True, starts_with('bax')=False, starts_with('z')=False — all confirmed by actually running it."
           }
         ]
       },
@@ -700,6 +876,18 @@
             "url": "https://www.geeksforgeeks.org/dsa/topological-sorting/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the Dijkstra example and confirm the result {'A':0,'B':3,'C':1,'D':4} — noting A→C→B (cost 3) beats the direct A→B edge (cost 4)."
+          },
+          {
+            "instruction": "Run the topo_sort example on the morning-routine tasks and confirm every dependency is respected in the output order."
+          },
+          {
+            "instruction": "Add one more node and edge to EACH graph (a new stop for Dijkstra, a new task dependency for topo_sort) and re-verify the results still respect every constraint.",
+            "expectOutcome": "Dijkstra's distances update correctly to account for the new edge (only improving a distance if the new path is actually shorter); the new topo_sort order still respects the added dependency plus every original one."
+          }
         ]
       },
       {
@@ -737,6 +925,19 @@
             "url": "https://www.geeksforgeeks.org/dsa/union-by-rank-and-path-compression-in-union-find-algorithm/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Build a UnionFind(6), union pairs to form two separate 3-node groups (e.g. union(0,1), union(1,2) for one group; union(3,4), union(4,5) for another)."
+          },
+          {
+            "instruction": "Confirm find() correctly identifies 0 and 2 as connected, and 0 and 3 as NOT connected.",
+            "expectOutcome": "find(0)==find(2) is True; find(0)==find(3) is False — verified by actually running it."
+          },
+          {
+            "instruction": "Union the two groups together (e.g. union(2,3)) and re-confirm every node is now in one connected group.",
+            "expectOutcome": "After union(2,3), find(0)==find(5) is True — the two separate groups have genuinely merged into one."
+          }
         ]
       },
       {
@@ -773,6 +974,14 @@
             "label": "GeeksforGeeks — Bitwise Operators in Python",
             "url": "https://www.geeksforgeeks.org/python/python-bitwise-operators/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the shift/odd-even/is_power_of_two/find_single examples exactly as shown and confirm every printed result."
+          },
+          {
+            "instruction": "Look up (or recall) LeetCode's 'Single Number' problem, and write one or two sentences explaining why the XOR-cancellation trick applies to it specifically (every number appears twice except one)."
           }
         ]
       }
@@ -828,6 +1037,19 @@
             "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/",
             "kind": "course"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the factorial and sum_list examples and confirm their outputs."
+          },
+          {
+            "instruction": "Trace factorial(3) BY HAND: write out each nested call and what it returns, before it collapses back up.",
+            "expectOutcome": "factorial(3) = 3*factorial(2) = 3*(2*factorial(1)) = 3*(2*1) = 6 — confirmed by actually running factorial(3), which returns 6."
+          },
+          {
+            "instruction": "Modify count_up to start from a different n of your choice (something well past 1000) and confirm it still hits RecursionError.",
+            "expectOutcome": "RecursionError is raised once the call depth passes Python's default limit (~1000), regardless of which large starting n you pick."
+          }
         ]
       },
       {
@@ -873,6 +1095,15 @@
             "label": "Python docs — Sorting HOW TO",
             "url": "https://docs.python.org/3/howto/sorting.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the timing comparison between bubble_sort and merge_sort across n = 500/1000/2000/4000 and confirm bubble sort's growth looks roughly quadratic against merge sort's much flatter growth."
+          },
+          {
+            "instruction": "Trace merge_sort([5, 2, 8]) BY HAND: write out the recursive splits down to single elements, then the merges back up.",
+            "expectOutcome": "Splits to [5] and [2,8], which splits further to [2] and [8] → merges to [2,8]; then merge([5],[2,8]) produces [2,5,8] — confirmed by actually running merge_sort([5,2,8]), which returns [2, 5, 8]."
           }
         ]
       },
@@ -920,6 +1151,16 @@
             "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/",
             "kind": "course"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both examples and confirm the dramatic timing gap between fib_naive and fib_memo at n=32 (roughly 10,000x)."
+          },
+          {
+            "instruction": "Rewrite fib_memo using `cache={}` as a mutable DEFAULT argument (instead of `cache=None` + create-inside), call it once, then print the default dict directly via `func.__defaults__[0]` to see what's inside.",
+            "expectOutcome": "The default dict is genuinely populated after the call (e.g. calling fib_memo_bad(5) leaves {2:1, 3:2, 4:3, 5:5} sitting in the shared default) — concretely confirming the mutable-default bug is real: that same dict persists and is reused across every future call to this function, not freshly created each time.",
+            "troubleshooting": "If you don't see the dict persisting, make sure you're calling the SAME function object twice and inspecting `.__defaults__[0]` directly rather than a fresh local variable — the bug is specifically about the one shared default object living on the function itself."
+          }
         ]
       },
       {
@@ -965,6 +1206,15 @@
             "label": "GeeksforGeeks — Dynamic Programming",
             "url": "https://www.geeksforgeeks.org/dsa/dynamic-programming/",
             "kind": "practice"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both climb_stairs and coin_change examples and confirm the outputs shown."
+          },
+          {
+            "instruction": "Trace coin_change([1, 5, 10, 25], 11) by hand: build the dp array from dp[0] up to dp[11], writing down each value.",
+            "expectOutcome": "dp = [0,1,2,3,4,1,2,3,4,5,1,2] — dp[11]=2 (10+1), confirmed by actually running it and printing the full array."
           }
         ]
       },
@@ -1012,6 +1262,15 @@
             "url": "https://www.geeksforgeeks.org/dsa/heap-data-structure/",
             "kind": "practice"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both the heapify/priority-queue example and the interleaved-operations timing comparison, confirming the heap approach is meaningfully faster than re-sorting on every push."
+          },
+          {
+            "instruction": "Build a simple max-heap using the negate-on-push trick: push several values negated, then pop and negate the result back each time.",
+            "expectOutcome": "Popping in order now returns the LARGEST remaining value each time — verified: pushing [5,2,8,1,9] then popping five times (with the negate trick) returned 9, 8, 5, 2, 1, in strictly descending order."
+          }
         ]
       },
       {
@@ -1052,6 +1311,16 @@
             "label": "GeeksforGeeks — QuickSort",
             "url": "https://www.geeksforgeeks.org/dsa/quick-sort-algorithm/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both quicksort_mid_pivot and the first-pivot-vs-mid-pivot timing comparison on already-sorted input, confirming first-pivot degrades toward O(n²) while mid-pivot stays fast."
+          },
+          {
+            "instruction": "Modify quicksort_first_pivot to pick a RANDOM element as pivot instead of always the first, and re-run the already-sorted-input timing test.",
+            "expectOutcome": "The worst case no longer reliably triggers — verified: random-pivot quicksort on already-sorted input at n=1000/2000/4000 ran in roughly 1.9/3.2/6.6ms, growing much more slowly than the ~4x-per-doubling pattern first-pivot showed on the same input.",
+            "troubleshooting": "Random pivot doesn't GUARANTEE avoiding the worst case (it's still theoretically possible, just astronomically unlikely) — if you happen to see one slow run, that's expected occasional variance, not a broken implementation; re-run a few times and the pattern should hold."
           }
         ]
       },
@@ -1094,6 +1363,19 @@
             "url": "https://www.geeksforgeeks.org/dsa/backtracking-algorithms/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the subsets example and confirm it produces all 8 subsets of [1,2,3], and 16 for a 4-element input."
+          },
+          {
+            "instruction": "Run the N-Queens example and confirm the solution counts (2 for 4-queens, 4 for 6-queens, 92 for 8-queens)."
+          },
+          {
+            "instruction": "Write a backtracking solution generating all permutations of [1,2,3], making sure to undo each choice (remove it from the current path) after recursing.",
+            "expectOutcome": "All 6 permutations of [1,2,3] — [[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]] — matching 3! = 6, confirmed by actually running it.",
+            "troubleshooting": "If you get fewer than 6 results, or duplicates, check your undo step (popping the last-added element from the path) runs AFTER the recursive call, for every choice, not just once at the end."
+          }
         ]
       },
       {
@@ -1134,6 +1416,18 @@
             "label": "GeeksforGeeks — Greedy Algorithms",
             "url": "https://www.geeksforgeeks.org/dsa/greedy-algorithms/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the max_activities example and confirm it selects 4 non-overlapping activities: (1,4), (5,7), (8,11), (12,16)."
+          },
+          {
+            "instruction": "Run the greedy_coin_change example on both US coins (63) and the [4,3,1] counterexample (6), confirming greedy is optimal for the first but suboptimal for the second."
+          },
+          {
+            "instruction": "Find or construct one MORE coin system where greedy fails, and verify by hand what the true optimal answer would be.",
+            "expectOutcome": "Coins [6,4,1] making amount 8 is one such case — greedy takes 6, then two 1s (6+1+1 = 3 coins), but the true optimal is 4+4 (2 coins) — confirmed by actually running both the greedy version and a DP tabulation check on this exact case."
           }
         ]
       }
@@ -1184,6 +1478,18 @@
             "url": "https://www.freecodecamp.org/news/rest-api-best-practices-rest-endpoint-design-examples/",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Pick a real app you use daily (e.g. a to-do app, a food delivery app, a photo app)."
+          },
+          {
+            "instruction": "Sketch what its API might look like for ONE feature: write the URL and HTTP method (GET/POST/PUT/DELETE) for at least 4 operations on that resource."
+          },
+          {
+            "instruction": "For each endpoint you wrote, note in one phrase what the request/response would roughly contain.",
+            "expectOutcome": "A small, consistent REST-style contract — e.g. for a to-do app's '/tasks' resource: GET /tasks (list), POST /tasks (create, body has title), PUT /tasks/{id} (update), DELETE /tasks/{id} (remove) — each URL naming the resource, each verb naming the action."
+          }
         ]
       },
       {
@@ -1227,6 +1533,15 @@
             "url": "https://github.com/donnemartin/system-design-primer",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write one sentence naming a real product/feature you'd guess is vertically scaled (a single powerful backing service is plausible for it), with your reasoning."
+          },
+          {
+            "instruction": "Write one sentence naming a real product/feature you'd guess is horizontally scaled (its scale/reliability needs suggest many machines), with your reasoning.",
+            "expectOutcome": "Reasoning tied to a concrete property of the service — e.g. a small internal admin tool might be vertically scaled (low, predictable traffic, simplicity wins), while a global consumer app handling millions of concurrent users is almost certainly horizontally scaled (no single machine could plausibly handle that load, and it needs to survive individual server failures)."
+          }
         ]
       },
       {
@@ -1268,6 +1583,16 @@
             "label": "AWS — What is Caching?",
             "url": "https://aws.amazon.com/caching/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the lru_cache example (slow_lookup vs cached_lookup) and confirm the dramatic timing difference between the first and repeat calls."
+          },
+          {
+            "instruction": "Call cached_lookup with a DIFFERENT argument than the one already cached, and confirm it pays the full cost again — then call it a SECOND time with that same new argument and confirm it's now fast too.",
+            "expectOutcome": "First call with a new argument (id=99) took the full ~30ms; the immediate repeat call with that same argument returned in ~0ms — verified directly: 30.1ms → 0.00ms → 30.5ms (new arg) → 0.00ms (same new arg, cached).",
+            "troubleshooting": "If the 'new argument' call isn't slow, double-check you're actually passing a genuinely different value — lru_cache keys its cache by the exact argument(s) passed, so reusing the same value you already called with will always be fast, which can look like a bug but isn't."
           }
         ]
       },
@@ -1315,6 +1640,19 @@
             "url": "https://github.com/donnemartin/system-design-primer#load-balancer",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the round_robin example across at least 7 requests and confirm the spread is roughly even across the 3 servers."
+          },
+          {
+            "instruction": "Run the naive hash%n vs ConsistentHashRing comparison and confirm the naive version remaps far more keys than the ring-based version when a 4th server is added.",
+            "expectOutcome": "Naive hash%n remaps roughly 70-80% of keys; the consistent-hashing ring remaps roughly 25-30% — close to the theoretical ideal of 1/(new server count) — confirming the ring's dramatically smaller blast radius."
+          },
+          {
+            "instruction": "Write one sentence describing why a session store or cache would specifically care about that remap-percentage difference.",
+            "expectOutcome": "A remapped key means a cache miss (or a lost session) — the naive approach would invalidate ~75% of all cached data or active sessions the moment a server is added or removed, while consistent hashing limits that damage to a small, predictable fraction."
+          }
         ]
       },
       {
@@ -1356,6 +1694,28 @@
             "label": "Forage Interview — practice this design out loud",
             "url": "/interview",
             "kind": "practice"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Pick your own product idea (something you understand well, not necessarily original)."
+          },
+          {
+            "instruction": "Write your design's API section: sketch the key REST endpoints, following the same shape as the URL-shortener example."
+          },
+          {
+            "instruction": "Write your design's Data section: what needs a database, and whether the access pattern is read-heavy or write-heavy."
+          },
+          {
+            "instruction": "Write your design's Caching section: what's worth caching, and why (tie it back to the 'hot subset' idea from the caching lesson)."
+          },
+          {
+            "instruction": "Write your design's Scaling section: how you'd handle more traffic than one server can take, and which load-balancing strategy fits your access pattern."
+          },
+          {
+            "instruction": "Rehearse explaining your full design out loud, in under 3 minutes, without reading directly off your notes.",
+            "expectOutcome": "A fluent, justified walkthrough covering all four sections — each decision backed by a specific reason tied to YOUR product's actual properties, not a generic template answer.",
+            "troubleshooting": "If you find yourself just listing techniques ('I'd use caching, I'd use a load balancer') without saying WHY for your specific product, that's the exact gap system-design interviewers probe on — go back and tie each choice to a concrete property of your design (read-heavy? needs session affinity? predictable hot subset?)."
           }
         ]
       }

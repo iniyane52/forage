@@ -1,6 +1,32 @@
 @import "tailwindcss";
 
+/* Tailwind v4 needs this explicitly for class-based dark: variants — the site was
+   unconditionally dark before the light/dark toggle, so it was never needed until now. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
+  /* Fonts/radii only — colors live below as real runtime custom properties, not
+     here. @theme inline bakes its values into generated utility CSS at build time
+     rather than keeping them live, so a class-based theme toggle can't flip them;
+     that's also why the color tokens were never consumed as generated Tailwind
+     utilities (bg-primary etc.) anywhere in this codebase, only via var(...). */
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono-face);
+  --font-display: var(--font-display-face);
+  --font-hero: var(--font-hero-face);
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+}
+
+/* ---- Theme tokens ----
+   Real runtime CSS custom properties on <html>, set by next-themes (`class="dark"`
+   or `class="light"`, resolved from OS preference then remembered per-user). `html`
+   (dark, the historical default) always loses the cascade to the more specific
+   `html.light` class selector regardless of source order, so this is the fallback
+   for the brief pre-hydration moment and non-JS edge cases, not just decoration. */
+html {
+  color-scheme: dark;
   --color-bg: #05070a;
   --color-surface: #0c1116;
   --color-text: #e8f4f5;
@@ -12,13 +38,124 @@
   --color-success: #3fb950;      /* correct / earned only — unchanged, stays distinct from the neon accents */
   --color-warning: #ffb020;
   --color-danger: #ff4757;
+  --color-border: rgba(255, 255, 255, 0.09);
+  --surface-rgb: 255 255 255;    /* .glass/.glass-solid mix against this — white-on-dark */
+  --color-on-primary: #05070a;   /* text painted on top of a solid --color-primary button */
   --font-sans: var(--font-body);
   --font-mono: var(--font-mono-face);
   --font-display: var(--font-display-face);
   --font-hero: var(--font-hero-face);
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 20px;
+}
+
+/* Light mode: blog-simple, mostly black-on-white, one calm blue accent everywhere
+   (no per-path neon in light mode — see pathMeta/getAccent) instead of the dark
+   theme's rainbow of neons. Functional colors (success/warning/danger) are toned to
+   accessible mid-tones rather than kept at full neon saturation, which reads as
+   loud/low-contrast on a white background. */
+html.light {
+  color-scheme: light;
+  --color-bg: #ffffff;
+  --color-surface: #f4f6f8;
+  --color-text: #0d1117;
+  --color-text-secondary: #57636b;
+  --color-primary: #2563eb;
+  --color-secondary: #2563eb;
+  --color-accent: #2563eb;
+  --color-cyan: #2563eb;
+  --color-success: #15803d;
+  --color-warning: #b45309;
+  --color-danger: #dc2626;
+  --color-border: rgba(13, 17, 23, 0.1);
+  --surface-rgb: 10 14 18;       /* .glass/.glass-solid mix against this — near-black-on-white */
+  --color-on-primary: #ffffff;   /* --color-primary is a mid-saturation blue here, not a bright neon — white text reads better than near-black */
+  /* Chakra Petch/Unbounded are a blocky, geometric "tech/gaming" display voice that
+     works against the dark neon aesthetic but reads more sci-fi-HUD than calm
+     ed-tech course platform on plain white -- neither freeCodeCamp nor Khan Academy
+     (checked live) stray from their body font for headlines. Light mode's headings
+     use Inter (already loaded, zero extra font weight) instead; dark mode is
+     untouched. .display/.font-hero read this alias, not --font-display-face/
+     --font-hero-face directly, so this one override covers every usage site. */
+  --font-display: var(--font-body);
+  --font-hero: var(--font-body);
+}
+
+/* Landing page is deliberately dark-only, by explicit product choice — the toggle is
+   removed from its header (ThemeToggle only renders in the authenticated app shell and
+   auth page). This scope redeclares the exact same values as the default `html` (dark)
+   block above, so the landing page renders correctly dark even when a signed-out
+   visitor's browser has previously stored a `light` preference from visiting the rest
+   of the site. Descendant custom-property redeclaration beats html.light's cascade for
+   anything under this scope, the same mechanism .lesson-accent-scope already relies on. */
+.force-dark-scope {
+  color-scheme: dark;
+  --color-bg: #05070a;
+  --color-surface: #0c1116;
+  --color-text: #e8f4f5;
+  --color-text-secondary: #7d99a3;
+  --color-primary: #00e5ff;
+  --color-secondary: #baff2e;
+  --color-accent: #ff3d81;
+  --color-cyan: #6ff9ff;
+  --color-success: #3fb950;
+  --color-warning: #ffb020;
+  --color-danger: #ff4757;
+  --color-border: rgba(255, 255, 255, 0.09);
+  --surface-rgb: 255 255 255;
+  --color-on-primary: #05070a;
+  /* <body>'s own background-color/-image (globals.css, below) paints against
+     html.light's tokens, since body is an ANCESTOR of this scope, not a
+     descendant -- a custom-property override here never reaches upward to
+     repaint it. Repainting the same background/grid pattern directly on this
+     scope is what actually covers that light body background with the real,
+     correct dark one. */
+  min-height: 100dvh;
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(rgb(var(--surface-rgb) / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--surface-rgb) / 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+  color: var(--color-text);
+}
+
+/* Per-lesson accent, resolved with no JS: the wrapper in learn/[slug]/page.tsx sets
+   --lesson-accent-dark (that stream's neon, per pathMeta.ts) and --lesson-accent-light
+   (the one fixed LIGHT_ACCENT blue) inline; this picks between them off the same
+   .light class every other token uses. Components reference var(--lesson-accent)
+   instead of a JS-computed color, so there's no theme-flip flash and no need to make
+   otherwise-server-rendered lesson layout components client components just for this. */
+.lesson-accent-scope {
+  --lesson-accent: var(--lesson-accent-dark);
+}
+.light .lesson-accent-scope {
+  --lesson-accent: var(--lesson-accent-light);
+}
+
+/* Terminal/CLI mockup motif (TypingCode's mini dashboard-mockup terminal,
+   TerminalWalkthrough's "how it works" session) -- deliberately stays dark in
+   both themes. A real terminal isn't white-on-white, and flipping it would also
+   break contrast against the pale/neon text these components hardcode for a
+   dark surface specifically. */
+.terminal-surface {
+  background: #05070a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), 0 10px 34px rgba(0, 0, 0, 0.35);
+}
+
+/* Solid code-block surface -- worked-example wrappers force the inner Shiki <pre>'s
+   own background transparent (for consistent rounded-corner framing regardless of
+   which Shiki theme is active) and paint this instead. --color-surface already flips
+   correctly per theme (dark editor-like surface / light gray, GitHub-light-ish). */
+.shiki-surface {
+  background: var(--color-surface);
+}
+
+/* Shiki dual-theme code blocks (src/lib/highlight.ts renders both light and dark
+   colors inline per token as --shiki-light/--shiki-dark; this class selector picks
+   which one paints, keyed off next-themes' class on <html> — no client JS). */
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -28,7 +165,7 @@
 }
 
 ::selection {
-  background: rgba(0, 229, 255, 0.25);
+  background: color-mix(in srgb, var(--color-primary) 25%, transparent);
 }
 
 /* The landing header is sticky -- without this, anchor jumps to #paths/#interview/
@@ -37,34 +174,17 @@ section[id] {
   scroll-margin-top: 72px;
 }
 
-html {
-  color-scheme: dark;
-  /* @theme inline doesn't emit these as live runtime custom properties, so redeclare
-     them plainly here — dozens of components reference var(--font-display) inline,
-     and :focus-visible below needs var(--color-accent) to actually resolve. */
-  --font-sans: var(--font-body);
-  --font-mono: var(--font-mono-face);
-  --font-display: var(--font-display-face);
-  --font-hero: var(--font-hero-face);
-  --color-primary: #00e5ff;
-  --color-secondary: #baff2e;
-  --color-accent: #ff3d81;
-  --color-cyan: #6ff9ff;
-  --color-success: #3fb950;
-  --color-warning: #ffb020;
-  --color-danger: #ff4757;
-}
-
 body {
   background-color: var(--color-bg);
   /* Fine blueprint/schematic grid, always present site-wide (not just the hero) --
      replaces a flat, empty near-black past the hero with something that reads as a
      real technical product rather than a blank marketing page. Low enough opacity
      to never compete with content; scrolls naturally with the page since it's a
-     plain body background-image, not a positioned/fixed element. */
+     plain body background-image, not a positioned/fixed element. Mixed against
+     --surface-rgb so the line color has the right polarity in both themes. */
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    linear-gradient(rgb(var(--surface-rgb) / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--surface-rgb) / 0.035) 1px, transparent 1px);
   background-size: 56px 56px;
   color: var(--color-text);
   font-family: var(--font-body), Arial, Helvetica, sans-serif;
@@ -258,13 +378,16 @@ body {
   to { background-position: 100% 0; }
 }
 
-/* ---- Glass surfaces ---- */
+/* ---- Glass surfaces ----
+   Mixed against --surface-rgb (white-on-dark / near-black-on-white) instead of a
+   literal rgba(255,255,255,X) so the same "frosted panel" mechanic has the right
+   polarity in both themes. */
 .glass {
-  background: rgba(255, 255, 255, 0.045);
+  background: rgb(var(--surface-rgb) / 0.045);
   backdrop-filter: blur(22px) saturate(150%);
   -webkit-backdrop-filter: blur(22px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 10px 34px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--color-border);
+  box-shadow: inset 0 1px 0 0 rgb(var(--surface-rgb) / 0.08), 0 10px 34px rgb(var(--surface-rgb) / 0.2);
 }
 .glass-hover {
   transition: border-color 200ms ease, background-color 200ms ease, transform 200ms ease,
@@ -277,62 +400,77 @@ body {
    Background opacity is bumped slightly (.045 -> .06) to compensate visually for the
    missing blur. */
 .glass-solid {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 10px 34px rgba(0, 0, 0, 0.35);
+  background: rgb(var(--surface-rgb) / 0.06);
+  border: 1px solid var(--color-border);
+  box-shadow: inset 0 1px 0 0 rgb(var(--surface-rgb) / 0.08), 0 10px 34px rgb(var(--surface-rgb) / 0.2);
 }
 .glass-hover:hover {
-  border-color: rgba(0, 229, 255, 0.35);
-  background: rgba(255, 255, 255, 0.065);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1), 0 14px 40px rgba(0, 229, 255, 0.16);
+  border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  background: rgb(var(--surface-rgb) / 0.065);
+  box-shadow: inset 0 1px 0 0 rgb(var(--surface-rgb) / 0.1), 0 14px 40px color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
 /* ---- Neumorphic controls (soft extruded, on surface color) ---- */
 .neu {
-  background: linear-gradient(145deg, #12191f, #080b0e);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.55), -4px -4px 12px rgba(0, 229, 255, 0.05);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-surface) 88%, rgb(var(--surface-rgb)) 12%),
+    color-mix(in srgb, var(--color-surface) 88%, transparent)
+  );
+  border: 1px solid var(--color-border);
+  box-shadow: 6px 6px 16px rgb(var(--surface-rgb) / 0.2), -4px -4px 12px color-mix(in srgb, var(--color-primary) 5%, transparent);
   transition: box-shadow 180ms ease, transform 120ms ease;
 }
 .neu:hover {
-  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.5), -3px -3px 10px rgba(0, 229, 255, 0.09);
+  box-shadow: 4px 4px 12px rgb(var(--surface-rgb) / 0.18), -3px -3px 10px color-mix(in srgb, var(--color-primary) 9%, transparent);
 }
 .neu:active {
-  box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.6), inset -3px -3px 8px rgba(0, 229, 255, 0.07);
+  box-shadow: inset 4px 4px 10px rgb(var(--surface-rgb) / 0.22), inset -3px -3px 8px color-mix(in srgb, var(--color-primary) 7%, transparent);
   transform: translateY(1px);
 }
 
 /* Brand gradient text */
 .brand-gradient {
-  background: linear-gradient(90deg, #00e5ff, #ff3d81 55%, #baff2e);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent) 55%, var(--color-secondary));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-/* Premium display typography (bold-editorial × gen-z) */
+/* Premium display typography (bold-editorial × gen-z) -- references the --font-display
+   alias (Chakra Petch in dark mode, Inter in light mode -- see the html.light block)
+   rather than --font-display-face directly, so both this class and any inline
+   style={{fontFamily: "var(--font-display)"}} usage pick up the same light-mode swap
+   from one place. */
 .display {
-  font-family: var(--font-display-face), sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.02;
 }
+/* Chakra Petch/Unbounded are both tight, display-cut faces (negative tracking, ~1.0
+   line-height reads correctly on them); Inter needs a looser rhythm at the same
+   sizes to avoid looking cramped, so light mode relaxes both. */
+.light .display {
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
 /* Bolder/chunkier than .display -- reserved for the hero headline only, layered on
    top of .display (keeps its letter-spacing/line-height, swaps the typeface itself). */
 .font-hero {
-  font-family: var(--font-hero-face), sans-serif;
+  font-family: var(--font-hero), sans-serif;
   font-weight: 800;
 }
 .lead {
   font-size: 1.15rem;
   line-height: 1.65;
-  color: #b8ccd1;
+  color: color-mix(in srgb, var(--color-text) 75%, var(--color-text-secondary) 25%);
 }
 @media (min-width: 640px) {
   .lead { font-size: 1.25rem; }
 }
 .gradient-word {
-  background: linear-gradient(90deg, #00e5ff, #baff2e);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -342,8 +480,8 @@ body {
    cyan behind dark text, like a marker highlight or a rubber stamp, not a
    training-data gradient tell. */
 .highlight-block {
-  background: #00e5ff;
-  color: #05070a;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   padding: 0.02em 0.18em;
   border-radius: 0.16em;
 }
@@ -416,7 +554,7 @@ body {
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #1a2429 transparent;
+  scrollbar-color: color-mix(in srgb, var(--color-surface) 60%, rgb(var(--surface-rgb))) transparent;
 }
 
 @media (prefers-reduced-motion: reduce) {

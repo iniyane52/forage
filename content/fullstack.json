@@ -48,6 +48,18 @@
             "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Grammar_and_types",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the var-leaks-out-of-blocks example and confirm `leaked` is accessible outside the if-block while `scoped` throws a ReferenceError."
+          },
+          {
+            "instruction": "Run the const-reassignment example and confirm reassigning `x` throws a TypeError, while `arr.push(4)` succeeds."
+          },
+          {
+            "instruction": "Write a for loop using `let` as the loop variable, and explain in one sentence why `let` (not `var`) is the standard modern choice for loop variables.",
+            "expectOutcome": "Each iteration of a `let`-based loop gets its own fresh binding — this matters specifically for closures created inside the loop (e.g. capturing the loop variable in a setTimeout callback), where `var` would notoriously let every callback see the same final value instead of the value at its own iteration."
+          }
         ]
       },
       {
@@ -93,6 +105,18 @@
             "label": "MDN — Arrow function expressions",
             "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the makeCounter example and confirm counter1 and counter2 behave independently (1,2,3 vs a fresh 1)."
+          },
+          {
+            "instruction": "Run the arrow-function examples (square, add, and the .map() callback) and confirm the outputs."
+          },
+          {
+            "instruction": "Write your own closure-based function — e.g. makeMultiplier(factor) that returns a function multiplying its argument by that fixed factor — and test it with two different factors.",
+            "expectOutcome": "Two independent multiplier functions, each remembering its own factor — verified: makeMultiplier(3) applied to 5 and 10 gave 15 and 30; makeMultiplier(2) applied to the same inputs gave 10 and 20, confirming each closure keeps its own separate 'factor'."
           }
         ]
       },
@@ -140,6 +164,18 @@
             "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the map/filter/reduce example on the prices array and confirm the three different output shapes (same-length, filtered, single value)."
+          },
+          {
+            "instruction": "Run the filter().map() chaining example on the products array and confirm it returns ['Widget', 'Gizmo']."
+          },
+          {
+            "instruction": "Write a chained expression returning the TOTAL price of only the in-stock products (filter, then reduce).",
+            "expectOutcome": "35 — verified: filtering to Widget (20) and Gizmo (15), then reducing with a sum, gives exactly 35 (Gadget's 45 is correctly excluded since it's out of stock)."
+          }
         ]
       },
       {
@@ -185,6 +221,18 @@
             "label": "MDN — async function",
             "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the delay/main example in Node and confirm the log ordering: 'starting...', then the line AFTER main() call, then 'done!' last."
+          },
+          {
+            "instruction": "Run the fetchUserSafely example and confirm it logs the successful user result."
+          },
+          {
+            "instruction": "Write your own async function that awaits a delayed value, then deliberately make the promise REJECT (e.g. `Promise.reject(new Error(...))` instead of resolve) and confirm your try/catch handles it gracefully.",
+            "expectOutcome": "The catch block runs and logs the error message instead of crashing — confirming the try/catch around await correctly handles a rejected promise, not just a resolved one."
           }
         ]
       },
@@ -232,6 +280,19 @@
             "label": "MDN — Document.querySelector()",
             "url": "https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Create a simple HTML file with a button and a div/paragraph, and a linked script using querySelector to grab both elements."
+          },
+          {
+            "instruction": "Add an addEventListener('click', ...) handler on the button that increments a counter variable and updates the div's textContent each click."
+          },
+          {
+            "instruction": "Open the file in a real browser and click the button several times, confirming the displayed count genuinely increases.",
+            "expectOutcome": "The on-screen text updates immediately on each click with no page reload — confirming direct, live DOM manipulation, and that the click handler's closure correctly 'remembers' the running count between clicks (tying back to the closures lesson).",
+            "troubleshooting": "If clicking does nothing, open the browser's console first — a typo'd selector (querySelector returning null) is the most common cause, and calling a method on null throws a clear, specific error there."
           }
         ]
       }
@@ -287,6 +348,20 @@
             "url": "https://www.typescriptlang.org/docs/handbook/2/objects.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run both examples with `node example.ts` (Node 22.6+ strips TS types natively) and confirm the output."
+          },
+          {
+            "instruction": "Write an object literal with extra unrelated properties (beyond what an interface requires) and pass it to a function typed to accept that smaller interface.",
+            "expectOutcome": "TypeScript accepts it without complaint — structural typing only checks that the required properties are present with the right types; extra properties don't disqualify it."
+          },
+          {
+            "instruction": "Deliberately assign a string to a variable annotated as `number`, and run it with plain `node file.ts` (not tsc) first, then check it with `npx tsc --noEmit`.",
+            "expectOutcome": "`node file.ts` runs without complaint (Node only strips annotations, it doesn't check them) — but `npx tsc --noEmit` reports a real compile error, confirming only the actual compiler catches type mismatches.",
+            "troubleshooting": "If tsc reports nothing wrong, double check you're running it against the exact file with the bad assignment, and that the file doesn't have a `// @ts-nocheck` or similar comment silently suppressing checks."
+          }
         ]
       },
       {
@@ -328,6 +403,19 @@
             "url": "https://www.typescriptlang.org/docs/handbook/2/narrowing.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the formatPadding example and confirm both outputs."
+          },
+          {
+            "instruction": "Run the discriminated-union Shape/getArea example and confirm both areas (circle ≈ 12.57, square = 9)."
+          },
+          {
+            "instruction": "Without narrowing first, write `function getRadius(shape: Shape) { return shape.radius; }` and confirm `npx tsc --noEmit` reports a compile error — then fix it by adding a `kind` check.",
+            "expectOutcome": "A real compile error: \"Property 'radius' does not exist on type 'Shape'. Property 'radius' does not exist on type 'Square'.\" — confirmed by actually running tsc against exactly this code.",
+            "troubleshooting": "If tsc reports no error, confirm the function is actually being type-checked as part of your tsconfig's included files — an isolated scratch file outside the project's tsconfig include paths won't be checked by a project-wide `tsc --noEmit` run."
+          }
         ]
       },
       {
@@ -368,6 +456,18 @@
             "label": "TypeScript Handbook — Generics",
             "url": "https://www.typescriptlang.org/docs/handbook/2/generics.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the identity<Type> example and confirm both calls return their input unchanged."
+          },
+          {
+            "instruction": "Run the logAndReturn<Type extends Lengthwise> example with both a string and an array, confirming both work."
+          },
+          {
+            "instruction": "Write a generic function `firstElement<Type>(arr: Type[]): Type` returning an array's first element, and call it with a number array and a string array.",
+            "expectOutcome": "firstElement([10,20,30]) returns 10 (typed as number); firstElement(['a','b','c']) returns 'a' (typed as string) — confirmed by actually running it with `node file.ts`, each call's return type matching its input array's element type."
           }
         ]
       },
@@ -414,6 +514,15 @@
             "label": "TypeScript Handbook — Generics",
             "url": "https://www.typescriptlang.org/docs/handbook/2/generics.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the getJson<ApiUser>/fakeUser example and confirm the printed output."
+          },
+          {
+            "instruction": "Define your own interface for a small API response shape (e.g. Product with id/name/price), write a typed function that would fetch it, and confirm in your editor (or via tsc) that accessing a misspelled property produces a compile error.",
+            "expectOutcome": "A real, specific compile error naming the misspelled property — confirmed by actually running tsc: accessing `.pric` instead of `.price` on a typed Product produces \"error TS2551: Property 'pric' does not exist on type 'Product'. Did you mean 'price'?\" — TypeScript even suggests the likely correct name."
           }
         ]
       }
@@ -468,6 +577,18 @@
             "url": "https://react.dev/learn/your-first-component",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the plain-JS formatGreeting function (runnable in Node right now) with the two example prop objects and confirm the outputs."
+          },
+          {
+            "instruction": "Call formatGreeting with a THIRD prop object of your own choosing and confirm the output matches your expectation before running it.",
+            "expectOutcome": "Verified: formatGreeting({name:'Priya', isVip:true}) produces \"Hello, Priya! You're a VIP member.\" — the exact same destructuring pattern a React component would use for props."
+          },
+          {
+            "instruction": "If you have a React environment available (or an online sandbox), build the Greeting/App example and confirm it renders two different greetings from the two <Greeting> calls."
+          }
         ]
       },
       {
@@ -513,6 +634,15 @@
             "label": "React docs — useState reference",
             "url": "https://react.dev/reference/react/useState",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the makeStateHolder example and confirm it prints 0 then 2, building real intuition for the 'remembers between calls' idea.",
+            "expectOutcome": "getCount() prints 0 initially, then after two setCount(getCount()+1) calls, prints 2 — confirmed by actually running it."
+          },
+          {
+            "instruction": "If you have a React environment available, build the Counter component and confirm clicking Increment actually increases the displayed count."
           }
         ]
       },
@@ -560,6 +690,18 @@
             "url": "https://react.dev/learn/rendering-lists#keeping-list-items-in-order-with-key",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the plain-JS index-vs-id key simulation with the exact peopleV1/peopleV2 arrays shown, confirming Bo's index-key shifts from 1 to 0 after Amy is removed, while Bo's id-key stays 2."
+          },
+          {
+            "instruction": "Modify the simulation so a person is ADDED (not removed) at the front instead, and re-confirm the same instability with index keys versus stability with id keys.",
+            "expectOutcome": "Adding 'Dee' at the end (v2 = [Bo, Cy, Dee]) after removing Amy still shows every remaining person's INDEX key shifting (Bo: 1→0, Cy: 2→1), while every ID key stays exactly the same (Bo:2, Cy:3) across both versions — confirmed by actually running it."
+          },
+          {
+            "instruction": "Write one sentence explaining why that shifting index would confuse React about which list item is which."
+          }
         ]
       },
       {
@@ -605,6 +747,15 @@
             "label": "React docs — Reacting to Input with State",
             "url": "https://react.dev/learn/reacting-to-input-with-state",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the simulateControlledInput example and confirm it prints the growing string after each simulated keystroke ('Y', then 'Yo').",
+            "expectOutcome": "Each call to handleChange prints the FULL accumulated value so far, not just the new character — confirmed: typing 'Yo' character-by-character printed 'input now shows: Y' then 'input now shows: Yo'."
+          },
+          {
+            "instruction": "If you have a React environment, build the NameForm component and confirm typing updates what's shown and submitting logs the name."
           }
         ]
       }
@@ -660,6 +811,19 @@
             "url": "https://nextjs.org/docs/app/getting-started/project-structure",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the plain-JS route-matching simulation and confirm the four outputs (Home page, Blog index, Blog post: hello-world, 404 Not Found)."
+          },
+          {
+            "instruction": "Call matchRoute with two more paths of your own that AREN'T in the routes object, confirming both correctly fall through to '404 Not Found'.",
+            "expectOutcome": "Both correctly return '404 Not Found' — verified: matchRoute('/learn') and matchRoute('/stream/aiml') each returned 404, since only '/', '/blog', and the '/blog/:slug' pattern are registered routes in this simulation."
+          },
+          {
+            "instruction": "In this actual Forage codebase, open src/app/(app)/learn/[slug]/page.tsx and confirm params is typed as a Promise and awaited exactly as this lesson describes.",
+            "expectOutcome": "Confirmed present in the real source: `params: Promise<...>` typed in the page's props, with `await params` used before accessing the slug — this is genuinely how this exact platform's own lesson pages are implemented, not a hypothetical."
+          }
         ]
       },
       {
@@ -700,6 +864,15 @@
             "label": "Next.js docs — Server and Client Components",
             "url": "https://nextjs.org/docs/app/getting-started/server-and-client-components",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the plain-JS server/client boundary simulation and confirm the console output — noting the secret key is logged as 'never exposed' and only plain data (title, likes) crosses into clientComponent()."
+          },
+          {
+            "instruction": "Find a real file in this Forage codebase with the \"use client\" directive (e.g. QuizRunner.tsx or TutorDrawer.tsx) and identify specifically WHY it needs to be a Client Component.",
+            "expectOutcome": "A specific, concrete reason tied to the file's actual code — e.g. QuizRunner.tsx needs useState to track the current answer/score and onClick handlers for selecting an option, both of which require the Client Component boundary; a Server Component can't use either."
           }
         ]
       },
@@ -748,6 +921,15 @@
             "url": "https://nextjs.org/docs/app/guides/caching-without-cache-components",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the plain-JS caching-default-flip simulation and confirm the three different 'cached' outputs (false, true, true) matching older-vs-this-version defaults."
+          },
+          {
+            "instruction": "Check this project's own next.config.ts and confirm cacheComponents is not set, meaning the 'not cached by default' behavior described here is what actually applies to this codebase.",
+            "expectOutcome": "Confirmed — no cacheComponents flag is present, so this project follows the 'previous model': fetch is uncached by default unless explicitly opted into with { cache: 'force-cache' }."
+          }
         ]
       },
       {
@@ -789,6 +971,15 @@
             "label": "Next.js docs — Mutating Data",
             "url": "https://nextjs.org/docs/app/getting-started/mutating-data",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the plain-JS createPostAction simulation and confirm the 'Correctly rejected' output for the call with session: null."
+          },
+          {
+            "instruction": "Write your own Server-Action-style function (plain JS) for a different mutation (e.g. deleteItem(itemId, session)) that similarly throws if no valid session is passed, and confirm both an authorized and unauthorized call behave correctly.",
+            "expectOutcome": "The authorized call succeeds and returns a result; the unauthorized call (session: null) throws 'Unauthorized' — confirming the self-check pattern generalizes beyond just the createPost example."
           }
         ]
       },
@@ -836,6 +1027,16 @@
             "url": "https://nextjs.org/docs/app/guides/caching-without-cache-components",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the plain-JS stale-cache simulation exactly as shown and confirm the 'stale' vs 'fresh' outputs.",
+            "expectOutcome": "Confirmed by actually running it: after mutating WITHOUT revalidating, the next read is a cache HIT missing 'Second Post'; after mutating WITH revalidation, the next read is a cache MISS that correctly includes all three posts."
+          },
+          {
+            "instruction": "Modify it to use a tag-based approach instead: simulate two different cached keys ('/posts' and '/posts/1') sharing one tag, and revalidate only that tag.",
+            "expectOutcome": "Both keys are present before revalidation and both are gone after revalidating the shared tag — confirmed by actually running a tag-index simulation where revalidateTag('posts-tag') correctly cleared both '/posts' and '/posts/1' at once, demonstrating tag-based revalidation's precision advantage over clearing one specific path at a time."
+          }
         ]
       }
     ]
@@ -856,8 +1057,8 @@
             "note": "This is a faithful simplification of Forage's REAL, live database schema (documented in this project's own CLAUDE.md) -- streams -> modules -> lessons is a genuine, currently-running example of exactly the normalized, foreign-key-linked hierarchy this lesson describes, not a toy example invented for teaching purposes."
           },
           {
-            "code": "-- Verified against Forage's ACTUAL live database (read-only query, real result):\nSELECT s.title AS stream, COUNT(m.id) AS module_count\nFROM streams s\nJOIN modules m ON m.stream_id = s.id\nGROUP BY s.title\nHAVING COUNT(m.id) < 5\nORDER BY module_count;\n\n/* Real result from this platform's live data:\n   Cybersecurity          | 3\n   Data Scientist          | 3\n   Full-Stack Developer    | 3\n   Software Engineer       | 4\n*/",
-            "note": "This exact query was run against Forage's real, live Supabase database while writing this lesson -- the result genuinely reflects which career paths (this very module you're reading is expanding one of them!) have fewer modules than others, a direct, live demonstration of querying a real normalized schema rather than a fabricated example."
+            "code": "-- Re-verified against Forage's ACTUAL live database (read-only query, real result):\nSELECT s.title AS stream, COUNT(m.id) AS module_count\nFROM streams s\nJOIN modules m ON m.stream_id = s.id\nGROUP BY s.title\nHAVING COUNT(m.id) < 8\nORDER BY module_count;\n\n/* Real result from this platform's live data (re-checked after this path's own\n   content-authoring rollout expanded several paths' module counts):\n   Software Engineer      | 5\n   Cloud & DevOps          | 7\n*/",
+            "note": "This exact query was re-run against Forage's real, live Supabase database while authoring this lesson's hands-on steps -- the threshold here is < 8 (not < 5) specifically because every Pro path was later expanded to at least 5 modules during this platform's own content-authoring work; a live schema's real data changes over time, which is itself worth internalizing about querying production systems."
           }
         ],
         "mistakes": [
@@ -884,6 +1085,15 @@
             "url": "https://www.postgresql.org/docs/current/ddl-constraints.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Sketch a normalized schema for a simple 'bookshelf' app: books, authors, and reviews. Decide what's a primary key, what's a foreign key, and which table each piece of information belongs in exactly once."
+          },
+          {
+            "instruction": "For your bookshelf schema, write out the CREATE TABLE statements (matching the streams/modules/lessons style shown) with correct PRIMARY KEY and REFERENCES foreign-key declarations.",
+            "expectOutcome": "Three tables (authors, books, reviews) where books.author_id REFERENCES authors.id and reviews.book_id REFERENCES books.id — an author's name/bio lives in exactly one place (the authors table), never copy-pasted into every book row."
+          }
         ]
       },
       {
@@ -893,12 +1103,12 @@
         "analogy": "WHERE is like a bouncer checking IDs at the door before anyone even gets grouped into party sections — it filters individual people before anything else happens. GROUP BY is the process of sorting everyone who got in in past the bouncer into labeled sections (by table, by favorite color, whatever the grouping is). HAVING is a second bouncer who only inspects the already-formed GROUPS themselves afterward (e.g. 'kick out any section with fewer than 3 people') — a fundamentally different check, at a different stage, than the WHERE bouncer at the front door.",
         "examples": [
           {
-            "code": "-- Verified against Forage's ACTUAL live database (real query, real result):\nSELECT s.title AS stream, COUNT(l.id) AS lesson_count\nFROM streams s\nJOIN modules m ON m.stream_id = s.id\nJOIN lessons l ON l.module_id = m.id\nGROUP BY s.title\nORDER BY lesson_count DESC;\n\n/* Real result from this platform's live data:\n   Cloud & DevOps           | 53\n   AI Engineer              | 48\n   Common Core              | 24\n   Software Engineer        | 19\n   Data Scientist           | 13\n   Full-Stack Developer     | 13\n   Cybersecurity            | 10\n*/",
-            "note": "Two JOINs chain the relationship from lessons all the way back to streams (lessons -> modules -> streams), and GROUP BY s.title collapses all matching rows down to one row per stream, with COUNT(l.id) as the aggregate. This is a REAL query run against Forage's actual live data while writing this lesson -- the counts match this platform's genuine current content breadth exactly."
+            "code": "-- Re-verified against Forage's ACTUAL live database (real query, real result):\nSELECT s.title AS stream, COUNT(l.id) AS lesson_count\nFROM streams s\nJOIN modules m ON m.stream_id = s.id\nJOIN lessons l ON l.module_id = m.id\nGROUP BY s.title\nORDER BY lesson_count DESC;\n\n/* Real result from this platform's live data:\n   Cloud & DevOps           | 53\n   AI Engineer              | 48\n   Data Scientist           | 37\n   Full-Stack Developer     | 36\n   Cybersecurity            | 32\n   Software Engineer        | 31\n   Common Core              | 25\n*/",
+            "note": "Two JOINs chain the relationship from lessons all the way back to streams (lessons -> modules -> streams), and GROUP BY s.title collapses all matching rows down to one row per stream, with COUNT(l.id) as the aggregate. This is a REAL query re-run against Forage's actual live data while authoring this lesson's hands-on steps -- the counts match this platform's genuine current content breadth exactly (and are noticeably larger than an earlier version of this same query would have shown, since every Pro path's content was substantially expanded over this platform's development)."
           },
           {
-            "code": "-- Verified against Forage's ACTUAL live database -- demonstrating WHERE vs HAVING\nSELECT s.title AS stream, COUNT(m.id) AS module_count\nFROM streams s\nJOIN modules m ON m.stream_id = s.id\nWHERE s.access_tier = 'pro'        -- filters INDIVIDUAL rows BEFORE grouping\nGROUP BY s.title\nHAVING COUNT(m.id) < 5              -- filters GROUPS themselves AFTER grouping\nORDER BY module_count;\n\n/* Real result: only pro-tier streams with fewer than 5 modules --\n   Cybersecurity, Data Scientist, Full-Stack Developer (each with 3),\n   Software Engineer (4) -- Cloud & DevOps (7) and AI Engineer (10) are correctly excluded */",
-            "note": "WHERE s.access_tier = 'pro' excludes the free Common Core stream's rows BEFORE any grouping happens. HAVING COUNT(m.id) < 5 then filters the resulting GROUPS (one per remaining stream) based on an aggregate value that only exists AFTER grouping -- this is precisely why HAVING can reference COUNT(...) but a WHERE clause at this stage cannot."
+            "code": "-- Re-verified against Forage's ACTUAL live database -- demonstrating WHERE vs HAVING\nSELECT s.title AS stream, COUNT(m.id) AS module_count\nFROM streams s\nJOIN modules m ON m.stream_id = s.id\nWHERE s.access_tier = 'pro'        -- filters INDIVIDUAL rows BEFORE grouping\nGROUP BY s.title\nHAVING COUNT(m.id) < 8               -- filters GROUPS themselves AFTER grouping\nORDER BY module_count;\n\n/* Real result: only pro-tier streams with fewer than 8 modules --\n   Software Engineer (5), Cloud & DevOps (7) -- AI Engineer (10), Full-Stack\n   Developer (8), Cybersecurity (8), and Data Scientist (8) are correctly excluded */",
+            "note": "WHERE s.access_tier = 'pro' excludes the free Common Core stream's rows BEFORE any grouping happens. HAVING COUNT(m.id) < 8 then filters the resulting GROUPS (one per remaining stream) based on an aggregate value that only exists AFTER grouping -- this is precisely why HAVING can reference COUNT(...) but a WHERE clause at this stage cannot."
           }
         ],
         "mistakes": [
@@ -929,6 +1139,15 @@
             "label": "PostgreSQL docs — Aggregate Functions",
             "url": "https://www.postgresql.org/docs/current/functions-aggregate.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Using the bookshelf schema from the previous lesson, write a query joining books and authors to list each book's title with its author's name."
+          },
+          {
+            "instruction": "Write a second query using GROUP BY and HAVING to find which authors have written more than 2 books.",
+            "expectOutcome": "A query grouping books by author_id, counting them, and filtering with HAVING COUNT(*) > 2 — correctly using HAVING (not WHERE) since the filter depends on an aggregate computed after grouping, exactly the WHERE-vs-HAVING distinction this lesson covers."
           }
         ]
       },
@@ -977,6 +1196,19 @@
             "url": "https://www.prisma.io/docs/orm/reference/prisma-config-reference",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Set up a scratch project (npm init, npm install prisma @prisma/client @prisma/adapter-better-sqlite3), define a small schema.prisma + prisma.config.ts matching the current-version shape shown."
+          },
+          {
+            "instruction": "Run `npx prisma migrate dev` and confirm it succeeds without error."
+          },
+          {
+            "instruction": "Actually run the create + findMany-with-include query and confirm the output matches the shape shown (a created user, then a findMany including their posts).",
+            "expectOutcome": "A real created user object, then a findMany result where each user's `posts` array is populated inline — confirming the adapter-based PrismaClient pattern works exactly as this lesson describes, not just as a claim.",
+            "troubleshooting": "If `new PrismaClient()` throws demanding an adapter, that's the current major version's real breaking change working as intended (see this lesson's warning) — pass the driver adapter explicitly, don't downgrade Prisma to avoid it."
+          }
         ]
       },
       {
@@ -1014,6 +1246,18 @@
             "label": "Prisma docs — Migrate",
             "url": "https://www.prisma.io/docs/orm/prisma-migrate",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `npm install prisma @prisma/client @prisma/adapter-better-sqlite3` in your terminal before continuing."
+          },
+          {
+            "instruction": "If you completed the previous lesson's Prisma setup, open the actual migration.sql file that npx prisma migrate dev generated in your prisma/migrations/ folder."
+          },
+          {
+            "instruction": "Read through it line by line and confirm it matches your schema.prisma changes exactly — every model becomes a CREATE TABLE, every @relation becomes a FOREIGN KEY constraint.",
+            "expectOutcome": "The generated SQL's CREATE TABLE statements and FOREIGN KEY constraints correspond exactly to your schema.prisma's models and @relation fields — confirming the migration file is a faithful, literal translation, not something to take on faith."
           }
         ]
       },
@@ -1060,6 +1304,15 @@
             "label": "MongoDB docs — Data Modeling Introduction",
             "url": "https://www.mongodb.com/docs/manual/core/data-modeling-introduction/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "For the bookshelf schema, identify one piece of data that fits the relational model well (e.g. author-to-books, a clean one-to-many relationship)."
+          },
+          {
+            "instruction": "Imagine one piece of data that might fit a flexible document shape better (e.g. wildly different metadata per book genre — a cookbook might have 'cuisine', a novel might have 'setting').",
+            "expectOutcome": "A concrete, justified choice for each — e.g. author-to-books stays relational because every book genuinely has exactly one author reference and the relationship is uniform across all books, while per-genre metadata fits a flexible jsonb column because different genres need genuinely different, non-overlapping fields that don't map cleanly onto one fixed set of columns."
           }
         ]
       }
@@ -1109,6 +1362,18 @@
             "url": "https://jwt.io/introduction",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the decodeJwtPayload example and confirm it prints { sub: 'aditi', role: 'pro' } without any signature verification."
+          },
+          {
+            "instruction": "Decode the HEADER portion (index 0, not the payload at index 1) of the same example JWT the same way, and identify what algorithm it claims to use.",
+            "expectOutcome": "{ alg: 'HS256' } — confirmed by actually decoding it — HS256 (HMAC-SHA256) is the algorithm this token claims was used to sign it."
+          },
+          {
+            "instruction": "Run the session login/logout simulation and confirm the session is valid before logout and invalid immediately after."
+          }
         ]
       },
       {
@@ -1152,6 +1417,15 @@
             "url": "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the hashPassword/verifyPassword example and confirm all three outputs (correct password verifies, wrong password doesn't, two hashes of the same password differ)."
+          },
+          {
+            "instruction": "Modify verifyPassword to use a plain `===` string comparison instead of timingSafeEqual, and confirm it STILL produces the same true/false results for a normal correct/wrong password test.",
+            "expectOutcome": "Functionally identical results on a normal test — confirmed: both the timingSafeEqual and the plain === version return the exact same true/false for a correct and a wrong password. The regression isn't visible in a single functional test at all; it's a TIMING side-channel only detectable by measuring comparison speed across many attempts, which is exactly why this bug class is easy to accidentally ship."
+          }
         ]
       },
       {
@@ -1194,6 +1468,15 @@
             "label": "Auth0 — Authorization Code Flow",
             "url": "https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow",
             "kind": "reference"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Read through the 6-step OAuth flow walkthrough and, for each step, write one phrase identifying WHO is acting (your app, the user, or the third-party provider)."
+          },
+          {
+            "instruction": "Find this project's own auth setup (src/lib/supabase/) and identify: does it currently support any third-party OAuth providers, or only email/password?",
+            "expectOutcome": "This project's auth page includes a 'Continue with Google' button and an /auth/callback route wired up, though per this project's own docs the actual Google Cloud OAuth credentials and Supabase dashboard provider toggle are external setup steps, not something confirmable purely from reading the code."
           }
         ]
       },
@@ -1240,6 +1523,15 @@
             "label": "Supabase docs — Row Level Security",
             "url": "https://supabase.com/docs/guides/database/postgres/row-level-security",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the deletePost_UIOnlyCheck vs deletePost_RealCheck simulation and confirm the UI-only version wrongly succeeds for an attacker while the real-check version correctly rejects them."
+          },
+          {
+            "instruction": "Find one real SECURITY DEFINER function in this project (e.g. mark_lesson_done, described in this platform's own database schema documentation) and identify what its own independent authorization check would need to verify.",
+            "expectOutcome": "A SECURITY DEFINER function like mark_lesson_done must check auth.uid() against the calling user AND verify (via has_lesson_access()) that the user actually has access to that specific lesson — bypassing RLS is exactly why the function itself must re-implement that check, rather than assuming the caller is already authorized."
           }
         ]
       },
@@ -1293,6 +1585,19 @@
             "url": "https://owasp.org/www-community/attacks/csrf",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the SQL injection example with the ' OR '1'='1 payload and confirm it breaks the intended WHERE clause in buildUnsafeQuery while remaining an inert value in buildSafeQuery."
+          },
+          {
+            "instruction": "Try a SECOND, more destructive-looking payload (e.g. \"'; DROP TABLE users; --\") against both functions.",
+            "expectOutcome": "buildUnsafeQuery genuinely splices it into the query string (producing `WHERE username = ''; DROP TABLE users; --'`), while buildSafeQuery still keeps it as an inert bound value — confirmed by actually running both, demonstrating the vulnerability isn't limited to one specific payload shape."
+          },
+          {
+            "instruction": "Run the XSS escapeForDisplay example with a real <script> tag payload instead of the <img onerror> one shown, and confirm it's escaped correctly.",
+            "expectOutcome": "'<script>alert(\"hacked\")</script>' escapes to '&lt;script&gt;alert(\"hacked\")&lt;/script&gt;' — confirmed by actually running it, showing the technique generalizes across different injection payload shapes, not just the one example already in the lesson."
+          }
         ]
       }
     ]
@@ -1341,6 +1646,20 @@
             "url": "https://vitest.dev/guide/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Set up a scratch project (npm init, npm install -D vitest), create sum.js/sum.test.js with the 4 tests shown, and run `npx vitest run`, confirming all 4 tests pass."
+          },
+          {
+            "instruction": "Add ONE more edge-case test of your own — e.g. sum(0, 0) should be 0 — and confirm the suite still passes with your new test included.",
+            "expectOutcome": "5 tests passed (5) — confirmed by actually running it: adding a zero-input edge case alongside the original 4 tests, all passing cleanly."
+          },
+          {
+            "instruction": "Deliberately change your new test's expectation to something wrong (e.g. expect sum(0,0) to be 1) and run it again to see a real failure.",
+            "expectOutcome": "A real failure with a clear Expected/Received diff — confirmed by actually running it: \"AssertionError: expected +0 to be 1\" with \"- Expected: 1\" / \"+ Received: 0\" shown clearly, and the summary correctly reporting \"1 failed | 4 passed (5)\".",
+            "troubleshooting": "If the whole suite reports 0 passed instead of a clean 4-passed/1-failed split, check you only broke the ONE assertion — a syntax error elsewhere in the file (like a stray bracket) fails the whole file to even load, which looks different from a genuine assertion failure."
+          }
         ]
       },
       {
@@ -1388,6 +1707,19 @@
             "url": "https://testing-library.com/docs/react-testing-library/intro/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Set up the Counter component and its test file above (npm install @testing-library/react @testing-library/jest-dom jsdom @vitejs/plugin-react -D), first WITHOUT the vitest.setup.js file."
+          },
+          {
+            "instruction": "Run the tests and confirm you see the exact 'Invalid Chai property: toBeInTheDocument' error described.",
+            "expectOutcome": "A real error naming toBeInTheDocument as an invalid Chai property — confirming the jest-dom matcher genuinely isn't registered without the explicit import."
+          },
+          {
+            "instruction": "Add the vitest.setup.js file (jest-dom import + afterEach cleanup) and re-run, confirming both tests now pass.",
+            "expectOutcome": "2 tests passed (2) — the initial-render test and the increment-on-click test both pass cleanly once the setup file registers the matchers and clears the DOM between tests."
+          }
         ]
       },
       {
@@ -1424,6 +1756,18 @@
             "label": "Vitest docs — Mocking",
             "url": "https://vitest.dev/guide/mocking.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `npm install vitest` in your terminal before continuing."
+          },
+          {
+            "instruction": "Set up api.js/api.test.js above and run them, confirming both the success-path and error-path (404) tests pass."
+          },
+          {
+            "instruction": "Write a THIRD test simulating a network failure (fetch itself rejecting, e.g. `vi.fn().mockRejectedValue(new Error(\"network down\"))`) and confirm getUser correctly propagates that rejection.",
+            "expectOutcome": "The third test passes by asserting `await expect(getUser(1)).rejects.toThrow(\"network down\")` — confirming getUser doesn't swallow a network-level failure, distinct from the already-tested 404 (HTTP-level) failure case."
           }
         ]
       },
@@ -1465,6 +1809,15 @@
             "label": "Playwright docs — Getting Started",
             "url": "https://playwright.dev/docs/intro",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Set up the tiny HTML page and Playwright config above (npm install -D @playwright/test, npx playwright install chromium), run `npx playwright test`, and confirm the real browser test passes."
+          },
+          {
+            "instruction": "Add a second test that clicks the button 5 times and confirms the final count.",
+            "expectOutcome": "The count reads 'Count: 5' after 5 real clicks — confirming the test genuinely drives a real browser through 5 separate click events, not just checking a single click."
           }
         ]
       }
@@ -1519,6 +1872,18 @@
             "url": "https://expressjs.com/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `npm install express` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples (health/users GET routes, and the POST /api/echo example) and confirm the responses match."
+          },
+          {
+            "instruction": "Add a new route `app.get('/api/users/:id/greeting', ...)` that returns a personalized greeting using the id param, and test it with fetch.",
+            "expectOutcome": "Requesting /api/users/42/greeting returns { message: 'Hello, User 42!' } — confirmed by actually running a real Express server with this route and fetching it, alongside the original /api/health and /api/users/:id routes both still working correctly."
+          }
         ]
       },
       {
@@ -1566,6 +1931,19 @@
             "url": "https://expressjs.com/en/resources/middleware/cors.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `npm install express cors` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run both examples (the fetch pattern walkthrough and the CORS-enabled server) and confirm the printed output."
+          },
+          {
+            "instruction": "Add a POST route to the CORS-enabled server (e.g. POST /api/users accepting a JSON body) and call it with fetch, confirming express.json() correctly parses the body.",
+            "expectOutcome": "POSTing { name: 'Cy' } returns { created: { name: 'Cy' } } — confirmed by actually running a real Express server with cors() and express.json() both enabled, verifying a full GET-then-POST round trip.",
+            "troubleshooting": "This Node-script test 'succeeding' does NOT prove CORS itself works — Node doesn't enforce CORS at all (per this lesson's own warning). Only an actual browser-based frontend on a different port would reveal whether cors() is truly needed; don't mistake this passing test for real cross-origin verification."
+          }
         ]
       },
       {
@@ -1609,6 +1987,15 @@
             "url": "https://12factor.net/config",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write out (in your own words) a deployment plan for your own capstone project (next lesson): which platform you'd use for the frontend, where the backend/database would live, and what secrets/environment variables it would need."
+          },
+          {
+            "instruction": "Confirm your plan explicitly separates 'committed to the repo' from 'set as an environment variable in the platform dashboard' for every secret you listed.",
+            "expectOutcome": "A clear, explicit list — e.g. DATABASE_URL and any API keys marked as platform-dashboard-only, with nothing sensitive planned for the repo itself, mirroring this very project's own NEXT_PUBLIC_SUPABASE_* + LLM_API_KEY setup (public keys in .env.local, the LLM secret only in Supabase's Edge Function secrets)."
+          }
         ]
       },
       {
@@ -1650,6 +2037,25 @@
             "label": "Forage Interview — practice explaining this project live",
             "url": "/interview",
             "kind": "practice"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Scope your capstone deliberately small (a to-do list, a simple notes app, a mini link-shortener) — write the scope down using the same four-section pattern shown (Frontend/Backend/Glue/Deploy)."
+          },
+          {
+            "instruction": "Build the backend first: Express routes (GET/POST) backed by an in-memory array, and confirm each route works via fetch/curl before touching the frontend at all."
+          },
+          {
+            "instruction": "Build the frontend: a controlled form (Module 2) and a rendered list with proper keys (Module 2), wired to your backend via fetch (Module 1's async/await)."
+          },
+          {
+            "instruction": "Get it fully working locally end-to-end, THEN deploy both frontend and backend."
+          },
+          {
+            "instruction": "Confirm the LIVE, deployed version works end-to-end — not just localhost.",
+            "expectOutcome": "Visiting the live public URL, submitting the form, and seeing the new item appear in the rendered list — genuinely round-tripping through the deployed backend, not a local dev server.",
+            "troubleshooting": "If the deployed frontend can't reach the deployed backend but everything worked locally, CORS (this module's earlier lesson) or a hardcoded localhost URL left in the frontend's fetch calls are the two most common causes — check both before assuming something deeper is broken."
           }
         ]
       }

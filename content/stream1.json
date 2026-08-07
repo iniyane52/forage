@@ -45,6 +45,21 @@
             "url": "https://ubuntu.com/tutorials/command-line-for-beginners",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Open a terminal (Git Bash, WSL, or any Linux/macOS terminal) and run `echo \"hello from the shell\"`.",
+            "expectOutcome": "The exact text `hello from the shell` printed back — echo just repeats what you give it."
+          },
+          {
+            "instruction": "Run `whoami`.",
+            "expectOutcome": "Your logged-in username, one word, nothing else."
+          },
+          {
+            "instruction": "Run `pwd`.",
+            "expectOutcome": "A full path ending wherever your terminal opened — this is your proof-of-life check: if these three commands ran without errors, your shell works and you're ready for the rest of this module.",
+            "troubleshooting": "If nothing happens or you see a syntax highlighting/autocomplete popup instead of output, you're probably typing into a text editor or your browser's address bar, not an actual terminal — this is the #1 mistake beginners hit here."
+          }
         ]
       },
       {
@@ -81,6 +96,29 @@
             "label": "GNU Coreutils Manual — File and directory commands",
             "url": "https://www.gnu.org/software/coreutils/manual/coreutils.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run `pwd` to note your starting location, then `mkdir myproject && cd myproject && pwd`.",
+            "expectOutcome": "Your original path with `/myproject` added to the end — you moved using a RELATIVE path (just the folder name), which only works because `myproject` is inside where you already were."
+          },
+          {
+            "instruction": "Run `mkdir logs && cd logs && pwd`.",
+            "expectOutcome": "The path now ends in `/myproject/logs` — two levels deep from where you started."
+          },
+          {
+            "instruction": "Run `cd ..` then `pwd`.",
+            "expectOutcome": "Back to the `/myproject` path from step 1 — `..` always means one level up from wherever you currently are."
+          },
+          {
+            "instruction": "Run `touch .env` then plain `ls`.",
+            "expectOutcome": "`.env` does NOT appear in the listing — files starting with `.` are hidden by default, not actually missing.",
+            "troubleshooting": "If you don't see any output at all from `ls`, that's correct if this is a fresh folder with only the hidden `.env` file in it — hidden means hidden, not that ls is broken."
+          },
+          {
+            "instruction": "Now run `ls -a`.",
+            "expectOutcome": "`.env` now appears, alongside `.` (this directory) and `..` (its parent) — `-a` is the flag that stops hiding dotfiles."
           }
         ]
       },
@@ -119,6 +157,29 @@
             "url": "https://www.gnu.org/software/coreutils/manual/coreutils.html",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run `mkdir -p project/src/utils` then `touch project/src/utils/helpers.js`, then `ls project/src/utils`.",
+            "expectOutcome": "`mkdir -p` created `project`, `project/src`, AND `project/src/utils` in one call even though none of them existed yet, and `helpers.js` now shows up inside the deepest one."
+          },
+          {
+            "instruction": "Run `cp project/src/utils/helpers.js project/src/utils/helpers.backup.js` then `ls project/src/utils` again.",
+            "expectOutcome": "Both `helpers.js` and `helpers.backup.js` now listed — `cp` leaves the original in place and creates a second, independent copy."
+          },
+          {
+            "instruction": "Run `mv project/src/utils/helpers.backup.js project/src/archive.js` then `ls project/src`.",
+            "expectOutcome": "`archive.js` now sitting directly in `project/src` (not in `utils` anymore) — `mv` moved AND renamed it in one step, and it's gone from `utils` entirely.",
+            "troubleshooting": "If you still see `helpers.backup.js` in the old location, double-check you used `mv` and not `cp` — unlike `cp`, `mv` never leaves the original behind."
+          },
+          {
+            "instruction": "Run `rm project/src/archive.js` then `ls project/src` to confirm.",
+            "expectOutcome": "`archive.js` no longer listed — plain `rm` on a single file is safe and reversible only via a backup, not via any undo command, which is exactly why the next step matters."
+          },
+          {
+            "instruction": "Before you ever run `rm -rf` for real, type out (don't run) the exact path you'd delete and read it back character by character, checking for stray spaces.",
+            "troubleshooting": "`rm -rf ~ /oldbuild` (with a space after `~`) deletes your ENTIRE home directory, not the `oldbuild` folder — this is the single most-cited real rm disaster, and it comes from a typo, not a misunderstanding of the command."
+          }
         ]
       },
       {
@@ -155,6 +216,24 @@
             "label": "GNU Coreutils Manual — cat, head, tail",
             "url": "https://www.gnu.org/software/coreutils/manual/coreutils.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run `printf 'line1\\nline2\\nline3\\nline4\\nline5\\n' > sample.log` to create a 5-line file, then `cat sample.log`.",
+            "expectOutcome": "All 5 lines printed at once, top to bottom — fine here since the file is tiny."
+          },
+          {
+            "instruction": "Run `head -n 3 sample.log`.",
+            "expectOutcome": "Only `line1`, `line2`, `line3` — the first 3 lines, nothing more."
+          },
+          {
+            "instruction": "Run `tail -n 3 sample.log`.",
+            "expectOutcome": "`line3`, `line4`, `line5` — the LAST 3 lines. Notice `line3` appears in both outputs since the file only has 5 lines total.",
+            "troubleshooting": "If head and tail show identical output, you likely have a very short file — that's expected on a 5-line file with `-n 3`; try `-n 2` to see them stop overlapping."
+          },
+          {
+            "instruction": "Imagine this file were a multi-gigabyte production log instead of 5 lines. Write one sentence: why would running plain `cat` on it be a real problem, and which command from this lesson avoids it?"
           }
         ]
       },
@@ -202,6 +281,25 @@
             "url": "https://vimhelp.org/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run `nano test.txt`, type a line of text, then press Ctrl+O, Enter, then Ctrl+X.",
+            "expectOutcome": "You're back at your normal shell prompt, and running `cat test.txt` afterward shows the line you typed — nano's on-screen shortcuts (shown at the bottom the whole time) are there so you never have to memorize them up front."
+          },
+          {
+            "instruction": "Run `vim test.txt`. Before typing anything, press `i`.",
+            "expectOutcome": "`-- INSERT --` appears at the bottom of the screen — this is vim confirming you can now type normally.",
+            "troubleshooting": "If you type before pressing `i` and letters seem to vanish or trigger weird jumps, you were still in NORMAL mode, where keys are commands, not text. This is the single most common vim confusion — press Esc, then `i`, and start again."
+          },
+          {
+            "instruction": "Type a short line, press Esc, then type `:wq` and press Enter.",
+            "expectOutcome": "Back at your shell prompt; `cat test.txt` shows your new line was saved — `:wq` means write (save) then quit."
+          },
+          {
+            "instruction": "Open vim again (`vim test.txt`), press `i`, type something you do NOT want to keep, press Esc, then type `:q!` and press Enter.",
+            "expectOutcome": "Back at your shell prompt with no save prompt or error — `:q!` discards your changes and exits, unlike `:wq`. This is the escape hatch worth memorizing before you ever get stuck in vim for real."
+          }
         ]
       },
       {
@@ -238,6 +336,24 @@
             "label": "GNU Coreutils Manual — chmod, chown",
             "url": "https://www.gnu.org/software/coreutils/manual/coreutils.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "On a real Linux machine, VM, or container (chmod's numeric effect doesn't reproduce faithfully on Windows/NTFS, even via Git Bash), run `touch deploy.sh` then `ls -l deploy.sh`.",
+            "expectOutcome": "A line starting with something like `-rw-r--r--` — the leading `-` means 'regular file', and the next 9 characters are owner/group/other permissions, none of which include execute (`x`) yet."
+          },
+          {
+            "instruction": "Run `chmod 755 deploy.sh` then `ls -l deploy.sh` again.",
+            "expectOutcome": "The permission string changes to `-rwxr-xr-x` — owner now has read+write+execute (7), group and other have read+execute (5 each)."
+          },
+          {
+            "instruction": "Run `chmod u+x,go-w deploy.sh` then `ls -l` once more.",
+            "expectOutcome": "The string reflects the symbolic change: owner keeps execute (was already set), group and other lose write if they had it — symbolic chmod adjusts specific bits without restating the whole permission set the way numeric chmod does."
+          },
+          {
+            "instruction": "In your own words, write one sentence explaining why `chmod 777` on a web-facing file is risky.",
+            "expectOutcome": "Something covering: 777 gives EVERY user on the system full read/write/execute — including write access for people who should never be able to modify that file. The fix is almost always a narrower, correct permission (755 or 644), not 'everyone gets everything'."
           }
         ]
       },
@@ -279,6 +395,25 @@
             "label": "GNU Coreutils / bash manual — Job Control",
             "url": "https://www.gnu.org/software/bash/manual/html_node/Job-Control.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run `sleep 30 &` then immediately `JOB_PID=$!` and `echo \"started background job with PID $JOB_PID\"`.",
+            "expectOutcome": "A line showing a real process ID number — `&` handed control back to your prompt immediately instead of making you wait 30 seconds."
+          },
+          {
+            "instruction": "Run `jobs`.",
+            "expectOutcome": "A line like `[1]+  Running    sleep 30 &` — confirming the backgrounded command is genuinely still running."
+          },
+          {
+            "instruction": "Run `kill $JOB_PID`, wait a second, then run `jobs` again.",
+            "expectOutcome": "The job now shows `Terminated` instead of `Running` (or disappears entirely) — you just ended a real background process, not just stopped watching it.",
+            "troubleshooting": "If `kill` seems to do nothing and the process is still Running, try `kill -9 $JOB_PID` as a last resort — but per this lesson's Common mistakes, that should be a last resort, not your first move."
+          },
+          {
+            "instruction": "Run `true; echo \"exit code: $?\"`, then `false; echo \"exit code: $?\"`, then `ls /nonexistent-path 2>/dev/null; echo \"exit code: $?\"`.",
+            "expectOutcome": "Three different numbers: 0 (true always succeeds), 1 (false always fails, generically), and 2 (a real but different failure — the path genuinely doesn't exist) — confirming `$?` distinguishes not just success/fail but different KINDS of failure."
           }
         ]
       },
@@ -322,6 +457,21 @@
             "url": "https://www.debian.org/doc/manuals/apt-guide/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "On a real Ubuntu/Debian machine, VM, or container (e.g. `docker run -it ubuntu bash`) — not required to be this authoring environment — run `sudo apt update`.",
+            "expectOutcome": "A series of lines fetching package lists ending in something like `Reading package lists... Done` — this refreshes what versions are available before you install anything."
+          },
+          {
+            "instruction": "Run `sudo apt install curl` (or `tree` if curl is already present), then confirm it works, e.g. `curl --version`.",
+            "expectOutcome": "Real version output — the package is now genuinely usable, not just 'installed' in name."
+          },
+          {
+            "instruction": "Run `sudo apt remove curl`, then try `curl --version` again.",
+            "expectOutcome": "A 'command not found' error — confirming removal genuinely took the software away rather than just hiding it.",
+            "troubleshooting": "If install fails with permission errors, make sure you're using `sudo` — package managers modify system-wide locations that a normal user account can't write to directly."
+          }
         ]
       },
       {
@@ -363,6 +513,23 @@
             "label": "ShellCheck — shell script static analysis (used to catch exactly these mistakes)",
             "url": "https://www.shellcheck.net/",
             "kind": "reference"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Create a file called `deploy.sh` starting with `#!/usr/bin/env bash`, then `set -euo pipefail`, then `ENVIRONMENT=\"${1:-staging}\"` and `echo \"Deploying to: $ENVIRONMENT\"`."
+          },
+          {
+            "instruction": "Add an if/else: if `[ \"$ENVIRONMENT\" = \"production\" ]`, echo a safety-check message; else echo a 'skipping' message. Then add a `for service in api worker scheduler; do echo \"  -> deploying $service\"; done` loop."
+          },
+          {
+            "instruction": "Run `chmod +x deploy.sh`, then run it twice: `./deploy.sh` (no argument) and `./deploy.sh production`.",
+            "expectOutcome": "The no-argument run defaults to \"staging\" and prints the skip message; the second run prints \"Deploying to: production\" and the safety-check message instead — same script, genuinely different behavior driven by the one argument.",
+            "troubleshooting": "If you get `permission denied` when running `./deploy.sh`, you skipped `chmod +x` — the file needs its execute bit set before `./` can run it directly."
+          },
+          {
+            "instruction": "Deliberately add a space around one `=` in your script (e.g. change `ENVIRONMENT=\"${1:-staging}\"` to `ENVIRONMENT = \"${1:-staging}\"`) and run it again.",
+            "expectOutcome": "An error like `deploy.sh: line 4: ENVIRONMENT: command not found` — bash reads `ENVIRONMENT = value` as trying to RUN a command called ENVIRONMENT, not assign a variable, because unlike most languages, bash requires zero spaces around `=`."
           }
         ]
       }
@@ -414,6 +581,20 @@
             "url": "https://www.rfc-editor.org/rfc/rfc1918",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run `curl -s -o /dev/null -w \"Status: %{http_code}\\n\" https://api.github.com`.",
+            "expectOutcome": "`Status: 200` — a real client (curl) made a real request and got a real response back from GitHub's server, the exact client-server exchange this lesson describes."
+          },
+          {
+            "instruction": "Run `ipconfig` (Windows) or `ip addr` (Linux) and find your machine's local network IP address.",
+            "expectOutcome": "An address starting with `10.`, `172.16-31.`, or `192.168.` — one of the three reserved private ranges, meaning it's only routable inside your own local network, not on the public internet."
+          },
+          {
+            "instruction": "Write one sentence: if that private IP isn't reachable from outside your network, how does your laptop reach github.com's server at all?",
+            "expectOutcome": "Your router performs NAT (network address translation), swapping your private IP for its own public IP on the way out — you don't need a public IP yourself to make outbound requests, only to receive unsolicited inbound ones."
+          }
         ]
       },
       {
@@ -455,6 +636,19 @@
             "label": "Cloudflare Learning — What is UDP?",
             "url": "https://www.cloudflare.com/learning/ddos/glossary/user-datagram-protocol-udp/",
             "kind": "article"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run `curl -s -o /dev/null -w \"Connect time: %{time_connect}s\\nTotal time: %{time_total}s\\n\" https://api.github.com`.",
+            "expectOutcome": "Two small numbers, both under a second on a normal connection — `time_connect` is specifically the TCP handshake (plus TLS) completing BEFORE any HTTP data moves at all."
+          },
+          {
+            "instruction": "Write down 2 apps you use daily that likely run over UDP (hint: anything real-time — video calls, live multiplayer) and 2 that rely on TCP (hint: loading a webpage, SSH)."
+          },
+          {
+            "instruction": "For each of the 4, write one sentence explaining why that protocol fits: does this app care more about EVERY packet arriving correctly (TCP), or about the newest data arriving FAST even if a packet is dropped (UDP)?",
+            "expectOutcome": "The core reasoning: a video call losing one frame briefly is fine (UDP — don't wait to retransmit it, just show the next one); a webpage missing a byte of HTML is not fine (TCP — retransmit until it's complete, even if slower)."
           }
         ]
       },
@@ -498,6 +692,25 @@
             "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run `curl -s -o /dev/null -w \"GET status: %{http_code}\\n\" https://api.github.com`.",
+            "expectOutcome": "`GET status: 200` — a successful request/response."
+          },
+          {
+            "instruction": "Run `curl -s -o /dev/null -w \"POST status: %{http_code}\\n\" -X POST https://api.github.com/repos`.",
+            "expectOutcome": "`POST status: 404` — an unauthenticated write attempt; GitHub's API deliberately returns 404 rather than 401 here to avoid revealing what exists.",
+            "troubleshooting": "If you expected 401 and got 404 instead, that's not a bug in your curl command — some APIs intentionally obscure resource existence from unauthenticated callers. Always check the specific API's own docs rather than assuming one universal convention."
+          },
+          {
+            "instruction": "Run `curl -s -o /dev/null -w \"Status: %{http_code}\\n\" https://api.github.com/this-path-does-not-exist-xyz`.",
+            "expectOutcome": "`Status: 404` — this time for the expected reason: the path genuinely doesn't exist."
+          },
+          {
+            "instruction": "Write one sentence each for 401, 403, and 404: what specifically does each mean, and what's the fix?",
+            "expectOutcome": "401 = not authenticated (fix: log in / send credentials). 403 = authenticated but not permitted (fix: needs different permissions, not different credentials). 404 = doesn't exist at all (fix: check the URL/resource, not auth)."
+          }
         ]
       },
       {
@@ -534,6 +747,19 @@
             "label": "IANA — Service Name and Transport Protocol Port Number Registry",
             "url": "https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml",
             "kind": "reference"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run the Python socket example: bind a socket to `127.0.0.1:8765`, then try binding a SECOND socket to the exact same address and port.",
+            "expectOutcome": "The first bind succeeds silently; the second raises a real OS-level error — on Windows something like `[WinError 10048] Only one usage of each socket address...`, on Mac/Linux `OSError: [Errno 98] Address already in use`.",
+            "troubleshooting": "If you hit this exact error while starting your OWN dev server (not this demo), it almost always means an earlier instance of that same server is still running in another terminal or background process — check for it before assuming your code is broken."
+          },
+          {
+            "instruction": "Recall or look up which port your own local dev server (or any app you run locally) listens on."
+          },
+          {
+            "instruction": "Write one sentence: does that port match one of the well-known conventions (22 SSH, 80 HTTP, 443 HTTPS, 5432 Postgres, 3306 MySQL), or is it an arbitrary higher number? Either is fine — the point is knowing which case you're in."
           }
         ]
       },
@@ -577,6 +803,19 @@
             "url": "https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run `nslookup github.com` (or `dig github.com` on Mac/Linux) against a real domain you use often.",
+            "expectOutcome": "A block showing `Server:`/`Address:` (the DNS resolver that answered) followed by `Name:`/`Address:` for the domain itself — a real name resolved to a real, current IP address.",
+            "troubleshooting": "If it times out instead of resolving, your network's default DNS resolver may be unreachable or misconfigured — try `nslookup github.com 8.8.8.8` to query Google's public resolver directly and confirm it's a resolver issue, not a 'the internet is down' issue."
+          },
+          {
+            "instruction": "Look up (or recall) the TTL configured on a DNS record you control, or a well-known public one."
+          },
+          {
+            "instruction": "Write one sentence explaining what that TTL number means in practice: if you changed that record right now, roughly how long would it take before every resolver worldwide reliably showed the new value instead of a cached old one?"
+          }
         ]
       },
       {
@@ -618,6 +857,20 @@
             "label": "everything curl (free official curl book)",
             "url": "https://everything.curl.dev/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run `curl -sI https://api.github.com` (capital `-I`, HEAD request).",
+            "expectOutcome": "Just response headers — status line plus lines like `Date:`, `Cache-Control:` — no response body at all, useful when you only need to check something like a status or content-type without downloading everything."
+          },
+          {
+            "instruction": "Run `curl -s -o /dev/null -w \"Status: %{http_code} | DNS: %{time_namelookup}s | Connect: %{time_connect}s | Total: %{time_total}s\\n\" https://api.github.com`.",
+            "expectOutcome": "Four numbers on one line, each isolating a different phase — if something's slow, this tells you WHICH phase (DNS vs connect vs the rest) rather than just 'the request was slow'."
+          },
+          {
+            "instruction": "Now deliberately request a method that should fail — try `curl -s -o /dev/null -w \"%{http_code}\\n\" -X DELETE https://api.github.com/user`.",
+            "expectOutcome": "A 4xx status (likely 401, since this needs real authentication) — confirming you can deliberately provoke and observe a failure case with curl, not just successful requests."
           }
         ]
       },
@@ -661,6 +914,21 @@
             "url": "https://owasp.org/Top10/A05_2021-Security_Misconfiguration/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "On paper or in notes, sketch a two-tier app: one public web server, one private database it talks to."
+          },
+          {
+            "instruction": "Write the web server's inbound rules: which port(s) should be open to the whole internet (`0.0.0.0/0`), and which (like SSH) should be restricted to a known IP range instead of the whole internet?"
+          },
+          {
+            "instruction": "Write the database's inbound rules separately. Specifically state: should its port ever be open to `0.0.0.0/0`, or only reachable from the web server's own security group?",
+            "expectOutcome": "The database's rule should allow traffic ONLY from the web server's security group/IP, never from the whole internet — this is the single most-cited real misconfiguration this lesson warns about."
+          },
+          {
+            "instruction": "Write one sentence describing what 'default-deny' means for anything you didn't explicitly write a rule for in your sketch."
+          }
         ]
       },
       {
@@ -702,6 +970,19 @@
             "label": "AWS — What is a Load Balancer?",
             "url": "https://aws.amazon.com/what-is/load-balancing/",
             "kind": "article"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Sketch a small diagram: one load balancer, 3 backend server instances behind it, and a health check arrow from the load balancer to each instance."
+          },
+          {
+            "instruction": "Label which server(s) the CLIENT actually connects to directly in your diagram.",
+            "expectOutcome": "Only the load balancer — clients never connect to the backend instances directly, which is the whole point of a reverse proxy sitting in front of them."
+          },
+          {
+            "instruction": "Write 2-3 sentences: if instance #2 starts failing its health check, what does the load balancer do with new incoming traffic, and what would happen to a user whose request was already mid-flight to instance #2 when it went down?",
+            "expectOutcome": "New traffic gets routed only to the healthy instances (1 and 3); a request already in flight to the failed instance #2 typically fails or times out for that one user — health checks prevent NEW damage, they don't retroactively save requests already in progress."
           }
         ]
       }
@@ -753,6 +1034,26 @@
             "url": "https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow",
             "kind": "article"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "In a repo with at least one commit, run `git checkout -b feature/add-health-check`.",
+            "expectOutcome": "`Switched to a new branch 'feature/add-health-check'` — an isolated line of work, main untouched."
+          },
+          {
+            "instruction": "Make a small change, `git add`, and `git commit -m \"add health check\"`.",
+            "expectOutcome": "A normal commit summary — this commit exists only on your feature branch so far."
+          },
+          {
+            "instruction": "If you have a real GitHub/GitLab remote, run `git push -u origin feature/add-health-check` and open a pull request there. If not, just note in writing what you WOULD do next: open a PR into main."
+          },
+          {
+            "instruction": "After merging (for real, or in your head if no remote), run `git branch -d feature/add-health-check`.",
+            "expectOutcome": "`Deleted branch feature/add-health-check (was <hash>)` — safe because its work is already merged into main."
+          },
+          {
+            "instruction": "Write one sentence: for a small team shipping continuously (this workflow), versus a team doing scheduled numbered releases, which one would actually benefit from Git Flow's extra develop/release/hotfix branches instead of this simpler trunk-based flow?"
+          }
         ]
       },
       {
@@ -789,6 +1090,27 @@
             "label": "Git — Basic Branching and Merging (official docs)",
             "url": "https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Create two branches that edit the SAME line of the SAME file differently: on `feature/new-thing`, set a file's content to one value and commit; switch to `main`, set it to a different value, and commit there too."
+          },
+          {
+            "instruction": "From `main`, run `git merge feature/new-thing`.",
+            "expectOutcome": "`CONFLICT (content): Merge conflict in <file>` and `Automatic merge failed; fix conflicts and then commit the result.` — a real conflict, not a metaphor."
+          },
+          {
+            "instruction": "Open the conflicted file.",
+            "expectOutcome": "Real conflict markers: `<<<<<<< HEAD`, then main's version, then `=======`, then the incoming branch's version, then `>>>>>>> feature/new-thing`."
+          },
+          {
+            "instruction": "Edit the file to keep whichever content is correct (or a combination), deleting ALL the marker lines (`<<<<<<<`, `=======`, `>>>>>>>`) completely — none of them should remain.",
+            "troubleshooting": "If you commit and later notice literal `<<<<<<<` text still in the file, you left a marker in during resolution — this is a genuinely common real mistake, always search the file for these markers before committing."
+          },
+          {
+            "instruction": "Run `git add <file>` then `git commit` (no `-m` needed — Git pre-fills a merge commit message).",
+            "expectOutcome": "A successful merge commit — check the file's final content one more time to confirm it's exactly what you intended, not an accidental half-resolution."
           }
         ]
       },
@@ -832,6 +1154,23 @@
             "url": "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run `echo '*.log' > .gitignore` then `echo '.env' >> .gitignore`."
+          },
+          {
+            "instruction": "Create matching files: `touch debug.log` and `echo 'API_KEY=secret123' > .env`."
+          },
+          {
+            "instruction": "Run `git add -A` then `git status --short`.",
+            "expectOutcome": "Only `.gitignore` itself shows as staged (e.g. `A  .gitignore`) — `debug.log` and `.env` exist on disk but never appear, even with the broad `-A` flag.",
+            "troubleshooting": "If a file you expected to be ignored still shows up staged, check that your .gitignore pattern's path is relative to the right place — a pattern that looks correct can silently not match a file in a different directory than you assumed."
+          },
+          {
+            "instruction": "Write one sentence: if `.env` had already been committed once BEFORE you added it to .gitignore, would adding it now remove it from history?",
+            "expectOutcome": "No — .gitignore only prevents FUTURE tracking; anything already committed remains in history and must be treated as compromised (rotate the secret), regardless of gitignore changes made afterward."
+          }
         ]
       },
       {
@@ -873,6 +1212,23 @@
             "label": "pre-commit framework — official docs",
             "url": "https://pre-commit.com/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Create `.git/hooks/pre-commit` containing a bash script that checks `git diff --cached --name-only` for anything matching `.env`, printing an error and `exit 1` if found."
+          },
+          {
+            "instruction": "Run `chmod +x .git/hooks/pre-commit` to make it executable.",
+            "troubleshooting": "If your hook doesn't run at all, double-check it's executable (`chmod +x`) and named exactly `pre-commit` with no file extension — Git looks for that exact filename."
+          },
+          {
+            "instruction": "Force-stage a real `.env` file (`git add -f .env`) and try `git commit -m \"oops\"`.",
+            "expectOutcome": "Your hook's error message printed, the commit REFUSED (nonzero exit code, no new commit created) — confirmed by running `git log --oneline -1` and seeing your previous commit still on top, not this one."
+          },
+          {
+            "instruction": "Unstage `.env`, then commit an unrelated file normally.",
+            "expectOutcome": "This commit succeeds normally — the hook only blocks what it's specifically checking for, everything else passes through untouched."
           }
         ]
       },
@@ -916,6 +1272,23 @@
             "url": "https://semver.org/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Run `git tag -a v1.0.0 -m \"First stable release\"` on your current commit."
+          },
+          {
+            "instruction": "Run `git tag`.",
+            "expectOutcome": "`v1.0.0` listed — a permanent pointer to this exact commit."
+          },
+          {
+            "instruction": "Run `git show v1.0.0 --stat`.",
+            "expectOutcome": "Real metadata: `Tagger:`, `Date:`, and your message `First stable release` — this is specifically what an ANNOTATED tag stores that a lightweight tag (`git tag v1.0.0` with no `-a`/`-m`) would not."
+          },
+          {
+            "instruction": "Think of a real change to a project you know (or imagine one): adding a new optional parameter with a default value. Would that be a major, minor, or patch semver bump?",
+            "expectOutcome": "Minor — it's a new capability that doesn't break existing callers (they don't have to pass the new parameter). A major bump would be for something that breaks existing usage; a patch would be for a bug fix with no behavior change."
+          }
         ]
       },
       {
@@ -957,6 +1330,22 @@
             "label": "Argo CD — official documentation",
             "url": "https://argo-cd.readthedocs.io/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Sketch the GitOps flow for scaling a service from 3 to 5 replicas: what FILE changes, what REVIEW step happens, and what automatically applies it to the live system."
+          },
+          {
+            "instruction": "Write out the same scaling change done manually instead (e.g. directly running a scale command against the live system) — no file change, no review, no automatic record."
+          },
+          {
+            "instruction": "Compare the two: write one sentence naming the specific audit-trail question GitOps can answer that the manual approach can't (e.g. 'who approved this exact change, and when').",
+            "expectOutcome": "Something like: with GitOps, the pull request IS the audit trail — who proposed it, who approved it, and exactly what changed, permanently in Git history. The manual change leaves no equivalent record unless someone remembers to write one down separately."
+          },
+          {
+            "instruction": "Write one more sentence: if someone ran a manual `kubectl apply` against a cluster that's supposed to be GitOps-managed, what would the GitOps controller eventually do?",
+            "expectOutcome": "It would detect the drift between the live cluster and what's declared in Git, and reconcile the cluster BACK to match Git — potentially undoing the manual change automatically, without warning, which is exactly why manual changes to a GitOps-managed system are a real mistake to avoid."
           }
         ]
       }
@@ -1008,6 +1397,19 @@
             "url": "https://docs.docker.com/get-started/docker-overview/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "With Docker running on your machine, time how long `docker run --rm alpine echo hello` takes after the image is already pulled once.",
+            "expectOutcome": "Well under a second for the container itself to start and run — it's reusing your host's already-running kernel, not booting a separate OS."
+          },
+          {
+            "instruction": "Write one sentence comparing that to how long a full VM typically takes to boot (tens of seconds to a couple minutes) — same rough order-of-magnitude gap Docker's own docs describe."
+          },
+          {
+            "instruction": "Write down one real situation where you'd still want a VM's stronger isolation despite the extra overhead (hint: running genuinely untrusted, potentially hostile code).",
+            "expectOutcome": "Something like: multi-tenant hosting of code you don't trust at all — containers share the host kernel, so a kernel-level exploit can potentially affect sibling containers; a VM's separate kernel is a real, stronger boundary for that specific threat model."
+          }
         ]
       },
       {
@@ -1049,6 +1451,20 @@
             "label": "Docker docs — Building best practices",
             "url": "https://docs.docker.com/build/building/best-practices/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write a Dockerfile for a simple app you know, following this order: `FROM` a base image, `WORKDIR`, then COPY only the dependency manifest (e.g. `package.json`) and RUN the install, THEN `COPY . .` for the rest of the source."
+          },
+          {
+            "instruction": "With Docker running, build it twice in a row with no code changes: `docker build -t myapp:1.0 .` then again.",
+            "expectOutcome": "The second build shows `CACHED` next to most steps and finishes almost instantly — nothing changed, so Docker reused every layer."
+          },
+          {
+            "instruction": "Change one line in your application source code (not the dependency file) and build a third time.",
+            "expectOutcome": "The dependency-install `RUN` step still shows `CACHED`, but the `COPY . .` step and everything after it re-runs — exactly the point of putting the dependency install first: source changes (frequent) don't invalidate the expensive install step (rare to change).",
+            "troubleshooting": "If EVERY step reruns even for a tiny source change, double check your Dockerfile copies the dependency manifest and runs the install BEFORE the broader `COPY . .` — the order is what makes caching work here, not just having separate steps."
           }
         ]
       },
@@ -1092,6 +1508,28 @@
             "url": "https://docs.docker.com/reference/cli/docker/container/run/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "With Docker running, build your image: `docker build -t myapp:1.0 .`, then run it detached with a port mapping and a name: `docker run -d -p 8080:3000 --name myapp-container myapp:1.0`."
+          },
+          {
+            "instruction": "Run `docker ps`.",
+            "expectOutcome": "A row for `myapp-container`, status `Up`, with `8080->3000` shown in the PORTS column — confirming it's genuinely running and reachable."
+          },
+          {
+            "instruction": "Run `docker logs myapp-container`.",
+            "expectOutcome": "Whatever your app printed on startup — this is your first stop for debugging a container that's running but not behaving correctly."
+          },
+          {
+            "instruction": "Run `docker exec -it myapp-container bash` (or `sh` if bash isn't in the image).",
+            "expectOutcome": "An interactive shell PROMPT running inside the container's own filesystem — you can `ls`, check files, poke around exactly as if you'd SSH'd into it.",
+            "troubleshooting": "If `-p 8080:3000` is missing and your app 'isn't reachable' from your browser at localhost:8080, that's expected — without an explicit port mapping, nothing outside the container can reach it, even though it's running fine internally."
+          },
+          {
+            "instruction": "Exit the shell (`exit`), then run `docker stop myapp-container`.",
+            "expectOutcome": "The container stops; a follow-up `docker ps` (without `-a`) no longer lists it."
+          }
         ]
       },
       {
@@ -1133,6 +1571,26 @@
             "label": "Docker docs — Volumes",
             "url": "https://docs.docker.com/engine/storage/volumes/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "With Docker running, create a network: `docker network create app-network`."
+          },
+          {
+            "instruction": "Run two simple containers on it, e.g. `docker run -d --name one --network app-network alpine sleep 300` and `docker run -d --name two --network app-network alpine sleep 300`."
+          },
+          {
+            "instruction": "Run `docker exec one ping -c 2 two`.",
+            "expectOutcome": "2 successful ping replies — container `one` reached container `two` BY NAME, because Docker's built-in DNS resolves container names to their current IP automatically on a shared user-defined network.",
+            "troubleshooting": "If ping fails with 'unknown host', double check both containers are on the SAME network (`docker network create` + `--network app-network` on both `docker run` commands) — containers on different (or no) networks genuinely can't reach each other by name."
+          },
+          {
+            "instruction": "Create a named volume and write a file into it via one container: `docker volume create demo-data` then `docker run --rm -v demo-data:/data alpine sh -c \"echo hello > /data/test.txt\"`."
+          },
+          {
+            "instruction": "Run a completely NEW container mounting that same volume: `docker run --rm -v demo-data:/data alpine cat /data/test.txt`.",
+            "expectOutcome": "`hello` printed — the file persisted in the named volume even though the container that wrote it is already gone (`--rm` removed it), proving the data lives in the volume, not in any one container."
           }
         ]
       },
@@ -1176,6 +1634,24 @@
             "url": "https://docs.docker.com/compose/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write a `compose.yaml` with two services: an `api` (built from your own Dockerfile) and a `db` (e.g. `image: postgres:16`), with the api depending on the db and both connected implicitly by Compose's automatic shared network."
+          },
+          {
+            "instruction": "With Docker running, run `docker compose up -d`.",
+            "expectOutcome": "Both services report as started, and `docker compose ps` afterward shows both with status `running`/`Up`."
+          },
+          {
+            "instruction": "From inside the api container (`docker compose exec api sh`), try to reach the db by its service name, e.g. `ping db` or connecting to it on its port.",
+            "expectOutcome": "It resolves and connects — Compose automatically creates a shared network for every service in the file, so `db` is reachable by name with zero manual `docker network create` step, unlike the previous lesson's manual setup."
+          },
+          {
+            "instruction": "Run `docker compose down`.",
+            "expectOutcome": "Containers and the network are removed, but the named volume (if any) survives — confirm with `docker volume ls`.",
+            "troubleshooting": "If your data unexpectedly disappeared, check whether you ran `docker compose down -v` instead of plain `down` — the `-v` flag additionally removes named volumes, deleting persisted data along with the containers."
+          }
         ]
       },
       {
@@ -1218,6 +1694,23 @@
             "url": "https://docs.docker.com/build/building/best-practices/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Take a Dockerfile you've already written and rewrite it as two stages: an early `FROM ... AS build` stage that installs dependencies and builds the app, and a final `FROM` stage that only `COPY --from=build` the finished output."
+          },
+          {
+            "instruction": "In the final stage, add `RUN useradd --system --uid 1001 appuser` and `USER appuser` before your `CMD`."
+          },
+          {
+            "instruction": "With Docker running, build both a single-stage and this multi-stage version, then compare sizes with `docker images`.",
+            "expectOutcome": "The multi-stage image is meaningfully smaller — it never carries forward the build-only dependencies, source files, or build cache that the single-stage version bakes in permanently.",
+            "troubleshooting": "If your app crashes after adding `USER appuser`, it likely needs write access to a specific directory (a cache or upload folder) that only root could write to by default — grant that one directory to `appuser` explicitly rather than reverting to running as root."
+          },
+          {
+            "instruction": "Run `docker run --rm <your-multi-stage-image> whoami`.",
+            "expectOutcome": "`appuser`, not `root` — confirming the container genuinely runs as a non-root user, not just that you wrote `USER appuser` in the file."
+          }
         ]
       },
       {
@@ -1259,6 +1752,20 @@
             "label": "Docker docs — docker push CLI reference",
             "url": "https://docs.docker.com/reference/cli/docker/image/push/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Go to hub.docker.com and search for a well-known image, e.g. `postgres`. Open its Tags tab.",
+            "expectOutcome": "A long list of specific version tags (like `16`, `16.2`, `15`) alongside `latest` — many independently versioned builds of the same image, not just one."
+          },
+          {
+            "instruction": "Write one sentence: what does pulling `postgres:latest` actually guarantee about which version you get, today versus in six months?",
+            "expectOutcome": "Nothing fixed — `latest` just means 'whatever was most recently pushed without an explicit tag', which can silently change over time. A redeploy today and one in six months could pull genuinely different versions."
+          },
+          {
+            "instruction": "Write one sentence explaining why a production deployment should pin an explicit version tag (e.g. `postgres:16.2`) instead.",
+            "expectOutcome": "An explicit tag guarantees you know exactly which build is running and that a redeploy pulls the SAME version, not whatever happens to be newest — reproducibility, not just convention."
           }
         ]
       }
@@ -1305,6 +1812,18 @@
             "url": "https://www.atlassian.com/continuous-delivery/principles/continuous-integration-vs-delivery-vs-deployment",
             "kind": "article"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Pick a project you know (personal or otherwise). Write down, honestly, whether it currently has: automated build+test, automated packaging, and automated deploy — or which of those steps are still manual."
+          },
+          {
+            "instruction": "Based on that, name which of the three levels it operates at today: CI only, Continuous Delivery, or Continuous Deployment."
+          },
+          {
+            "instruction": "Write one sentence: what would have to be true about its test suite specifically before it could safely skip the human approval step and reach full Continuous Deployment?",
+            "expectOutcome": "Something like: the automated tests would need to reliably catch the kinds of problems a human reviewer currently catches — if humans are still finding real bugs the test suite misses, removing that gate is genuinely riskier, not just faster."
+          }
         ]
       },
       {
@@ -1341,6 +1860,20 @@
             "label": "GitHub Actions docs — Understanding GitHub Actions (jobs/steps)",
             "url": "https://docs.github.com/en/actions/get-started/understanding-github-actions",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Create `pipeline.sh` with three echoed stages (Build, Test, Deploy) where a `run_tests` function deliberately `return 1`s (simulating a failing test), and the script exits 1 before Deploy if tests fail."
+          },
+          {
+            "instruction": "Run `chmod +x pipeline.sh` then `./pipeline.sh; echo \"exit code: $?\"`.",
+            "expectOutcome": "Build and Test stage output print, then \"Tests FAILED -- aborting pipeline before deploy\" — the Deploy stage's echo line NEVER prints, and the final exit code is 1."
+          },
+          {
+            "instruction": "Change `run_tests` to `return 0` instead of `return 1`, and run the script again.",
+            "expectOutcome": "All three stages now print, including Deploy, and the exit code is 0 — same script, only the test outcome changed, and that alone flips whether deploy happens.",
+            "troubleshooting": "If Deploy still doesn't print even after switching to `return 0`, check you're not still running the OLD version of the script from your shell history — re-run `./pipeline.sh` explicitly after saving the edit."
           }
         ]
       },
@@ -1384,6 +1917,19 @@
             "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Create `.github/workflows/ci.yml` with `on: push` and `pull_request` triggers targeting `main`, and one job (`build-and-test`) that uses `actions/checkout@v4`, sets up your language's runtime, and runs your test command."
+          },
+          {
+            "instruction": "Add a second job called `deploy` with `needs: build-and-test` and `if: github.ref == 'refs/heads/main'`.",
+            "troubleshooting": "If you push this and BOTH jobs run immediately in parallel regardless of order, you're missing `needs:` — without it, every job in a workflow runs in parallel by default, not in the order they're written."
+          },
+          {
+            "instruction": "If you have a real GitHub repo, push this file and check the Actions tab. If not, read your YAML back and trace through it by hand: for a push to a feature branch (not main), would the deploy job run?",
+            "expectOutcome": "No — `if: github.ref == 'refs/heads/main'` means the deploy job only runs when the ref is literally main, so a feature-branch push runs build-and-test but skips deploy entirely."
+          }
         ]
       },
       {
@@ -1420,6 +1966,18 @@
             "label": "Martin Fowler — TestPyramid",
             "url": "https://martinfowler.com/bliki/TestPyramid.html",
             "kind": "article"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "For a project you know, write down roughly how many tests exist today (or would need to) at each level: unit, integration, end-to-end."
+          },
+          {
+            "instruction": "Compare your numbers to the typical pyramid shape (~70% unit / ~20% integration / ~10% end-to-end). Write one sentence: is your project pyramid-shaped, or inverted (more slow tests than fast ones)?"
+          },
+          {
+            "instruction": "Name one specific user flow in that project important enough to deserve a slower, full end-to-end test (e.g. 'checkout and payment', not 'hovering over a button').",
+            "expectOutcome": "A flow where a silent failure would be genuinely costly (losing a sale, corrupting user data) — end-to-end tests are expensive to run and maintain, so they're reserved for flows where that cost is clearly worth it, not applied broadly."
           }
         ]
       },
@@ -1463,6 +2021,19 @@
             "url": "https://martinfowler.com/bliki/BlueGreenDeployment.html",
             "kind": "article"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "For a hypothetical high-traffic checkout service, write down the three strategies from this lesson (rolling, blue-green, canary) and one real cost/risk tradeoff for each."
+          },
+          {
+            "instruction": "Pick one and write 2-3 sentences justifying it specifically for THIS service (high-traffic, checkout = revenue-critical) — not which one sounds best in general.",
+            "expectOutcome": "A reasonable answer leans canary: checkout is revenue-critical enough that limiting a bad release's blast radius to a small % of real traffic (with active monitoring and fast rollback) matters more than blue-green's cost or rolling's simplicity — though a well-argued case for another strategy, with real tradeoffs named, is equally valid here."
+          },
+          {
+            "instruction": "Write one sentence: what would make your chosen strategy actually WORTHLESS as a safety mechanism if it were missing?",
+            "expectOutcome": "For canary specifically: active monitoring of real metrics during the rollout. A canary with nobody (and nothing automated) watching error rates is just a slower rolling deployment with no real safety benefit."
+          }
         ]
       },
       {
@@ -1499,6 +2070,19 @@
             "label": "GitHub Actions docs — Using secrets in GitHub Actions",
             "url": "https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write a workflow step that references a secret via `${{ secrets.PROD_API_KEY }}` (GitHub Actions syntax) inside an `env:` block for a deploy step — not as a literal value anywhere in the file."
+          },
+          {
+            "instruction": "Write one sentence: even for a fully PRIVATE repository, why is this still safer than hardcoding the real value directly in the YAML?",
+            "expectOutcome": "Private today doesn't mean private forever — repos get made public by mistake, collaborators get added who shouldn't see production credentials, and anyone who ever clones the repo (including old commits) gets the literal value permanently. The platform's secrets store keeps it out of the repo's content and history entirely."
+          },
+          {
+            "instruction": "Write one more sentence: if you needed to debug a workflow and were tempted to `echo` a secret's value to see it, what should you do instead?",
+            "expectOutcome": "Don't print the value — most CI platforms auto-redact KNOWN secret references in logs, but a transformed value (base64'd, concatenated into another string) may not be recognized and could leak. Verify indirectly (e.g. check the request that used it succeeded) instead of ever deliberately printing it."
           }
         ]
       },
@@ -1542,6 +2126,19 @@
             "url": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/cache-dependencies",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write a two-job workflow: a `build` job that runs `actions/upload-artifact@v4` with a specific `name:` for its output directory, and a `deploy` job with `needs: build` that runs `actions/download-artifact@v4` with the EXACT SAME `name:`.",
+            "troubleshooting": "If the download step can't find the artifact, the single most common cause is the `name:` not matching exactly between upload and download — check both spellings character-for-character."
+          },
+          {
+            "instruction": "Add an `actions/cache@v4` step to the build job, keyed on `hashFiles('package-lock.json')` (or your language's equivalent lockfile)."
+          },
+          {
+            "instruction": "Write one sentence distinguishing what breaks if the CACHE is missing/stale, versus what breaks if the ARTIFACT is missing.",
+            "expectOutcome": "A missing/stale cache just means a slower build (dependencies reinstall from scratch) — no functional problem. A missing artifact means the deploy job has NOTHING to deploy — it's a required output, not a speed optimization, and its absence breaks the pipeline outright."
+          }
         ]
       },
       {
@@ -1578,6 +2175,19 @@
             "label": "Google SRE Book — Chapter 12: Effective Troubleshooting",
             "url": "https://sre.google/sre-book/effective-troubleshooting/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Find a real failed pipeline run (yours, or a public open-source project's failed CI run) and open its logs for the specific failing step, not just the overall red X."
+          },
+          {
+            "instruction": "Read the actual failing step's output and decide: does this look like a genuine code/test problem (a specific assertion failed, a real error), or a flaky/infrastructure issue (timeout, network blip, 'runner lost connection')?",
+            "expectOutcome": "A concrete classification with a reason — e.g. 'a specific assertion says expected 5 got 3, that's a real test failure' versus 'connection reset mid-download, that's infrastructure flakiness, worth just re-running once.'"
+          },
+          {
+            "instruction": "Now imagine this exact failure had instead reached production as a live incident. Write out, in order, your first three actions.",
+            "expectOutcome": "The correct order: (1) roll back to the last known-good version immediately, (2) confirm the rollback actually resolved it (metrics back to normal), (3) ONLY THEN calmly investigate root cause — not 'try to fix forward under pressure' as step 1, which is the most common real mistake this lesson warns about."
           }
         ]
       }
@@ -1625,6 +2235,20 @@
             "url": "https://kubernetes.io/docs/concepts/overview/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write down a real scenario: a container you started by hand with `docker run` crashes at 3am. What happens to it with no one watching?",
+            "expectOutcome": "Nothing — it just stays down until a human notices (an alert, a user complaint) and manually restarts it. Plain `docker run` has no standing supervisor bringing it back."
+          },
+          {
+            "instruction": "Now write the same scenario under Kubernetes managing that container as part of a Deployment with 3 desired replicas.",
+            "expectOutcome": "Kubernetes' control plane notices actual state (2 running) no longer matches desired state (3 declared) and starts a replacement automatically — no human needs to notice the crash at all, let alone act on it at 3am."
+          },
+          {
+            "instruction": "Write one sentence: is 'desired state' a one-time instruction or a standing declaration?",
+            "expectOutcome": "Standing — Kubernetes continuously and repeatedly enforces it, which is exactly why a crash gets fixed automatically rather than needing someone to re-run a command each time."
+          }
         ]
       },
       {
@@ -1661,6 +2285,20 @@
             "label": "Kubernetes docs — Pods",
             "url": "https://kubernetes.io/docs/concepts/workloads/pods/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write a `pod.yaml` for a container image you know: `apiVersion: v1`, `kind: Pod`, with one container specifying `image`, `ports`, and both `resources.requests` and `resources.limits` for cpu/memory."
+          },
+          {
+            "instruction": "Write one sentence: what happens to THIS pod (not a Deployment-managed one) if its container crashes?",
+            "expectOutcome": "Nothing brings it back automatically — a bare Pod has no controller supervising it; only a Deployment/ReplicaSet (next lesson) provides that automatic recreation."
+          },
+          {
+            "instruction": "If you have a real cluster available (minikube, kind, or Docker Desktop's Kubernetes), run `kubectl apply -f pod.yaml` then `kubectl get pods`.",
+            "expectOutcome": "Your pod listed with STATUS `Running` (after brief `ContainerCreating`) — confirming the manifest was valid and genuinely scheduled.",
+            "troubleshooting": "If status shows `Pending` for a while, run `kubectl describe pod <name>` and check the Events section — it usually names the exact reason (e.g. insufficient resources, or the image couldn't be pulled)."
           }
         ]
       },
@@ -1699,6 +2337,20 @@
             "url": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write a `deployment.yaml`: `replicas: 3`, a `selector.matchLabels` block, and a pod `template` whose own `metadata.labels` match that selector exactly.",
+            "troubleshooting": "If you write the selector and template labels slightly differently (a real, common mistake), the Deployment can't find/manage the pods it just created — double check they match character-for-character."
+          },
+          {
+            "instruction": "Write the exact `kubectl` command to update this Deployment's image to a new version, and separately, the command to roll that back if it caused problems.",
+            "expectOutcome": "`kubectl set image deployment/<name> <container>=<new-image>` to update, and `kubectl rollout undo deployment/<name>` to roll back — two distinct commands for two distinct situations."
+          },
+          {
+            "instruction": "If you have a real cluster, apply your Deployment, then manually delete one of its pods with `kubectl delete pod <one-pod-name>`.",
+            "expectOutcome": "A new pod appears almost immediately (check `kubectl get pods`) to restore the declared 3 replicas — the ReplicaSet noticed the count dropped and fixed it, confirming manually deleting a managed pod doesn't actually 'fix' anything, it just gets replaced."
+          }
         ]
       },
       {
@@ -1735,6 +2387,19 @@
             "label": "Kubernetes docs — Service",
             "url": "https://kubernetes.io/docs/concepts/services-networking/service/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write a `service.yaml`: `type: ClusterIP`, a `selector` matching a label (e.g. `app: api`) from a Deployment's pod template, and `port`/`targetPort`."
+          },
+          {
+            "instruction": "Write one sentence: which Service `type` would you use instead if this needed to be reachable from the public internet on a cloud provider, and why not `NodePort`?",
+            "expectOutcome": "`LoadBalancer` — it's the standard, robust choice for real public-facing traffic on cloud infrastructure. `NodePort` is simple but limited (accessible only via a specific port on any node's own IP), not meant as the production-grade public entry point."
+          },
+          {
+            "instruction": "If you have a real cluster, apply both a Deployment and this matching Service, then run `kubectl run tmp --rm -it --image=busybox -- wget -qO- http://<service-name>`.",
+            "expectOutcome": "A real response body from your app — confirming another pod reached your Deployment's pods purely by the Service's stable name, with zero knowledge of any individual pod's IP."
           }
         ]
       },
@@ -1778,6 +2443,23 @@
             "url": "https://kubernetes.io/docs/concepts/configuration/secret/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write a `configmap.yaml` with 2 plain settings (e.g. `LOG_LEVEL: \"info\"`)."
+          },
+          {
+            "instruction": "Base64-encode a sample string yourself: run `echo -n \"password123\" | base64`.",
+            "expectOutcome": "`cGFzc3dvcmQxMjM=` — and critically, run `echo cGFzc3dvcmQxMjM= | base64 -d` right after to decode it back instantly.",
+            "troubleshooting": "If decoding it back instantly feels almost too easy, that's the entire point of this step — Secret data being 'base64-encoded' provides zero real confidentiality on its own, only obfuscation from a casual glance."
+          },
+          {
+            "instruction": "Write a `secret.yaml` using that encoded value under `data:`, `type: Opaque`."
+          },
+          {
+            "instruction": "Write one sentence: what ADDITIONAL measure (beyond just using a Secret resource) would actually be needed to protect this value at rest?",
+            "expectOutcome": "Something like enabling encryption-at-rest for Secrets in the cluster's underlying data store (etcd), and/or using an external secrets manager (Vault, cloud KMS-backed secrets) — a bare Kubernetes Secret alone is not encrypted by default, only encoded."
+          }
         ]
       },
       {
@@ -1820,6 +2502,23 @@
             "url": "https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Add a `livenessProbe` (httpGet on a health endpoint, e.g. `/healthz`) and a `readinessProbe` (e.g. `/ready`) to a Deployment manifest you've already written."
+          },
+          {
+            "instruction": "Write one sentence distinguishing what happens on a FAILED liveness probe versus a FAILED readiness probe.",
+            "expectOutcome": "A failed liveness probe triggers a container RESTART (Kubernetes believes it's stuck/dead). A failed readiness probe just REMOVES the pod from Service routing temporarily — the container keeps running, it's just not sent traffic until it passes again."
+          },
+          {
+            "instruction": "Write the exact `kubectl autoscale` command to keep this Deployment between 2 and 8 replicas, targeting 70% CPU utilization.",
+            "expectOutcome": "`kubectl autoscale deployment/<name> --cpu-percent=70 --min=2 --max=8`"
+          },
+          {
+            "instruction": "If you have a real cluster, apply the Deployment with probes and run `kubectl get pods` shortly after.",
+            "expectOutcome": "Pods show `READY 1/1` once the readiness probe starts passing — before that, briefly `0/1`, meaning it's running but not yet marked ready for traffic."
+          }
         ]
       },
       {
@@ -1856,6 +2555,19 @@
             "label": "Kubernetes docs — Ingress",
             "url": "https://kubernetes.io/docs/concepts/services-networking/ingress/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Write an `ingress.yaml` with two `rules`, each keyed by a different `host`, each routing to a different backend `service.name` + `port`."
+          },
+          {
+            "instruction": "Write one sentence: what additional cluster component is REQUIRED for this manifest to have any actual effect?",
+            "expectOutcome": "An Ingress controller (e.g. ingress-nginx) must already be running in the cluster — the Ingress resource alone is just a declaration; nothing implements the routing without a controller watching for it."
+          },
+          {
+            "instruction": "If you have a real cluster with an Ingress controller installed, apply this manifest and run `kubectl get ingress`.",
+            "expectOutcome": "Your Ingress listed with an ADDRESS once the controller has processed it — if ADDRESS stays empty, that's the strongest signal no controller is actually installed to act on it."
           }
         ]
       },
@@ -1899,6 +2611,21 @@
             "url": "https://kubernetes.io/docs/reference/kubectl/quick-reference/",
             "kind": "reference"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Without running anything yet, write down the ORDER of kubectl commands you'd run to diagnose a pod that isn't starting: which command first, second, third?",
+            "expectOutcome": "`kubectl get pods` (spot the problem pod and its STATUS) → `kubectl describe pod <name>` (read the Events section for the real reason) → `kubectl logs <name>` (only useful once the container has actually started running).",
+            "troubleshooting": "If you jumped straight to `kubectl logs` first, that's a common real ordering mistake — logs only show output from a container that's ACTUALLY running; a pod stuck in `Pending` or `ImagePullBackOff` has no logs yet, and `describe` reveals that faster."
+          },
+          {
+            "instruction": "If you have a real cluster, deliberately apply a manifest with a typo'd image name (e.g. `image: nginx:doesnotexist123`), then run your diagnostic order from step 1.",
+            "expectOutcome": "`get pods` shows `ImagePullBackOff` or `ErrImagePull`; `describe pod` explicitly names the failed image pull in its Events — confirming describe surfaces the real cause directly, exactly as this lesson claims."
+          },
+          {
+            "instruction": "Write one sentence: what does `kubectl apply -f` do differently from a separate create-then-update workflow?",
+            "expectOutcome": "`apply` is declarative and idempotent — it creates the resource if it doesn't exist, or updates it to match the file if it does, using the SAME command either way; you don't need to track whether something already exists to know which command to run."
+          }
         ]
       },
       {
@@ -1935,6 +2662,23 @@
             "label": "Helm — official documentation",
             "url": "https://helm.sh/docs/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Sketch (in notes) a `values.yaml` for a chart deploying the Deployment/Service/Ingress you've written in earlier lessons — parameterize at minimum the image tag and replica count as `{{ .Values.xxx }}` placeholders."
+          },
+          {
+            "instruction": "Write the exact Helm command to install this chart using a specific `production-values.yaml` file.",
+            "expectOutcome": "`helm install my-app ./mychart --values production-values.yaml`"
+          },
+          {
+            "instruction": "Write one sentence: if a Helm-deployed release breaks after an upgrade, what single command would you reach for first, and what does it actually do?",
+            "expectOutcome": "`helm rollback my-app 1` (or whichever revision number) — it reverts the ENTIRE release (all its templated resources together) back to a previous known revision, not just one manifest at a time."
+          },
+          {
+            "instruction": "Write one more sentence: why does manually editing a Helm-deployed manifest with `kubectl edit` (outside Helm) cause a real problem later?",
+            "expectOutcome": "It creates drift between what Helm's own release history believes is deployed and what's actually running in the cluster — the same class of problem as the GitOps out-of-band-change issue from the Git module, just inside Helm's tracking instead of Git's."
           }
         ]
       }
@@ -1987,6 +2731,19 @@
             "url": "https://developer.hashicorp.com/terraform/intro/core-workflow",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Install Terraform if you have it available, or write this by hand: a `main.tf` with a `terraform` block declaring a provider, a `provider` block, and one `resource` block for something you're at least conceptually familiar with."
+          },
+          {
+            "instruction": "If you have Terraform and real cloud credentials, run `terraform init` then `terraform plan`. If not, write out by hand what you'd EXPECT `plan` to print for a brand-new resource that doesn't exist yet.",
+            "expectOutcome": "A plan showing one resource to be created (`+` prefix in Terraform's own output convention), listing every attribute it would set — nothing created yet, purely a preview."
+          },
+          {
+            "instruction": "Write one sentence: why does `plan` matter as a separate step from `apply`, rather than just applying directly?",
+            "expectOutcome": "Plan is a dry run specifically to catch an UNINTENDED change (e.g. Terraform proposing to destroy and recreate a resource because of a config change you didn't realize was destructive) before it actually happens to real infrastructure, not after."
+          }
         ]
       },
       {
@@ -2028,6 +2785,21 @@
             "label": "AWS — IAM documentation",
             "url": "https://docs.aws.amazon.com/iam/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "For a hypothetical app that runs a container and stores user file uploads, pick ONE cloud provider and name its specific compute option (e.g. AWS ECS Fargate) and specific storage option (e.g. S3)."
+          },
+          {
+            "instruction": "Write one sentence justifying each choice — specifically why NOT a full VM, and why NOT block storage."
+          },
+          {
+            "instruction": "Write the IAM permissions that app's own role should have — name the exact action and exact resource scope (e.g. 's3:GetObject on this-one-bucket-only'), not a broad policy."
+          },
+          {
+            "instruction": "Now write what it should explicitly NOT have — name one broad permission (like admin/full-access) that would be tempting to grant 'just to avoid permission errors' but is wrong here.",
+            "expectOutcome": "Scoping to exactly what's needed (e.g. read-only on one specific bucket) versus a broad admin policy — the same 'narrow, deliberate scope' principle as security groups earlier in this path, applied to identity instead of network access."
           }
         ]
       },
@@ -2071,6 +2843,21 @@
             "url": "https://grafana.com/docs/grafana/latest/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "For a hypothetical API service, list 3 specific metrics you'd track (not just 'performance' — name actual measurable numbers, e.g. request rate, error rate, p99 latency)."
+          },
+          {
+            "instruction": "Name one specific piece of information you'd want captured in a LOG line at the moment of an error (e.g. the user ID, the exact input that triggered it) that a metric alone could never tell you."
+          },
+          {
+            "instruction": "Describe a scenario, specifically in a multi-service system, where distributed TRACING (not metrics, not logs) is the only tool that actually finds the root cause.",
+            "expectOutcome": "Something like: a request is slow overall (a metric shows this), it passes through 4 microservices, and only a trace shows exactly WHICH of the 4 downstream calls is actually the bottleneck — metrics alone show the symptom, tracing shows where in the chain it happened."
+          },
+          {
+            "instruction": "Write a PromQL-style expression for one of your 3 metrics (e.g. `rate(http_requests_total{status=~\"5..\"}[5m])` for error rate) — doesn't need to run anywhere, just practice expressing a metric as a real query."
+          }
         ]
       },
       {
@@ -2113,6 +2900,22 @@
             "url": "https://prometheus.io/docs/alerting/latest/overview/",
             "kind": "docs"
           }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Define an SLI (e.g. 'percentage of requests completing in under 300ms') for a hypothetical service."
+          },
+          {
+            "instruction": "Define a corresponding SLO using that SLI (e.g. '99% of requests under 300ms, measured over 30 days')."
+          },
+          {
+            "instruction": "Write one alert rule with a sustained-duration condition (a `for:` style threshold, not a single-instant trigger), e.g. 'error rate above 5% for more than 5 minutes'.",
+            "troubleshooting": "If your rule fires on ANY single bad data point with no sustained-duration requirement, that's the exact 'alert fatigue' mistake this lesson warns about — a `for:` duration exists specifically to ignore brief, self-resolving blips."
+          },
+          {
+            "instruction": "Write one sentence: what specifically makes your alert ACTIONABLE rather than just noisy?",
+            "expectOutcome": "It fires only on a sustained, real breach (not a transient blip), and someone receiving it would know exactly what to DO next — a good alert implies a next action, not just 'something's different.'"
+          }
         ]
       },
       {
@@ -2149,6 +2952,19 @@
             "label": "AWS — Tagging Best Practices",
             "url": "https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-best-practices.html",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Define a tagging convention: at least 3 tag KEYS you'd require on every cloud resource for a hypothetical team (e.g. `team`, `environment`, `project`)."
+          },
+          {
+            "instruction": "For EACH tag, write the specific cost-attribution question it would let you answer later (e.g. 'team tag → how much is the payments team spending this month').",
+            "expectOutcome": "Three distinct, concrete questions — not 'so we can track costs better' vaguely, but a specific breakdown each tag genuinely enables (by team, by environment, by project, etc.)."
+          },
+          {
+            "instruction": "Write one sentence: why is retrofitting tags onto an already-large, untagged cloud footprint much harder than enforcing the convention from day one?",
+            "expectOutcome": "Every existing untagged resource needs someone to go back and manually identify and tag it after the fact, with no automatic enforcement — versus building the requirement into your Terraform modules/provisioning process from the start, where nothing gets created untagged in the first place."
           }
         ]
       },
@@ -2191,6 +3007,24 @@
             "label": "Kubernetes docs — Deployments",
             "url": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/",
             "kind": "docs"
+          }
+        ],
+        "handsOnSteps": [
+          {
+            "instruction": "Pick a small application in a language/framework you're comfortable with (even a simple one) and write a Dockerfile for it — correct layer order, a non-root USER, a reasonably minimal final image."
+          },
+          {
+            "instruction": "Write a CI pipeline (a real one if you have a repo, or a written-out YAML if not) that builds, tests, and pushes to a registry — failing fast if tests fail, and tagging the image explicitly (never `latest`)."
+          },
+          {
+            "instruction": "Write a Kubernetes Deployment (resource requests/limits, liveness AND readiness probes) and a Service routing to it — reuse patterns from the Kubernetes module."
+          },
+          {
+            "instruction": "Add at least one exposed metric (even a simple request counter) and one defined alert condition for it, using the observability module's patterns."
+          },
+          {
+            "instruction": "Write a short paragraph: name ONE deliberate architectural decision you made anywhere in this capstone (a deployment strategy, a resource limit, a tagging choice) and your actual reasoning for it — not just that it works, but why you chose it over an alternative.",
+            "expectOutcome": "A specific, defensible decision with real tradeoffs named — this is deliberately the same skill a technical interview for this kind of role actually probes: not reciting that you did something, but explaining why."
           }
         ]
       }

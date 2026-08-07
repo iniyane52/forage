@@ -5,6 +5,12 @@
 
 export type Difficulty = "beginner" | "intermediate" | "advanced";
 
+// Light mode drops each path's neon accent in favor of one calm, consistent blue --
+// "blog-simple", not a rainbow. Consumed via the `.lesson-accent-scope` CSS custom
+// property cascade in globals.css (`--lesson-accent`, resolved per theme with no JS),
+// not by branching component render trees on the resolved theme.
+export const LIGHT_ACCENT = "#2563eb";
+
 export type PathMeta = {
   accent: string;
   skills: string[];

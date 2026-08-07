@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Chakra_Petch, Unbounded } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 import { NavProgress } from "@/components/ui/NavProgress";
 import "./globals.css";
 
@@ -39,7 +40,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#05070a",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#05070a" },
+  ],
 };
 
 export default function RootLayout({
@@ -48,6 +52,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${inter.variable} ${jetbrainsMono.variable} ${chakraPetch.variable} ${unbounded.variable} h-full antialiased overflow-x-hidden`}
     >
       <body className="min-h-full flex flex-col overflow-x-hidden">
@@ -61,8 +66,10 @@ export default function RootLayout({
             __html: `try{if('scrollRestoration' in history){history.scrollRestoration='manual';}window.scrollTo(0,0);window.addEventListener('pageshow',function(e){if(e.persisted)window.scrollTo(0,0);});}catch(e){}`,
           }}
         />
-        <NavProgress />
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem value={{ light: "light", dark: "dark" }}>
+          <NavProgress />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

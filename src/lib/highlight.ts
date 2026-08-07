@@ -16,14 +16,20 @@ export function detectLanguage(code: string): string {
   return "text";
 }
 
+// Both themes' colors are baked into one inline-styled render (light as the plain
+// `color`/`background-color`, dark as `--shiki-dark`/`--shiki-dark-bg` custom
+// properties) -- the `.dark .shiki` rule in globals.css picks the dark ones when the
+// theme toggle is on dark. No client JS, no second render per theme.
+const THEMES = { light: "github-light", dark: "github-dark" };
+
 /** Server-only: pre-colored HTML with inline styles, no client JS/runtime cost. */
 export async function highlightCode(code: string, lang?: string): Promise<string> {
   const language = lang ?? detectLanguage(code);
   try {
-    return await codeToHtml(code, { lang: language, theme: "github-dark" });
+    return await codeToHtml(code, { lang: language, themes: THEMES });
   } catch {
     // Unknown/unsupported language id for whatever detectLanguage guessed --
     // fall back to plain-text highlighting rather than breaking the lesson page.
-    return await codeToHtml(code, { lang: "text", theme: "github-dark" });
+    return await codeToHtml(code, { lang: "text", themes: THEMES });
   }
 }

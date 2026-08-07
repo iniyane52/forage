@@ -44,14 +44,21 @@ export function ScrollHero({
       if (reduce || !mounted || !cardRef.current) return;
       const cardEl = cardRef.current;
 
-      gsap.set(cardEl, { transformPerspective: 1000, scale: 1.06, opacity: 0 });
-      gsap.to(cardEl, {
-        scale: 1,
-        opacity: 1,
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: { trigger: cardEl, start: "top 90%", once: true },
-      });
+      // Plain play-on-mount, deliberately NOT scrollTrigger-gated: this card is
+      // always above the fold at page load, so "wait for a scroll-triggered
+      // enter" was actively wrong here, not just imprecise. Confirmed live: with
+      // a scrollTrigger (start: "top 90%", once: true), the card was stuck
+      // invisible (opacity 0) on a fresh load and only appeared after scrolling
+      // away and back -- ScrollTrigger only checks/fires against the scroll
+      // position it had at CREATION time, and a page load fires no scroll event
+      // to prompt a recheck, so an already-satisfied trigger silently never
+      // fires. A follow-up ScrollTrigger.refresh() call didn't fix it either
+      // (refresh recalculates trigger positions, it doesn't retroactively fire
+      // enter callbacks for non-scrubbed tweens). Since there's no real "wait
+      // for scroll" case to handle for an always-visible-on-load element, this
+      // sidesteps the whole class of bug rather than chasing the timing.
+      gsap.set(cardEl, { transformPerspective: 1000, scale: 1.06, rotate: -3, opacity: 0 });
+      gsap.to(cardEl, { scale: 1, rotate: 0, opacity: 1, duration: 1, ease: "power3.out" });
 
       if (!window.matchMedia("(pointer: fine)").matches) return;
 

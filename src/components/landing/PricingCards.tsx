@@ -35,33 +35,33 @@ export function PricingCards() {
   return (
     <div ref={sectionRef} className="grid sm:grid-cols-2 gap-5">
       <div ref={freeRef} className="glass rounded-2xl p-6 h-full">
-        <p className="text-xs font-bold uppercase tracking-widest text-[#7d99a3]">Free</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-secondary)]">Free</p>
         <p className="text-3xl font-bold mt-1" style={{ fontFamily: "var(--font-display)" }}>
           ₹0
         </p>
-        <p className="text-xs text-[#7d99a3]">forever</p>
+        <p className="text-xs text-[var(--color-text-secondary)]">forever</p>
         <ul className="mt-5 space-y-2 text-sm">
           {["The full Common Core", "Quizzes, XP, streaks & badges", "One free 4-minute mock interview"].map((p) => (
             <li key={p} className="flex items-start gap-2">
-              <CheckCircle2 size={16} className="text-[#3fb950] mt-0.5 shrink-0" />
+              <CheckCircle2 size={16} className="text-[var(--color-success)] mt-0.5 shrink-0" />
               {p}
             </li>
           ))}
         </ul>
       </div>
-      <div ref={proRef} className="glass rounded-2xl p-6 border-[#00e5ff]/40 relative overflow-hidden h-full">
-        <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-[#ff3d81]/20 blur-3xl pointer-events-none" />
-        <p className="text-xs font-bold uppercase tracking-widest text-[#ff3d81] flex items-center gap-1">
+      <div ref={proRef} className="glass rounded-2xl p-6 border-[var(--color-primary)]/40 relative overflow-hidden h-full">
+        <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-[var(--color-accent)]/20 blur-3xl pointer-events-none" />
+        <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-accent)] flex items-center gap-1">
           <Sparkles size={13} /> Pro
         </p>
         <p ref={proPriceRef} className="text-3xl font-bold mt-1" style={{ fontFamily: "var(--font-display)" }}>
           Coming soon
         </p>
-        <p className="text-xs text-[#7d99a3]">pricing to be announced</p>
+        <p className="text-xs text-[var(--color-text-secondary)]">pricing to be announced</p>
         <ul className="mt-5 space-y-2 text-sm">
           {["All 6 career paths, basics → advanced", "FAANG-caliber quizzes per lesson", "Unlimited Forage Interview sessions"].map((p) => (
             <li key={p} className="flex items-start gap-2">
-              <CheckCircle2 size={16} className="text-[#ff3d81] mt-0.5 shrink-0" />
+              <CheckCircle2 size={16} className="text-[var(--color-accent)] mt-0.5 shrink-0" />
               {p}
             </li>
           ))}

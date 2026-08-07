@@ -126,18 +126,18 @@ export function TerminalHeading({ text, className = "" }: { text: string; classN
   if (!mounted || reduce) {
     return (
       <h2 className={`font-mono font-bold ${className}`}>
-        <span className="text-[#00e5ff]">{">"}</span> {text}
+        <span className="text-[var(--color-primary)]">{">"}</span> {text}
       </h2>
     );
   }
 
   return (
     <h2 className={`font-mono font-bold ${className}`} style={{ perspective: 400 }}>
-      <span className="text-[#00e5ff] mr-2">{">"}</span>
+      <span className="text-[var(--color-primary)] mr-2">{">"}</span>
       <span ref={textRef}>{text}</span>
       <motion.span
         aria-hidden="true"
-        className="inline-block w-[0.5em] h-[0.85em] bg-[#00e5ff] ml-1 align-middle"
+        className="inline-block w-[0.5em] h-[0.85em] bg-[var(--color-primary)] ml-1 align-middle"
         animate={{ opacity: [1, 1, 0, 0] }}
         transition={{ duration: 1, repeat: Infinity, times: [0, 0.5, 0.5, 1] }}
       />

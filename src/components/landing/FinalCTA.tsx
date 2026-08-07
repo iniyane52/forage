@@ -81,17 +81,17 @@ export function FinalCTA() {
     <div ref={cardRef} className="glass rounded-2xl p-10 relative overflow-hidden">
       <div
         ref={glowRef}
-        className="absolute inset-0 bg-gradient-to-br from-[#00e5ff]/10 to-[#6ff9ff]/10 pointer-events-none"
+        className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary)]/10 to-[var(--color-cyan)]/10 pointer-events-none"
       />
       <SectionHeading className="text-2xl sm:text-3xl mb-3">Stop preparing to prepare.</SectionHeading>
-      <p className="text-sm text-[#7d99a3] max-w-md mx-auto mb-6">
+      <p className="text-sm text-[var(--color-text-secondary)] max-w-md mx-auto mb-6">
         Start the Common Core today — it&rsquo;s free, it takes about 10-15 hours, and it
         ends with you choosing a real path.
       </p>
       <Link
         ref={btnRef}
         href="/auth"
-        className="inline-flex items-center gap-1.5 px-6 py-3 rounded-xl bg-[#00e5ff] text-[#05070a] text-sm font-semibold hover:bg-[#33ebff] transition-colors"
+        className="inline-flex items-center gap-1.5 px-6 py-3 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] text-sm font-semibold hover:opacity-90 transition-opacity"
       >
         Start learning free <ArrowRight size={16} />
       </Link>

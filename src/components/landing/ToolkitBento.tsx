@@ -34,9 +34,11 @@ function Cell({
   return (
     <motion.div
       className={`glass-solid rounded-2xl border ${featured ? "p-7" : "p-5"}`}
-      style={{ borderColor: `${item.color}2e` }}
+      style={{ borderColor: `${item.color}2e`, transformPerspective: 800 }}
       initial={!mounted || reduce ? false : { opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
+      whileHover={mounted && reduce ? undefined : { y: -4, rotateX: 2, rotateZ: -0.3, scale: 1.01 }}
+      whileTap={mounted && reduce ? undefined : { scale: 0.99 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.6, delay: index * 0.06, ease: EASE }}
     >
@@ -49,7 +51,7 @@ function Cell({
       <h3 className={`font-bold ${featured ? "text-lg mb-1.5" : "text-sm mb-1"}`} style={{ fontFamily: "var(--font-display)" }}>
         {item.title}
       </h3>
-      <p className={`text-[#7d99a3] leading-relaxed ${featured ? "text-sm" : "text-xs"}`}>{item.body}</p>
+      <p className={`text-[var(--color-text-secondary)] leading-relaxed ${featured ? "text-sm" : "text-xs"}`}>{item.body}</p>
       {featured && item.preview ? (
         <div key="preview" className="mt-3">
           {item.preview}

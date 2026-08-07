@@ -94,15 +94,15 @@ export default function AuthPage() {
       <FadeUp className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
-            Forage<span className="text-[#00e5ff]">.</span>
+            Forage<span className="text-[var(--color-primary)]">.</span>
           </h1>
-          <p className="text-[#7d99a3] mt-3 text-sm">
+          <p className="text-[var(--color-text-secondary)] mt-3 text-sm">
             Learn it from zero. Prove it with quizzes. Ship it for real.
           </p>
         </div>
 
         <Glass className="p-6">
-          <div className="flex gap-2 mb-6 p-1 rounded-xl bg-white/[0.03]">
+          <div className="flex gap-2 mb-6 p-1 rounded-xl bg-[rgb(var(--surface-rgb)/0.03)]">
             {(["signin", "signup"] as const).map((m) => (
               <button
                 key={m}
@@ -112,7 +112,9 @@ export default function AuthPage() {
                   setConfirmPassword("");
                 }}
                 className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                  mode === m ? "bg-[#00e5ff] text-[#05070a]" : "text-[#7d99a3] hover:text-white"
+                  mode === m
+                    ? "bg-[var(--color-primary)] text-[var(--color-on-primary)]"
+                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
                 }`}
               >
                 {m === "signin" ? "Sign in" : "Create account"}
@@ -128,7 +130,7 @@ export default function AuthPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#00e5ff] transition-colors"
+              className="w-full bg-[rgb(var(--surface-rgb)/0.05)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-sm outline-none focus:border-[var(--color-primary)] transition-colors"
             />
             <div className="relative">
               <input
@@ -139,13 +141,13 @@ export default function AuthPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password (6+ characters)"
-                className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 pr-11 text-sm outline-none focus:border-[#00e5ff] transition-colors"
+                className="w-full bg-[rgb(var(--surface-rgb)/0.05)] border border-[var(--color-border)] rounded-xl px-4 py-3 pr-11 text-sm outline-none focus:border-[var(--color-primary)] transition-colors"
               />
               <button
                 type="button"
                 onClick={() => setShowPw(!showPw)}
                 aria-label={showPw ? "Hide password" : "Show password"}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7d99a3] hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
               >
                 {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -159,12 +161,12 @@ export default function AuthPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm password"
-                className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#00e5ff] transition-colors"
+                className="w-full bg-[rgb(var(--surface-rgb)/0.05)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-sm outline-none focus:border-[var(--color-primary)] transition-colors"
               />
             )}
             <button
               disabled={busy}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#00e5ff] to-[#3fb950] font-semibold text-[#05070a] disabled:opacity-50 flex items-center justify-center gap-2 transition-opacity"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-success)] font-semibold text-[var(--color-on-primary)] disabled:opacity-50 flex items-center justify-center gap-2 transition-opacity"
             >
               {busy && <Loader2 size={18} className="animate-spin" />}
               {busy ? "Working..." : mode === "signin" ? "Sign in" : "Start learning free"}
@@ -172,30 +174,30 @@ export default function AuthPage() {
           </form>
 
           {message && (
-            <p role="alert" className="mt-4 text-sm text-[#ffb020] flex items-start gap-2">
+            <p role="alert" className="mt-4 text-sm text-[var(--color-warning)] flex items-start gap-2">
               <AlertTriangle size={16} className="mt-0.5 shrink-0" />
               <span>{message}</span>
             </p>
           )}
 
           <div className="flex items-center gap-3 my-4">
-            <span className="h-px flex-1 bg-white/10" />
-            <span className="text-xs text-[#7d99a3]">or</span>
-            <span className="h-px flex-1 bg-white/10" />
+            <span className="h-px flex-1 bg-[var(--color-border)]" />
+            <span className="text-xs text-[var(--color-text-secondary)]">or</span>
+            <span className="h-px flex-1 bg-[var(--color-border)]" />
           </div>
 
           <button
             type="button"
             onClick={signInWithGoogle}
             disabled={oauthBusy || busy}
-            className="w-full py-3 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] font-semibold text-sm flex items-center justify-center gap-2.5 transition-colors disabled:opacity-50"
+            className="w-full py-3 rounded-xl border border-[var(--color-border)] bg-[rgb(var(--surface-rgb)/0.03)] hover:bg-[rgb(var(--surface-rgb)/0.06)] font-semibold text-sm flex items-center justify-center gap-2.5 transition-colors disabled:opacity-50"
           >
             {oauthBusy ? <Loader2 size={18} className="animate-spin" /> : <GoogleMark />}
             Continue with Google
           </button>
         </Glass>
 
-        <p className="text-center text-xs text-[#7d99a3] mt-6">
+        <p className="text-center text-xs text-[var(--color-text-secondary)] mt-6">
           Free Common Core + 6 career paths — from absolute basics to hiring standard.
         </p>
       </FadeUp>

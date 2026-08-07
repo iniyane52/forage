@@ -14,7 +14,24 @@
           "Trying to solve the whole problem at once instead of one small piece.",
           "Copying code you don't understand — it works until it breaks, then you're stuck."
         ],
-        "handsOn": "Write down a real problem you'd like to solve with code (e.g. 'organise my photos by date'). Don't solve it — just break it into 3–5 smaller steps in plain English.",
+        "handsOn": "Write down a real problem you'd like to solve with code (e.g. 'organise my photos by date'). Don't solve it — just break it into 3–5 smaller steps in plain English. Work through the steps below in order; they're based on George Polya's classic 4-step problem-solving method (understand, plan, carry out, look back) — the same approach experienced engineers use on anything unfamiliar, not just math.",
+        "handsOnSteps": [
+          {
+            "instruction": "Pick a real problem you actually want solved — something small and genuinely yours, like 'which of my subscriptions am I not using enough to justify?' Write your goal in one plain sentence."
+          },
+          {
+            "instruction": "List every smaller step needed to reach that goal, in order. No code yet — just plain English, like a recipe. (This is Polya's 'devise a plan.')"
+          },
+          {
+            "instruction": "For each step, ask yourself: 'could I explain this to a 10-year-old?' If not, that step is still too big — break it down further until every step is that simple."
+          },
+          {
+            "instruction": "Circle the one step you're least sure how to do. That's the step you'd research first if you were actually building this."
+          },
+          {
+            "instruction": "Re-read your whole list once more, start to finish. Does the order actually work — does each step really follow from the one before it? (This is Polya's 'look back.')"
+          }
+        ],
         "doneWhen": "You can take one goal and list the smaller steps it's made of, in your own words.",
         "checks": [
           {
@@ -41,6 +58,11 @@
             "label": "How to think like a programmer (freeCodeCamp)",
             "url": "https://www.freecodecamp.org/news/how-to-think-like-a-programmer-lessons-in-problem-solving-d1d8bf1de7d2/",
             "kind": "docs"
+          },
+          {
+            "label": "Problem Solving (The Odin Project)",
+            "url": "https://www.theodinproject.com/lessons/foundations-problem-solving",
+            "kind": "practice"
           }
         ]
       },
@@ -61,6 +83,23 @@
           "Confusing 'small' with 'easy' — small steps can still need learning, but they're tackleable."
         ],
         "handsOn": "Take the problem you wrote last lesson and decompose it further: for each of your 3–5 steps, ask 'can I do this in one action, or does it split into smaller steps?' Keep splitting until each step feels doable.",
+        "handsOnSteps": [
+          {
+            "instruction": "Pull up the 3–5 steps you wrote in the previous lesson. If you skipped it, quickly write one now: a real problem broken into 3–5 rough steps."
+          },
+          {
+            "instruction": "Take the first step on your list. Ask yourself: 'could I actually sit down and do this right now, in one sitting, with no further planning?' If yes, leave it as is."
+          },
+          {
+            "instruction": "If the answer was no, split that step into 2–3 smaller steps. Repeat this same question for every remaining step on your list."
+          },
+          {
+            "instruction": "Pick the smallest, most concrete step you now have and say out loud what the very first action would be (e.g. 'open a blank file', 'search for X'). If you can't say it, that step is still too big — split it once more."
+          },
+          {
+            "instruction": "Compare your expanded list to your original 3–5 steps. Ending up with more steps than you started with is the expected, correct outcome — it means you decomposed successfully, not that the problem got harder."
+          }
+        ],
         "doneWhen": "Your problem is a list of steps small enough that you'd know how to start each one (even if you'd need to look something up).",
         "checks": [
           {
@@ -95,7 +134,27 @@
           "Changing many things at once, so you can't tell what fixed (or broke) it.",
           "Assuming your code is right and the tool is wrong — it's almost always your code first."
         ],
-        "handsOn": "Next time something errors (in any app or code), STOP and read the full error message out loud. Write down: what did I expect, what happened, and what's the very first thing the message points to?",
+        "handsOn": "Next time something errors (in any app or code), STOP and read the full error message out loud. Write down: what did I expect, what happened, and what's the very first thing the message points to? You don't have to wait for a real one to strike — the steps below have you manufacture a tiny error on purpose so you can practice the loop right now.",
+        "handsOnSteps": [
+          {
+            "instruction": "Open any online Python runner (or a terminal with Python installed) and deliberately write one broken line: `print(\"hello)` — notice the closing quote is missing on purpose. Run it.",
+            "expectOutcome": "A SyntaxError, something like: `SyntaxError: unterminated string literal (detected at line 1)`, with a little `^` marker pointing at roughly where the string started — not a silent failure."
+          },
+          {
+            "instruction": "Read the full error message top to bottom, out loud, before touching anything else. Write down in your own words: what line does it point to, and what does it say is wrong?",
+            "expectOutcome": "Your own sentence, something like: 'line 1, it says the string literal is unterminated — I never closed the quote.'"
+          },
+          {
+            "instruction": "Write one more sentence for each: what did you expect to happen when you ran it, and what actually happened instead."
+          },
+          {
+            "instruction": "Fix ONLY the one thing the error pointed to — add the missing closing quote — and nothing else. Run it again.",
+            "expectOutcome": "`hello` printed cleanly, no error — confirming the one thing you fixed was actually the whole problem."
+          },
+          {
+            "instruction": "If a NEW error had appeared instead of clean output, that's not failure — it means step 2 starts over on the new message. Notice that this loop (reproduce → read → narrow down → fix one thing → re-test) is the same loop regardless of what the error actually says."
+          }
+        ],
         "doneWhen": "You can describe the debugging loop — read the error, reproduce it, narrow it down — in your own words.",
         "checks": [
           {
@@ -131,6 +190,23 @@
           "Re-reading instead of self-testing — testing yourself is what makes it stick."
         ],
         "handsOn": "Pick one small thing you learned today and explain it, out loud or in writing, as if to a friend who's never seen it. Notice where you get stuck — that's what you don't fully understand yet.",
+        "handsOnSteps": [
+          {
+            "instruction": "Pick one specific thing you learned in the last lesson or two (e.g. 'what a variable is', or 'the debugging loop'). Write its name down."
+          },
+          {
+            "instruction": "Without looking anything up, explain it in writing in 3–4 sentences as if to a friend who has never coded — use a real analogy if one comes to mind."
+          },
+          {
+            "instruction": "Read back what you just wrote. Circle any spot where you paused, hedged ('I think...'), or reached for a term you couldn't actually define — that's the exact edge of what you understand."
+          },
+          {
+            "instruction": "Pick one of those circled spots and go look it up now, specifically to fill that one gap — not a general re-read of the whole topic."
+          },
+          {
+            "instruction": "Rewrite just that one sentence with the gap filled. This loop — learn → explain → find the gap → fill it — is the one you'll repeat constantly through this course, not a one-off exercise."
+          }
+        ],
         "doneWhen": "You can name your learning loop: learn just enough → build → explain it → revisit what was shaky.",
         "checks": [
           {
@@ -173,6 +249,26 @@
           "Believing programs 'live' in the CPU — they're loaded from storage into RAM to run."
         ],
         "handsOn": "On your own computer, open the task manager (Ctrl+Shift+Esc on Windows) and find the CPU, Memory (RAM), and Disk usage. Watch them change as you open an app.",
+        "handsOnSteps": [
+          {
+            "instruction": "Open Task Manager (Ctrl+Shift+Esc on Windows) or Activity Monitor (Cmd+Space, type 'Activity Monitor' on Mac). Find the CPU, Memory, and Disk tabs or columns.",
+            "expectOutcome": "A live view with percentages/numbers for CPU and Memory that are already moving slightly even with nothing open — background processes are always doing a little work."
+          },
+          {
+            "instruction": "Note the current CPU % and RAM usage while you're not doing anything extra — this is your baseline."
+          },
+          {
+            "instruction": "Open a fairly heavy app you already have installed (a browser, or a code editor) and watch CPU and RAM in Task Manager while it launches.",
+            "expectOutcome": "A short CPU spike while the app launches (it's being loaded from storage and started), then RAM usage climbing and staying up once it's open — CPU usually settles back down after launch, but RAM stays elevated the whole time the app runs."
+          },
+          {
+            "instruction": "Close that app and watch RAM usage in Task Manager.",
+            "expectOutcome": "RAM usage drops back down close to your baseline within a second or two — that memory is freed the moment the program closes, unlike storage."
+          },
+          {
+            "instruction": "Compare your total Disk/storage capacity (often 100s of GB) to your total RAM (often 8-32GB). Notice they're very different numbers — storage capacity is how much you can permanently keep; RAM is how much you can actively work on at once."
+          }
+        ],
         "doneWhen": "You can explain the roles of CPU, RAM, and storage with the office analogy.",
         "checks": [
           {
@@ -219,6 +315,28 @@
           "Typos in names — the command line is exact; 'Documents' ≠ 'documents' on some systems."
         ],
         "handsOn": "Open a terminal (Terminal on Mac, PowerShell on Windows). Run pwd, then ls (or dir), then cd into a folder and ls again. You just navigated by typing.",
+        "handsOnSteps": [
+          {
+            "instruction": "Open a terminal and run `pwd`.",
+            "expectOutcome": "One line of text: the full path of the folder you're currently in (e.g. something ending in your username or 'Documents')."
+          },
+          {
+            "instruction": "Run `ls` (Mac/Linux/Git Bash) or `dir` (Windows PowerShell/CMD).",
+            "expectOutcome": "A list of the files and folders that live directly inside your current folder — the same things you'd see if you opened this location in your graphical file explorer."
+          },
+          {
+            "instruction": "Pick one folder name from that list and run `cd <that-folder-name>`, then `pwd` again.",
+            "expectOutcome": "The path from step 1 with the folder name added onto the end — proof you actually moved, not just looked."
+          },
+          {
+            "instruction": "Run `ls`/`dir` again in this new location.",
+            "expectOutcome": "A different list of files/folders than step 2 showed — this one's contents, not the original folder's."
+          },
+          {
+            "instruction": "Run `cd ..` and then `pwd` one more time.",
+            "expectOutcome": "You're back to the exact path from step 1 — `..` always means 'the folder one level up from here'."
+          }
+        ],
         "doneWhen": "You can move between folders and list their contents using the terminal, and explain what a file path is.",
         "checks": [
           {
@@ -254,6 +372,23 @@
           "Assuming a domain name and an IP address are different things — the name just maps to the address via DNS."
         ],
         "handsOn": "In a terminal, run `ping google.com`. You'll see it resolve to an IP address and measure the round-trip time of messages to that server and back.",
+        "handsOnSteps": [
+          {
+            "instruction": "Open a terminal and run `ping google.com` (on Windows it stops after 4 tries automatically; on Mac/Linux press Ctrl+C to stop it after a few lines).",
+            "expectOutcome": "The very first line shows google.com resolved to a numeric IP address (either a dotted one like 142.250.x.x, or a longer IPv6 one) — that's DNS doing its job before anything else could happen."
+          },
+          {
+            "instruction": "Look at the reply lines underneath. Write down the round-trip time (the `time=` number) shown for each reply.",
+            "expectOutcome": "A handful of small numbers, usually under 100ms — the time for a message to travel to Google's server and a reply to come back, end to end."
+          },
+          {
+            "instruction": "Now run `ping` on a domain that doesn't exist, e.g. `ping thisdomaindoesnotexist12345.com`.",
+            "expectOutcome": "An error about the host not being found (something like 'could not find host' or 'unknown host') — instead of an IP address, because DNS has nothing to resolve that name to."
+          },
+          {
+            "instruction": "Compare the two runs: the real domain resolved to an address and got replies; the fake one failed at the very first step, before any message even tried to travel anywhere."
+          }
+        ],
         "doneWhen": "You can explain, using the letter analogy, what happens when you visit a website — including what DNS does.",
         "checks": [
           {
@@ -295,6 +430,24 @@
           "Believing pages are 'pushed' to you — the browser requests, the server responds."
         ],
         "handsOn": "Open any website, press F12 (developer tools) → Network tab → reload. Watch the requests appear, and click one to see its status code and response.",
+        "handsOnSteps": [
+          {
+            "instruction": "Open any website, press F12 to open developer tools, click the 'Network' tab, then reload the page (F5).",
+            "expectOutcome": "A growing list of rows fill in as the page loads — each one method/URL/status, e.g. `GET /index.html 200`, `GET /logo.png 200` — every single thing the page needed, requested one at a time."
+          },
+          {
+            "instruction": "Click the very first row in that list (usually the page's own HTML document) and look at its Status column.",
+            "expectOutcome": "Status 200 — meaning the server successfully sent back what was requested."
+          },
+          {
+            "instruction": "Type a URL that doesn't exist on that same site, e.g. `<the-site>/this-page-does-not-exist-xyz`, and check the Network tab's status for that page's own request.",
+            "expectOutcome": "Status 404 — the server responded, but explicitly said 'nothing exists at that address', which is different from the request failing to reach the server at all."
+          },
+          {
+            "instruction": "Back on the working page, find any request whose response looks like `{ \"key\": \"value\", ... }` rather than a full HTML page (often an API call — try the Fetch/XHR filter in the Network tab if there's a lot of noise) and click it to view its Response tab.",
+            "expectOutcome": "Structured text made of keys and values in curly braces — that's JSON, data meant for the page's own JavaScript to read, not for you to look at directly."
+          }
+        ],
         "doneWhen": "You can explain request→response, what 200/404/500 mean, and what JSON is for.",
         "checks": [
           {
@@ -348,6 +501,24 @@
           "Thinking a variable IS the value — it's a label pointing at a value you can change."
         ],
         "handsOn": "In an online Python runner (see resources), create three variables — your name, your age, and whether you like coffee — and print a sentence using all three.",
+        "handsOnSteps": [
+          {
+            "instruction": "In an online Python runner, create three variables: `name = \"...\"` (your name), `age = ...` (your age, no quotes), `likes_coffee = True` or `False`."
+          },
+          {
+            "instruction": "Add `print(name, \"is\", age, \"and likes coffee:\", likes_coffee)` and run it.",
+            "expectOutcome": "One line, e.g. `Iniyan is 22 and likes coffee: True` — print() joins everything you pass it with spaces automatically."
+          },
+          {
+            "instruction": "Now deliberately break it: change `age = 22` to `age = \"22\"` (with quotes), add a new line `print(age + 3)`, and run it.",
+            "expectOutcome": "A `TypeError: can only concatenate str (not \"int\") to str` — Python refusing to add text and a number together.",
+            "troubleshooting": "If you see a different error mentioning 'str' and 'int' together, you're in the right place — that's Python's way of saying 'these are different types and I won't guess what you meant'. This is the exact mistake from the Common mistakes list above, now something you've triggered and read yourself."
+          },
+          {
+            "instruction": "Remove the quotes around `\"22\"` again (back to `age = 22`) and re-run `print(age + 3)`.",
+            "expectOutcome": "`25` — now that age is a real number, addition works."
+          }
+        ],
         "doneWhen": "You can create variables of different types and use them by name in a printed message.",
         "checks": [
           {
@@ -394,6 +565,25 @@
           "Writing overlapping conditions that never reach the else."
         ],
         "handsOn": "Write a program that stores a number and prints 'even' or 'odd' — hint: a number is even if number % 2 == 0 (% gives the remainder).",
+        "handsOnSteps": [
+          {
+            "instruction": "Write `number = 7` then an if/else that prints `\"even\"` if `number % 2 == 0`, else prints `\"odd\"`. Run it.",
+            "expectOutcome": "`odd` — 7 divided by 2 leaves a remainder of 1, so `7 % 2 == 0` is False."
+          },
+          {
+            "instruction": "Change `number` to an even value like `8` and run again.",
+            "expectOutcome": "`even` — `8 % 2` is 0, so the condition is now True and the if-branch runs instead."
+          },
+          {
+            "instruction": "Deliberately remove the indentation from the line inside the `if` (make it start at the very left edge, same column as `if` itself) and run it.",
+            "expectOutcome": "An `IndentationError: expected an indented block after 'if' statement...` — Python won't guess which lines belong to the if.",
+            "troubleshooting": "This is the exact mistake from the Common mistakes list — Python uses indentation, not brackets, to know which lines are 'inside' the if. Put the 4-space indent back and it runs again."
+          },
+          {
+            "instruction": "Fix the indentation back, then change `==` to a single `=` in the condition (`if number = 8:`) and run it.",
+            "expectOutcome": "A `SyntaxError: invalid syntax. Maybe you meant '==' or ':=' instead of '='?` — Python catches this exact mistake by name and tells you the fix directly, rather than silently doing the wrong thing."
+          }
+        ],
         "doneWhen": "You can write an if/else that reacts differently based on a condition, and predict which branch runs.",
         "checks": [
           {
@@ -435,6 +625,21 @@
           "Editing a list while looping over it — surprising results; loop over a copy if you must."
         ],
         "handsOn": "Write a loop that prints the numbers 1 to 10, then a second loop that adds them up and prints the total (55).",
+        "handsOnSteps": [
+          {
+            "instruction": "Write `for i in range(1, 11): print(i)` and run it.",
+            "expectOutcome": "The numbers 1 through 10, one per line — `range(1, 11)` starts at 1 and stops right before 11."
+          },
+          {
+            "instruction": "Change it to `range(10)` (drop the `1,`) and run it again.",
+            "expectOutcome": "0 through 9 instead of 1 through 10 — the classic off-by-one. `range(10)` always starts at 0 by default and stops before 10, giving you 10 numbers, just not the ones you might expect.",
+            "troubleshooting": "If your output is shifted down by one from what you wanted, check whether you meant `range(n)` (0 to n-1) or `range(1, n+1)` (1 to n) — this exact mix-up is in the Common mistakes list above."
+          },
+          {
+            "instruction": "Fix it back to `range(1, 11)`, then below it write: `total = 0`, then `for i in range(1, 11): total = total + i`, then `print(total)`.",
+            "expectOutcome": "`55` — 1+2+...+10 accumulated one number at a time into `total`."
+          }
+        ],
         "doneWhen": "You can write a for loop over a range and over a list, and explain when you'd use while instead.",
         "checks": [
           {
@@ -476,6 +681,23 @@
           "Confusing defining a function (writing it) with calling it (running it)."
         ],
         "handsOn": "Write a function is_even(number) that returns True or False, then call it on three different numbers and print the results.",
+        "handsOnSteps": [
+          {
+            "instruction": "Write `def is_even(number): return number % 2 == 0`, then call it three times on different numbers, printing each result: `print(is_even(4))`, `print(is_even(7))`, `print(is_even(0))`.",
+            "expectOutcome": "`True`, `False`, `True` on three separate lines — one function, called three times with different inputs, each time giving back a fresh answer."
+          },
+          {
+            "instruction": "Now delete the word `return` from the function so the line just reads `number % 2 == 0`, and run `print(is_even(4))` again.",
+            "expectOutcome": "`None` instead of `True` — the function still computes the comparison, but without `return` it never hands the result back to whoever called it, so Python's default 'nothing to give back' value comes out instead.",
+            "troubleshooting": "If you ever see `None` where you expected a real value, check whether the function actually has a `return` on the line that computes the answer — this is the exact 'forgetting return' mistake from the list above."
+          },
+          {
+            "instruction": "Put `return` back, then write a second, near-identical function `is_odd(number)` by copy-pasting `is_even` and flipping the comparison to `!= 0`. Call and print it once."
+          },
+          {
+            "instruction": "Notice you just duplicated almost the whole function for one flipped condition — a real hint that `is_odd(n)` could instead just be written as `not is_even(n)`, reusing the function you already wrote instead of repeating the logic. This is the whole reason functions exist: to define something once and reuse it, not copy it."
+          }
+        ],
         "doneWhen": "You can write a function with an argument and a return value, and call it more than once.",
         "checks": [
           {
@@ -523,6 +745,22 @@
           "Never committing until the end — commit small and often so you always have a recent save."
         ],
         "handsOn": "Watch a 5-minute 'what is Git' video (see resources) and write, in one sentence each, what a commit is and what GitHub is for.",
+        "handsOnSteps": [
+          {
+            "instruction": "Open a terminal and run `git --version` to confirm Git is actually installed on your machine before you need it in the next lesson.",
+            "expectOutcome": "A single line like `git version 2.xx.x` — if instead you get 'command not found' (Mac/Linux) or 'not recognized' (Windows), install Git first (see resources) before continuing.",
+            "troubleshooting": "On Windows, installing Git also gives you 'Git Bash', a terminal that understands these Unix-style commands even outside PowerShell — use it for the Git lessons if plain PowerShell ever behaves unexpectedly."
+          },
+          {
+            "instruction": "Watch a 5-minute 'what is Git' video (see resources)."
+          },
+          {
+            "instruction": "Without looking anything up, write one sentence: 'A commit is ___.'"
+          },
+          {
+            "instruction": "Write a second sentence: 'GitHub is ___, and it's different from Git because ___.'"
+          }
+        ],
         "doneWhen": "You can explain, with the save-point analogy, what Git does and how GitHub differs from it.",
         "checks": [
           {
@@ -568,7 +806,29 @@
           "Forgetting `git add` before commit (nothing gets saved).",
           "Committing secrets or huge files — use a .gitignore to exclude them."
         ],
-        "handsOn": "Install Git, make a folder with one text file, and do the full loop: git init → add → commit. Then change the file and make a second commit. Run git log --oneline to see both.",
+        "handsOn": "Install Git, make a folder with one text file, and do the full loop: git init → add → commit. Then change the file and make a second commit. Run git log --oneline to see both. Work through the steps below one at a time — each tells you what you should actually see if you did it right.",
+        "handsOnSteps": [
+          {
+            "instruction": "Make a new empty folder, open a terminal inside it, and run `git init`.",
+            "expectOutcome": "A line like `Initialized empty Git repository in .../.git/` — this folder is now a Git repo (an empty one, nothing tracked yet)."
+          },
+          {
+            "instruction": "Create one text file with a line of text in it, save it, then run `git status`.",
+            "expectOutcome": "Your file listed under `Untracked files:` — Git has noticed it exists but isn't tracking changes to it yet."
+          },
+          {
+            "instruction": "Run `git add .`, then `git status` again.",
+            "expectOutcome": "The same file now listed under `Changes to be committed:` instead — it's staged, ready for the next commit."
+          },
+          {
+            "instruction": "Run `git commit -m \"add notes\"`.",
+            "expectOutcome": "A summary line like `1 file changed, 1 insertion(+)` plus a short commit hash (e.g. `[master (root-commit) 8240b6d]`)."
+          },
+          {
+            "instruction": "Add a second line to the file, `git add .` and commit again with a new message, then run `git log --oneline`.",
+            "expectOutcome": "Two lines, newest commit first, each showing a short hash followed by the message you gave it — your first real commit history."
+          }
+        ],
         "doneWhen": "You can make a commit from scratch and read your own history with git log.",
         "checks": [
           {
@@ -611,6 +871,24 @@
           "Typing your GitHub account password when `git push` prompts for one — GitHub stopped accepting passwords for this years ago; you need a Personal Access Token (generate one under GitHub Settings → Developer settings) or an SSH key set up instead."
         ],
         "handsOn": "Create a free GitHub account and a new empty repository. Push a small project (even a single README.md) to it. Confirm it appears online.",
+        "handsOnSteps": [
+          {
+            "instruction": "Create a free GitHub account if you don't have one, then click 'New repository', give it a name, and create it EMPTY (don't add a README from GitHub's UI yet — you'll push your own)."
+          },
+          {
+            "instruction": "In a local project with at least one commit (reuse the one from the previous lesson), run `git remote add origin <the-URL-GitHub-just-showed-you>`, then `git remote -v` to check it.",
+            "expectOutcome": "Two lines, both showing your repo's URL — one for `(fetch)`, one for `(push)` — confirming the connection is set up correctly on your side, before you've sent anything yet."
+          },
+          {
+            "instruction": "Run `git branch -M main` to make sure your branch is named `main`, then `git push -u origin main`.",
+            "expectOutcome": "If this is your very first push, GitHub will prompt for authentication rather than a password field working directly — a browser sign-in popup, or a prompt for a Personal Access Token. Follow it through; once authenticated, you'll see upload progress lines ending in something like `branch 'main' set up to track 'origin/main'`.",
+            "troubleshooting": "If it instead says `remote: Repository not found` or `fatal: could not read Username`, double check the URL you pasted in step 2 matches exactly what GitHub showed you (a typo'd URL points nowhere) — that's the single most common cause, ahead of an actual auth problem."
+          },
+          {
+            "instruction": "Refresh the repository's page on github.com.",
+            "expectOutcome": "Your file(s) now listed there, with your commit message shown next to them — the exact same project that was only ever on your machine, now backed up and shareable."
+          }
+        ],
         "doneWhen": "You have one project live on GitHub with a README, pushed from your own machine.",
         "checks": [
           {
@@ -662,6 +940,29 @@
           "Never deleting old branches once merged — they pile up and make the branch list confusing; `git branch -d name` cleans up a branch that's already safely merged."
         ],
         "handsOn": "In a project with at least one commit, create a new branch, make and commit a small change on it, switch back to main and confirm your change ISN'T there, then merge the branch and confirm it now is.",
+        "handsOnSteps": [
+          {
+            "instruction": "In a project with at least one commit, run `git checkout -b add-feature`.",
+            "expectOutcome": "`Switched to a new branch 'add-feature'` — you're now working on the new branch, not main."
+          },
+          {
+            "instruction": "Add a new line to any file in the project, then `git add .` and `git commit -m \"add feature\"`.",
+            "expectOutcome": "The usual commit summary line — this commit now exists only on `add-feature`, not on `main`."
+          },
+          {
+            "instruction": "Run `git checkout main`, then open the file you just edited.",
+            "expectOutcome": "The file WITHOUT your new line — proof that main was never touched by anything you just did on the branch."
+          },
+          {
+            "instruction": "Run `git merge add-feature`.",
+            "expectOutcome": "A summary like `Fast-forward` followed by a file change stat (e.g. `1 file changed, 1 insertion(+)`) — check the file again and your new line is now there on main too."
+          },
+          {
+            "instruction": "Run `git branch -d add-feature`.",
+            "expectOutcome": "`Deleted branch add-feature (was <a short hash>).` — safe to delete because its commit is already part of main's history; you haven't lost anything.",
+            "troubleshooting": "If `-d` refuses with a warning about unmerged changes, it means this branch has commits main doesn't have yet — either merge it first, or use `-D` (capital) only if you're certain you want to discard that work."
+          }
+        ],
         "doneWhen": "You've created a branch, committed on it, switched back to main, and merged — and can explain why this kept main safe the whole time.",
         "checks": [
           {
@@ -704,6 +1005,23 @@
           "Not checking whether the listener is actually following."
         ],
         "handsOn": "Take one concept you learned in this Common Core and explain it in writing to an imaginary non-technical friend, in under 100 words, using an analogy. Read it back — is there any jargon you could remove?",
+        "handsOnSteps": [
+          {
+            "instruction": "Pick one concept from this course so far (e.g. 'what a variable is', 'how a git commit works'). Write its name down."
+          },
+          {
+            "instruction": "Write an explanation for a non-technical friend, under 100 words, that includes one real analogy — no unexplained jargon."
+          },
+          {
+            "instruction": "Count your words. If you're over 100, cut it down — explaining something simply under a tight limit is the actual skill being practiced here, not just writing more."
+          },
+          {
+            "instruction": "Read it back and circle any word a smart 12-year-old wouldn't know. For each one, either cut it or swap in a plain-language equivalent."
+          },
+          {
+            "instruction": "Read the final version out loud once. If it sounds like something you'd actually say to a friend — not a textbook definition — you're done."
+          }
+        ],
         "doneWhen": "You can explain a technical idea to a non-expert using plain words and an analogy.",
         "checks": [
           {
@@ -745,6 +1063,23 @@
           "Asking 'it doesn't work' without saying what you tried and what happened."
         ],
         "handsOn": "Write a short message asking a teammate for help with a bug. Include: what you're trying to do, what you expected, what actually happened, and what you've already tried.",
+        "handsOnSteps": [
+          {
+            "instruction": "Pick a real (or recently remembered) bug you've hit. Write a one-line subject that names the actual problem — not 'help' or 'question'."
+          },
+          {
+            "instruction": "Write one sentence of context: what you're trying to build or do."
+          },
+          {
+            "instruction": "Write three short lines: what you expected to happen, what actually happened instead, and one thing you've already tried."
+          },
+          {
+            "instruction": "Add one specific, answerable ask at the end (e.g. 'Could you check line 12 of app.py?') — not a vague 'please help'."
+          },
+          {
+            "instruction": "Read the whole message start to finish as if you're a teammate with zero context. If they'd understand the problem and know exactly what's being asked, it's ready to send."
+          }
+        ],
         "doneWhen": "You can write a clear, concise technical message with a specific ask and enough context to act on.",
         "checks": [
           {
@@ -780,6 +1115,23 @@
           "Over-promising then going silent — flag slippage early instead."
         ],
         "handsOn": "Reflect and write: think of a group project you've done. What was one communication breakdown, and what's one specific thing you'd do differently now (e.g. 'raise blockers within a day')?",
+        "handsOnSteps": [
+          {
+            "instruction": "Think of one real group project or collaboration you've been part of — school, work, or even a hobby project."
+          },
+          {
+            "instruction": "Write down one specific moment where communication broke down: who was affected, and what actually happened."
+          },
+          {
+            "instruction": "Name which of the three good-teammate behaviours from this lesson (raise blockers early, feedback about the work not the person, keep commitments or flag early) was missing in that moment."
+          },
+          {
+            "instruction": "Write one specific, concrete change for next time — not 'communicate better', but something checkable, like 'message the team the same day I know I'm stuck'."
+          },
+          {
+            "instruction": "Put that one sentence somewhere you'll actually see again (notes app, sticky note). The point is a real behaviour change, not a one-time reflection you never look at again."
+          }
+        ],
         "doneWhen": "You can name three behaviours of a good teammate and why each builds trust.",
         "checks": [
           {
@@ -821,6 +1173,24 @@
           "Two pages as a beginner — cut to one."
         ],
         "handsOn": "Draft a one-page resume outline: your details, then 3 projects (even small ones from this course counts as a start) each with 2 metric-or-tech bullets. You'll refine this in the Interview Prep of your chosen path.",
+        "handsOnSteps": [
+          {
+            "instruction": "At the top, write your name, email, and one link (GitHub or a portfolio). Nothing else needed yet."
+          },
+          {
+            "instruction": "List 3 projects, even small ones — a project from this course counts as a real start. Just the name of each, for now."
+          },
+          {
+            "instruction": "For each project, write one bullet stating what you built and the specific tech used, e.g. 'Built a personal budget tracker using Python and SQLite.'"
+          },
+          {
+            "instruction": "For each project, write a second bullet with a concrete result or detail — a number, a link, a specific feature — not 'made a website using coding'."
+          },
+          {
+            "instruction": "Read every bullet and ask: 'could I talk about this for 2 minutes if asked in an interview?' If any bullet fails that test, rewrite or cut it.",
+            "troubleshooting": "If you're struggling to find a second bullet's worth of detail for a project, that's a real signal — not that your resume-writing is weak, but that the project itself might need one more concrete finishing touch (a deployed link, a measured result) before it's truly interview-ready."
+          }
+        ],
         "doneWhen": "You have a one-page, projects-first resume outline where you can defend every line.",
         "checks": [
           {
@@ -863,6 +1233,20 @@
           "Believing the paths are totally separate — they share a big foundation."
         ],
         "handsOn": "As you read the next lessons, keep a note titled 'what energised me'. For each career, jot a quick gut reaction: 'yes / maybe / no' and one word why.",
+        "handsOnSteps": [
+          {
+            "instruction": "Open a blank note (any app) and title it 'What energised me'."
+          },
+          {
+            "instruction": "Write four headings in it: Build, Data & AI, Operate, Protect — the four families from this lesson."
+          },
+          {
+            "instruction": "Leave the headings empty for now — you'll add one line under each as you read the next four lessons. This step is just having it ready."
+          },
+          {
+            "instruction": "Skim back over the Common Core modules you've already finished (Programming Essentials, Git, etc.) and jot one sentence: which single lesson felt most natural to you so far? That's your first real data point, before you've even read the career lessons."
+          }
+        ],
         "doneWhen": "You can name the main career families and that they share a common foundation.",
         "checks": [
           {
@@ -898,6 +1282,20 @@
           "Confusing the two — one leans analysis/communication, the other leans engineering/deployment."
         ],
         "handsOn": "In your 'what energised me' note: would you rather (a) dig into data to find a surprising insight and explain it, or (b) build the system that runs a model in production? Jot your gut reaction.",
+        "handsOnSteps": [
+          {
+            "instruction": "Open your 'what energised me' note from the previous lesson."
+          },
+          {
+            "instruction": "Under 'Data & AI', write a gut reaction: yes / maybe / no, plus one word why."
+          },
+          {
+            "instruction": "Answer directly, in one sentence: would you rather (a) dig into data to find a surprising insight and explain it, or (b) build the system that runs a model reliably in production?"
+          },
+          {
+            "instruction": "If you're genuinely unsure, write down the specific thing holding you back (e.g. 'not sure I'd enjoy the statistics side') — that's exactly the real tension between these two roles, and useful signal, not a failure to decide."
+          }
+        ],
         "doneWhen": "You can describe what a Data Scientist and an AI/ML Engineer each do, and how they differ.",
         "checks": [
           {
@@ -938,6 +1336,20 @@
           "Skipping DSA for SWE roles — it's the core of those interviews."
         ],
         "handsOn": "In your note: does 'solve tricky algorithm problems and design robust systems' (SWE) or 'build a whole web app people can use' (Full-Stack) sound more like you?",
+        "handsOnSteps": [
+          {
+            "instruction": "Open your 'what energised me' note and go to the 'Build' heading."
+          },
+          {
+            "instruction": "Write a gut reaction: yes / maybe / no, plus one word why."
+          },
+          {
+            "instruction": "Answer directly, in one sentence: does 'solve tricky algorithm problems and design robust systems' (SWE) or 'build a whole web app people can use, front to back' (Full-Stack) sound more like you?"
+          },
+          {
+            "instruction": "If both sound appealing, that's genuinely common — write down which one you'd rather be doing on a random Tuesday two years from now, which usually cuts through the ambiguity better than 'which sounds more impressive'."
+          }
+        ],
         "doneWhen": "You can describe what a Software Engineer and a Full-Stack Developer each do, and how their interviews differ.",
         "checks": [
           {
@@ -979,6 +1391,20 @@
           "Assuming security skills can be used freely — unauthorized access is illegal."
         ],
         "handsOn": "In your note: does 'automate deployments and keep systems running reliably at scale' (Cloud/DevOps) or 'find and fix security weaknesses to protect people' (Cybersecurity) pull at you more?",
+        "handsOnSteps": [
+          {
+            "instruction": "Open your 'what energised me' note and go to the 'Operate' and 'Protect' headings."
+          },
+          {
+            "instruction": "Under each, write a gut reaction: yes / maybe / no, plus one word why."
+          },
+          {
+            "instruction": "Answer directly, in one sentence: does 'automate deployments and keep systems running reliably at scale' (Cloud/DevOps) or 'find and fix security weaknesses to protect people' (Cybersecurity) pull at you more?"
+          },
+          {
+            "instruction": "Re-read the ethics warning in this lesson's concept once more and write one sentence confirming you understand it — this isn't optional context, it's the one rule that applies from day one of the Cybersecurity path if you choose it."
+          }
+        ],
         "doneWhen": "You can describe what Cloud/DevOps and Cybersecurity each do, and state the ethics rule for security work.",
         "checks": [
           {
@@ -1019,6 +1445,23 @@
           "Thinking you must master the path before starting — you learn it by doing it."
         ],
         "handsOn": "Read back your 'what energised me' notes. Write one sentence: 'I'm choosing the ___ path because ___.' Then, on the dashboard, open that path (Pro unlocks all six).",
+        "handsOnSteps": [
+          {
+            "instruction": "Open your 'what energised me' note and read all four entries (Build / Data & AI / Operate / Protect) back to back."
+          },
+          {
+            "instruction": "Circle whichever entry has the strongest 'yes'. If two are genuinely close, write that down honestly too — it's real information, not indecision."
+          },
+          {
+            "instruction": "Write one sentence: 'I'm choosing the ___ path because ___', using your own actual reasoning from the note — not whichever sounds most impressive to say out loud."
+          },
+          {
+            "instruction": "Go to your Forage dashboard and open that path's page — just to look at it, not to commit to anything beyond today."
+          },
+          {
+            "instruction": "Write down (or just remember) that this is a starting direction, not a life sentence — the Common Core foundation you just finished transfers no matter what you pick."
+          }
+        ],
         "doneWhen": "You've named your chosen path and one honest reason, backed by which lessons energised you.",
         "checks": [
           {
@@ -1040,6 +1483,278 @@
             "label": "See all career paths (Pricing)",
             "url": "/pricing",
             "kind": "practice"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cc-preview",
+    "title": "A Taste of the Pro Paths — Building StudyTrack",
+    "why": "Every lesson so far has been building general-purpose skills. This module is different: five short, genuinely hands-on lessons, each borrowed directly from a different Pro path's own real toolkit — Data Science, AI Engineering, Full-Stack development, Cybersecurity, and Cloud & DevOps — all working on the exact SAME tiny project: StudyTrack, a student-performance tracker. Every lesson touches the same 8-student dataset, so by the end you'll have watched one small idea (does study time predict passing?) travel through five real, different professional lenses — not five disconnected demos.",
+    "topics": [
+      {
+        "id": "cc-preview-data",
+        "title": "StudyTrack, part 1 — a Data Scientist's first look",
+        "concept": "Before building anything, a Data Scientist's first move is always the same: look at the actual numbers. Given StudyTrack's 8 students (their study hours and exam scores), computing the MEAN, MEDIAN, and STANDARD DEVIATION of the scores gives a quick sense of 'what's typical and how spread out is it', while a CORRELATION coefficient (using NumPy) answers the specific question 'does more study time actually relate to a higher score, in this data?' — the exact first step behind almost every real data investigation, on a real (if tiny) dataset.",
+        "analogy": "Looking at StudyTrack's raw list of 8 study-hours/score pairs is like being handed a spreadsheet with no summary — technically all the information is there, but you can't SEE the pattern. Computing mean/median/std and a correlation coefficient is turning on the spreadsheet's summary row and a quick chart: the same data, now actually readable.",
+        "examples": [
+          {
+            "code": "import numpy as np\n\nstudents = [\"Aria\", \"Ben\", \"Chen\", \"Dev\", \"Elena\", \"Farid\", \"Gita\", \"Hana\"]\nstudy_hours = np.array([2, 5, 8, 3, 9, 1, 6, 7])\nexam_scores = np.array([58, 72, 91, 61, 95, 52, 78, 85])\n\nprint(\"mean score:\", np.mean(exam_scores))\nprint(\"median score:\", np.median(exam_scores))\nprint(\"std (spread):\", round(np.std(exam_scores), 2))\n\ncorrelation = np.corrcoef(study_hours, exam_scores)[0, 1]\nprint(\"correlation (study hours vs score):\", round(correlation, 3))",
+            "note": "Actually run: mean=74.0, median=75.0, std=14.92, and a correlation of 0.998 — extremely close to a perfect +1, confirming that in THIS dataset, more study hours very strongly relates to a higher score. This is exactly the kind of first look a Data Scientist does before building anything more complex — and it's the same numpy you'd use on a real dataset with thousands of rows, not a simplified stand-in."
+          }
+        ],
+        "mistakes": [
+          "Jumping straight to building a model before ever looking at basic statistics — mean/median/std/correlation are cheap to compute and often reveal the whole story on their own.",
+          "Assuming a strong correlation on 8 students proves a real, general relationship — a real Data Scientist would want far more data before trusting this pattern generalizes beyond this specific small group.",
+          "Confusing correlation with causation — this data shows studying MORE and scoring HIGHER move together, not proof that studying CAUSES the higher score (though here, unlike some real-world examples, that causal story is genuinely plausible)."
+        ],
+        "handsOn": "Run the example and confirm the four numbers. Then add a 9th student of your own (pick their study hours and a plausible score) and re-run — see how much the mean and correlation shift with just one more data point.",
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run the example exactly as shown and confirm the four numbers: mean=74.0, median=75.0, std=14.92, correlation=0.998."
+          },
+          {
+            "instruction": "Add a 9th student of your own (pick a study_hours value and a plausible exam_score) to both arrays, and re-run.",
+            "expectOutcome": "The mean, median, and correlation all shift by some amount — the exact numbers depend on what you picked, but a single added data point visibly moving these statistics is itself the real lesson: with only 8-9 data points, each individual student has real, outsized influence on the summary numbers, unlike a dataset with thousands of rows.",
+            "troubleshooting": "If your new student's score doesn't fit the existing pattern (e.g. very high hours but a low score), the correlation should drop noticeably — that's correct behavior, not a bug; you've just added a genuine outlier to a very small dataset."
+          }
+        ],
+        "doneWhen": "You can compute mean/median/std/correlation with NumPy on a real small dataset, and explain why a strong correlation on only 8 data points deserves more caution than the same correlation on a much larger dataset.",
+        "checks": [
+          {
+            "q": "Why might a Data Scientist be cautious about trusting a 0.998 correlation computed from only 8 students?",
+            "a": "With so few data points, each individual student has a large influence on the computed correlation — a single unusual student (high hours, low score, or vice versa) could swing the number dramatically. A real Data Scientist would want a much larger sample before trusting that this pattern reliably generalizes."
+          }
+        ],
+        "keyTakeaways": [
+          "Computing mean/median/std/correlation is almost always the FIRST real step in a data investigation, before building anything more complex.",
+          "NumPy's np.corrcoef() measures how strongly two variables move together, from -1 to +1.",
+          "Small datasets are genuinely more fragile — a single added or unusual data point can visibly shift summary statistics."
+        ],
+        "resources": [
+          {
+            "label": "Forage Data Scientist path",
+            "url": "/stream/data",
+            "kind": "practice"
+          },
+          {
+            "label": "NumPy — official quickstart",
+            "url": "https://numpy.org/doc/stable/user/quickstart.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-preview-ai",
+        "title": "StudyTrack, part 2 — an AI Engineer teaches the pattern to a model",
+        "concept": "The Data Scientist lesson FOUND a real pattern (more study hours → higher scores) by looking at the data directly. An AI Engineer's job is different: teach a MODEL to recognize that same pattern automatically, so it can make a prediction for a brand-new student it's never seen. `LogisticRegression` (scikit-learn) is a genuinely real, widely-used classifier — given StudyTrack's 8 students labeled pass/fail (score ≥ 70), it learns the relationship between study hours and passing, then `predict()`/`predict_proba()` apply that learned pattern to new students.",
+        "analogy": "The Data Scientist lesson is like a coach personally reviewing game tape and noticing 'players who practice more tend to win more.' This lesson is teaching an ASSISTANT to recognize that same pattern well enough to make their own prediction about a player they've never seen play, based only on how much that player practices — the assistant didn't invent the insight, it LEARNED it from the same data the coach looked at.",
+        "examples": [
+          {
+            "code": "from sklearn.linear_model import LogisticRegression\nimport numpy as np\n\nstudy_hours = np.array([2, 5, 8, 3, 9, 1, 6, 7]).reshape(-1, 1)\nexam_scores = np.array([58, 72, 91, 61, 95, 52, 78, 85])\npassed = (exam_scores >= 70).astype(int)   # 1 = passed, 0 = did not\n\nmodel = LogisticRegression()\nmodel.fit(study_hours, passed)\n\n# Two NEW students, never seen during training\nnew_students_hours = np.array([[2.5], [8]])\npredictions = model.predict(new_students_hours)\nprobabilities = model.predict_proba(new_students_hours)[:, 1]\nfor h, p, prob in zip(new_students_hours.flatten(), predictions, probabilities):\n    print(f\"{h} study hours -> predicted pass={bool(p)}, probability={prob:.2f}\")",
+            "note": "Actually run: a new student with 2.5 hours is predicted to FAIL (16% pass probability), while one with 8 hours is predicted to PASS (99% probability) — the model genuinely learned the study-hours-to-passing relationship from the 8 training students, and correctly applies it to two students it never saw during training."
+          }
+        ],
+        "mistakes": [
+          "Training a model on 8 data points and treating its predictions as highly reliable — this tiny example is for LEARNING the fit/predict pattern; a real deployed model needs far more training data.",
+          "Confusing predict() (a hard yes/no) with predict_proba() (a confidence level) — the 2.5-hour student's 16% probability is genuinely different information than just 'predicted fail', and often matters more in a real decision.",
+          "Forgetting the model only knows what it was trained on — it learned 'study hours predict passing' specifically from THIS dataset; a different dataset could show a different (or no) relationship."
+        ],
+        "handsOn": "Run the example and confirm both predictions and their probabilities. Then pick a third new study-hours value of your own choosing, predict it, and reason about whether the result matches your own intuition given the training data's pattern.",
+        "handsOnSteps": [
+          {
+            "instruction": "If you don't already have it from an earlier lesson, run `pip install numpy scikit-learn` in your terminal before continuing."
+          },
+          {
+            "instruction": "Run the example and confirm: 2.5 hours predicts fail (~16% probability), 8 hours predicts pass (~99% probability)."
+          },
+          {
+            "instruction": "Pick a third study-hours value of your own (e.g. 4.5) and add it to new_students_hours, then re-run.",
+            "expectOutcome": "A prediction and probability consistent with where your chosen value sits relative to the training data's pattern — a value near the middle of the training range (roughly 4-6 hours) should produce a probability noticeably closer to 50%, since that's exactly where the model is LEAST confident, sitting near its decision boundary.",
+            "troubleshooting": "If your chosen value is far outside the training range (e.g. 20 hours), the model will still confidently extrapolate a prediction — but a real AI Engineer would flag this as a genuine limitation: the model has never seen anything like 20 hours and its confidence there isn't actually earned by real data."
+          }
+        ],
+        "doneWhen": "You can fit a scikit-learn LogisticRegression on labeled data, call predict()/predict_proba() on new examples, and explain the difference between a hard prediction and a probability.",
+        "checks": [
+          {
+            "q": "Why does predict_proba() often give more useful information than predict() alone?",
+            "a": "predict() collapses everything down to a single yes/no, hiding how CONFIDENT the model actually is. predict_proba() reveals that confidence directly — a prediction of 'pass' at 51% probability is genuinely different, more borderline information than a prediction of 'pass' at 99%, even though predict() would report both as simply 'pass'."
+          }
+        ],
+        "keyTakeaways": [
+          "An AI/ML model learns a pattern from labeled training data, then applies that learned pattern to new, unseen examples.",
+          "predict() gives a hard classification; predict_proba() reveals the model's actual confidence.",
+          "A model's predictions are only as trustworthy as the data it was trained on — and are on shakier ground for inputs far outside that training range."
+        ],
+        "resources": [
+          {
+            "label": "Forage AI Engineer path",
+            "url": "/stream/aiml",
+            "kind": "practice"
+          },
+          {
+            "label": "scikit-learn — LogisticRegression documentation",
+            "url": "https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-preview-fullstack",
+        "title": "StudyTrack, part 3 — a Full-Stack Developer shows the prediction to a user",
+        "concept": "The AI Engineer lesson produced a real prediction (pass/fail + a probability) — but a raw Python object sitting in a script is useless to an actual student checking their own progress. A Full-Stack Developer's job is turning that data into something a REAL PERSON can read: a small JavaScript function that takes a student's data and produces a clear, human-readable message — the exact same 'take structured data, render it as UI a person understands' job that every real frontend, from a simple message to a full React app, ultimately does.",
+        "analogy": "The AI Engineer's prediction is like a lab result printed as raw numbers on a slip of paper — accurate, but not exactly reassuring or clear to the actual patient. A Full-Stack Developer's job is being the person who reads that slip and explains it back in one clear sentence the patient actually understands — same underlying information, now genuinely usable by the person it's for.",
+        "examples": [
+          {
+            "code": "function StudentCard({ name, studyHours, predictedPass }) {\n  const status = predictedPass ? \"On track to pass\" : \"At risk \\u2014 needs more study time\";\n  const badge = predictedPass ? \"\\u2705\" : \"\\u26A0\\uFE0F\";\n  return `${badge} ${name}: ${studyHours}h studied \\u2014 ${status}`;\n}\n\n// Using the EXACT predictions from the AI Engineer lesson --\n// Farid (2.5h, predicted fail) and Chen-equivalent (8h, predicted pass)\nconst students = [\n  { name: \"Farid\", studyHours: 2.5, predictedPass: false },\n  { name: \"Chen\", studyHours: 8, predictedPass: true },\n];\n\nfor (const s of students) {\n  console.log(StudentCard(s));\n}",
+            "note": "Actually run in Node: produces '\\u26A0\\uFE0F Farid: 2.5h studied \\u2014 At risk \\u2014 needs more study time' and '\\u2705 Chen: 8h studied \\u2014 On track to pass' -- taking the exact same predictions from the previous lesson and turning them into a message a real student would actually understand at a glance, no data-science or ML knowledge required to read it."
+          }
+        ],
+        "mistakes": [
+          "Showing a raw probability number (like '0.16') directly to an end user instead of translating it into a clear message — most real users don't want to interpret a decimal, they want a plain answer.",
+          "Hardcoding each student's card individually instead of writing one function that works for ANY student's data — the whole point of a function like StudentCard is reusability across every student, not just these two.",
+          "Forgetting that this exact 'take data in, render a readable message out' pattern is the foundation of essentially every real UI component, whether it's this plain function or a full React component later in the Full-Stack path."
+        ],
+        "handsOn": "Run the example and confirm both messages. Then add a third student of your own (with a name, study hours, and a predictedPass value you choose) and confirm StudentCard() produces a sensible message for them too.",
+        "handsOnSteps": [
+          {
+            "instruction": "Run the example exactly as shown in Node (`node studytrack.js` or a similar file) and confirm both messages print correctly."
+          },
+          {
+            "instruction": "Add a third student object of your own to the students array, with a name, studyHours, and a predictedPass value you choose, and re-run.",
+            "expectOutcome": "A correctly-formatted third message, using the same badge/status logic as the other two — confirming StudentCard() genuinely works for ANY student data passed in, not just the two originally hardcoded ones.",
+            "troubleshooting": "If your new object is missing one of the three expected fields (name/studyHours/predictedPass), the message will print 'undefined' in that spot instead of throwing an error — a real, common JavaScript beginner trap worth noticing: missing object fields fail silently rather than loudly."
+          }
+        ],
+        "doneWhen": "You can write a JavaScript function that takes a data object and returns a clear, human-readable message, and have confirmed it works correctly for new data it wasn't originally written around.",
+        "checks": [
+          {
+            "q": "Why is StudentCard() written as a function that takes a {name, studyHours, predictedPass} object, rather than three separate hardcoded messages?",
+            "a": "A single function that accepts any matching data object works for EVERY student, not just the ones it was originally written for — this is the core reusability idea behind essentially all real frontend code: write the rendering logic once, then feed it whatever real data comes in, rather than hand-writing a new version for every new case."
+          }
+        ],
+        "keyTakeaways": [
+          "A Full-Stack Developer's core job includes turning structured data (like a prediction) into a message or UI a real person can actually understand.",
+          "Writing one reusable function that accepts data, rather than hardcoding each case, is the foundation of real frontend code.",
+          "JavaScript object property access silently returns 'undefined' for a missing field rather than throwing an error — a common source of quiet bugs."
+        ],
+        "resources": [
+          {
+            "label": "Forage Full-Stack Developer path",
+            "url": "/stream/fullstack",
+            "kind": "practice"
+          },
+          {
+            "label": "MDN — Functions",
+            "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-preview-cyber",
+        "title": "StudyTrack, part 4 — a Cybersecurity Engineer protects student logins",
+        "concept": "StudyTrack now has real value worth protecting: student names, scores, and — since students presumably log in to see their own data — passwords. A Cybersecurity Engineer's first, most fundamental rule: NEVER store a password as plain, readable text. Instead, store a HASH (via `hashlib.sha256`, a one-way mathematical function) — if StudyTrack's database were ever breached, an attacker would see only unreadable hashes, not actual passwords, and checking a login attempt means hashing what was TYPED and comparing hashes, never comparing raw passwords directly.",
+        "analogy": "Storing a plaintext password is like a school keeping a filing cabinet of every student's actual house key, labeled with their name — anyone who breaks into the cabinet instantly has a working key to every student's house. Storing a HASH instead is like the school keeping a unique, tamper-evident wax seal impression of each key instead of the key itself — genuinely useful for CONFIRMING 'does this key match the one on file', but useless to an intruder trying to reconstruct or use an actual key from it.",
+        "examples": [
+          {
+            "code": "import hashlib\n\n# StudyTrack's login system: NEVER store this plaintext value anywhere\npassword = \"chen-study-buddy-2024\"\n\nhashed = hashlib.sha256(password.encode()).hexdigest()\nprint(\"plaintext (NEVER store this):\", password)\nprint(\"sha256 hash (safe to store):\", hashed)\n\ndef check_login(attempt, stored_hash):\n    return hashlib.sha256(attempt.encode()).hexdigest() == stored_hash\n\nprint(\"correct password check:\", check_login(\"chen-study-buddy-2024\", hashed))\nprint(\"wrong password check:\", check_login(\"wrong-guess\", hashed))",
+            "note": "Actually run: the real password hashes to a fixed 64-character hex string (c9dbd2300293c69bb04423b558d698c58bc9afb55da5c99ae5d42abfe87d052f), and check_login() correctly returns True for the exact right password and False for a wrong guess -- confirming login verification works entirely through comparing HASHES, with the real plaintext password only ever existing briefly in memory, never written anywhere."
+          }
+        ],
+        "mistakes": [
+          "Storing StudyTrack's passwords as plain text 'just for now, to make it easier to debug' — this is exactly the kind of shortcut that turns into a real, serious breach later; there's no safe amount of plaintext password storage.",
+          "Comparing a login attempt directly against the stored plaintext instead of hashing the attempt and comparing hashes — if you're ever comparing raw passwords directly, something has already gone wrong.",
+          "Assuming this simplified SHA-256 example is production-ready as-is — real systems also add a per-user random SALT and use a deliberately slow hashing function (like bcrypt or scrypt), both covered in the full Cybersecurity path; this lesson's point is the core one-way-hash IDEA, not a complete production recipe."
+        ],
+        "handsOn": "Run the example and confirm the correct password check returns True and the wrong one returns False. Then pick a different password of your own, hash it, and confirm your own check_login() call correctly accepts the right password and rejects a wrong guess.",
+        "handsOnSteps": [
+          {
+            "instruction": "Run the example exactly as shown and confirm both the correct-password check (True) and wrong-password check (False)."
+          },
+          {
+            "instruction": "Pick a different password of your own, hash it with the same function, and write your own check_login() call confirming it correctly accepts the right password and rejects at least one wrong guess.",
+            "expectOutcome": "Your own password hashes to a different 64-character hex string, and check_login() correctly returns True only for your exact password — confirmed by actually running it, demonstrating this isn't specific to the one example password, the technique works for any password."
+          }
+        ],
+        "doneWhen": "You can explain why passwords must be hashed rather than stored plaintext, and can hash a password and correctly verify a login attempt against that hash using Python.",
+        "checks": [
+          {
+            "q": "If StudyTrack's database were stolen by an attacker, what would they actually see for a student's password if it was stored correctly (hashed)?",
+            "a": "A fixed-length hash string (like a 64-character hex value) with no way to reverse it back into the real password — hashing is a genuinely one-way mathematical operation, so even with full access to the stolen database, the attacker would not have the students' actual, usable passwords."
+          }
+        ],
+        "keyTakeaways": [
+          "Passwords must NEVER be stored as plain, readable text — always store a one-way hash instead.",
+          "Verifying a login means hashing the attempted password and comparing HASHES, never comparing raw passwords directly.",
+          "This is the core idea, not a complete production recipe — real systems add a per-user salt and a deliberately slow hash function, covered in the full Cybersecurity path."
+        ],
+        "resources": [
+          {
+            "label": "Forage Cybersecurity path",
+            "url": "/stream/cybersecurity",
+            "kind": "practice"
+          },
+          {
+            "label": "OWASP — Password Storage Cheat Sheet",
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html",
+            "kind": "docs"
+          }
+        ]
+      },
+      {
+        "id": "cc-preview-cloud",
+        "title": "StudyTrack, part 5 — a Cloud & DevOps Engineer prepares it to actually ship",
+        "concept": "StudyTrack now has real logic, a real UI message, and real password protection — the last piece before it could genuinely run in production is CONFIGURATION: things like the database connection string, which are different in development versus production, and must NEVER be hardcoded directly into the code (especially anything containing a real password, exactly like the previous lesson's whole point). The standard fix, used by virtually every real deployed application: read these values from ENVIRONMENT VARIABLES (`os.environ`) at runtime instead — the same code then works correctly in any environment, with the actual secret values living only in that environment's configuration, never inside a committed file.",
+        "analogy": "Hardcoding StudyTrack's real database password directly into the source code is like writing your house's alarm code on a sticky note taped to the front door — anyone who sees the code (or the git history, forever) has it. Reading it from an environment variable instead is like keeping that same code in a safe that only the actual house (the specific server it's deployed to) has the combination to — the CODE itself (the house's structure) can be shared freely, copied, even made public, without exposing anything sensitive.",
+        "examples": [
+          {
+            "code": "import os\n\n# BAD: hardcoding StudyTrack's real database connection directly in the code\nbad_database_url = \"postgresql://admin:supersecret123@studytrack-db.example.com/prod\"\nprint(\"hardcoded (BAD -- this secret is now in git history forever):\", bad_database_url[:30], \"...\")\n\n# GOOD: read from an environment variable, never committed to any file\nos.environ[\"DATABASE_URL\"] = \"postgresql://admin:supersecret123@studytrack-db.example.com/prod\"   # (this line simulates the hosting platform setting it -- your own code never writes this)\ngood_database_url = os.environ.get(\"DATABASE_URL\")\nprint(\"from env var (GOOD -- not in any file):\", good_database_url[:30], \"...\")\n\n# What happens if a required variable is missing -- fail clearly, don't guess\nmissing = os.environ.get(\"MISSING_API_KEY\")\nprint(\"missing env var returns:\", missing)\n\nmissing_with_default = os.environ.get(\"MISSING_API_KEY\", \"no-key-configured\")\nprint(\"with an explicit fallback default:\", missing_with_default)",
+            "note": "Actually run: both the hardcoded and env-var versions produce the SAME connection string value here (since the example simulates setting the env var itself for demonstration) -- but the CRITICAL difference is where each one lives: the hardcoded version is permanently baked into the source file (and its git history) forever, while the env-var version exists only in that specific environment's configuration, never written to any file at all. A genuinely missing env var correctly returns None (or an explicit fallback default if you provide one), rather than silently guessing a value."
+          }
+        ],
+        "mistakes": [
+          "Committing a real secret (database password, API key) directly into a code file 'just to get it working quickly' — even in a private repo, this is a real, common way secrets leak, since git history keeps every past version forever, even after later deleting the line.",
+          "Assuming environment variables are only relevant for 'real' companies with complex infrastructure — this exact pattern (NEXT_PUBLIC_SUPABASE_URL and friends) is precisely how THIS platform, Forage itself, is configured, in its own real .env.local file.",
+          "Not having a clear fallback/error behavior when a required environment variable is missing — silently continuing with `None` (rather than failing loudly and clearly) can cause confusing failures much later, far from the actual missing-config root cause."
+        ],
+        "handsOn": "Run the example and confirm the hardcoded-vs-env-var distinction, and the missing-variable behavior. Then set your own environment variable (e.g. MY_TEST_VAR) in your terminal before running Python, and confirm os.environ.get('MY_TEST_VAR') correctly reads the value you set outside the code itself.",
+        "handsOnSteps": [
+          {
+            "instruction": "Run the example exactly as shown and confirm the missing-variable behavior (None, then the fallback default)."
+          },
+          {
+            "instruction": "In your terminal, set your own environment variable BEFORE running Python (e.g. `set MY_TEST_VAR=hello` on Windows or `export MY_TEST_VAR=hello` on Mac/Linux), then run a small script that prints `os.environ.get('MY_TEST_VAR')`.",
+            "expectOutcome": "Your script correctly prints 'hello' — confirming the value genuinely came from OUTSIDE the code itself (set in your terminal session, not written anywhere in the .py file), which is exactly the real mechanism a hosting platform uses to inject secrets into a deployed app without ever putting them in the repo.",
+            "troubleshooting": "If it prints None instead of your value, double-check you set the environment variable in the SAME terminal session you're running Python from — environment variables set in one terminal window don't carry over to a separate one."
+          }
+        ],
+        "doneWhen": "You can explain why secrets belong in environment variables rather than hardcoded in source files, and have confirmed reading a real environment variable you set yourself from outside the code.",
+        "checks": [
+          {
+            "q": "Why is committing a real database password directly into a source code file dangerous even if you delete that line in a later commit?",
+            "a": "Git preserves the FULL history of every past version of a file — deleting the line in a new commit does not remove it from earlier commits, which remain fully accessible in the repository's history. The only real fix is treating the exposed secret as compromised and rotating/changing it, not just removing the line."
+          }
+        ],
+        "keyTakeaways": [
+          "Secrets (passwords, API keys, connection strings) belong in environment variables, never hardcoded directly in source files.",
+          "os.environ.get() reads a variable set OUTSIDE the code, in the environment it's actually running in — the same real mechanism this very Forage platform uses.",
+          "A genuinely missing environment variable returns None by default, or an explicit fallback if you provide one — deciding how to handle that missing case is a real, deliberate choice, not an afterthought."
+        ],
+        "resources": [
+          {
+            "label": "Forage Cloud & DevOps path",
+            "url": "/stream/cloud-devops",
+            "kind": "practice"
+          },
+          {
+            "label": "The Twelve-Factor App — Config (environment variables)",
+            "url": "https://12factor.net/config",
+            "kind": "reference"
           }
         ]
       }
